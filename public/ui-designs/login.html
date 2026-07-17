@@ -1,0 +1,201 @@
+<!DOCTYPE html><html lang="en" class="light"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-tint": "#2a6b2c",
+                    "on-tertiary-fixed": "#002204",
+                    "inverse-surface": "#303030",
+                    "inverse-primary": "#91d78a",
+                    "on-secondary-fixed": "#002204",
+                    "on-surface": "#1b1c1c",
+                    "on-secondary-container": "#217128",
+                    "on-secondary-fixed-variant": "#005312",
+                    "on-error": "#ffffff",
+                    "secondary-container": "#a0f399",
+                    "surface-container": "#f0eded",
+                    "on-secondary": "#ffffff",
+                    "surface-container-high": "#eae7e7",
+                    "secondary-fixed": "#a3f69c",
+                    "on-error-container": "#93000a",
+                    "inverse-on-surface": "#f3f0ef",
+                    "outline": "#717a6d",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed-variant": "#005313",
+                    "on-tertiary-container": "#77db76",
+                    "outline-variant": "#c0c9bb",
+                    "primary": "#00450d",
+                    "primary-container": "#1b5e20",
+                    "on-background": "#1b1c1c",
+                    "surface-container-low": "#f6f3f2",
+                    "tertiary": "#00460e",
+                    "secondary": "#1b6d24",
+                    "on-surface-variant": "#41493e",
+                    "surface-container-highest": "#e5e2e1",
+                    "surface-bright": "#fcf9f8",
+                    "primary-fixed-dim": "#91d78a",
+                    "background": "#fcf9f8",
+                    "tertiary-fixed-dim": "#78dc77",
+                    "on-primary-container": "#90d689",
+                    "on-primary": "#ffffff",
+                    "tertiary-container": "#006017",
+                    "on-primary-fixed": "#002203",
+                    "secondary-fixed-dim": "#88d982",
+                    "on-primary-fixed-variant": "#0c5216",
+                    "surface-dim": "#dcd9d9",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed": "#acf4a4",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed": "#94f990",
+                    "surface-variant": "#e5e2e1",
+                    "surface-container-lowest": "#ffffff",
+                    "surface": "#fcf9f8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "40px",
+                    "gutter": "24px",
+                    "md": "16px",
+                    "base": "8px",
+                    "margin-mobile": "16px",
+                    "xs": "4px",
+                    "lg": "24px",
+                    "sm": "8px",
+                    "margin-desktop": "32px"
+            },
+            "fontFamily": {
+                    "body-md": ["Work Sans"],
+                    "headline-lg-mobile": ["Work Sans"],
+                    "headline-md": ["Work Sans"],
+                    "headline-sm": ["Work Sans"],
+                    "body-lg": ["Work Sans"],
+                    "headline-lg": ["Work Sans"],
+                    "label-md": ["Work Sans"],
+                    "label-sm": ["Work Sans"]
+            },
+            "fontSize": {
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    }catch(_e){}</script></head><body class="bg-background font-body-md text-on-background min-h-screen flex flex-col">
+<!-- Top Navigation Bar (Partial execution from JSON: login state excludes full nav) -->
+<header class="bg-surface border-b border-outline-variant flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-16 fixed top-0 z-50">
+<div class="flex items-center gap-2">
+<a href="#" onclick="window.top.postMessage({ type: 'navigate', path: '/home' }, window.location.origin); return false;" class="flex items-center gap-2">
+<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPEIWYWtZnyIwQbN_iGXmWsV8pwt4C_0C-YEczE-9FPtMT4B0E7BoecK9TwkOO9Zzp5gN1Atmh1x9H9b_ZHzKAiaXQM7UKpJm4kGC95Y5zk6bvAjKZ-p5id-P2joyNy0QZplSbH8QetsSXawxym6RYPZunyTHfyEJwkHxv8IZkAzA8RSytLpZRSE6hGh6SsnSOl4UX2jrXhRUM0ZvFdNRmmThMBeY2DEuc0s6fqVimVB5Miu7XRqwX" class="h-8 w-auto" alt="AgriLink Logo">
+<span class="font-headline-sm text-headline-sm font-bold text-primary">AgriLink</span>
+</a>
+</div>
+<div class="hidden md:flex items-center gap-4">
+<a href="#" class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors">Help Center</a>
+<a href="#" onclick="window.top.postMessage({ type: 'navigate', path: '/login' }, window.location.origin); return false;" class="font-label-md text-label-md text-primary font-bold border-b-2 border-primary">Login</a>
+</div>
+</header>
+<!-- Main Content: Login Shell -->
+<main class="flex-grow flex items-center justify-center pt-24 pb-12 px-margin-mobile">
+<!-- Login Container -->
+<div class="w-full max-w-[440px] bg-surface-container-lowest border border-outline-variant rounded-xl login-card-shadow overflow-hidden">
+<!-- Card Header/Brand Branding -->
+<div class="p-8 text-center border-b border-outline-variant bg-surface-bright">
+<div class="mb-4 flex justify-center">
+<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPEIWYWtZnyIwQbN_iGXmWsV8pwt4C_0C-YEczE-9FPtMT4B0E7BoecK9TwkOO9Zzp5gN1Atmh1x9H9b_ZHzKAiaXQM7UKpJm4kGC95Y5zk6bvAjKZ-p5id-P2joyNy0QZplSbH8QetsSXawxym6RYPZunyTHfyEJwkHxv8IZkAzA8RSytLpZRSE6hGh6SsnSOl4UX2jrXhRUM0ZvFdNRmmThMBeY2DEuc0s6fqVimVB5Miu7XRqwX" class="h-12 w-auto" alt="AgriLink Icon">
+</div>
+<h1 class="font-headline-md text-headline-md text-on-surface font-bold">Welcome Back</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">Enter your credentials to access the AgriLink portal</p>
+</div>
+<!-- Login Form -->
+<form class="p-8 space-y-6" onsubmit="event.preventDefault();">
+<!-- Email Input -->
+<div class="space-y-2">
+<label for="email" class="font-label-md text-label-md text-on-surface-variant block">Email Address</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">mail</span>
+<input type="email" id="email" placeholder="name@company.com" class="w-full pl-10 pr-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-primary input-glow transition-all">
+</div>
+</div>
+<!-- Password Input -->
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<label for="password" class="font-label-md text-label-md text-on-surface-variant">Password</label>
+<a href="#" class="font-label-sm text-label-sm text-primary hover:underline">Forgot password?</a>
+</div>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">lock</span>
+<input type="password" id="password" placeholder="••••••••" class="w-full pl-10 pr-12 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-primary input-glow transition-all">
+<button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface-variant">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</div>
+<!-- Remember Me -->
+<div class="flex items-center gap-2">
+<input type="checkbox" id="remember" class="w-4 h-4 text-primary border-outline-variant rounded focus:ring-primary-container">
+<label for="remember" class="font-label-sm text-label-sm text-on-surface-variant select-none">Remember this device for 30 days</label>
+</div>
+<!-- Action Button -->
+<button type="submit" class="w-full bg-primary-container text-white font-label-md text-label-md py-4 rounded-lg hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                    Login to AgriLink
+                    <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<!-- Divider -->
+<div class="relative py-2">
+<div class="absolute inset-0 flex items-center"><div class="w-full border-t border-outline-variant"></div></div>
+<div class="relative flex justify-center text-xs uppercase"><span class="bg-surface-container-lowest px-2 text-outline font-label-sm">New to AgriLink?</span></div>
+</div>
+<!-- Register Redirect -->
+<div class="text-center">
+<a href="#" onclick="window.top.postMessage({ type: 'navigate', path: '/register' }, window.location.origin); return false;" class="inline-flex items-center gap-2 font-label-md text-label-md text-primary font-bold hover:bg-surface-container-low px-4 py-2 rounded-lg transition-colors">
+                        Register Your Business
+                        <span class="material-symbols-outlined text-[20px]">corporate_fare</span>
+</a>
+</div>
+</form>
+</div>
+</main>
+<!-- Footer (As per JSON configuration) -->
+<footer class="bg-surface-container-highest text-on-surface w-full mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin-mobile md:px-margin-desktop py-lg w-full max-w-7xl mx-auto gap-4">
+<div class="flex flex-col md:flex-row items-center gap-4">
+<span class="font-bold text-primary">AgriLink</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant">© 2024 AgriLink Egypt. All rights reserved.</p>
+</div>
+<nav class="flex flex-wrap justify-center gap-6">
+<a href="#" class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors">Privacy Policy</a>
+<a href="#" class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors">Terms of Service</a>
+<a href="#" class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors">Compliance</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Contact</a>
+</nav>
+</div>
+</footer>
+<!-- Script for simple interaction states -->
+<script>
+        document.querySelectorAll('button[type="button"]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const icon = this.querySelector('.material-symbols-outlined');
+                const input = this.previousElementSibling;
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.textContent = 'visibility_off';
+                } else {
+                    input.type = 'password';
+                    icon.textContent = 'visibility';
+                }
+            });
+        });
+    </script>
+</body></html>
