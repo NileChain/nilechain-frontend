@@ -1,192 +1,333 @@
-﻿
-<!-- 1. Navbar -->
-<nav class="sticky top-0 z-50 bg-surface border-b border-outline-variant w-full h-16 flex justify-between items-center px-4 md:px-margin-desktop transition-all duration-300">
-<div class="flex items-center gap-2">
-<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPEIWYWtZnyIwQbN_iGXmWsV8pwt4C_0C-YEczE-9FPtMT4B0E7BoecK9TwkOO9Zzp5gN1Atmh1x9H9b_ZHzKAiaXQM7UKpJm4kGC95Y5zk6bvAjKZ-p5id-P2joyNy0QZplSbH8QetsSXawxym6RYPZunyTHfyEJwkHxv8IZkAzA8RSytLpZRSE6hGh6SsnSOl4UX2jrXhRUM0ZvFdNRmmThMBeY2DEuc0s6fqVimVB5Miu7XRqwX" alt="NileChain Logo" class="h-10 w-auto">
-<span class="font-headline-md text-headline-md font-bold text-primary hidden md:block">NileChain</span>
-</div>
-<div class="hidden md:flex gap-8 items-center font-label-md text-label-md text-on-surface-variant">
-<a href="#" class="hover:text-primary transition-colors">Marketplace</a>
-<a href="#" class="hover:text-primary transition-colors">Solutions</a>
-<a href="#" class="hover:text-primary transition-colors">Resources</a>
-</div>
-<div class="flex items-center gap-sm">
-<button [routerLink]="'/login'" class="hidden sm:block px-4 py-2 font-label-md text-label-md text-primary hover:bg-surface-container-low transition-colors rounded-lg">Login</button>
-<button [routerLink]="'/register'" class="bg-primary px-6 py-2 rounded-lg font-label-md text-label-md text-on-primary hover:opacity-90 transition-all active:scale-95">Register</button>
-</div>
-</nav>
-<!-- 2. Hero Section -->
-<header class="hero-gradient relative min-h-[85vh] flex flex-col justify-center items-center px-4 py-xl md:py-0 overflow-hidden">
-<!-- Background Elements -->
-<div class="absolute top-20 left-10 opacity-10 pointer-events-none">
-<span class="material-symbols-outlined text-[120px] text-primary">agriculture</span>
-</div>
-<div class="absolute bottom-20 right-10 opacity-10 pointer-events-none">
-<span class="material-symbols-outlined text-[120px] text-primary">factory</span>
-</div>
-<div class="max-w-4xl w-full text-center z-10">
-<div class="inline-flex items-center gap-2 bg-secondary-container px-3 py-1 rounded-full mb-6">
-<span class="material-symbols-outlined text-[18px] text-on-secondary-container">verified</span>
-<span class="text-label-sm font-label-sm text-on-secondary-container tracking-wider">#1 AGRI-NETWORK IN EGYPT</span>
-</div>
-<h1 class="font-headline-lg text-headline-lg md:text-5xl lg:text-6xl text-on-background mb-4 leading-tight">
-                Connect Your Farm to <br class="hidden md:block">
-<span class="text-primary">Egypt's Largest Factories</span>
-</h1>
-<p class="font-body-lg text-body-lg text-on-surface-variant mb-10 max-w-2xl mx-auto">
-                ربط المزارع المصرية بأكبر المصانع لضمان استقرار السوق وزيادة الإنتاجية. منصة متكاملة للتعاقدات الزراعية الذكية.
-            </p>
-<div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-<button [routerLink]="'/register'" class="w-full sm:w-auto bg-primary text-on-primary px-8 py-4 rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all">
-<span class="material-symbols-outlined">agriculture</span>
-                    Join as a Farm (مزرعة)
-                </button>
-<button [routerLink]="'/register'" class="w-full sm:w-auto border-2 border-primary text-primary px-8 py-4 rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-surface-container-low transition-all">
-<span class="material-symbols-outlined">factory</span>
-                    Join as a Factory (مصنع)
-                </button>
-</div>
-</div>
-<!-- Floating Card Mockup -->
-<div class="mt-16 w-full max-w-5xl px-4 hidden md:block">
-<div class="glass-card rounded-xl p-6 shadow-2xl flex items-center justify-between gap-8 translate-y-12 transition-transform duration-700 hover:translate-y-8">
-<div class="flex-1 space-y-3">
-<div class="h-2 w-24 bg-primary/20 rounded-full"></div>
-<div class="h-8 w-full bg-surface-container rounded-lg"></div>
-<div class="h-2 w-48 bg-primary/20 rounded-full"></div>
-</div>
-<div class="flex-1 flex gap-4">
-<div class="aspect-video bg-secondary-container/30 rounded-lg flex-1 flex items-center justify-center">
-<span class="material-symbols-outlined text-primary text-4xl">trending_up</span>
-</div>
-<div class="aspect-video bg-primary/10 rounded-lg flex-1 flex items-center justify-center">
-<span class="material-symbols-outlined text-primary text-4xl">query_stats</span>
-</div>
-</div>
-</div>
-</div>
-</header>
-<!-- 4. Stats Bar -->
-<section class="bg-surface-container-lowest py-10 px-4 md:px-margin-desktop border-y border-outline-variant">
-<div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-center text-center">
-<div class="flex flex-col items-center">
-<h3 class="font-headline-lg text-headline-lg text-primary">500+</h3>
-<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Verified Farms (مزارع)</p>
-</div>
-<div class="hidden md:block stat-divider mx-auto"></div>
-<div class="flex flex-col items-center">
-<h3 class="font-headline-lg text-headline-lg text-primary">120+</h3>
-<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Global Factories (مصانع)</p>
-</div>
-<div class="hidden md:block stat-divider mx-auto"></div>
-<div class="flex flex-col items-center">
-<h3 class="font-headline-lg text-headline-lg text-primary">2,000+</h3>
-<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Secure Contracts (عقود)</p>
-</div>
-</div>
-</section>
-<!-- 3. How It Works -->
-<section class="py-xl px-4 md:px-margin-desktop max-w-7xl mx-auto">
-<div class="text-center mb-16">
-<h2 class="font-headline-lg text-headline-lg text-on-background mb-4">How NileChain Works</h2>
-<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">
-                Simplified B2B transactions built for the Egyptian agricultural ecosystem.
-                <br>خطوات بسيطة لربط الإنتاج بالتصنيع.
-            </p>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter relative">
-<!-- Connecting Line -->
-<div class="hidden md:block absolute top-1/3 left-[15%] right-[15%] h-0.5 border-t-2 border-dashed border-outline-variant z-0"></div>
-<!-- Step 1 -->
-<div class="group relative z-10 flex flex-col items-center text-center p-md bg-white rounded-xl border border-outline-variant hover:shadow-lg transition-all duration-300">
-<div class="w-20 h-20 bg-secondary-container rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm">
-<span class="material-symbols-outlined text-4xl text-on-secondary-container">inventory</span>
-</div>
-<h4 class="font-headline-sm text-headline-sm mb-2">Supply Request</h4>
-<p class="font-body-md text-body-md text-on-surface-variant">Factories post detailed material needs, quality standards, and volume requirements.</p>
-<p class="font-label-sm text-label-sm text-primary mt-4 font-bold">طلب توريد</p>
-</div>
-<!-- Step 2 -->
-<div class="group relative z-10 flex flex-col items-center text-center p-md bg-white rounded-xl border border-outline-variant hover:shadow-lg transition-all duration-300">
-<div class="w-20 h-20 bg-primary-container rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm">
-<span class="material-symbols-outlined text-4xl text-white">psychology</span>
-</div>
-<h4 class="font-headline-sm text-headline-sm mb-2">AI Matching</h4>
-<p class="font-body-md text-body-md text-on-surface-variant">Our smart engine matches requests with local farms based on crop health and location.</p>
-<p class="font-label-sm text-label-sm text-primary mt-4 font-bold">مطابقة ذكية</p>
-</div>
-<!-- Step 3 -->
-<div class="group relative z-10 flex flex-col items-center text-center p-md bg-white rounded-xl border border-outline-variant hover:shadow-lg transition-all duration-300">
-<div class="w-20 h-20 bg-secondary-container rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm">
-<span class="material-symbols-outlined text-4xl text-on-secondary-container">contract_edit</span>
-</div>
-<h4 class="font-headline-sm text-headline-sm mb-2">Sign Contract</h4>
-<p class="font-body-md text-body-md text-on-surface-variant">Secure digital contracts are finalized with built-in compliance and payment tracking.</p>
-<p class="font-label-sm text-label-sm text-primary mt-4 font-bold">توقيع العقود</p>
-</div>
-</div>
-</section>
-<!---->
-<section class="py-16 bg-surface-container-low overflow-hidden">
-<div class="max-w-6xl mx-auto px-4">
-<p class="text-center font-label-md text-label-md text-outline uppercase tracking-[0.2em] mb-10">Trusted By Industry Leaders</p>
-<div class="flex flex-wrap justify-center items-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all">
-<div class="h-12 w-32 bg-outline-variant rounded flex items-center justify-center text-on-surface-variant font-bold">AGRO-CORP</div>
-<div class="h-12 w-32 bg-outline-variant rounded flex items-center justify-center text-on-surface-variant font-bold">EGYPT-FOODS</div>
-<div class="h-12 w-32 bg-outline-variant rounded flex items-center justify-center text-on-surface-variant font-bold">NILE-CAN</div>
-<div class="h-12 w-32 bg-outline-variant rounded flex items-center justify-center text-on-surface-variant font-bold">DELTA-MILLS</div>
-<div class="h-12 w-32 bg-outline-variant rounded flex items-center justify-center text-on-surface-variant font-bold">GLOBAL-SEED</div>
-</div>
-</div>
-</section>
-<!-- 5. Footer -->
-<footer class="bg-surface-container-highest dark:bg-inverse-surface py-16 px-4 md:px-margin-desktop border-t border-outline-variant">
-<div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-<div class="col-span-1 md:col-span-1">
-<div class="flex items-center gap-2 mb-4">
-<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPEIWYWtZnyIwQbN_iGXmWsV8pwt4C_0C-YEczE-9FPtMT4B0E7BoecK9TwkOO9Zzp5gN1Atmh1x9H9b_ZHzKAiaXQM7UKpJm4kGC95Y5zk6bvAjKZ-p5id-P2joyNy0QZplSbH8QetsSXawxym6RYPZunyTHfyEJwkHxv8IZkAzA8RSytLpZRSE6hGh6SsnSOl4UX2jrXhRUM0ZvFdNRmmThMBeY2DEuc0s6fqVimVB5Miu7XRqwX" alt="NileChain Logo" class="h-8">
-<span class="font-bold text-primary text-headline-sm">NileChain</span>
-</div>
-<p class="font-body-md text-body-md text-on-surface-variant">
-                    Revolutionizing Egypt's agricultural supply chain through technology and transparent enterprise solutions.
-                </p>
-</div>
-<div>
-<h5 class="font-label-md text-label-md text-on-surface mb-6 uppercase tracking-wider">Marketplace</h5>
-<ul class="space-y-3 font-label-sm text-label-sm text-on-surface-variant">
-<li><a href="#" class="hover:text-primary transition-colors">Find Supply</a></li>
-<li><a href="#" class="hover:text-primary transition-colors">Farm Profiles</a></li>
-<li><a href="#" class="hover:text-primary transition-colors">Contract Templates</a></li>
-<li><a href="#" class="hover:text-primary transition-colors">Pricing Index</a></li>
-</ul>
-</div>
-<div>
-<h5 class="font-label-md text-label-md text-on-surface mb-6 uppercase tracking-wider">Company</h5>
-<ul class="space-y-3 font-label-sm text-label-sm text-on-surface-variant">
-<li><a href="#" class="hover:text-primary transition-colors">About Us</a></li>
-<li><a href="#" class="hover:text-primary transition-colors">Careers</a></li>
-<li><a href="#" class="hover:text-primary transition-colors">Impact Report</a></li>
-<li><a href="#" class="hover:text-primary transition-colors">Newsroom</a></li>
-</ul>
-</div>
-<div>
-<h5 class="font-label-md text-label-md text-on-surface mb-6 uppercase tracking-wider">Newsletter</h5>
-<p class="font-body-md text-body-md text-on-surface-variant mb-4">Get the latest agricultural insights.</p>
-<div class="flex gap-2">
-<input type="email" placeholder="Email" class="flex-1 bg-white border border-outline-variant rounded-lg px-4 py-2 text-label-md focus:ring-1 focus:ring-primary outline-none">
-<button class="bg-primary text-on-primary p-2 rounded-lg"><span class="material-symbols-outlined">send</span></button>
-</div>
-</div>
-</div>
-<div class="max-w-7xl mx-auto pt-8 border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-4">
-<p class="font-label-sm text-label-sm text-on-surface-variant">
-                © 2025 NileChain Egypt. All rights reserved.
-            </p>
-<div class="flex gap-6 font-label-sm text-label-sm text-on-surface-variant">
-<a href="#" class="hover:text-primary underline decoration-transparent hover:decoration-primary transition-all">Privacy Policy</a>
-<a href="#" class="hover:text-primary underline decoration-transparent hover:decoration-primary transition-all">Terms of Service</a>
-<a href="#" class="hover:text-primary underline decoration-transparent hover:decoration-primary transition-all">Compliance</a>
-</div>
-</div>
-</footer>
+﻿<div class="ui-page">
+  <!-- Navbar -->
+  <nav
+    class="sticky top-0 z-50 bg-surface/95 backdrop-blur border-b border-outline-variant w-full h-16 flex justify-between items-center px-4 md:px-margin-desktop transition-all duration-300"
+    aria-label="Primary"
+  >
+    <a [routerLink]="'/landing'" class="flex items-center gap-2">
+      <img
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPEIWYWtZnyIwQbN_iGXmWsV8pwt4C_0C-YEczE-9FPtMT4B0E7BoecK9TwkOO9Zzp5gN1Atmh1x9H9b_ZHzKAiaXQM7UKpJm4kGC95Y5zk6bvAjKZ-p5id-P2joyNy0QZplSbH8QetsSXawxym6RYPZunyTHfyEJwkHxv8IZkAzA8RSytLpZRSE6hGh6SsnSOl4UX2jrXhRUM0ZvFdNRmmThMBeY2DEuc0s6fqVimVB5Miu7XRqwX"
+        [attr.alt]="'app.name' | translate"
+        class="h-10 w-auto"
+      />
+      <span class="font-headline-md text-headline-md font-bold text-primary hidden md:block">{{
+        'app.name' | translate
+      }}</span>
+    </a>
 
+    <div class="hidden md:flex gap-8 items-center font-label-md text-label-md text-on-surface-variant">
+      <a href="#features" class="hover:text-primary transition-colors">{{ 'landing.marketplace' | translate }}</a>
+      <a href="#how-it-works" class="hover:text-primary transition-colors">{{ 'landing.solutions' | translate }}</a>
+      <a href="#trusted" class="hover:text-primary transition-colors">{{ 'landing.resources' | translate }}</a>
+    </div>
+
+    <div class="flex items-center gap-1 sm:gap-2">
+      <ui-language-toggle />
+      <ui-theme-toggle />
+      <button
+        type="button"
+        [routerLink]="'/login'"
+        class="ui-btn-ghost hidden sm:inline-flex"
+      >
+        {{ 'landing.login' | translate }}
+      </button>
+      <button type="button" [routerLink]="'/register'" class="ui-btn-primary !py-2 !px-5">
+        {{ 'landing.register' | translate }}
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header
+    class="hero-gradient relative min-h-[85vh] flex flex-col justify-center items-center px-4 py-xl md:py-0 overflow-hidden"
+  >
+    <div class="absolute top-20 start-10 opacity-10 pointer-events-none" aria-hidden="true">
+      <span class="material-symbols-outlined text-[120px] text-primary">agriculture</span>
+    </div>
+    <div class="absolute bottom-20 end-10 opacity-10 pointer-events-none" aria-hidden="true">
+      <span class="material-symbols-outlined text-[120px] text-primary">factory</span>
+    </div>
+
+    <div class="max-w-4xl w-full text-center z-10 animate-fade-in">
+      <div
+        class="inline-flex items-center gap-2 bg-secondary-container px-3 py-1 rounded-full mb-6"
+      >
+        <span class="material-symbols-outlined text-[18px] text-on-secondary-container" aria-hidden="true"
+          >verified</span
+        >
+        <span class="text-label-sm font-label-sm text-on-secondary-container tracking-wider">{{
+          'landing.badgeEgypt' | translate
+        }}</span>
+      </div>
+
+      <h1 class="font-headline-lg text-headline-lg md:text-5xl lg:text-6xl text-on-background mb-4 leading-tight">
+        {{ 'landing.titleLine1' | translate }}
+        <br class="hidden md:block" />
+        <span class="text-primary">{{ 'landing.titleLine2' | translate }}</span>
+      </h1>
+
+      <p class="font-body-lg text-body-lg text-on-surface-variant mb-10 max-w-2xl mx-auto">
+        {{ 'landing.subtitle' | translate }}
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <button type="button" [routerLink]="'/register'" class="ui-btn-primary w-full sm:w-auto shadow-md">
+          <span class="material-symbols-outlined" aria-hidden="true">agriculture</span>
+          {{ 'landing.joinFarm' | translate }}
+        </button>
+        <button type="button" [routerLink]="'/register'" class="ui-btn-secondary w-full sm:w-auto">
+          <span class="material-symbols-outlined" aria-hidden="true">factory</span>
+          {{ 'landing.joinFactory' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-16 w-full max-w-5xl px-4 hidden md:block" aria-hidden="true">
+      <div
+        class="glass-card rounded-xl p-6 shadow-md flex items-center justify-between gap-8 translate-y-12 transition-transform duration-700 hover:translate-y-8"
+      >
+        <div class="flex-1 space-y-3">
+          <div class="h-2 w-24 bg-primary/20 rounded-full"></div>
+          <div class="h-8 w-full bg-surface-container rounded-lg"></div>
+          <div class="h-2 w-48 bg-primary/20 rounded-full"></div>
+        </div>
+        <div class="flex-1 flex gap-4">
+          <div
+            class="aspect-video bg-secondary-container/30 rounded-lg flex-1 flex items-center justify-center"
+          >
+            <span class="material-symbols-outlined text-primary text-4xl">trending_up</span>
+          </div>
+          <div class="aspect-video bg-primary/10 rounded-lg flex-1 flex items-center justify-center">
+            <span class="material-symbols-outlined text-primary text-4xl">query_stats</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats -->
+  <section
+    class="bg-surface-container-lowest py-10 px-4 md:px-margin-desktop border-y border-outline-variant"
+    aria-label="Platform statistics"
+  >
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-center text-center">
+      <div class="flex flex-col items-center animate-slide-up">
+        <h2 class="font-headline-lg text-headline-lg text-primary">500+</h2>
+        <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">
+          {{ 'landing.statsFarmsLabel' | translate }}
+        </p>
+      </div>
+      <div class="hidden md:block stat-divider mx-auto" aria-hidden="true"></div>
+      <div class="flex flex-col items-center animate-slide-up">
+        <h2 class="font-headline-lg text-headline-lg text-primary">120+</h2>
+        <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">
+          {{ 'landing.statsFactoriesLabel' | translate }}
+        </p>
+      </div>
+      <div class="hidden md:block stat-divider mx-auto" aria-hidden="true"></div>
+      <div class="flex flex-col items-center animate-slide-up">
+        <h2 class="font-headline-lg text-headline-lg text-primary">2,000+</h2>
+        <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">
+          {{ 'landing.statsContractsLabel' | translate }}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="how-it-works" class="py-xl px-4 md:px-margin-desktop max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <h2 class="font-headline-lg text-headline-lg text-on-background mb-4">
+        {{ 'landing.howTitle' | translate }}
+      </h2>
+      <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">
+        {{ 'landing.howSubtitle' | translate }}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter relative">
+      <div
+        class="hidden md:block absolute top-1/3 start-[15%] end-[15%] h-0.5 border-t-2 border-dashed border-outline-variant z-0"
+        aria-hidden="true"
+      ></div>
+
+      <article
+        class="group relative z-10 flex flex-col items-center text-center p-md bg-surface-container-lowest rounded-xl border border-outline-variant hover:shadow-md transition-all duration-300"
+      >
+        <div
+          class="w-20 h-20 bg-secondary-container rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm"
+        >
+          <span class="material-symbols-outlined text-4xl text-on-secondary-container" aria-hidden="true"
+            >inventory</span
+          >
+        </div>
+        <h3 class="font-headline-sm text-headline-sm mb-2">{{ 'landing.howStep1Title' | translate }}</h3>
+        <p class="font-body-md text-body-md text-on-surface-variant">{{ 'landing.howStep1Body' | translate }}</p>
+      </article>
+
+      <article
+        class="group relative z-10 flex flex-col items-center text-center p-md bg-surface-container-lowest rounded-xl border border-outline-variant hover:shadow-md transition-all duration-300"
+      >
+        <div
+          class="w-20 h-20 bg-primary-container rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm"
+        >
+          <span class="material-symbols-outlined text-4xl text-on-primary-container" aria-hidden="true"
+            >psychology</span
+          >
+        </div>
+        <h3 class="font-headline-sm text-headline-sm mb-2">{{ 'landing.howStep2Title' | translate }}</h3>
+        <p class="font-body-md text-body-md text-on-surface-variant">{{ 'landing.howStep2Body' | translate }}</p>
+      </article>
+
+      <article
+        class="group relative z-10 flex flex-col items-center text-center p-md bg-surface-container-lowest rounded-xl border border-outline-variant hover:shadow-md transition-all duration-300"
+      >
+        <div
+          class="w-20 h-20 bg-secondary-container rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm"
+        >
+          <span class="material-symbols-outlined text-4xl text-on-secondary-container" aria-hidden="true"
+            >contract_edit</span
+          >
+        </div>
+        <h3 class="font-headline-sm text-headline-sm mb-2">{{ 'landing.howStep3Title' | translate }}</h3>
+        <p class="font-body-md text-body-md text-on-surface-variant">{{ 'landing.howStep3Body' | translate }}</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- Trusted by -->
+  <section id="trusted" class="py-16 bg-surface-container-low overflow-hidden">
+    <div class="max-w-6xl mx-auto px-4">
+      <p class="text-center font-label-md text-label-md text-outline uppercase tracking-[0.2em] mb-10">
+        {{ 'landing.trustedBy' | translate }}
+      </p>
+      <div
+        class="flex flex-wrap justify-center items-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all"
+        aria-hidden="true"
+      >
+        <div
+          class="h-12 w-32 bg-outline-variant rounded flex items-center justify-center text-on-surface-variant font-bold"
+        >
+          AGRO-CORP
+        </div>
+        <div
+          class="h-12 w-32 bg-outline-variant rounded flex items-center justify-center text-on-surface-variant font-bold"
+        >
+          EGYPT-FOODS
+        </div>
+        <div
+          class="h-12 w-32 bg-outline-variant rounded flex items-center justify-center text-on-surface-variant font-bold"
+        >
+          NILE-CAN
+        </div>
+        <div
+          class="h-12 w-32 bg-outline-variant rounded flex items-center justify-center text-on-surface-variant font-bold"
+        >
+          DELTA-MILLS
+        </div>
+        <div
+          class="h-12 w-32 bg-outline-variant rounded flex items-center justify-center text-on-surface-variant font-bold"
+        >
+          GLOBAL-SEED
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer
+    class="bg-surface-container-highest py-16 px-4 md:px-margin-desktop border-t border-outline-variant"
+  >
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <img
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPEIWYWtZnyIwQbN_iGXmWsV8pwt4C_0C-YEczE-9FPtMT4B0E7BoecK9TwkOO9Zzp5gN1Atmh1x9H9b_ZHzKAiaXQM7UKpJm4kGC95Y5zk6bvAjKZ-p5id-P2joyNy0QZplSbH8QetsSXawxym6RYPZunyTHfyEJwkHxv8IZkAzA8RSytLpZRSE6hGh6SsnSOl4UX2jrXhRUM0ZvFdNRmmThMBeY2DEuc0s6fqVimVB5Miu7XRqwX"
+            [attr.alt]="'app.name' | translate"
+            class="h-8"
+          />
+          <span class="font-bold text-primary text-headline-sm">{{ 'app.name' | translate }}</span>
+        </div>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {{ 'landing.footerTagline' | translate }}
+        </p>
+      </div>
+
+      <div>
+        <h3 class="font-label-md text-label-md text-on-surface mb-6 uppercase tracking-wider">
+          {{ 'landing.footerMarketplace' | translate }}
+        </h3>
+        <ul class="space-y-3 font-label-sm text-label-sm text-on-surface-variant">
+          <li>
+            <a href="#" class="hover:text-primary transition-colors">{{ 'landing.findSupply' | translate }}</a>
+          </li>
+          <li>
+            <a href="#" class="hover:text-primary transition-colors">{{ 'landing.farmProfiles' | translate }}</a>
+          </li>
+          <li>
+            <a href="#" class="hover:text-primary transition-colors">{{
+              'landing.contractTemplates' | translate
+            }}</a>
+          </li>
+          <li>
+            <a href="#" class="hover:text-primary transition-colors">{{ 'landing.pricingIndex' | translate }}</a>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-label-md text-label-md text-on-surface mb-6 uppercase tracking-wider">
+          {{ 'landing.footerCompany' | translate }}
+        </h3>
+        <ul class="space-y-3 font-label-sm text-label-sm text-on-surface-variant">
+          <li>
+            <a href="#" class="hover:text-primary transition-colors">{{ 'landing.aboutUs' | translate }}</a>
+          </li>
+          <li>
+            <a href="#" class="hover:text-primary transition-colors">{{ 'landing.careers' | translate }}</a>
+          </li>
+          <li>
+            <a href="#" class="hover:text-primary transition-colors">{{ 'landing.impactReport' | translate }}</a>
+          </li>
+          <li>
+            <a href="#" class="hover:text-primary transition-colors">{{ 'landing.newsroom' | translate }}</a>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-label-md text-label-md text-on-surface mb-6 uppercase tracking-wider">
+          {{ 'landing.footerNewsletter' | translate }}
+        </h3>
+        <p class="font-body-md text-body-md text-on-surface-variant mb-4">
+          {{ 'landing.footerNewsletterHint' | translate }}
+        </p>
+        <form class="flex gap-2" (submit)="$event.preventDefault()">
+          <label class="sr-only" for="newsletter-email">{{ 'landing.newsletterEmail' | translate }}</label>
+          <input
+            id="newsletter-email"
+            type="email"
+            [attr.placeholder]="'landing.newsletterEmail' | translate"
+            class="ui-input flex-1 !py-2"
+          />
+          <button type="submit" class="ui-btn-primary !px-3 !py-2" [attr.aria-label]="'common.submit' | translate">
+            <span class="material-symbols-outlined icon-flip" aria-hidden="true">send</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div
+      class="max-w-7xl mx-auto pt-8 border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-4"
+    >
+      <p class="font-label-sm text-label-sm text-on-surface-variant">
+        {{ 'landing.footerRights' | translate }}
+      </p>
+      <div class="flex gap-6 font-label-sm text-label-sm text-on-surface-variant">
+        <a href="#" class="hover:text-primary transition-all">{{ 'landing.privacy' | translate }}</a>
+        <a href="#" class="hover:text-primary transition-all">{{ 'landing.terms' | translate }}</a>
+        <a href="#" class="hover:text-primary transition-all">{{ 'landing.compliance' | translate }}</a>
+      </div>
+    </div>
+  </footer>
+</div>

@@ -1,0 +1,230 @@
+<app-sidebar-farm active="matches" />
+
+<main class="md:ms-[280px] min-h-screen bg-surface">
+  <header
+    class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
+  >
+    <div class="flex items-center gap-4">
+      <button
+        type="button"
+        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
+        [attr.aria-label]="'common.toggleMenu' | translate"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+      </button>
+      <h1 class="font-headline-md text-headline-md font-bold text-primary">
+        {{ 'farm.matches.title' | translate }}
+      </h1>
+    </div>
+    <div class="flex items-center gap-2 sm:gap-4">
+      <ui-language-toggle />
+      <ui-theme-toggle />
+      <button
+        type="button"
+        class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant relative"
+        [attr.aria-label]="'common.notifications' | translate"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+        <span
+          class="absolute top-2 end-2 w-2 h-2 bg-error rounded-full"
+          aria-hidden="true"
+        ></span>
+      </button>
+      <div class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant">
+        <div class="text-end hidden sm:block">
+          <p class="font-label-md text-label-md text-on-surface leading-tight">Ahmed El-Sayed</p>
+          <p class="text-label-sm text-label-sm text-on-surface-variant">
+            {{ 'nav.premiumFarmer' | translate }}
+          </p>
+        </div>
+        <div
+          class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary"
+        >
+          <span class="font-bold">AS</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in">
+    <section class="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-4">
+      <div>
+        <h2 class="font-headline-lg text-headline-lg font-bold text-on-surface">
+          {{ 'farm.matches.pageHeading' | translate }}
+        </h2>
+        <p class="font-body-lg text-body-lg text-on-surface-variant mt-2">
+          {{ 'farm.matches.subtitle' | translate }}
+        </p>
+      </div>
+      <div class="flex items-center gap-3 flex-wrap">
+        <div class="relative hidden sm:block">
+          <label class="sr-only" for="matches-search">{{ 'common.search' | translate }}</label>
+          <span
+            class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-outline"
+            aria-hidden="true"
+            >search</span
+          >
+          <input
+            id="matches-search"
+            class="ui-input w-64 ps-10"
+            type="search"
+            [attr.placeholder]="'farm.matches.searchPlaceholder' | translate"
+          />
+        </div>
+        <button type="button" class="ui-btn-primary flex items-center gap-2">
+          <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
+          <span class="hidden md:inline">{{ 'common.aiAssistant' | translate }}</span>
+        </button>
+      </div>
+    </section>
+
+    <section
+      class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant flex flex-wrap gap-4 items-center justify-between"
+      [attr.aria-label]="'farm.matches.filters' | translate"
+    >
+      <div class="flex gap-2 items-center text-outline font-title-md text-title-md">
+        <span class="material-symbols-outlined" aria-hidden="true">filter_list</span>
+        <span>{{ 'farm.matches.filters' | translate }}</span>
+      </div>
+      <div class="flex flex-wrap gap-4 flex-1">
+        <div class="relative w-full sm:w-auto">
+          <label class="sr-only" for="filter-status">{{ 'farm.matches.status' | translate }}</label>
+          <select id="filter-status" class="ui-input w-full sm:w-48 appearance-none pe-10">
+            <option>{{ 'farm.matches.allStatus' | translate }}</option>
+            <option>{{ 'farm.matches.statusProposed' | translate }}</option>
+            <option>{{ 'farm.matches.statusReviewing' | translate }}</option>
+          </select>
+          <span
+            class="material-symbols-outlined absolute end-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none"
+            aria-hidden="true"
+            >arrow_drop_down</span
+          >
+        </div>
+        <div class="relative w-full sm:w-auto">
+          <label class="sr-only" for="filter-crop">{{ 'farm.matches.crop' | translate }}</label>
+          <select id="filter-crop" class="ui-input w-full sm:w-48 appearance-none pe-10">
+            <option>{{ 'farm.matches.allCrops' | translate }}</option>
+            <option>Wheat</option>
+            <option>Corn</option>
+            <option>Cotton</option>
+          </select>
+          <span
+            class="material-symbols-outlined absolute end-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none"
+            aria-hidden="true"
+            >arrow_drop_down</span
+          >
+        </div>
+      </div>
+      <button type="button" class="text-primary font-title-md text-title-md hover:underline w-full sm:w-auto text-center sm:text-end">
+        {{ 'common.reset' | translate }}
+      </button>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-gutter" [attr.aria-label]="'farm.matches.title' | translate">
+      @for (match of matches; track match.factory) {
+        <article
+          class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col gap-6 transition-all hover:shadow-md"
+        >
+          <div class="flex justify-between items-start gap-4">
+            <div class="min-w-0">
+              <h3 class="font-title-lg text-title-lg font-bold text-on-surface mb-1">
+                {{ match.factory }}
+              </h3>
+              <p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1">
+                <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
+                  >location_on</span
+                >
+                {{ match.location }}
+              </p>
+            </div>
+            <div class="flex gap-2 flex-col items-end shrink-0">
+              <div
+                class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full flex items-center gap-1 shadow-sm"
+              >
+                <span class="material-symbols-outlined text-[16px] fill" aria-hidden="true"
+                  >auto_awesome</span
+                >
+                <span class="font-label-lg text-label-lg font-bold"
+                  >{{ 'farm.matches.aiScore' | translate }} {{ match.matchScore }}%</span
+                >
+              </div>
+              <div
+                class="px-3 py-1 rounded-full flex items-center gap-1 border"
+                [class]="
+                  match.riskTone === 'safe'
+                    ? 'bg-surface-container text-primary border-outline-variant'
+                    : 'bg-error-container text-on-error-container border-error-container'
+                "
+              >
+                <span class="material-symbols-outlined text-[16px]" aria-hidden="true">security</span>
+                <span class="font-label-lg text-label-lg"
+                  >{{ 'farm.matches.safetyScore' | translate }} {{ match.riskScore }}</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-surface-container rounded-lg p-4 grid grid-cols-2 gap-4">
+            <div class="flex flex-col">
+              <span class="font-label-sm text-label-sm text-outline mb-1">{{
+                'farm.matches.crop' | translate
+              }}</span>
+              <div class="flex items-center gap-2 text-on-surface font-title-md text-title-md">
+                <span class="material-symbols-outlined text-primary" aria-hidden="true">{{
+                  match.cropIcon
+                }}</span>
+                {{ match.crop }}
+              </div>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-label-sm text-label-sm text-outline mb-1">{{
+                'farm.matches.quantity' | translate
+              }}</span>
+              <div class="flex items-center gap-2 text-on-surface font-title-md text-title-md">
+                <span class="material-symbols-outlined text-primary" aria-hidden="true">scale</span>
+                {{ match.quantity }}
+              </div>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-label-sm text-label-sm text-outline mb-1">{{
+                'farm.matches.price' | translate
+              }}</span>
+              <div class="flex items-center gap-2 text-on-surface font-title-md text-title-md">
+                <span class="material-symbols-outlined text-primary" aria-hidden="true">payments</span>
+                {{ match.price }}
+              </div>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-label-sm text-label-sm text-outline mb-1">{{
+                'farm.matches.deliveryDate' | translate
+              }}</span>
+              <div class="flex items-center gap-2 text-on-surface font-title-md text-title-md">
+                <span class="material-symbols-outlined text-primary" aria-hidden="true"
+                  >calendar_month</span
+                >
+                {{ match.deliveryDate }}
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-3 mt-auto pt-2">
+            <button
+              type="button"
+              class="flex-1 ui-btn-primary font-title-md text-title-md py-3 flex items-center justify-center gap-2"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+              {{ 'farm.matches.acceptOffer' | translate }}
+            </button>
+            <button
+              type="button"
+              class="flex-1 ui-btn-secondary font-title-md text-title-md py-3 flex items-center justify-center gap-2"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">cancel</span>
+              {{ 'farm.matches.declineOffer' | translate }}
+            </button>
+          </div>
+        </article>
+      }
+    </section>
+  </div>
+</main>

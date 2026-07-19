@@ -1,0 +1,43 @@
+import { Component } from '@angular/core';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { SidebarAdminComponent } from '../../../shared/components/sidebar-admin/sidebar-admin.component';
+import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
+import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+
+@Component({
+  selector: 'app-knowledge-base',
+  standalone: true,
+  imports: [TranslatePipe, SidebarAdminComponent, UiLanguageToggleComponent, UiThemeToggleComponent],
+  templateUrl: './knowledge-base.component.html',
+})
+export class KnowledgeBaseComponent {
+  readonly categories = [
+    { key: 'quality', icon: 'verified', count: 42 },
+    { key: 'contract', icon: 'contract', count: 18 },
+    { key: 'science', icon: 'science', count: 156 },
+  ] as const;
+
+  readonly documents = [
+    {
+      title: 'Wheat Export Quality Specs 2026',
+      meta: 'PDF · 2.4 MB',
+      category: 'quality',
+      date: '12 Oct 2025',
+      status: 'indexed',
+    },
+    {
+      title: 'Standard Distributor Agreement - EMEA',
+      meta: 'DOCX · 1.1 MB',
+      category: 'contract',
+      date: '10 Oct 2025',
+      status: 'indexed',
+    },
+    {
+      title: 'Soil Analysis & Crop Yield Predictions Q3',
+      meta: 'CSV · 14.5 MB',
+      category: 'science',
+      date: '08 Oct 2025',
+      status: 'processing',
+    },
+  ] as const;
+}

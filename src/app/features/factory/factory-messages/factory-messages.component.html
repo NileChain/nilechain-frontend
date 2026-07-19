@@ -1,0 +1,261 @@
+<app-sidebar-factory active="messages" />
+
+<main class="md:ms-[280px] min-h-screen bg-surface flex flex-col">
+  <div class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto w-full flex flex-col flex-1 min-h-0 animate-fade-in">
+    <!-- Header -->
+    <header class="flex justify-between items-center gap-4 flex-wrap shrink-0 mb-gutter">
+      <div>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface">
+          {{ 'messages.title' | translate }}
+        </h1>
+      </div>
+      <div class="flex items-center gap-2 sm:gap-4">
+        <ui-language-toggle />
+        <ui-theme-toggle />
+      </div>
+    </header>
+
+    <!-- Two-pane messaging -->
+    <div
+      class="flex flex-col md:flex-row flex-1 min-h-[560px] md:min-h-[calc(100vh-8rem)] rounded-xl border border-outline-variant overflow-hidden bg-surface-container-lowest"
+    >
+      <!-- Conversation list -->
+      <section
+        class="w-full md:w-[320px] lg:w-[360px] bg-surface flex flex-col border-b md:border-b-0 md:border-e border-outline-variant shrink-0 max-h-[280px] md:max-h-none"
+        [attr.aria-label]="'messages.title' | translate"
+      >
+        <div class="p-4 border-b border-outline-variant">
+          <label class="sr-only" for="msg-search">{{ 'messages.search' | translate }}</label>
+          <div class="relative">
+            <span
+              class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]"
+              aria-hidden="true"
+              >search</span
+            >
+            <input
+              id="msg-search"
+              type="search"
+              class="ui-input !ps-10 !py-2.5"
+              [attr.placeholder]="'messages.search' | translate"
+            />
+          </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto">
+          @for (convo of conversations; track convo.id) {
+            <div
+              class="flex items-start p-4 transition-colors cursor-default border-s-4 hover:bg-surface-container-low"
+              [class.bg-surface-container]="convo.active"
+              [class.border-primary]="convo.active"
+              [class.border-transparent]="!convo.active"
+              [attr.aria-current]="convo.active ? 'true' : null"
+            >
+              <div class="relative me-4 shrink-0">
+                @if (convo.avatarUrl) {
+                  <img
+                    [src]="convo.avatarUrl"
+                    [alt]="convo.name"
+                    class="w-12 h-12 rounded-full object-cover bg-surface-container-high"
+                  />
+                } @else {
+                  <div
+                    class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-title-lg font-bold"
+                  >
+                    {{ convo.initial }}
+                  </div>
+                }
+                @if (convo.online) {
+                  <span
+                    class="absolute bottom-0 end-0 w-3.5 h-3.5 bg-success-green border-2 border-surface rounded-full"
+                    [attr.aria-label]="'messages.online' | translate"
+                  ></span>
+                }
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-baseline mb-1 gap-2">
+                  <h2 class="font-title-md text-title-md text-on-surface truncate">
+                    {{ convo.name }}
+                  </h2>
+                  <span
+                    class="font-label-sm text-label-sm whitespace-nowrap text-on-surface-variant"
+                    [class.text-primary]="convo.active"
+                  >
+                    {{ convo.timeKey | translate }}
+                  </span>
+                </div>
+                <p class="font-body-md text-body-md text-on-surface-variant truncate">
+                  {{ convo.previewKey | translate }}
+                </p>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Active thread -->
+      <section class="flex-1 flex flex-col bg-surface min-w-0 min-h-[400px]" aria-live="polite">
+        <!-- Deal context bar -->
+        <div
+          class="min-h-[72px] bg-surface-container-lowest border-b border-outline-variant px-4 sm:px-6 py-3 flex items-center justify-between gap-3 flex-wrap shrink-0"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0"
+            >
+              <span class="material-symbols-outlined fill" aria-hidden="true">storefront</span>
+            </div>
+            <div>
+              <h2 class="font-title-md text-title-md text-on-surface">Modern Valley Farms</h2>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="w-2 h-2 rounded-full bg-success-green" aria-hidden="true"></span>
+                <span class="font-label-sm text-label-sm text-on-surface-variant">{{
+                  'messages.online' | translate
+                }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <div
+              class="flex items-center gap-1.5 bg-surface-container px-3 py-1.5 rounded-lg border border-outline-variant"
+            >
+              <span class="material-symbols-outlined text-on-surface-variant text-[18px]" aria-hidden="true"
+                >tag</span
+              >
+              <span class="font-body-md text-body-md text-on-surface tracking-wider"
+                >NCH-2026-0089</span
+              >
+            </div>
+            <div
+              class="flex items-center gap-1.5 bg-primary-container px-3 py-1.5 rounded-lg text-on-primary-container"
+            >
+              <span class="material-symbols-outlined text-[18px] fill" aria-hidden="true">eco</span>
+              <span class="font-title-md text-title-md font-bold">Potatoes</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-6">
+          <div class="flex justify-center">
+            <span
+              class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-3 py-1 rounded-full"
+            >
+              {{ 'messages.todayDate' | translate }}
+            </span>
+          </div>
+
+          <div
+            class="self-center w-full max-w-lg rounded-2xl p-4 border border-outline-variant bg-secondary-container/40"
+          >
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-primary fill shrink-0" aria-hidden="true"
+                >smart_toy</span
+              >
+              <div>
+                <h3 class="font-title-md text-title-md text-on-surface mb-1 flex items-center gap-2">
+                  {{ 'messages.aiInsightTitle' | translate }}
+                  <span class="material-symbols-outlined text-primary text-[16px] fill" aria-hidden="true"
+                    >verified</span
+                  >
+                </h3>
+                <p class="font-body-md text-body-md text-on-surface-variant">
+                  {{ 'messages.aiInsightBody' | translate }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          @for (msg of chatMessages; track msg.id) {
+            @if (msg.kind === 'incoming') {
+              <div class="flex flex-col items-start max-w-[85%] sm:max-w-[70%]">
+                <div
+                  class="bg-surface-container p-4 rounded-2xl rounded-ee-none text-on-surface"
+                >
+                  @if (msg.attachment) {
+                    <div
+                      class="relative w-48 h-32 rounded-xl overflow-hidden mb-2 border border-outline-variant"
+                    >
+                      <img
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBR2IRAA5foJcl6dui_zLUMzVj1ytZhaCkpz1QoomPW6h1sxUJRc1n3SKp0Ov6r6XoJhWxeKRDrL8BKcFKMpvTbYlOaZCvhdc1Ds0o2VuhN0DSe4nXh4_QrdVWkeGEOW7dgrAjdZZIm08l-gKTKj0lpmOUQHhGF-3pd1QObafOOg5Bjq894-TOg6IFeiY7S9hYEV7s2_iurupY4IM2lmylvtlQdnk6tsaEuTfX1w1md9UXoH7icQ0GJSpWVS5VN3j3B0rCG8yFp6sE"
+                        [attr.alt]="'messages.packagingAlt' | translate"
+                        class="w-full h-full object-cover"
+                      />
+                      <div
+                        class="absolute bottom-2 end-2 bg-surface-container-highest text-on-surface px-2 py-1 rounded font-label-sm text-label-sm flex items-center gap-1"
+                      >
+                        <span class="material-symbols-outlined text-[14px]" aria-hidden="true"
+                          >image</span
+                        >
+                        img_1.jpg
+                      </div>
+                    </div>
+                  }
+                  <p class="font-body-lg text-body-lg">{{ msg.bodyKey | translate }}</p>
+                </div>
+                <span class="text-label-sm font-label-sm text-on-surface-variant mt-1.5 ms-2">{{
+                  msg.time
+                }}</span>
+              </div>
+            } @else {
+              <div class="flex flex-col items-end self-end max-w-[85%] sm:max-w-[70%]">
+                <div
+                  class="bg-primary-container text-on-primary-container p-4 rounded-2xl rounded-es-none"
+                >
+                  <p class="font-body-lg text-body-lg">{{ msg.bodyKey | translate }}</p>
+                </div>
+                <div class="flex items-center gap-1 mt-1.5 me-2">
+                  <span
+                    class="material-symbols-outlined text-[16px] text-primary fill"
+                    aria-hidden="true"
+                    >done_all</span
+                  >
+                  <span class="text-label-sm font-label-sm text-on-surface-variant">{{
+                    msg.time
+                  }}</span>
+                </div>
+              </div>
+            }
+          }
+        </div>
+
+        <!-- Composer (presentational only) -->
+        <div class="p-4 bg-surface-container-lowest border-t border-outline-variant shrink-0">
+          <div class="max-w-4xl mx-auto flex items-end gap-3">
+            <button
+              type="button"
+              class="w-12 h-12 shrink-0 rounded-full bg-surface-container hover:bg-surface-container-high transition-colors flex items-center justify-center text-on-surface-variant"
+              [attr.aria-label]="'messages.attach' | translate"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">attach_file</span>
+            </button>
+            <div
+              class="flex-1 relative bg-surface-container-low rounded-3xl border border-outline-variant focus-within:border-primary transition-all flex items-center px-4 py-2 min-h-[56px]"
+            >
+              <label class="sr-only" for="msg-composer">{{ 'messages.placeholder' | translate }}</label>
+              <input
+                id="msg-composer"
+                type="text"
+                class="w-full bg-transparent border-none focus:outline-none font-body-lg text-body-lg text-on-surface placeholder:text-on-surface-variant"
+                [attr.placeholder]="'messages.placeholder' | translate"
+              />
+              <button
+                type="button"
+                class="text-on-surface-variant hover:text-primary transition-colors ms-2 shrink-0"
+                [attr.aria-label]="'messages.emoji' | translate"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">mood</span>
+              </button>
+            </div>
+            <button
+              type="button"
+              class="w-14 h-14 shrink-0 rounded-full bg-primary-container text-on-primary-container hover:opacity-90 transition-all flex items-center justify-center"
+              [attr.aria-label]="'messages.send' | translate"
+            >
+              <span class="material-symbols-outlined icon-flip" aria-hidden="true">send</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>

@@ -1,0 +1,28 @@
+import { Component, inject } from '@angular/core';
+import { ThemeService } from '../../../core/services/theme.service';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+
+@Component({
+  selector: 'ui-theme-toggle',
+  standalone: true,
+  imports: [TranslatePipe],
+  template: `
+    <button
+      type="button"
+      class="inline-flex h-10 w-10 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      [attr.aria-label]="
+        theme.isDark()
+          ? ('common.themeLight' | translate)
+          : ('common.themeDark' | translate)
+      "
+      (click)="theme.toggle()"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">
+        {{ theme.isDark() ? 'light_mode' : 'dark_mode' }}
+      </span>
+    </button>
+  `,
+})
+export class UiThemeToggleComponent {
+  readonly theme = inject(ThemeService);
+}

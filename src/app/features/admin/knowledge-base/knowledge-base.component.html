@@ -1,0 +1,306 @@
+<app-sidebar-admin active="knowledgeBase" />
+
+<main class="md:ms-[280px] min-h-screen bg-surface">
+  <header
+    class="h-16 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
+  >
+    <div class="flex items-center gap-4">
+      <button
+        type="button"
+        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
+        [attr.aria-label]="'common.toggleMenu' | translate"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+      </button>
+      <h2 class="font-headline-md text-headline-md font-bold text-primary">
+        {{ 'admin.knowledgeBase.title' | translate }}
+      </h2>
+    </div>
+    <div class="flex items-center gap-2 sm:gap-4">
+      <ui-language-toggle />
+      <ui-theme-toggle />
+      <button
+        type="button"
+        class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant relative"
+        [attr.aria-label]="'common.notifications' | translate"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+        <span
+          class="absolute top-2 end-2 w-2 h-2 bg-error rounded-full"
+          aria-hidden="true"
+        ></span>
+      </button>
+      <div class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant">
+        <div class="text-end hidden sm:block">
+          <p class="font-label-md text-label-md text-on-surface leading-tight">Admin</p>
+          <p class="text-label-sm text-label-sm text-on-surface-variant">
+            {{ 'nav.adminRole' | translate }}
+          </p>
+        </div>
+        <div
+          class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container"
+        >
+          <span class="font-bold">AD</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in">
+    <section class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+      <div class="space-y-1">
+        <h1 class="font-headline-lg text-headline-lg font-bold text-on-surface">
+          {{ 'admin.knowledgeBase.title' | translate }}
+        </h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {{ 'admin.knowledgeBase.subtitle' | translate }}
+        </p>
+      </div>
+      <div class="relative hidden lg:block max-w-xs w-full">
+        <label class="sr-only" for="kb-search">{{ 'common.search' | translate }}</label>
+        <span
+          class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
+          aria-hidden="true"
+          >search</span
+        >
+        <input
+          id="kb-search"
+          type="search"
+          class="ui-input w-full ps-10"
+          [attr.placeholder]="'admin.knowledgeBase.searchPlaceholder' | translate"
+        />
+      </div>
+    </section>
+
+    <!-- Upload + categories -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+      <article class="lg:col-span-2 ui-card p-6 flex flex-col relative overflow-hidden">
+        <div class="mb-6 relative z-10">
+          <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+            {{ 'admin.knowledgeBase.uploadTitle' | translate }}
+          </h2>
+          <p class="font-body-md text-body-md text-on-surface-variant mt-1">
+            {{ 'admin.knowledgeBase.uploadFormats' | translate }}
+          </p>
+        </div>
+        <div
+          class="flex-1 border-2 border-dashed border-outline-variant hover:border-primary bg-surface-container-lowest hover:bg-surface-container transition-all rounded-lg flex flex-col items-center justify-center p-8 text-center relative z-10 min-h-[220px]"
+        >
+          <span
+            class="material-symbols-outlined text-4xl text-primary mb-4"
+            aria-hidden="true"
+            >cloud_upload</span
+          >
+          <p class="font-title-md text-title-md text-on-surface mb-2">
+            {{ 'admin.knowledgeBase.dropzone' | translate }}
+          </p>
+          <p class="font-body-md text-body-md text-on-surface-variant mb-6">
+            {{ 'admin.knowledgeBase.orBrowse' | translate }}
+          </p>
+          <div class="flex flex-wrap justify-center gap-3">
+            <label class="ui-btn-secondary inline-flex items-center gap-2 cursor-pointer">
+              <span class="material-symbols-outlined text-sm" aria-hidden="true">folder</span>
+              {{ 'admin.knowledgeBase.browseFiles' | translate }}
+              <input class="sr-only" type="file" multiple />
+            </label>
+            <button type="button" class="ui-btn-primary">
+              {{ 'admin.knowledgeBase.upload' | translate }}
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <article class="ui-card p-6 flex flex-col">
+        <h2 class="font-title-lg text-title-lg text-on-surface font-bold mb-6">
+          {{ 'admin.knowledgeBase.categories' | translate }}
+        </h2>
+        <div class="space-y-4 flex-1">
+          @for (cat of categories; track cat.key) {
+            <div
+              class="bg-surface-container p-4 rounded-lg flex items-center justify-between border border-transparent hover:border-outline-variant hover:bg-surface-container-high transition-colors"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0"
+                >
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{
+                    cat.icon
+                  }}</span>
+                </div>
+                <div>
+                  <p class="font-title-md text-title-md text-on-surface">
+                    @if (cat.key === 'quality') {
+                      {{ 'admin.knowledgeBase.catQuality' | translate }}
+                    }
+                    @if (cat.key === 'contract') {
+                      {{ 'admin.knowledgeBase.catContract' | translate }}
+                    }
+                    @if (cat.key === 'science') {
+                      {{ 'admin.knowledgeBase.catScience' | translate }}
+                    }
+                  </p>
+                  <p class="font-label-lg text-label-lg text-on-surface-variant">
+                    {{ cat.count }} {{ 'admin.knowledgeBase.documentsLabel' | translate }}
+                  </p>
+                </div>
+              </div>
+              <span
+                class="material-symbols-outlined text-on-surface-variant icon-flip"
+                aria-hidden="true"
+                >chevron_right</span
+              >
+            </div>
+          }
+        </div>
+      </article>
+    </section>
+
+    <!-- Documents table -->
+    <section class="ui-card overflow-hidden">
+      <div
+        class="p-6 border-b border-outline-variant flex justify-between items-center gap-3 bg-surface-container-lowest"
+      >
+        <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+          {{ 'admin.knowledgeBase.recentDocuments' | translate }}
+        </h2>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-colors"
+            [attr.aria-label]="'common.filter' | translate"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">filter_list</span>
+          </button>
+          <button
+            type="button"
+            class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-colors"
+            [attr.aria-label]="'common.actions' | translate"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">more_vert</span>
+          </button>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-start border-collapse">
+          <thead>
+            <tr class="bg-surface-container border-b border-outline-variant">
+              <th scope="col" class="p-4 w-12">
+                <span class="sr-only">{{ 'admin.knowledgeBase.documentIcon' | translate }}</span>
+              </th>
+              <th scope="col" class="p-4 font-label-lg text-label-lg text-on-surface-variant text-start">
+                {{ 'admin.knowledgeBase.documentTitle' | translate }}
+              </th>
+              <th scope="col" class="p-4 font-label-lg text-label-lg text-on-surface-variant text-start">
+                {{ 'admin.knowledgeBase.category' | translate }}
+              </th>
+              <th scope="col" class="p-4 font-label-lg text-label-lg text-on-surface-variant text-start">
+                {{ 'admin.knowledgeBase.dateUploaded' | translate }}
+              </th>
+              <th scope="col" class="p-4 font-label-lg text-label-lg text-on-surface-variant text-start">
+                {{ 'admin.knowledgeBase.aiStatus' | translate }}
+              </th>
+              <th scope="col" class="p-4 font-label-lg text-label-lg text-on-surface-variant text-start w-16">
+                {{ 'common.actions' | translate }}
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-outline-variant">
+            @for (doc of documents; track doc.title) {
+              <tr class="hover:bg-surface-container-low transition-colors group">
+                <td class="p-4">
+                  <span
+                    class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors"
+                    aria-hidden="true"
+                    >description</span
+                  >
+                </td>
+                <td class="p-4">
+                  <p class="font-title-md text-title-md text-on-surface">{{ doc.title }}</p>
+                  <p class="font-label-sm text-label-sm text-on-surface-variant">{{ doc.meta }}</p>
+                </td>
+                <td class="p-4">
+                  <span
+                    class="inline-flex items-center gap-1 bg-surface-container px-2 py-1 rounded text-on-surface font-label-sm text-label-sm border border-outline-variant"
+                  >
+                    @if (doc.category === 'quality') {
+                      <span class="material-symbols-outlined text-[14px] text-primary" aria-hidden="true"
+                        >verified</span
+                      >
+                      {{ 'admin.knowledgeBase.catQuality' | translate }}
+                    }
+                    @if (doc.category === 'contract') {
+                      <span class="material-symbols-outlined text-[14px] text-primary" aria-hidden="true"
+                        >contract</span
+                      >
+                      {{ 'admin.knowledgeBase.catContract' | translate }}
+                    }
+                    @if (doc.category === 'science') {
+                      <span class="material-symbols-outlined text-[14px] text-primary" aria-hidden="true"
+                        >science</span
+                      >
+                      {{ 'admin.knowledgeBase.catScience' | translate }}
+                    }
+                  </span>
+                </td>
+                <td class="p-4 font-body-md text-body-md text-on-surface-variant">
+                  {{ doc.date }}
+                </td>
+                <td class="p-4">
+                  @if (doc.status === 'indexed') {
+                    <span
+                      class="inline-flex items-center gap-1.5 bg-secondary-container/40 text-on-secondary-container px-3 py-1 rounded-full font-label-sm text-label-sm border border-outline-variant"
+                    >
+                      <span
+                        class="material-symbols-outlined text-[14px] text-primary"
+                        aria-hidden="true"
+                        >check_circle</span
+                      >
+                      {{ 'admin.knowledgeBase.indexed' | translate }}
+                    </span>
+                  }
+                  @if (doc.status === 'processing') {
+                    <span
+                      class="inline-flex items-center gap-1.5 bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full font-label-sm text-label-sm border border-outline-variant"
+                    >
+                      <span class="material-symbols-outlined text-[14px]" aria-hidden="true"
+                        >sync</span
+                      >
+                      {{ 'admin.knowledgeBase.processing' | translate }}
+                    </span>
+                  }
+                </td>
+                <td class="p-4">
+                  <button
+                    type="button"
+                    class="text-on-surface-variant hover:text-primary transition-colors"
+                    [attr.aria-label]="'common.download' | translate"
+                  >
+                    <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div
+        class="p-4 border-t border-outline-variant bg-surface-container-lowest flex flex-col sm:flex-row justify-between items-center gap-3"
+      >
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {{ 'admin.knowledgeBase.showingResults' | translate }}
+        </p>
+        <div class="flex gap-2">
+          <button type="button" class="ui-btn-secondary !px-3 !py-1 text-label-sm">
+            {{ 'common.previous' | translate }}
+          </button>
+          <button type="button" class="ui-btn-primary !px-3 !py-1 text-label-sm">1</button>
+          <button type="button" class="ui-btn-secondary !px-3 !py-1 text-label-sm">2</button>
+          <button type="button" class="ui-btn-secondary !px-3 !py-1 text-label-sm">3</button>
+          <button type="button" class="ui-btn-secondary !px-3 !py-1 text-label-sm">
+            {{ 'common.next' | translate }}
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>

@@ -4,10 +4,19 @@ import { Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
+import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-register',
-  imports: [CommonModule, RouterLink],
+  imports: [
+    CommonModule,
+    RouterLink,
+    TranslatePipe,
+    UiLanguageToggleComponent,
+    UiThemeToggleComponent,
+  ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
 })
@@ -99,7 +108,7 @@ export class RegisterComponent {
     const password = this.passwordValue();
     const confirmPassword = this.confirmPasswordValue();
     if (!email || !password || !confirmPassword) {
-      this.errorMessage.set('Please complete all required fields.');
+      this.errorMessage.set('register.errors.required');
       return;
     }
 
@@ -130,9 +139,7 @@ export class RegisterComponent {
           void this.router.navigate(['/landing']);
         },
         error: () => {
-          this.errorMessage.set(
-            'Unable to create account right now. Please try again.'
-          );
+          this.errorMessage.set('register.errors.failed');
         },
       });
   }

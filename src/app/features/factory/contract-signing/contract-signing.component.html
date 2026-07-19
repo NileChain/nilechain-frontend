@@ -1,0 +1,304 @@
+<app-sidebar-factory active="contracts" />
+
+<main class="md:ms-[280px] min-h-screen bg-surface">
+  <div class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in">
+    <!-- Header -->
+    <header class="flex justify-between items-center gap-4 flex-wrap">
+      <div>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface">
+          {{ 'contractSign.title' | translate }}
+        </h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {{ 'contractSign.subtitle' | translate }}
+        </p>
+      </div>
+      <div class="flex items-center gap-2 sm:gap-4">
+        <ui-language-toggle />
+        <ui-theme-toggle />
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start pb-8">
+      <!-- Action panel -->
+      <aside class="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-6">
+        <!-- Status timeline -->
+        <section class="ui-card p-6" aria-labelledby="timeline-heading">
+          <h2
+            id="timeline-heading"
+            class="font-title-lg text-title-lg text-on-surface mb-6 flex items-center gap-2"
+          >
+            <span class="material-symbols-outlined text-primary" aria-hidden="true"
+              >pending_actions</span
+            >
+            {{ 'contractSign.timeline' | translate }}
+          </h2>
+          <div class="flex flex-col gap-0 relative">
+            <div
+              class="absolute start-[11px] top-2 bottom-6 w-[2px] bg-surface-container-high z-0"
+              aria-hidden="true"
+            ></div>
+            <ol class="flex flex-col gap-0 relative list-none p-0 m-0">
+            @for (step of timeline; track step.key) {
+              <li class="flex items-start gap-4 relative z-10 mb-6 last:mb-0">
+                @if (step.state === 'done') {
+                  <div
+                    class="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center shrink-0 mt-0.5"
+                  >
+                    <span
+                      class="material-symbols-outlined text-on-primary-container text-[14px]"
+                      aria-hidden="true"
+                      >check</span
+                    >
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-title-md text-title-md text-on-surface">{{
+                      step.key | translate
+                    }}</span>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">{{
+                      step.descKey | translate
+                    }}</span>
+                  </div>
+                } @else if (step.state === 'current') {
+                  <div
+                    class="w-6 h-6 rounded-full bg-primary-container border-2 border-primary flex items-center justify-center shrink-0 mt-0.5"
+                    aria-current="step"
+                  >
+                    <div
+                      class="w-2 h-2 rounded-full bg-on-primary-container"
+                      aria-hidden="true"
+                    ></div>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-title-md text-title-md text-primary font-bold">{{
+                      step.key | translate
+                    }}</span>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">{{
+                      step.descKey | translate
+                    }}</span>
+                  </div>
+                } @else {
+                  <div
+                    class="w-6 h-6 rounded-full bg-surface-container-high border-2 border-outline-variant flex items-center justify-center shrink-0 mt-0.5"
+                  ></div>
+                  <div class="flex flex-col">
+                    <span class="font-title-md text-title-md text-on-surface-variant">{{
+                      step.key | translate
+                    }}</span>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">{{
+                      step.descKey | translate
+                    }}</span>
+                  </div>
+                }
+              </li>
+            }
+            </ol>
+          </div>
+        </section>
+
+        <!-- Deal summary -->
+        <section class="ui-card p-6" aria-labelledby="summary-heading">
+          <h2 id="summary-heading" class="font-title-lg text-title-lg text-on-surface mb-4">
+            {{ 'contractSign.summary' | translate }}
+          </h2>
+          <dl class="flex flex-col gap-3 m-0">
+            @for (row of summaryRows; track row.labelKey) {
+              <div
+                class="flex justify-between items-center py-2 border-b border-surface-container-high last:border-b-0"
+              >
+                <dt class="font-body-md text-body-md text-on-surface-variant">
+                  {{ row.labelKey | translate }}
+                </dt>
+                <dd
+                  class="font-title-md text-title-md m-0 text-on-surface"
+                  [class.text-primary]="row.emphasize"
+                  [class.font-bold]="row.emphasize"
+                >
+                  {{ row.value }}
+                </dd>
+              </div>
+            }
+          </dl>
+        </section>
+
+        <!-- Actions -->
+        <div class="flex flex-col gap-3">
+          <button type="button" class="ui-btn-primary w-full !py-4">
+            <span class="material-symbols-outlined" aria-hidden="true">edit_document</span>
+            {{ 'contractSign.acceptSign' | translate }}
+          </button>
+          <button
+            type="button"
+            class="w-full py-3 rounded-lg font-title-md text-title-md flex items-center justify-center gap-2 border border-danger-red text-danger-red hover:bg-error-container hover:text-on-error-container transition-colors"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">cancel</span>
+            {{ 'contractSign.decline' | translate }}
+          </button>
+          <button type="button" class="ui-btn-secondary w-full">
+            <span class="material-symbols-outlined" aria-hidden="true">chat_bubble</span>
+            {{ 'contractSign.message' | translate }}
+          </button>
+          <button type="button" class="ui-btn-ghost w-full">
+            <span class="material-symbols-outlined" aria-hidden="true">download</span>
+            {{ 'contractSign.downloadPdf' | translate }}
+          </button>
+        </div>
+      </aside>
+
+      <!-- Contract document -->
+      <section
+        class="lg:col-span-8 ui-card overflow-hidden flex flex-col min-h-[560px] lg:h-[870px]"
+        aria-labelledby="document-heading"
+      >
+        <div
+          class="bg-surface-container-low border-b border-outline-variant px-4 sm:px-6 py-3 flex items-center justify-between gap-3 flex-wrap shrink-0"
+        >
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="material-symbols-outlined text-on-surface-variant" aria-hidden="true"
+              >description</span
+            >
+            <h2
+              id="document-heading"
+              class="font-title-md text-title-md text-on-surface font-semibold truncate"
+            >
+              {{ 'contractSign.document' | translate }} #NC-2026-889
+            </h2>
+          </div>
+          <div
+            class="inline-flex items-center gap-1.5 bg-secondary-container text-on-secondary-container px-3 py-1.5 rounded-full"
+          >
+            <span class="material-symbols-outlined text-[16px] fill" aria-hidden="true"
+              >verified_user</span
+            >
+            <span class="font-label-sm text-label-sm font-bold">{{
+              'contractSign.ragBadge' | translate
+            }}</span>
+          </div>
+        </div>
+
+        <div class="p-6 md:p-12 overflow-y-auto flex-1 bg-surface-container-lowest">
+          <div class="max-w-3xl mx-auto space-y-8">
+            <div class="text-center space-y-4 mb-10">
+              <p class="font-headline-sm text-headline-sm text-on-surface font-bold">
+                {{ 'contractSign.bismillah' | translate }}
+              </p>
+              <h3
+                class="font-title-lg text-title-lg text-on-surface-variant border-b-2 border-primary inline-block pb-2 px-4 sm:px-8"
+              >
+                {{ 'contractSign.docTitle' | translate }}
+              </h3>
+              <p class="font-body-md text-body-md text-on-surface-variant">
+                {{ 'contractSign.preamble' | translate }}
+              </p>
+            </div>
+
+            <div class="bg-surface p-6 rounded-lg border border-outline-variant space-y-6">
+              <div>
+                <h4
+                  class="font-title-md text-title-md text-primary font-bold flex items-center gap-2 mb-2"
+                >
+                  <span class="w-2 h-2 rounded-full bg-primary shrink-0" aria-hidden="true"></span>
+                  {{ 'contractSign.partyBuyer' | translate }}
+                </h4>
+                <p class="font-body-lg text-body-lg text-on-surface leading-relaxed">
+                  {{ 'contractSign.partyBuyerBody' | translate }}
+                </p>
+              </div>
+              <div class="border-t border-outline-variant pt-4">
+                <h4
+                  class="font-title-md text-title-md text-primary font-bold flex items-center gap-2 mb-2"
+                >
+                  <span
+                    class="w-2 h-2 rounded-full bg-success-green shrink-0"
+                    aria-hidden="true"
+                  ></span>
+                  {{ 'contractSign.partySeller' | translate }}
+                </h4>
+                <p class="font-body-lg text-body-lg text-on-surface leading-relaxed">
+                  {{ 'contractSign.partySellerBody' | translate }}
+                </p>
+              </div>
+            </div>
+
+            <div class="space-y-6">
+              <div class="space-y-3">
+                <h4 class="font-title-md text-title-md text-on-surface font-bold">
+                  {{ 'contractSign.clause1Title' | translate }}
+                </h4>
+                <p class="font-body-md text-body-md text-on-surface leading-relaxed text-start">
+                  {{ 'contractSign.clause1Body' | translate }}
+                </p>
+                <ul
+                  class="list-disc list-inside font-body-md text-body-md text-on-surface-variant space-y-2 ps-4 bg-surface-container-low p-4 rounded-lg"
+                >
+                  @for (item of clause1Items; track item) {
+                    <li>{{ item | translate }}</li>
+                  }
+                </ul>
+              </div>
+
+              <div class="space-y-3">
+                <h4 class="font-title-md text-title-md text-on-surface font-bold">
+                  {{ 'contractSign.clause2Title' | translate }}
+                </h4>
+                <p class="font-body-md text-body-md text-on-surface leading-relaxed text-start">
+                  {{ 'contractSign.clause2Body' | translate }}
+                </p>
+              </div>
+
+              <div class="space-y-3">
+                <h4 class="font-title-md text-title-md text-on-surface font-bold">
+                  {{ 'contractSign.clause3Title' | translate }}
+                </h4>
+                <p class="font-body-md text-body-md text-on-surface leading-relaxed text-start">
+                  {{ 'contractSign.clause3Body' | translate }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Signature area -->
+            <div
+              class="mt-12 pt-8 border-t-2 border-outline-variant grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8"
+            >
+              <button
+                type="button"
+                class="flex flex-col items-center justify-center p-6 border-2 border-dashed border-outline-variant rounded-xl bg-surface hover:bg-surface-container-low transition-colors group text-center"
+                [attr.aria-label]="'contractSign.clickToSign' | translate"
+              >
+                <span class="font-title-md text-title-md text-on-surface mb-4">{{
+                  'contractSign.buyerSignLabel' | translate
+                }}</span>
+                <div
+                  class="w-full h-24 flex items-center justify-center bg-surface-container-lowest rounded border border-outline-variant mb-2"
+                >
+                  <span
+                    class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[32px]"
+                    aria-hidden="true"
+                    >draw</span
+                  >
+                </div>
+                <span class="font-label-sm text-label-sm text-on-surface-variant">{{
+                  'contractSign.clickToSign' | translate
+                }}</span>
+              </button>
+
+              <div
+                class="flex flex-col items-center justify-center p-6 border-2 border-outline-variant rounded-xl bg-surface opacity-60 text-center"
+              >
+                <span class="font-title-md text-title-md text-on-surface mb-4">{{
+                  'contractSign.sellerSignLabel' | translate
+                }}</span>
+                <div
+                  class="w-full h-24 flex items-center justify-center bg-surface-container-lowest rounded mb-2"
+                >
+                  <span class="font-body-lg text-body-lg text-on-surface-variant italic">{{
+                    'contractSign.awaitingSignature' | translate
+                  }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>

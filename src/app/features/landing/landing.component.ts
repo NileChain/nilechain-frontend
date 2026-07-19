@@ -1,10 +1,13 @@
 import { AfterViewInit, Component, OnDestroy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { TranslatePipe } from '../../core/pipes/translate.pipe';
+import { UiLanguageToggleComponent } from '../../shared/ui/language-toggle/language-toggle.component';
+import { UiThemeToggleComponent } from '../../shared/ui/theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-landing',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
 })

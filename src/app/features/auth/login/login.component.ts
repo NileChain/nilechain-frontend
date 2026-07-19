@@ -3,10 +3,18 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
+import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-login',
-  imports: [RouterLink],
+  imports: [
+    RouterLink,
+    TranslatePipe,
+    UiLanguageToggleComponent,
+    UiThemeToggleComponent,
+  ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
@@ -42,7 +50,7 @@ export class LoginComponent {
     const rememberMe = Boolean(formData.get('rememberMe'));
 
     if (!email || !password) {
-      this.errorMessage.set('Email and password are required.');
+      this.errorMessage.set('login.errors.required');
       return;
     }
 
@@ -74,9 +82,7 @@ export class LoginComponent {
           void this.router.navigate(['/landing']);
         },
         error: () => {
-          this.errorMessage.set(
-            'Unable to sign in with the provided credentials.'
-          );
+          this.errorMessage.set('login.errors.invalid');
         },
       });
   }

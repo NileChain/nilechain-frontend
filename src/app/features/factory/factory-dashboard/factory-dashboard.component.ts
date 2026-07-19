@@ -11,6 +11,9 @@ import {
   Legend,
   Tooltip,
 } from 'chart.js';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
+import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 
 Chart.register(
   LineController,
@@ -25,7 +28,7 @@ Chart.register(
 
 @Component({
   selector: 'app-factory-dashboard',
-  imports: [],
+  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent],
   templateUrl: './factory-dashboard.component.html',
   styleUrl: './factory-dashboard.component.scss',
 })

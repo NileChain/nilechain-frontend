@@ -1,0 +1,156 @@
+<app-sidebar-factory active="supplyRequest" />
+
+<main class="md:ms-[280px] min-h-screen bg-surface">
+  <div class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in">
+    <!-- Topbar -->
+    <header class="flex justify-between items-center gap-4 flex-wrap">
+      <div>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface">
+          {{ 'factory.supplyRequest.title' | translate }}
+        </h1>
+        <p class="font-body-lg text-body-lg text-on-surface-variant mt-1">
+          {{ 'factory.supplyRequest.subtitle' | translate }}
+        </p>
+      </div>
+      <div class="flex items-center gap-2 sm:gap-4">
+        <span
+          class="hidden sm:inline-flex items-center gap-2 bg-primary-container/10 px-4 py-2 rounded-lg"
+        >
+          <span class="material-symbols-outlined text-primary text-xl fill" aria-hidden="true"
+            >auto_awesome</span
+          >
+          <span class="font-title-md text-title-md text-primary">{{
+            'factory.supplyRequest.aiPowered' | translate
+          }}</span>
+        </span>
+        <ui-language-toggle />
+        <ui-theme-toggle />
+      </div>
+    </header>
+
+    <!-- Presentational form -->
+    <form class="ui-card p-6 md:p-8 space-y-8 animate-slide-up" novalidate>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Crop -->
+        <div class="space-y-2">
+          <label class="block font-title-md text-title-md text-on-surface" for="crop_type">
+            {{ 'factory.supplyRequest.crop' | translate }}
+            <span class="text-error" aria-hidden="true">*</span>
+            <span class="sr-only">{{ 'common.required' | translate }}</span>
+          </label>
+          <div class="relative">
+            <select id="crop_type" name="crop_type" class="ui-input appearance-none pe-10">
+              <option disabled selected value="">
+                {{ 'factory.supplyRequest.selectCrop' | translate }}
+              </option>
+              @for (crop of crops; track crop.value) {
+                <option [value]="crop.value">{{ crop.labelKey | translate }}</option>
+              }
+            </select>
+            <span
+              class="material-symbols-outlined absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none"
+              aria-hidden="true"
+              >expand_more</span
+            >
+          </div>
+        </div>
+
+        <!-- Quantity -->
+        <div class="space-y-2">
+          <label class="block font-title-md text-title-md text-on-surface" for="quantity">
+            {{ 'factory.supplyRequest.quantity' | translate }}
+            <span class="text-error" aria-hidden="true">*</span>
+            <span class="sr-only">{{ 'common.required' | translate }}</span>
+          </label>
+          <input
+            id="quantity"
+            name="quantity"
+            type="number"
+            min="1"
+            class="ui-input"
+            [attr.placeholder]="'factory.supplyRequest.quantityPlaceholder' | translate"
+          />
+        </div>
+
+        <!-- Target price -->
+        <div class="space-y-2">
+          <label class="block font-title-md text-title-md text-on-surface" for="target_price">
+            {{ 'factory.supplyRequest.targetPrice' | translate }}
+            <span class="text-error" aria-hidden="true">*</span>
+            <span class="sr-only">{{ 'common.required' | translate }}</span>
+          </label>
+          <input
+            id="target_price"
+            name="target_price"
+            type="number"
+            min="0"
+            class="ui-input"
+            [attr.placeholder]="'factory.supplyRequest.pricePlaceholder' | translate"
+          />
+        </div>
+
+        <!-- Delivery date -->
+        <div class="space-y-2">
+          <label class="block font-title-md text-title-md text-on-surface" for="delivery_date">
+            {{ 'factory.supplyRequest.deliveryDate' | translate }}
+            <span class="text-error" aria-hidden="true">*</span>
+            <span class="sr-only">{{ 'common.required' | translate }}</span>
+          </label>
+          <input id="delivery_date" name="delivery_date" type="date" class="ui-input" />
+        </div>
+      </div>
+
+      <!-- Quality -->
+      <div class="space-y-2">
+        <label class="block font-title-md text-title-md text-on-surface" for="quality_specs">
+          {{ 'factory.supplyRequest.quality' | translate }}
+          <span class="text-on-surface-variant font-body-md text-body-md"
+            >({{ 'common.optional' | translate }})</span
+          >
+        </label>
+        <textarea
+          id="quality_specs"
+          name="quality_specs"
+          rows="4"
+          class="ui-input resize-y"
+          [attr.placeholder]="'factory.supplyRequest.qualityPlaceholder' | translate"
+        ></textarea>
+      </div>
+
+      <!-- Governorates -->
+      <fieldset class="space-y-3">
+        <legend class="font-title-md text-title-md text-on-surface">
+          {{ 'factory.supplyRequest.governorates' | translate }}
+        </legend>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {{ 'factory.supplyRequest.governoratesHint' | translate }}
+        </p>
+        <div class="flex flex-wrap gap-2">
+          @for (gov of governorates; track gov.value) {
+            <label class="cursor-pointer">
+              <input class="peer sr-only" name="governorate" type="checkbox" [value]="gov.value" />
+              <span
+                class="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface-variant font-title-md text-title-md peer-checked:bg-primary-container peer-checked:text-on-primary-container peer-checked:border-primary-container transition-colors select-none"
+              >
+                {{ gov.labelKey | translate }}
+              </span>
+            </label>
+          }
+        </div>
+      </fieldset>
+
+      <hr class="border-outline-variant" />
+
+      <!-- Actions -->
+      <div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-4">
+        <button type="button" class="ui-btn-ghost w-full sm:w-auto">
+          {{ 'factory.supplyRequest.cancel' | translate }}
+        </button>
+        <button type="button" class="ui-btn-primary w-full sm:w-auto">
+          <span class="material-symbols-outlined fill" aria-hidden="true">manage_search</span>
+          {{ 'factory.supplyRequest.submit' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</main>

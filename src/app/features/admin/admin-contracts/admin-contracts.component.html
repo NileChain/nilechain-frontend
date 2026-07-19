@@ -1,0 +1,265 @@
+<app-sidebar-admin active="contracts" />
+
+<main class="md:ms-[280px] min-h-screen bg-surface">
+  <header
+    class="h-16 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
+  >
+    <div class="flex items-center gap-4">
+      <button
+        type="button"
+        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
+        [attr.aria-label]="'common.toggleMenu' | translate"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+      </button>
+      <h2 class="font-headline-md text-headline-md font-bold text-primary">
+        {{ 'admin.contracts.title' | translate }}
+      </h2>
+    </div>
+    <div class="flex items-center gap-2 sm:gap-4">
+      <ui-language-toggle />
+      <ui-theme-toggle />
+      <button
+        type="button"
+        class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant relative"
+        [attr.aria-label]="'common.notifications' | translate"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+        <span
+          class="absolute top-2 end-2 w-2 h-2 bg-error rounded-full"
+          aria-hidden="true"
+        ></span>
+      </button>
+      <div class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant">
+        <div class="text-end hidden sm:block">
+          <p class="font-label-md text-label-md text-on-surface leading-tight">Admin</p>
+          <p class="text-label-sm text-label-sm text-on-surface-variant">
+            {{ 'nav.adminRole' | translate }}
+          </p>
+        </div>
+        <div
+          class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container"
+        >
+          <span class="font-bold">AD</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in">
+    <section class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+      <div class="space-y-1">
+        <h1 class="font-headline-lg text-headline-lg font-bold text-on-surface">
+          {{ 'admin.contracts.title' | translate }}
+        </h1>
+        <p class="font-body-lg text-body-lg text-on-surface-variant">
+          {{ 'admin.contracts.subtitle' | translate }}
+        </p>
+      </div>
+      <button type="button" class="ui-btn-primary inline-flex items-center gap-2 shrink-0">
+        <span class="material-symbols-outlined text-[20px]" aria-hidden="true">add</span>
+        {{ 'admin.contracts.newContract' | translate }}
+      </button>
+    </section>
+
+    <!-- Filters -->
+    <section class="ui-card p-6">
+      <div class="flex items-center justify-between mb-4 gap-3">
+        <h2 class="font-title-md text-title-md text-on-surface flex items-center gap-2">
+          <span class="material-symbols-outlined" aria-hidden="true">filter_alt</span>
+          {{ 'admin.contracts.advancedFilter' | translate }}
+        </h2>
+        <button type="button" class="ui-btn-ghost text-primary font-label-lg text-label-lg">
+          {{ 'admin.contracts.resetFilters' | translate }}
+        </button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div>
+          <label
+            class="block font-label-lg text-label-lg text-on-surface-variant mb-1"
+            for="filter-farm"
+            >{{ 'admin.contracts.farm' | translate }}</label
+          >
+          <select id="filter-farm" class="ui-input w-full">
+            <option>{{ 'admin.contracts.allFarms' | translate }}</option>
+            <option>Eastern Nile Farms</option>
+            <option>Delta Cooperative</option>
+          </select>
+        </div>
+        <div>
+          <label
+            class="block font-label-lg text-label-lg text-on-surface-variant mb-1"
+            for="filter-factory"
+            >{{ 'admin.contracts.factory' | translate }}</label
+          >
+          <select id="filter-factory" class="ui-input w-full">
+            <option>{{ 'admin.contracts.allFactories' | translate }}</option>
+            <option>Modern Food Factories</option>
+            <option>National Export Co.</option>
+          </select>
+        </div>
+        <div>
+          <label
+            class="block font-label-lg text-label-lg text-on-surface-variant mb-1"
+            for="filter-crop"
+            >{{ 'admin.contracts.crop' | translate }}</label
+          >
+          <select id="filter-crop" class="ui-input w-full">
+            <option>{{ 'admin.contracts.allCrops' | translate }}</option>
+            <option>Wheat</option>
+            <option>Processing Tomato</option>
+            <option>Long Staple Cotton</option>
+          </select>
+        </div>
+        <div>
+          <label
+            class="block font-label-lg text-label-lg text-on-surface-variant mb-1"
+            for="filter-status"
+            >{{ 'common.status' | translate }}</label
+          >
+          <select id="filter-status" class="ui-input w-full">
+            <option>{{ 'admin.contracts.allStatuses' | translate }}</option>
+            <option>{{ 'admin.contracts.statusSigned' | translate }}</option>
+            <option>{{ 'admin.contracts.statusReview' | translate }}</option>
+            <option>{{ 'admin.contracts.statusRejected' | translate }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="relative max-w-md">
+        <label class="sr-only" for="admin-contracts-search">{{ 'common.search' | translate }}</label>
+        <span
+          class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
+          aria-hidden="true"
+          >search</span
+        >
+        <input
+          id="admin-contracts-search"
+          type="search"
+          class="ui-input w-full ps-10"
+          [attr.placeholder]="'admin.contracts.searchPlaceholder' | translate"
+        />
+      </div>
+    </section>
+
+    <!-- Contracts table -->
+    <section class="ui-card overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-start border-collapse">
+          <thead>
+            <tr class="bg-surface-container-low border-b border-outline-variant">
+              <th scope="col" class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start">
+                {{ 'admin.contracts.contractId' | translate }}
+              </th>
+              <th scope="col" class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start">
+                {{ 'admin.contracts.farm' | translate }}
+              </th>
+              <th scope="col" class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start">
+                {{ 'admin.contracts.factory' | translate }}
+              </th>
+              <th scope="col" class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start">
+                {{ 'admin.contracts.crop' | translate }}
+              </th>
+              <th scope="col" class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start">
+                {{ 'admin.contracts.value' | translate }}
+              </th>
+              <th scope="col" class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start">
+                {{ 'admin.contracts.riskIndex' | translate }}
+              </th>
+              <th scope="col" class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start">
+                {{ 'common.status' | translate }}
+              </th>
+              <th scope="col" class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start">
+                {{ 'common.actions' | translate }}
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-outline-variant">
+            @for (c of contracts; track c.id) {
+              <tr class="hover:bg-surface-container-lowest transition-colors">
+                <td class="py-4 px-6 font-body-md text-body-md text-on-surface font-medium">
+                  {{ c.id }}
+                </td>
+                <td class="py-4 px-6 font-body-md text-body-md text-on-surface">{{ c.farm }}</td>
+                <td class="py-4 px-6 font-body-md text-body-md text-on-surface">{{ c.factory }}</td>
+                <td class="py-4 px-6 font-body-md text-body-md text-on-surface-variant">
+                  {{ c.crop }}
+                </td>
+                <td class="py-4 px-6 font-body-md text-body-md text-on-surface">{{ c.value }}</td>
+                <td class="py-4 px-6">
+                  @if (c.risk === 'low') {
+                    <div class="flex items-center gap-1">
+                      <span class="h-2 w-2 rounded-full bg-success-green" aria-hidden="true"></span>
+                      <span class="font-label-sm text-label-sm text-success-green"
+                        >{{ 'common.low' | translate }} ({{ c.riskScore }})</span
+                      >
+                    </div>
+                  }
+                  @if (c.risk === 'medium') {
+                    <div class="flex items-center gap-1">
+                      <span class="h-2 w-2 rounded-full bg-warning-orange" aria-hidden="true"></span>
+                      <span class="font-label-sm text-label-sm text-warning-orange"
+                        >{{ 'common.medium' | translate }} ({{ c.riskScore }})</span
+                      >
+                    </div>
+                  }
+                  @if (c.risk === 'high') {
+                    <div class="flex items-center gap-1">
+                      <span class="h-2 w-2 rounded-full bg-danger-red" aria-hidden="true"></span>
+                      <span class="font-label-sm text-label-sm text-danger-red"
+                        >{{ 'common.high' | translate }} ({{ c.riskScore }})</span
+                      >
+                    </div>
+                  }
+                </td>
+                <td class="py-4 px-6">
+                  @if (c.status === 'signed') {
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-secondary-container text-on-secondary-container"
+                      >{{ 'admin.contracts.statusSigned' | translate }}</span
+                    >
+                  }
+                  @if (c.status === 'review') {
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container-high text-on-surface"
+                      >{{ 'admin.contracts.statusReview' | translate }}</span
+                    >
+                  }
+                  @if (c.status === 'rejected') {
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-error-container text-on-error-container"
+                      >{{ 'admin.contracts.statusRejected' | translate }}</span
+                    >
+                  }
+                </td>
+                <td class="py-4 px-6 text-on-surface-variant">
+                  <button
+                    type="button"
+                    class="hover:text-primary transition-colors"
+                    [attr.aria-label]="'common.actions' | translate"
+                  >
+                    <span class="material-symbols-outlined" aria-hidden="true">more_vert</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div
+        class="bg-surface-container-low p-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-outline-variant"
+      >
+        <span class="font-body-md text-body-md text-on-surface-variant">{{
+          'admin.contracts.showingResults' | translate
+        }}</span>
+        <div class="flex gap-2">
+          <button type="button" class="ui-btn-secondary !px-3 !py-1" disabled>
+            {{ 'common.previous' | translate }}
+          </button>
+          <button type="button" class="ui-btn-secondary !px-3 !py-1">
+            {{ 'common.next' | translate }}
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>

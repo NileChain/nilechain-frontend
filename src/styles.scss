@@ -1,3 +1,5 @@
+@use 'styles/tokens';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,66 +7,153 @@
 @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
-* {
-  font-family: 'Work Sans', sans-serif;
-  box-sizing: border-box;
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Work Sans', sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  html,
+  body {
+    background-color: var(--color-background);
+    color: var(--color-on-background);
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+  }
+
+  body {
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  /* Directional icon flip for RTL */
+  [dir='rtl'] .icon-flip {
+    transform: scaleX(-1);
+  }
 }
 
-html,
-body {
-  background-color: #fcf9f8;
-  color: #1b1c1c;
-  margin: 0;
-  padding: 0;
+@layer components {
+  .material-symbols-outlined {
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24;
+    user-select: none;
+  }
+
+  .material-symbols-outlined[data-fill='1'],
+  .material-symbols-outlined.fill {
+    font-variation-settings:
+      'FILL' 1,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24;
+  }
+
+  .hero-gradient {
+    background: radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--color-secondary-container) 55%, transparent) 0%,
+      var(--color-background) 60%
+    );
+  }
+
+  html.dark .hero-gradient {
+    background: radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--color-primary-container) 40%, transparent) 0%,
+      var(--color-background) 65%
+    );
+  }
+
+  .glass-card,
+  .glass-panel {
+    background: color-mix(
+      in srgb,
+      var(--color-surface-container-lowest) 92%,
+      transparent
+    );
+    border: 1px solid var(--color-outline-variant);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .stat-divider {
+    width: 2px;
+    height: 70px;
+    background: var(--color-outline-variant);
+  }
+
+  .login-card-shadow {
+    box-shadow: var(--shadow-login);
+  }
+
+  .input-glow:focus,
+  .input-focus-effect:focus {
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--color-primary) 20%, transparent);
+  }
+
+  .role-card-active {
+    border-color: var(--color-primary);
+    background: var(--color-secondary-container);
+    color: var(--color-on-secondary-container);
+  }
+
+  .sidebar-active {
+    background: var(--color-secondary-container);
+    color: var(--color-on-secondary-container);
+    transform: scale(0.98);
+  }
+
+  .ui-page {
+    @apply bg-background text-on-background min-h-screen antialiased;
+  }
+
+  .ui-card {
+    @apply rounded-lg bg-surface-container-lowest border border-outline-variant shadow-sm;
+  }
+
+  .ui-input {
+    @apply w-full rounded-lg border border-outline-variant bg-surface px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline transition-all focus:border-primary focus:outline-none input-glow;
+  }
+
+  .ui-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-primary-container px-6 py-3 font-label-md text-label-md text-on-primary-container transition-all hover:opacity-90 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .ui-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border-2 border-primary px-6 py-3 font-label-md text-label-md text-primary transition-all hover:bg-surface-container-low active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary;
+  }
+
+  .ui-btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-label-md text-label-md text-primary transition-colors hover:bg-surface-container-low focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary;
+  }
 }
 
-.material-symbols-outlined {
-  font-variation-settings:
-    'FILL' 0,
-    'wght' 400,
-    'GRAD' 0,
-    'opsz' 24;
-}
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+  }
 
-.hero-gradient {
-  background: radial-gradient(circle at top right, #e8f5e9 0%, #f9fbf9 60%);
-}
+  .animate-slide-up {
+    animation: slideUp 0.45s ease-out;
+  }
 
-.glass-card,
-.glass-panel {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid #c0c9bb;
-  backdrop-filter: blur(10px);
-}
-
-.stat-divider {
-  width: 2px;
-  height: 70px;
-  background: #c0c9bb;
-}
-
-.login-card-shadow {
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.08);
-}
-
-.input-glow:focus,
-.input-focus-effect:focus {
-  box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.2);
-}
-
-.role-card-active {
-  border-color: #1b5e20;
-  background: #a0f399;
-}
-
-.sidebar-active {
-  background: #a0f399;
-  color: #217128;
-  transform: scale(0.98);
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.4s ease-out;
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
 }
 
 @keyframes fadeIn {
@@ -75,5 +164,27 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
