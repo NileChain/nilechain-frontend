@@ -28,6 +28,7 @@ Chart.register(
 
 @Component({
   selector: 'app-factory-dashboard',
+  standalone: true,
   imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent],
   templateUrl: './factory-dashboard.component.html',
   styleUrl: './factory-dashboard.component.scss',

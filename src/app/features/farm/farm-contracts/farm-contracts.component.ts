@@ -1,13 +1,12 @@
 import { Component } from '@angular/core';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
-import { SidebarFarmComponent } from '../../../shared/components/sidebar-farm/sidebar-farm.component';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-farm-contracts',
   standalone: true,
-  imports: [TranslatePipe, SidebarFarmComponent, UiLanguageToggleComponent, UiThemeToggleComponent],
+  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent],
   templateUrl: './farm-contracts.component.html',
 })
 export class FarmContractsComponent {

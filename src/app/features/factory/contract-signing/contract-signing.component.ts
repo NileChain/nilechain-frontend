@@ -1,13 +1,12 @@
 import { Component } from '@angular/core';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
-import { SidebarFactoryComponent } from '../../../shared/components/sidebar-factory/sidebar-factory.component';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-contract-signing',
   standalone: true,
-  imports: [TranslatePipe, SidebarFactoryComponent, UiLanguageToggleComponent, UiThemeToggleComponent],
+  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent],
   templateUrl: './contract-signing.component.html',
 })
 export class ContractSigningComponent {

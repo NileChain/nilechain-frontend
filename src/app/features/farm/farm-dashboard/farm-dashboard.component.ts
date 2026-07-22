@@ -6,6 +6,7 @@ import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-to
 
 @Component({
   selector: 'app-farm-dashboard',
+  standalone: true,
   imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent],
   templateUrl: './farm-dashboard.component.html',
   styleUrl: './farm-dashboard.component.scss',
