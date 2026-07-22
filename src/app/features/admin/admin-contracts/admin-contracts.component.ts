@@ -1,13 +1,12 @@
 import { Component } from '@angular/core';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
-import { SidebarAdminComponent } from '../../../shared/components/sidebar-admin/sidebar-admin.component';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-admin-contracts',
   standalone: true,
-  imports: [TranslatePipe, SidebarAdminComponent, UiLanguageToggleComponent, UiThemeToggleComponent],
+  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent],
   templateUrl: './admin-contracts.component.html',
 })
 export class AdminContractsComponent {

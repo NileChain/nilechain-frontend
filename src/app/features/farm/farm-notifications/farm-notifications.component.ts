@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
-import { SidebarFarmComponent } from '../../../shared/components/sidebar-farm/sidebar-farm.component';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 import { AuthService } from '../../../core/services/auth.service';
@@ -8,7 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
 @Component({
   selector: 'app-farm-notifications',
   standalone: true,
-  imports: [TranslatePipe, SidebarFarmComponent, UiLanguageToggleComponent, UiThemeToggleComponent],
+  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent],
   templateUrl: './farm-notifications.component.html',
 })
 export class FarmNotificationsComponent {
