@@ -10,9 +10,14 @@ export const environment = {
     endpoints: {
       login: '/auth/login',
       register: '/auth/register',
-      refresh: '/auth/refresh',
+      refresh: '/auth/refresh-token',
+      refreshToken: '/auth/refresh-token',
       me: '/auth/me',
       logout: '/auth/logout',
+      confirmEmail: '/auth/confirm-email',
+      forgotPassword: '/auth/forgot-password',
+      resetPassword: '/auth/reset-password',
+      phone: '/auth/phone',
     },
   },
 };

@@ -1,37 +1,31 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-sidebar-admin',
   standalone: true,
-  imports: [],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './sidebar-admin.component.html',
 })
 export class SidebarAdminComponent {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
+  /** Key of the currently active nav item. */
   @Input() active = 'dashboard';
 
-  readonly items = [
-    { key: 'dashboard', icon: 'dashboard', label: 'Dashboard' },
-    { key: 'profile', icon: 'person', label: 'Profile' },
-    { key: 'matches', icon: 'handshake', label: 'Matches' },
-    { key: 'contracts', icon: 'description', label: 'Contracts' },
-    { key: 'messages', icon: 'forum', label: 'Messages' },
-    { key: 'notifications', icon: 'notifications', label: 'Notifications' },
-  ] as const;
+  readonly items: Array<{ key: string; icon: string; labelKey: string; link: string }> = [
+    { key: 'dashboard', icon: 'monitoring', labelKey: 'nav.dashboard', link: '/admin-dashboard' },
+    { key: 'users', icon: 'group', labelKey: 'nav.users', link: '/admin-users' },
+    { key: 'contracts', icon: 'description', labelKey: 'nav.contracts', link: '/admin-contracts' },
+    { key: 'knowledgeBase', icon: 'auto_stories', labelKey: 'nav.knowledgeBase', link: '/knowledge-base' },
+  ];
 
-  isActive(key: (typeof this.items)[number]['key']): boolean {
-    if (this.active === key) {
-      return true;
-    }
-
-    // Keep compatibility with existing admin pages that pass old keys.
-    if (this.active === 'users' && key === 'profile') {
-      return true;
-    }
-
-    if (this.active === 'knowledgeBase' && key === 'matches') {
-      return true;
-    }
-
-    return false;
+  logout(): void {
+    this.authService.logout().subscribe({
+      next: () => void this.router.navigate(['/landing']),
+    });
   }
 }

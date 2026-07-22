@@ -21,7 +21,7 @@
   <nav class="flex-1 space-y-1" aria-label="Admin navigation">
     @for (item of items; track item.key) {
       <a
-        href="#"
+        [routerLink]="item.link"
         [class]="
           isActive(item.key)
             ? 'flex items-center gap-3 px-3 py-2.5 bg-secondary-container text-on-secondary-container rounded-lg transition-all scale-95 duration-100'
@@ -49,5 +49,13 @@
       <span class="material-symbols-outlined" aria-hidden="true">help_center</span>
       <span class="font-label-md text-label-md">Support</span>
     </a>
+    <button
+      type="button"
+      (click)="logout()"
+      class="w-full text-start text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+      {{ 'nav.logout' | translate }}
+    </button>
   </div>
 </aside>

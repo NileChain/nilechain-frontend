@@ -59,7 +59,15 @@
     "enterprisePortal": "Enterprise Portal",
     "premiumFarmer": "Premium Farmer",
     "highHealth": "High Health",
-    "reliabilityScore": "Reliability Score"
+    "reliabilityScore": "Reliability Score",
+    "select": "-- Select --",
+    "add": "Add",
+    "added": "Added",
+    "remove": "Remove",
+    "update": "Update",
+    "saved": "Saved",
+    "saving": "Saving…",
+    "retry": "Retry"
   },
   "nav": {
     "home": "Home",
@@ -177,6 +185,28 @@
       "invalid": "Invalid email or password."
     }
   },
+  "forgotPassword": {
+    "title": "Forgot Password",
+    "subtitle": "Enter your email and we'll send you a reset link.",
+    "submit": "Send Reset Link",
+    "sending": "Sending…",
+    "sent": "If an account with that email exists, we've sent a reset link."
+  },
+  "resetPassword": {
+    "title": "Reset Password",
+    "subtitle": "Enter your new password.",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "submit": "Reset Password",
+    "resetting": "Resetting…",
+    "success": "Password has been reset successfully!"
+  },
+  "confirmEmail": {
+    "verifying": "Verifying your email…",
+    "success": "Email Confirmed!",
+    "successMessage": "Your email has been verified successfully.",
+    "failed": "Confirmation Failed"
+  },
   "register": {
     "title": "Create your account",
     "subtitle": "Choose your role and start connecting.",
@@ -207,6 +237,12 @@
     "creatingAccount": "Creating account…",
     "accountCreated": "Account created successfully!",
     "and": "and",
+    "farmDetails": "Farm Details",
+    "farmName": "Farm Name",
+    "farmNamePlaceholder": "e.g. El Salam Farm",
+    "governorate": "Governorate",
+    "sizeInFeddans": "Farm Size (Feddans)",
+    "sizePlaceholder": "e.g. 150",
     "errors": {
       "required": "Please complete all required fields.",
       "failed": "Unable to create account right now. Please try again."
@@ -279,15 +315,22 @@
       "completionPercent": "Profile completion 85 percent",
       "completionHint": "Add more crops to reach 100% and increase your visibility.",
       "feddan": "feddan",
+      "governorate": "Governorate",
       "soilClay": "Clay",
       "soilSandy": "Sandy",
-      "soilMixed": "Mixed",
+      "soilLoamy": "Loamy",
+      "soilSilty": "Silty",
+      "soilPeaty": "Peaty",
+      "soilChalky": "Chalky",
+      "soilSaline": "Saline",
       "cropsGrown": "Crops grown",
       "addCrop": "Add",
       "cropsHint": "Select the crops you currently grow to improve smart matching.",
       "documentsTitle": "Documents & files",
       "browseFiles": "Or click to browse files from your device",
-      "supportedFormats": "Supported formats: PDF, JPG, PNG (max 5 MB)"
+      "supportedFormats": "Supported formats: PDF, JPG, PNG (max 5 MB)",
+      "phone": "Phone Number",
+      "phonePlaceholder": "e.g. 01001234567"
     },
     "matches": {
       "title": "Matches",

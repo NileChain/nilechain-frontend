@@ -1,13 +1,9 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
   <header
-    class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
-  >
+    class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40">
     <div class="flex items-center gap-4">
-      <button
-        type="button"
-        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
-        [attr.aria-label]="'common.toggleMenu' | translate"
-      >
+      <button type="button" class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
+        [attr.aria-label]="'common.toggleMenu' | translate">
         <span class="material-symbols-outlined" aria-hidden="true">menu</span>
       </button>
       <h1 class="font-headline-md text-headline-md font-bold text-primary">
@@ -17,276 +13,363 @@
     <div class="flex items-center gap-2 sm:gap-4">
       <ui-language-toggle />
       <ui-theme-toggle />
-      <button
-        type="button"
-        class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant relative"
-        [attr.aria-label]="'common.notifications' | translate"
-      >
+      <button type="button" class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant relative"
+        [attr.aria-label]="'common.notifications' | translate">
         <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
-        <span
-          class="absolute top-2 end-2 w-2 h-2 bg-error rounded-full"
-          aria-hidden="true"
-        ></span>
+        <span class="absolute top-2 end-2 w-2 h-2 bg-error rounded-full" aria-hidden="true"></span>
       </button>
-      <div class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant">
-        <div class="text-end hidden sm:block">
-          <p class="font-label-md text-label-md text-on-surface leading-tight">Ahmed El-Sayed</p>
-          <p class="text-label-sm text-label-sm text-on-surface-variant">
-            {{ 'nav.premiumFarmer' | translate }}
-          </p>
+        <div class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant">
+          <div class="text-end hidden sm:block">
+            <p class="font-label-md text-label-md text-on-surface leading-tight">{{ currentUser()?.displayName || currentUser()?.email }}</p>
+            <p class="text-label-sm text-label-sm text-on-surface-variant">
+              {{ 'nav.premiumFarmer' | translate }}
+            </p>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary">
+            <span class="font-bold">{{ (currentUser()?.displayName || currentUser()?.email || '?').charAt(0).toUpperCase() }}{{ (currentUser()?.displayName || currentUser()?.email || '').split(' ').length > 1 ? (currentUser()?.displayName || currentUser()?.email || '').split(' ').pop()!.charAt(0).toUpperCase() : '' }}</span>
+          </div>
         </div>
-        <div
-          class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary"
-        >
-          <span class="font-bold">AS</span>
-        </div>
-      </div>
     </div>
   </header>
 
-  <div class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in">
-    <section class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
-      <div>
-        <h2 class="font-headline-lg text-headline-lg text-on-surface">
-          {{ 'farm.profile.title' | translate }}
-        </h2>
-        <p class="font-body-lg text-body-lg text-on-surface-variant mt-2">
-          {{ 'farm.profile.subtitle' | translate }}
-        </p>
-      </div>
-      <button type="button" class="ui-btn-primary flex items-center justify-center gap-2 shrink-0">
-        <span class="material-symbols-outlined" aria-hidden="true">save</span>
-        {{ 'farm.profile.save' | translate }}
-      </button>
-    </section>
+  @if (loading()) {
+    <div class="flex justify-center py-20">
+      <ui-loader size="lg" [label]="'common.loading' | translate" />
+    </div>
+  }
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-      <div class="lg:col-span-4 flex flex-col gap-gutter">
-        <article
-          class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant relative overflow-hidden"
-        >
-          <div
-            class="absolute -end-12 -top-12 w-32 h-32 bg-primary-container opacity-10 rounded-full"
-            aria-hidden="true"
-          ></div>
-          <div class="flex items-center gap-4">
-            <div
-              class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shrink-0"
-            >
-              <span
-                class="material-symbols-outlined text-on-primary-container text-2xl fill"
-                aria-hidden="true"
-                >verified</span
-              >
-            </div>
-            <div>
-              <h3 class="font-title-lg text-title-lg text-primary font-bold">
-                {{ 'farm.profile.verified' | translate }}
-              </h3>
-              <p class="font-body-md text-body-md text-on-surface-variant">
-                {{ 'farm.profile.verifiedByNile' | translate }}
-              </p>
-            </div>
-          </div>
-        </article>
-
-        <article
-          class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col items-center justify-center"
-        >
-          <h3 class="font-title-md text-title-md text-on-surface mb-4 self-start w-full">
-            {{ 'farm.profile.completion' | translate }}
-          </h3>
-          <div class="relative w-32 h-32 mb-4" role="img" [attr.aria-label]="'farm.profile.completionPercent' | translate">
-            <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100" aria-hidden="true">
-              <circle
-                cx="50"
-                cy="50"
-                r="45"
-                fill="transparent"
-                stroke="var(--color-surface-container-highest)"
-                stroke-width="8"
-              ></circle>
-              <circle
-                cx="50"
-                cy="50"
-                r="45"
-                fill="transparent"
-                stroke="var(--color-primary-container)"
-                stroke-width="8"
-                stroke-dasharray="282.7"
-                stroke-dashoffset="42.4"
-                class="transition-all duration-1000 ease-out"
-              ></circle>
-            </svg>
-            <div class="absolute inset-0 flex flex-col items-center justify-center">
-              <span class="font-headline-lg text-headline-lg font-bold text-primary">85%</span>
-            </div>
-          </div>
-          <p class="font-body-md text-body-md text-center text-on-surface-variant">
-            {{ 'farm.profile.completionHint' | translate }}
-          </p>
-        </article>
-      </div>
-
-      <div class="lg:col-span-8 flex flex-col gap-gutter">
-        <article
-          class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant"
-        >
-          <h3 class="font-title-lg text-title-lg text-on-surface mb-6 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary" aria-hidden="true">info</span>
-            {{ 'farm.profile.basicInfo' | translate }}
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block font-label-lg text-label-lg text-on-surface-variant mb-2" for="farm-name">
-                {{ 'farm.profile.farmName' | translate }}
-              </label>
-              <input
-                id="farm-name"
-                class="ui-input w-full"
-                type="text"
-                value="Al-Nour Agricultural Farms"
-              />
-            </div>
-            <div>
-              <label class="block font-label-lg text-label-lg text-on-surface-variant mb-2" for="farm-location">
-                {{ 'farm.profile.location' | translate }}
-              </label>
-              <div class="relative">
-                <span
-                  class="material-symbols-outlined absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
-                  aria-hidden="true"
-                  >location_on</span
-                >
-                <input
-                  id="farm-location"
-                  class="ui-input w-full pe-10"
-                  type="text"
-                  value="Delta, Egypt"
-                />
-              </div>
-            </div>
-            <div>
-              <label class="block font-label-lg text-label-lg text-on-surface-variant mb-2" for="farm-area">
-                {{ 'farm.profile.area' | translate }}
-              </label>
-              <div class="flex items-center gap-2">
-                <input id="farm-area" class="ui-input w-full" type="number" value="150" />
-                <span
-                  class="font-body-md text-body-md text-on-surface-variant bg-surface-container-high px-3 py-3 rounded-lg border border-outline-variant shrink-0"
-                >
-                  {{ 'farm.profile.feddan' | translate }}
-                </span>
-              </div>
-            </div>
-            <div>
-              <label class="block font-label-lg text-label-lg text-on-surface-variant mb-2" for="farm-soil">
-                {{ 'farm.profile.soilType' | translate }}
-              </label>
-              <select id="farm-soil" class="ui-input w-full appearance-none">
-                <option>{{ 'farm.profile.soilClay' | translate }}</option>
-                <option>{{ 'farm.profile.soilSandy' | translate }}</option>
-                <option>{{ 'farm.profile.soilMixed' | translate }}</option>
-              </select>
-            </div>
-          </div>
-        </article>
-
-        <article
-          class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant"
-        >
-          <div class="flex justify-between items-center mb-6 gap-4 flex-wrap">
-            <h3 class="font-title-lg text-title-lg text-on-surface flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary" aria-hidden="true">eco</span>
-              {{ 'farm.profile.cropsGrown' | translate }}
-            </h3>
-            <button
-              type="button"
-              class="text-primary font-title-md text-title-md hover:underline decoration-primary flex items-center gap-1"
-            >
-              <span class="material-symbols-outlined text-sm" aria-hidden="true">add</span>
-              {{ 'farm.profile.addCrop' | translate }}
-            </button>
-          </div>
-          <p class="font-body-md text-body-md text-on-surface-variant mb-4">
-            {{ 'farm.profile.cropsHint' | translate }}
-          </p>
-          <div class="flex flex-wrap gap-3">
-            @for (crop of selectedCrops; track crop) {
-              <span
-                class="bg-primary-container text-on-primary-container border border-primary-container px-4 py-2 rounded-full font-label-lg text-label-lg flex items-center gap-2"
-              >
-                {{ crop }}
-                <span class="material-symbols-outlined text-sm" aria-hidden="true">check</span>
-              </span>
-            }
-            @for (crop of availableCrops; track crop) {
-              <span
-                class="bg-surface-container border border-outline-variant text-on-surface-variant px-4 py-2 rounded-full font-label-lg text-label-lg flex items-center gap-2"
-              >
-                {{ crop }}
-              </span>
-            }
-          </div>
-        </article>
-
-        <article
-          class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant"
-        >
-          <h3 class="font-title-lg text-title-lg text-on-surface mb-6 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary" aria-hidden="true">folder</span>
-            {{ 'farm.profile.documentsTitle' | translate }}
-          </h3>
-          <div
-            class="border-2 border-dashed border-outline-variant bg-surface-container-low rounded-xl p-8 flex flex-col items-center justify-center text-center mb-6 group hover:bg-surface-container transition-colors"
-            role="region"
-            [attr.aria-label]="'farm.profile.dropzone' | translate"
-          >
-            <div
-              class="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mb-4 group-hover:bg-primary-container transition-colors"
-            >
-              <span
-                class="material-symbols-outlined text-3xl text-on-surface-variant group-hover:text-on-primary-container transition-colors"
-                aria-hidden="true"
-                >upload_file</span
-              >
-            </div>
-            <h4 class="font-title-md text-title-md text-on-surface mb-2">
-              {{ 'farm.profile.dropzone' | translate }}
-            </h4>
-            <p class="font-body-md text-body-md text-on-surface-variant mb-4">
-              {{ 'farm.profile.browseFiles' | translate }}
-            </p>
-            <p class="font-label-sm text-label-sm text-outline">
-              {{ 'farm.profile.supportedFormats' | translate }}
-            </p>
-          </div>
-          <ul class="space-y-3">
-            @for (doc of documents; track doc.name) {
-              <li
-                class="flex items-center justify-between bg-surface-container px-4 py-3 rounded-lg border border-outline-variant"
-              >
-                <div class="flex items-center gap-4 min-w-0">
-                  <span class="material-symbols-outlined text-secondary shrink-0" aria-hidden="true">{{
-                    doc.icon
-                  }}</span>
-                  <div class="min-w-0">
-                    <p class="font-body-md text-body-md text-on-surface truncate">{{ doc.name }}</p>
-                    <p class="font-label-sm text-label-sm text-on-surface-variant">{{ doc.size }}</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  class="text-error hover:bg-error-container p-2 rounded-full transition-colors flex items-center justify-center shrink-0"
-                  [attr.aria-label]="'common.delete' | translate"
-                >
-                  <span class="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
-                </button>
-              </li>
-            }
-          </ul>
-        </article>
+  @else if (!profile()) {
+    <div class="flex justify-center py-20">
+      <div class="text-center max-w-md">
+        <span class="material-symbols-outlined text-6xl text-outline mb-4" aria-hidden="true">error</span>
+        <h2 class="font-headline-md text-headline-md text-on-surface mb-2">{{ error() }}</h2>
+        <button type="button" (click)="loadProfile()" class="ui-btn-primary mt-4">
+          {{ 'common.retry' | translate }}
+        </button>
       </div>
     </div>
-  </div>
+  }
+
+  @else {
+    @let p = profile()!;
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in">
+        <section class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+          <div>
+            <h2 class="font-headline-lg text-headline-lg text-on-surface">
+              {{ 'farm.profile.title' | translate }}
+            </h2>
+            <p class="font-body-lg text-body-lg text-on-surface-variant mt-2">
+              {{ 'farm.profile.subtitle' | translate }}
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            @if (saveSuccess()) {
+              <span class="text-success-green font-label-md flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm" aria-hidden="true">check_circle</span>
+                {{ 'common.saved' | translate }}
+              </span>
+            }
+            <button type="submit" [disabled]="saving()" class="ui-btn-primary flex items-center justify-center gap-2 shrink-0">
+              @if (saving()) {
+                <ui-loader size="sm" />
+                <span>{{ 'common.saving' | translate }}</span>
+              } @else {
+                <span class="material-symbols-outlined" aria-hidden="true">save</span>
+                <span>{{ 'farm.profile.save' | translate }}</span>
+              }
+            </button>
+          </div>
+        </section>
+
+        @if (error()) {
+          <p class="text-error font-label-sm" role="alert">{{ error() }}</p>
+        }
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+          <div class="lg:col-span-4 flex flex-col gap-gutter">
+
+            @if (p.isVerified) {
+            <article
+              class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant relative overflow-hidden">
+              <div class="absolute -end-12 -top-12 w-32 h-32 bg-primary-container opacity-10 rounded-full"
+                aria-hidden="true"></div>
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-on-primary-container text-2xl fill"
+                    aria-hidden="true">verified</span>
+                </div>
+                <div>
+                  <h3 class="font-title-lg text-title-lg text-primary font-bold">
+                    {{ 'farm.profile.verified' | translate }}
+                  </h3>
+                  <p class="font-body-md text-body-md text-on-surface-variant">
+                    {{ 'farm.profile.verifiedByNile' | translate }}
+                  </p>
+                </div>
+              </div>
+            </article>
+            }
+
+            <article
+              class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col items-center justify-center">
+              <h3 class="font-title-md text-title-md text-on-surface mb-4 self-start w-full">
+                {{ 'farm.profile.completion' | translate }}
+              </h3>
+              <div class="relative w-32 h-32 mb-4" role="img"
+                [attr.aria-label]="'farm.profile.completionPercent' | translate">
+                <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100" aria-hidden="true">
+                  <circle cx="50" cy="50" r="45" fill="transparent" stroke="var(--color-surface-container-highest)"
+                    stroke-width="8"></circle>
+                  <circle cx="50" cy="50" r="45" fill="transparent" stroke="var(--color-primary-container)"
+                    stroke-width="8" stroke-dasharray="282.7" [attr.stroke-dashoffset]="282.7 - (282.7 * p.completionPercent / 100)"
+                    class="transition-all duration-1000 ease-out">
+                  </circle>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <span class="font-headline-lg text-headline-lg font-bold text-primary">
+                    {{ p.completionPercent }}%
+                  </span>
+                </div>
+              </div>
+              <p class="font-body-md text-body-md text-center text-on-surface-variant">
+                {{ 'farm.profile.completionHint' | translate }}
+              </p>
+            </article>
+
+            <article class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant">
+              <h3 class="font-title-lg text-title-lg text-on-surface mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary" aria-hidden="true">phone</span>
+                {{ 'farm.profile.phone' | translate }}
+              </h3>
+              <div class="flex items-center gap-3">
+                <input type="tel" class="ui-input flex-1" [value]="phoneNumber()" (input)="phoneNumber.set($any($event.target).value)"
+                  [attr.placeholder]="'farm.profile.phonePlaceholder' | translate" />
+                <button type="button" (click)="updatePhone()" [disabled]="updatingPhone() || !phoneNumber()"
+                  class="ui-btn-primary shrink-0">
+                  @if (updatingPhone()) {
+                    <ui-loader size="sm" />
+                  } @else {
+                    {{ 'common.update' | translate }}
+                  }
+                </button>
+              </div>
+            </article>
+          </div>
+
+          <div class="lg:col-span-8 flex flex-col gap-gutter">
+            <article class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant">
+              <h3 class="font-title-lg text-title-lg text-on-surface mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary" aria-hidden="true">info</span>
+                {{ 'farm.profile.basicInfo' | translate }}
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block font-label-lg text-label-lg text-on-surface-variant mb-2" for="farm-name">
+                    {{ 'farm.profile.farmName' | translate }}
+                  </label>
+                  <input id="farm-name" class="ui-input w-full" type="text" formControlName="name" />
+                </div>
+                <div>
+                  <label class="block font-label-lg text-label-lg text-on-surface-variant mb-2" for="farm-location">
+                    {{ 'farm.profile.location' | translate }}
+                  </label>
+                  <div class="relative">
+                    <span
+                      class="material-symbols-outlined absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
+                      aria-hidden="true">location_on</span>
+                    <input id="farm-location" class="ui-input w-full pe-10" type="text" formControlName="location" />
+                  </div>
+                </div>
+                <div>
+                  <label class="block font-label-lg text-label-lg text-on-surface-variant mb-2" for="farm-governorate">
+                    {{ 'farm.profile.governorate' | translate }}
+                  </label>
+                  <select id="farm-governorate" class="ui-input w-full appearance-none" formControlName="governorate">
+                    <option value="Alexandria">Alexandria</option>
+                    <option value="Aswan">Aswan</option>
+                    <option value="Asyut">Asyut</option>
+                    <option value="Beheira">Beheira</option>
+                    <option value="Beni Suef">Beni Suef</option>
+                    <option value="Cairo">Cairo</option>
+                    <option value="Dakahlia">Dakahlia</option>
+                    <option value="Damietta">Damietta</option>
+                    <option value="Faiyum">Faiyum</option>
+                    <option value="Gharbia">Gharbia</option>
+                    <option value="Giza">Giza</option>
+                    <option value="Ismailia">Ismailia</option>
+                    <option value="Kafr El Sheikh">Kafr El Sheikh</option>
+                    <option value="Luxor">Luxor</option>
+                    <option value="Matrouh">Matrouh</option>
+                    <option value="Minya">Minya</option>
+                    <option value="Monufia">Monufia</option>
+                    <option value="New Valley">New Valley</option>
+                    <option value="North Sinai">North Sinai</option>
+                    <option value="Port Said">Port Said</option>
+                    <option value="Qalyubia">Qalyubia</option>
+                    <option value="Qena">Qena</option>
+                    <option value="Red Sea">Red Sea</option>
+                    <option value="Sharqia">Sharqia</option>
+                    <option value="Sohag">Sohag</option>
+                    <option value="South Sinai">South Sinai</option>
+                    <option value="Suez">Suez</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block font-label-lg text-label-lg text-on-surface-variant mb-2" for="farm-area">
+                    {{ 'farm.profile.area' | translate }}
+                  </label>
+                  <div class="flex items-center gap-2">
+                    <input id="farm-area" class="ui-input w-full" type="number" formControlName="sizeInFeddans" />
+                    <span
+                      class="font-body-md text-body-md text-on-surface-variant bg-surface-container-high px-3 py-3 rounded-lg border border-outline-variant shrink-0">
+                      {{ 'farm.profile.feddan' | translate }}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <label class="block font-label-lg text-label-lg text-on-surface-variant mb-2" for="farm-soil">
+                    {{ 'farm.profile.soilType' | translate }}
+                  </label>
+                  <select id="farm-soil" class="ui-input w-full appearance-none" formControlName="soilType">
+                    <option value="">{{ 'common.select' | translate }}</option>
+                    <option value="Clay">{{ 'farm.profile.soilClay' | translate }}</option>
+                    <option value="Sandy">{{ 'farm.profile.soilSandy' | translate }}</option>
+                    <option value="Loamy">{{ 'farm.profile.soilLoamy' | translate }}</option>
+                    <option value="Silty">{{ 'farm.profile.soilSilty' | translate }}</option>
+                    <option value="Peaty">{{ 'farm.profile.soilPeaty' | translate }}</option>
+                    <option value="Chalky">{{ 'farm.profile.soilChalky' | translate }}</option>
+                    <option value="Saline">{{ 'farm.profile.soilSaline' | translate }}</option>
+                  </select>
+                </div>
+              </div>
+            </article>
+
+            <article class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant">
+              <div class="flex justify-between items-center mb-6 gap-4 flex-wrap">
+                <h3 class="font-title-lg text-title-lg text-on-surface flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary" aria-hidden="true">eco</span>
+                  {{ 'farm.profile.cropsGrown' | translate }}
+                </h3>
+              </div>
+              <p class="font-body-md text-body-md text-on-surface-variant mb-4">
+                {{ 'farm.profile.cropsHint' | translate }}
+              </p>
+              <div class="flex items-center gap-3 mb-4">
+                <select class="ui-input flex-1" [value]="selectedCropTypeId()" (change)="selectedCropTypeId.set($any($event.target).value)">
+                  <option value="">{{ 'common.select' | translate }}</option>
+                  @for (ct of cropTypes(); track ct.cropTypeId) {
+                    <option [value]="ct.cropTypeId" [disabled]="isCropAdded(ct.cropTypeId)">
+                      {{ ct.name }}@if (isCropAdded(ct.cropTypeId)) { ({{ 'common.added' | translate }}) }
+                    </option>
+                  }
+                </select>
+                <button type="button" (click)="addCrop()" [disabled]="addingCrop() || !selectedCropTypeId()"
+                  class="ui-btn-primary shrink-0">
+                  @if (addingCrop()) {
+                    <ui-loader size="sm" />
+                  } @else {
+                    {{ 'common.add' | translate }}
+                  }
+                </button>
+              </div>
+              @if (p.cropTypes.length > 0) {
+                <div class="flex flex-wrap gap-3">
+                  @for (crop of p.cropTypes; track crop.cropTypeId) {
+                    <span
+                      class="bg-primary-container text-on-primary-container border border-primary-container px-4 py-2 rounded-full font-label-lg text-label-lg flex items-center gap-2">
+                      {{ crop.name }}
+                      <button type="button" (click)="deleteCrop(crop.cropTypeId)" [disabled]="deletingCropId() === crop.cropTypeId"
+                        class="text-on-primary-container hover:text-error transition-colors ml-1" [attr.aria-label]="'common.remove' | translate">
+                        @if (deletingCropId() === crop.cropTypeId) {
+                          <ui-loader size="sm" />
+                        } @else {
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">close</span>
+                        }
+                      </button>
+                    </span>
+                  }
+                </div>
+              } @else {
+                <p class="font-body-md text-body-md text-on-surface-variant italic">
+                  {{ 'common.empty' | translate }}
+                </p>
+              }
+            </article>
+
+            <article class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant">
+              <h3 class="font-title-lg text-title-lg text-on-surface mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary" aria-hidden="true">folder</span>
+                {{ 'farm.profile.documentsTitle' | translate }}
+              </h3>
+              <div
+                class="border-2 border-dashed border-outline-variant bg-surface-container-low rounded-xl p-8 flex flex-col items-center justify-center text-center mb-6 group hover:bg-surface-container transition-colors cursor-pointer"
+                role="region" [attr.aria-label]="'farm.profile.dropzone' | translate" (click)="fileInput.click()">
+                <div
+                  class="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mb-4 group-hover:bg-primary-container transition-colors">
+                  <span
+                    class="material-symbols-outlined text-3xl text-on-surface-variant group-hover:text-on-primary-container transition-colors"
+                    aria-hidden="true">upload_file</span>
+                </div>
+                <h4 class="font-title-md text-title-md text-on-surface mb-2">
+                  {{ 'farm.profile.dropzone' | translate }}
+                </h4>
+                <p class="font-body-md text-body-md text-on-surface-variant mb-4">
+                  {{ 'farm.profile.browseFiles' | translate }}
+                </p>
+                <p class="font-label-sm text-label-sm text-outline">
+                  {{ 'farm.profile.supportedFormats' | translate }}
+                </p>
+                <input #fileInput type="file" (change)="onFileSelected($event)" class="hidden" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
+                @if (uploadingDocument()) {
+                  <ui-loader size="sm" class="mt-4" />
+                }
+              </div>
+              @if (p.documents.length > 0) {
+                <ul class="space-y-3">
+                  @for (doc of p.documents; track doc.documentId) {
+                    <li
+                      class="flex items-center justify-between bg-surface-container px-4 py-3 rounded-lg border border-outline-variant">
+                      <div class="flex items-center gap-4 min-w-0">
+                        <span class="material-symbols-outlined text-secondary shrink-0" aria-hidden="true">
+                          {{ doc.fileType === 'pdf' ? 'picture_as_pdf' : 'description' }}
+                        </span>
+                        <div class="min-w-0">
+                          <p class="font-body-md text-body-md text-on-surface truncate">{{ doc.name }}</p>
+                          <p class="font-label-sm text-label-sm text-on-surface-variant">{{ doc.size }}</p>
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-1">
+                        @if (doc.fileUrl) {
+                          <a [href]="doc.fileUrl" target="_blank" rel="noopener noreferrer"
+                            class="text-primary hover:bg-primary-container p-2 rounded-full transition-colors flex items-center justify-center shrink-0"
+                            [attr.aria-label]="'common.download' | translate">
+                            <span class="material-symbols-outlined text-sm" aria-hidden="true">download</span>
+                          </a>
+                        }
+                        <button type="button" (click)="deleteDocument(doc.documentId)" [disabled]="deletingDocumentId() === doc.documentId"
+                          class="text-error hover:bg-error-container p-2 rounded-full transition-colors flex items-center justify-center shrink-0"
+                          [attr.aria-label]="'common.remove' | translate">
+                          @if (deletingDocumentId() === doc.documentId) {
+                            <ui-loader size="sm" />
+                          } @else {
+                            <span class="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
+                          }
+                        </button>
+                      </div>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p class="font-body-md text-body-md text-on-surface-variant italic">
+                  {{ 'common.empty' | translate }}
+                </p>
+              }
+            </article>
+          </div>
+        </div>
+      </div>
+    </form>
+  }
 </main>

@@ -8,7 +8,25 @@ export interface RegisterRequest {
   email: string;
   password: string;
   confirmPassword: string;
-  role: string;
+  businessType: string;
+  name?: string;
+  governorate?: string;
+  sizeInFeddans?: number;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  newPassword: string;
+  confirmPassword: string;
+  token: string;
 }
 
 export interface AuthTokens {
@@ -20,6 +38,7 @@ export interface AuthTokens {
 export interface AuthResponse {
   accessToken: string;
   refreshToken?: string;
+  expiresAt?: string;
   user?: UserProfile;
 }
 
@@ -27,7 +46,12 @@ export interface UserProfile {
   id?: string;
   email: string;
   displayName?: string;
-  roles: string[];
+
+  role?: string;
+  roles?: string[];
+
+  emailConfirmed?: boolean;
+  isVerified?: boolean;
 }
 
 export interface JwtPayload {

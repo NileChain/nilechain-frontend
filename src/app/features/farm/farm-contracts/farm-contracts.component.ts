@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-farm-contracts',
@@ -10,6 +11,8 @@ import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-to
   templateUrl: './farm-contracts.component.html',
 })
 export class FarmContractsComponent {
+  private readonly authService = inject(AuthService);
+  readonly currentUser = this.authService.currentUser;
   readonly contracts = [
     {
       id: 'NCH-2026-084',

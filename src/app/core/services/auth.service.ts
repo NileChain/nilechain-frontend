@@ -4,9 +4,12 @@ import { map, Observable, of, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AuthResponse,
+  ForgotPasswordRequest,
   JwtPayload,
   LoginRequest,
+  RefreshTokenRequest,
   RegisterRequest,
+  ResetPasswordRequest,
   UserProfile,
 } from '../models/user.model';
 import { TokenStorageService } from './token-storage.service';
@@ -28,7 +31,23 @@ export class AuthService {
   readonly isAuthenticated = computed(() =>
     Boolean(this.accessTokenSignal() && this.userSignal())
   );
-  readonly roles = computed(() => this.userSignal()?.roles ?? []);
+  readonly roles = computed(() => {
+    const user = this.userSignal();
+
+    if (!user) {
+      return [];
+    }
+
+    if (user.roles?.length) {
+      return user.roles;
+    }
+
+    if (user.role) {
+      return [user.role];
+    }
+
+    return [];
+  });
 
   login(payload: LoginRequest): Observable<UserProfile> {
     return this.http
@@ -77,16 +96,52 @@ export class AuthService {
     );
   }
 
+  refreshToken(): Observable<AuthResponse> {
+    const refreshToken = this.tokenStorage.getRefreshToken();
+    return this.http
+      .post<AuthResponse>(this.getUrl(environment.auth.endpoints.refresh), { refreshToken } as RefreshTokenRequest)
+      .pipe(
+        tap((response) => this.establishSession(response))
+      );
+  }
+
+  getMe(): Observable<UserProfile> {
+    return this.http.get<UserProfile>(this.getUrl(environment.auth.endpoints.me));
+  }
+
+  forgotPassword(payload: ForgotPasswordRequest): Observable<void> {
+    return this.http.post<void>(this.getUrl(environment.auth.endpoints.forgotPassword), payload);
+  }
+
+  resetPassword(payload: ResetPasswordRequest): Observable<void> {
+    return this.http.post<void>(this.getUrl(environment.auth.endpoints.resetPassword), payload);
+  }
+
+  confirmEmail(userId: string, token: string): Observable<void> {
+    return this.http.get<void>(`${this.getUrl(environment.auth.endpoints.confirmEmail)}?userId=${userId}&token=${encodeURIComponent(token)}`);
+  }
+
+  updatePhone(phoneNumber: string): Observable<void> {
+    return this.http.put<void>(this.getUrl(environment.auth.endpoints.phone), { phoneNumber });
+  }
+
   private establishSession(response: AuthResponse): void {
     this.tokenStorage.setTokens(response.accessToken, response.refreshToken);
     this.accessTokenSignal.set(response.accessToken);
 
     const userFromToken = this.buildUserFromToken(response.accessToken);
-    const user = response.user ?? userFromToken;
-    this.userSignal.set(user);
+
+    if (response.user) {
+      this.userSignal.set({
+        ...response.user,
+        roles: response.user.role ? [response.user.role] : [],
+      });
+    } else {
+      this.userSignal.set(userFromToken);
+    }
   }
 
-  private clearSession(): void {
+  clearSession(): void {
     this.tokenStorage.clear();
     this.accessTokenSignal.set(null);
     this.userSignal.set(null);
