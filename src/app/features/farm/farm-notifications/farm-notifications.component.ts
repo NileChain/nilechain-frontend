@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { SidebarFarmComponent } from '../../../shared/components/sidebar-farm/sidebar-farm.component';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-farm-notifications',
@@ -11,6 +12,8 @@ import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-to
   templateUrl: './farm-notifications.component.html',
 })
 export class FarmNotificationsComponent {
+  private readonly authService = inject(AuthService);
+  readonly currentUser = this.authService.currentUser;
   readonly todayItems = [
     {
       id: 'n1',

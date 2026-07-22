@@ -24,7 +24,7 @@
   <nav class="flex-grow space-y-1" [attr.aria-label]="'nav.dashboard' | translate">
     @for (item of items; track item.key) {
       <a
-        href="#"
+        [routerLink]="item.link"
         [class]="
           active === item.key
             ? 'sidebar-active flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-100 active:scale-95'
@@ -47,12 +47,13 @@
       <span class="material-symbols-outlined" aria-hidden="true">settings</span>
       {{ 'nav.settings' | translate }}
     </a>
-    <a
-      href="#"
-      class="text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150"
+    <button
+      type="button"
+      (click)="logout()"
+      class="w-full text-start text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150"
     >
       <span class="material-symbols-outlined" aria-hidden="true">logout</span>
       {{ 'nav.logout' | translate }}
-    </a>
+    </button>
   </div>
 </aside>

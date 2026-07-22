@@ -1,9 +1,10 @@
-import { AfterViewInit, Component, OnDestroy } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { AfterViewInit, Component, OnDestroy, inject } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../shared/ui/theme-toggle/theme-toggle.component';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-landing',
@@ -12,6 +13,31 @@ import { UiThemeToggleComponent } from '../../shared/ui/theme-toggle/theme-toggl
   styleUrl: './landing.component.scss',
 })
 export class LandingComponent implements AfterViewInit, OnDestroy {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  readonly isAuthenticated = this.authService.isAuthenticated;
+  readonly currentUser = this.authService.currentUser;
+
+  readonly roles = this.authService.roles;
+
+  goToDashboard(): void {
+    const userRoles = this.roles();
+
+    if (userRoles.includes('Farm') || userRoles.includes('Admin')) {
+      void this.router.navigate(['/farm-dashboard']);
+    } else if (userRoles.includes('Factory')) {
+      void this.router.navigate(['/factory-dashboard']);
+    } else {
+      void this.router.navigate(['/login']);
+    }
+  }
+
+  logout(): void {
+    this.authService.logout().subscribe({
+      next: () => void this.router.navigate(['/landing']),
+    });
+  }
+
   private readonly onScroll = (): void => {
     const nav = document.querySelector('nav');
     if (!nav) {

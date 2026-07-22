@@ -14,6 +14,7 @@ import {
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { SidebarFactoryComponent } from '../../../shared/components/sidebar-factory/sidebar-factory.component';
 
 Chart.register(
   LineController,
@@ -28,7 +29,7 @@ Chart.register(
 
 @Component({
   selector: 'app-factory-dashboard',
-  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent],
+  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent, SidebarFactoryComponent],
   templateUrl: './factory-dashboard.component.html',
   styleUrl: './factory-dashboard.component.scss',
 })

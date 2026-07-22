@@ -69,7 +69,12 @@ export class LoginComponent {
             return;
           }
 
-          if (this.authService.hasAnyRole(['Factory', 'Admin'])) {
+          if (this.authService.hasAnyRole(['Admin'])) {
+            void this.router.navigate(['/admin-dashboard']);
+            return;
+          }
+
+          if (this.authService.hasAnyRole(['Factory'])) {
             void this.router.navigate(['/factory-dashboard']);
             return;
           }

@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { RegisterRequest } from '../../../core/models/user.model';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
@@ -34,6 +35,13 @@ export class RegisterComponent {
   readonly showToast = signal(false);
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal('');
+  readonly farmName = signal('');
+  readonly farmGovernorate = signal('');
+  readonly farmSize = signal<number>(0);
+
+  onFarmSizeInput(value: string): void {
+    this.farmSize.set(Number(value));
+  }
 
   readonly passwordVisibilityIcon = computed(() =>
     this.passwordFieldType() === 'password' ? 'visibility' : 'visibility_off'
@@ -114,19 +122,32 @@ export class RegisterComponent {
 
     this.isSubmitting.set(true);
 
+    const registerPayload: RegisterRequest = {
+      email,
+      password,
+      confirmPassword,
+      businessType: role,
+    };
+
+    if (role === 'farm') {
+      registerPayload.name = this.farmName();
+      registerPayload.governorate = this.farmGovernorate();
+      registerPayload.sizeInFeddans = this.farmSize();
+    }
+
     this.authService
-      .register({
-        email,
-        password,
-        confirmPassword,
-        role,
-      })
+      .register(registerPayload)
       .pipe(finalize(() => this.isSubmitting.set(false)))
       .subscribe({
         next: () => {
           this.showToast.set(true);
 
-          if (this.authService.hasAnyRole(['Factory', 'Admin'])) {
+          if (this.authService.hasAnyRole(['Admin'])) {
+            void this.router.navigate(['/admin-dashboard']);
+            return;
+          }
+
+          if (this.authService.hasAnyRole(['Factory'])) {
             void this.router.navigate(['/factory-dashboard']);
             return;
           }

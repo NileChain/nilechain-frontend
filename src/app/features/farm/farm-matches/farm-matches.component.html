@@ -32,7 +32,7 @@
       </button>
       <div class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant">
         <div class="text-end hidden sm:block">
-          <p class="font-label-md text-label-md text-on-surface leading-tight">Ahmed El-Sayed</p>
+          <p class="font-label-md text-label-md text-on-surface leading-tight">{{ currentUser()?.displayName || currentUser()?.email }}</p>
           <p class="text-label-sm text-label-sm text-on-surface-variant">
             {{ 'nav.premiumFarmer' | translate }}
           </p>
@@ -40,7 +40,7 @@
         <div
           class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary"
         >
-          <span class="font-bold">AS</span>
+          <span class="font-bold">{{ (currentUser()?.displayName || currentUser()?.email || '?').charAt(0).toUpperCase() }}{{ (currentUser()?.displayName || currentUser()?.email || '').split(' ').length > 1 ? (currentUser()?.displayName || currentUser()?.email || '').split(' ').pop()!.charAt(0).toUpperCase() : '' }}</span>
         </div>
       </div>
     </div>
