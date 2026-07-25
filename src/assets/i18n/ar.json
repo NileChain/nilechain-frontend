@@ -67,7 +67,11 @@
     "update": "تحديث",
     "saved": "تم الحفظ",
     "saving": "جارٍ الحفظ…",
-    "retry": "إعادة المحاولة"
+    "retry": "إعادة المحاولة",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "blocked": "محظور"
   },
   "nav": {
     "home": "الرئيسية",
@@ -243,6 +247,9 @@
     "governorate": "المحافظة",
     "sizeInFeddans": "مساحة المزرعة (فدان)",
     "sizePlaceholder": "مثال: 150",
+    "factoryDetails": "بيانات المصنع",
+    "factoryName": "اسم المصنع",
+    "factoryNamePlaceholder": "مثال: مصنع النيل للتصنيع",
     "errors": {
       "required": "يرجى إكمال جميع الحقول المطلوبة.",
       "failed": "تعذّر إنشاء الحساب الآن. يرجى المحاولة مرة أخرى."
@@ -448,7 +455,14 @@
       "documents": "الوثائق والمستندات",
       "dropzoneTitle": "اسحب وأفلت الملفات هنا",
       "dropzoneHint": "أو انقر لتصفح الملفات من جهازك",
-      "supportedFormats": "صيغ مدعومة: PDF, JPG, PNG (الحد الأقصى 5 ميجابايت)"
+      "supportedFormats": "صيغ مدعومة: PDF, JPG, PNG (الحد الأقصى 5 ميجابايت)",
+      "industryType": "نوع الصناعة",
+      "phone": "رقم الهاتف",
+      "phonePlaceholder": "مثال: 01001234567",
+      "saved": "تم حفظ الملف الشخصي بنجاح!",
+      "saveFailed": "فشل حفظ الملف الشخصي.",
+      "phoneUpdated": "تم تحديث رقم الهاتف!",
+      "phoneUpdateFailed": "فشل تحديث رقم الهاتف."
     },
     "supplyRequest": {
       "title": "طلب توريد جديد",
@@ -594,7 +608,16 @@
       "roleFactory": "مصنع",
       "roleAdmin": "مشرف",
       "advancedFilter": "تصفية متقدمة",
-      "showingResults": "عرض ١ إلى ٣ من ٤٥ نتيجة"
+      "showingResults": "عرض ١ إلى ٣ من ٤٥ نتيجة",
+      "unblock": "إلغاء الحظر",
+      "page": "صفحة {{current}} من {{total}}",
+      "noUsers": "لم يتم العثور على مستخدمين",
+      "businessName": "اسم النشاط التجاري",
+      "farmName": "اسم المزرعة",
+      "factoryName": "اسم المصنع",
+      "governorate": "المحافظة",
+      "sizeInFeddans": "المساحة (فدان)",
+      "editUser": "تعديل المستخدم"
     },
     "contracts": {
       "title": "العقود",

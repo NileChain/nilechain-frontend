@@ -3,48 +3,22 @@
     <div class="flex items-center gap-3">
       <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">agriculture</span>
       <div>
-        <h1 class="font-headline-sm text-headline-sm font-bold text-primary leading-tight">AgriLink B2B</h1>
+        <h1 class="font-headline-sm text-headline-sm font-bold text-primary leading-tight">NileChain B2B</h1>
         <p class="text-label-sm font-label-sm text-on-surface-variant opacity-70">Enterprise Portal</p>
       </div>
     </div>
   </div>
-  <nav class="flex-grow space-y-1">
-    <a href="#" class="sidebar-active flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-100 active:scale-95">
-      <span class="material-symbols-outlined">dashboard</span>
-      Dashboard
-    </a>
-    <a href="#" class="text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150">
-      <span class="material-symbols-outlined">person</span>
-      Profile
-    </a>
-    <a href="#" class="text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150">
-      <span class="material-symbols-outlined">handshake</span>
-      Matches
-    </a>
-    <a href="#" class="text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150">
-      <span class="material-symbols-outlined">description</span>
-      Contracts
-    </a>
-    <a href="#" class="text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150">
-      <span class="material-symbols-outlined">forum</span>
-      Messages
-    </a>
-    <a href="#" class="text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150">
-      <span class="material-symbols-outlined">notifications</span>
-      Notifications
-    </a>
 
-  <!-- Main navigation -->
   <nav class="flex-grow space-y-1" [attr.aria-label]="'nav.dashboard' | translate">
     @for (item of items; track item.key) {
       <a
         [routerLink]="item.link"
         [class]="
-          active === item.key
+          active() === item.key
             ? 'sidebar-active flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-100 active:scale-95'
             : 'text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150'
         "
-        [attr.aria-current]="active === item.key ? 'page' : null"
+        [attr.aria-current]="active() === item.key ? 'page' : null"
       >
         <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
         {{ item.labelKey | translate }}

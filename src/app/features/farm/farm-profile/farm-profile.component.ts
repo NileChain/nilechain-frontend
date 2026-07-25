@@ -16,7 +16,6 @@ import { UpdateFarmProfileRequest } from '../../../core/models/farm/update-farm-
   imports: [
     ReactiveFormsModule,
     TranslatePipe,
-    SidebarFarmComponent,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
     UiLoaderComponent,

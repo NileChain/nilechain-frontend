@@ -13,7 +13,7 @@
       >
     </div>
     <div>
-      <h1 class="font-headline-sm text-headline-sm font-bold text-primary">AgriLink B2B</h1>
+      <h1 class="font-headline-sm text-headline-sm font-bold text-primary">NileChain B2B</h1>
       <p class="font-label-sm text-label-sm text-on-surface-variant opacity-70">Enterprise Portal</p>
     </div>
   </div>
@@ -23,13 +23,14 @@
       <a
         [routerLink]="item.link"
         [class]="
-          isActive(item.key)
-            ? 'flex items-center gap-3 px-3 py-2.5 bg-secondary-container text-on-secondary-container rounded-lg transition-all scale-95 duration-100'
-            : 'flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all'
+          active() === item.key
+            ? 'sidebar-active flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-100 active:scale-95'
+            : 'text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150'
         "
+        [attr.aria-current]="active() === item.key ? 'page' : null"
       >
         <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
-        <span class="font-label-md text-label-md">{{ item.label }}</span>
+        <span class="font-label-md text-label-md">{{ item.labelKey | translate }}</span>
       </a>
     }
   </nav>

@@ -12,6 +12,6 @@ import { SidebarFactoryComponent } from '../../shared/components/sidebar-factory
 })
 export class FactoryLayoutComponent {
   constructor(title: Title) {
-    title.setTitle('AgriLink - Factory');
+    title.setTitle('NileChain - Factory');
   }
 }

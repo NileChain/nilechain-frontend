@@ -12,6 +12,6 @@ import { SidebarFarmComponent } from '../../shared/components/sidebar-farm/sideb
 })
 export class FarmLayoutComponent {
   constructor(title: Title) {
-    title.setTitle('AgriLink - Farm');
+    title.setTitle('NileChain - Farm');
   }
 }

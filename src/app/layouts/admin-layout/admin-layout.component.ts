@@ -12,6 +12,6 @@ import { SidebarAdminComponent } from '../../shared/components/sidebar-admin/sid
 })
 export class AdminLayoutComponent {
 	constructor(title: Title) {
-		title.setTitle('AgriLink - Admin');
+		title.setTitle('NileChain - Admin');
 	}
 }

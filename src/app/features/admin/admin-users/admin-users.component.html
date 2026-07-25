@@ -54,7 +54,7 @@
           {{ 'admin.users.subtitle' | translate }}
         </p>
       </div>
-      <button type="button" class="ui-btn-primary inline-flex items-center gap-2 shrink-0">
+      <button type="button" (click)="openAddModal()" class="ui-btn-primary inline-flex items-center gap-2 shrink-0">
         <span class="material-symbols-outlined text-[20px]" aria-hidden="true">add</span>
         {{ 'admin.users.addUser' | translate }}
       </button>
@@ -66,196 +66,328 @@
         <label class="sr-only" for="admin-users-search">{{ 'common.search' | translate }}</label>
         <span
           class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
-          aria-hidden="true"
-          >search</span
-        >
+          aria-hidden="true">search</span>
         <input
           id="admin-users-search"
           type="search"
           class="ui-input w-full ps-10"
           [attr.placeholder]="'admin.users.searchPlaceholder' | translate"
+          [ngModel]="searchInput()"
+          (ngModelChange)="onSearchInput($event)"
         />
       </div>
       <div class="flex flex-wrap gap-2">
-        <button type="button" class="ui-btn-primary !rounded-full !px-4 !py-2 text-label-lg">
+        <button type="button" (click)="setFilter('all')"
+          [class]="activeFilter() === 'all' ? 'ui-btn-primary !rounded-full !px-4 !py-2 text-label-lg' : 'ui-btn-secondary !rounded-full !px-4 !py-2 text-label-lg border border-outline-variant'">
           {{ 'admin.users.filterAll' | translate }}
         </button>
-        <button
-          type="button"
-          class="ui-btn-secondary !rounded-full !px-4 !py-2 text-label-lg border border-outline-variant"
-        >
+        <button type="button" (click)="setFilter('farm')"
+          [class]="activeFilter() === 'farm' ? 'ui-btn-primary !rounded-full !px-4 !py-2 text-label-lg' : 'ui-btn-secondary !rounded-full !px-4 !py-2 text-label-lg border border-outline-variant'">
           {{ 'admin.users.roleFarm' | translate }}
         </button>
-        <button
-          type="button"
-          class="ui-btn-secondary !rounded-full !px-4 !py-2 text-label-lg border border-outline-variant"
-        >
+        <button type="button" (click)="setFilter('factory')"
+          [class]="activeFilter() === 'factory' ? 'ui-btn-primary !rounded-full !px-4 !py-2 text-label-lg' : 'ui-btn-secondary !rounded-full !px-4 !py-2 text-label-lg border border-outline-variant'">
           {{ 'admin.users.roleFactory' | translate }}
-        </button>
-        <button
-          type="button"
-          class="ui-btn-secondary !rounded-full !px-4 !py-2 text-label-lg border border-outline-variant"
-        >
-          {{ 'admin.users.roleAdmin' | translate }}
-        </button>
-        <button
-          type="button"
-          class="ui-btn-ghost !rounded-full !px-4 !py-2 text-label-lg border border-outline-variant inline-flex items-center gap-2"
-        >
-          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">filter_list</span>
-          {{ 'admin.users.advancedFilter' | translate }}
         </button>
       </div>
     </section>
+
+    @if (error()) {
+      <p class="text-error font-label-sm" role="alert">{{ error() }}</p>
+    }
 
     <!-- Users table -->
     <section class="ui-card overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-start border-collapse">
-          <thead>
-            <tr class="bg-surface-container-lowest border-b border-outline-variant">
-              <th scope="col" class="p-4 font-title-md text-title-md text-on-surface text-start">
-                {{ 'admin.users.name' | translate }}
-              </th>
-              <th scope="col" class="p-4 font-title-md text-title-md text-on-surface text-start">
-                {{ 'admin.users.email' | translate }}
-              </th>
-              <th scope="col" class="p-4 font-title-md text-title-md text-on-surface text-start">
-                {{ 'admin.users.role' | translate }}
-              </th>
-              <th scope="col" class="p-4 font-title-md text-title-md text-on-surface text-start">
-                {{ 'admin.users.status' | translate }}
-              </th>
-              <th scope="col" class="p-4 font-title-md text-title-md text-on-surface text-start">
-                {{ 'common.actions' | translate }}
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-outline-variant">
-            @for (user of users; track user.id) {
-              <tr class="hover:bg-surface-container-low transition-colors group">
-                <td class="p-4">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center font-bold text-primary shrink-0"
-                    >
-                      {{ user.initial }}
-                    </div>
-                    <div>
-                      <p class="font-body-lg text-body-lg font-medium text-on-surface">
-                        {{ user.name }}
-                      </p>
-                      <p class="font-label-sm text-label-sm text-on-surface-variant">
-                        ID: {{ user.id }}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-                <td class="p-4 font-body-md text-body-md text-on-surface-variant">
-                  {{ user.email }}
-                </td>
-                <td class="p-4">
-                  @if (user.role === 'farm') {
-                    <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container-high text-on-surface"
-                      >{{ 'admin.users.roleFarm' | translate }}</span
-                    >
-                  }
-                  @if (user.role === 'factory') {
-                    <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container-high text-on-surface"
-                      >{{ 'admin.users.roleFactory' | translate }}</span
-                    >
-                  }
-                  @if (user.role === 'admin') {
-                    <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-primary-container text-on-primary-container"
-                      >{{ 'admin.users.roleAdmin' | translate }}</span
-                    >
-                  }
-                </td>
-                <td class="p-4">
-                  @if (user.status === 'verified') {
-                    <span
-                      class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-label-sm text-label-sm bg-secondary-container text-on-secondary-container"
-                    >
-                      <span class="w-2 h-2 rounded-full bg-success-green" aria-hidden="true"></span>
-                      {{ 'common.verified' | translate }}
-                    </span>
-                  }
-                  @if (user.status === 'pending') {
-                    <span
-                      class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-label-sm text-label-sm bg-error-container text-on-error-container"
-                    >
-                      <span class="w-2 h-2 rounded-full bg-danger-red" aria-hidden="true"></span>
-                      {{ 'common.pending' | translate }}
-                    </span>
-                  }
-                </td>
-                <td class="p-4">
-                  <div class="flex items-center gap-2">
-                    @if (user.status === 'pending') {
-                      <button
-                        type="button"
-                        class="ui-btn-primary !px-3 !py-1.5 !text-label-lg inline-flex items-center gap-1"
-                      >
-                        <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
-                          >check_circle</span
-                        >
-                        {{ 'admin.users.verify' | translate }}
-                      </button>
-                    }
-                    <button
-                      type="button"
-                      class="p-2 text-on-surface-variant hover:text-danger-red rounded-full hover:bg-error-container transition-colors"
-                      [attr.aria-label]="'admin.users.block' | translate"
-                    >
-                      <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
-                        >block</span
-                      >
-                    </button>
-                    <button
-                      type="button"
-                      class="p-2 text-on-surface-variant hover:text-primary rounded-full hover:bg-surface-container transition-colors"
-                      [attr.aria-label]="'common.edit' | translate"
-                    >
-                      <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
-                        >edit</span
-                      >
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-
-      <div
-        class="p-4 border-t border-outline-variant bg-surface-container-lowest flex flex-col sm:flex-row items-center justify-between gap-3 font-body-md text-body-md text-on-surface-variant"
-      >
-        <p>{{ 'admin.users.showingResults' | translate }}</p>
-        <div class="flex items-center gap-2">
-          <button
-            type="button"
-            class="p-1 rounded hover:bg-surface-container transition-colors opacity-50"
-            disabled
-            [attr.aria-label]="'common.previous' | translate"
-          >
-            <span class="material-symbols-outlined icon-flip" aria-hidden="true">chevron_left</span>
-          </button>
-          <span class="px-2 font-medium text-on-surface">1</span>
-          <button
-            type="button"
-            class="p-1 rounded hover:bg-surface-container transition-colors"
-            [attr.aria-label]="'common.next' | translate"
-          >
-            <span class="material-symbols-outlined icon-flip" aria-hidden="true"
-              >chevron_right</span
-            >
-          </button>
+      @if (loading()) {
+        <div class="flex justify-center py-12">
+          <span class="material-symbols-outlined text-4xl animate-spin text-primary" aria-hidden="true">progress_activity</span>
         </div>
-      </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-start border-collapse">
+            <thead>
+              <tr class="bg-surface-container-lowest border-b border-outline-variant">
+                <th scope="col" class="p-4 font-title-md text-title-md text-on-surface text-start">
+                  {{ 'admin.users.name' | translate }}
+                </th>
+                <th scope="col" class="p-4 font-title-md text-title-md text-on-surface text-start">
+                  {{ 'admin.users.email' | translate }}
+                </th>
+                <th scope="col" class="p-4 font-title-md text-title-md text-on-surface text-start">
+                  {{ 'admin.users.role' | translate }}
+                </th>
+                <th scope="col" class="p-4 font-title-md text-title-md text-on-surface text-start">
+                  {{ 'admin.users.status' | translate }}
+                </th>
+                <th scope="col" class="p-4 font-title-md text-title-md text-on-surface text-start">
+                  {{ 'common.actions' | translate }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant">
+              @for (user of users(); track user.id) {
+                <tr class="hover:bg-surface-container-low transition-colors group">
+                  <td class="p-4">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center font-bold text-primary shrink-0"
+                      >
+                        {{ getInitial(user.displayName, user.email) }}
+                      </div>
+                      <div>
+                        <p class="font-body-lg text-body-lg font-medium text-on-surface" [innerHTML]="highlightText(user.displayName || user.farmName || user.factoryName)">
+                        </p>
+                        @if (user.isVerified) {
+                          <span class="inline-flex items-center gap-1 text-label-sm text-success-green font-label-sm">
+                            <span class="material-symbols-outlined text-sm" aria-hidden="true">verified</span>
+                            {{ 'common.verified' | translate }}
+                          </span>
+                        }
+                      </div>
+                    </div>
+                  </td>
+                  <td class="p-4 font-body-md text-body-md text-on-surface-variant" [innerHTML]="highlightText(user.email)">
+                  </td>
+                  <td class="p-4">
+                    @if (user.role.toLowerCase() === 'farm') {
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container-high text-on-surface">
+                        {{ 'admin.users.roleFarm' | translate }}
+                      </span>
+                    } @else if (user.role.toLowerCase() === 'factory') {
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container-high text-on-surface">
+                        {{ 'admin.users.roleFactory' | translate }}
+                      </span>
+                    } @else if (user.role.toLowerCase() === 'admin') {
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-primary-container text-on-primary-container">
+                        {{ 'admin.users.roleAdmin' | translate }}
+                      </span>
+                    }
+                  </td>
+                  <td class="p-4">
+                    @if (user.isBlocked) {
+                      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-label-sm text-label-sm bg-error-container text-on-error-container">
+                        <span class="w-2 h-2 rounded-full bg-danger-red" aria-hidden="true"></span>
+                        {{ 'common.blocked' | translate }}
+                      </span>
+                    } @else if (user.isVerified) {
+                      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-label-sm text-label-sm bg-secondary-container text-on-secondary-container">
+                        <span class="w-2 h-2 rounded-full bg-success-green" aria-hidden="true"></span>
+                        {{ 'common.verified' | translate }}
+                      </span>
+                    } @else {
+                      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-label-sm text-label-sm bg-surface-container-high text-on-surface-variant">
+                        <span class="w-2 h-2 rounded-full bg-outline" aria-hidden="true"></span>
+                        {{ 'common.pending' | translate }}
+                      </span>
+                    }
+                  </td>
+                  <td class="p-4">
+                    <div class="flex items-center gap-2">
+                      @if (!user.isVerified && !user.isBlocked && user.role.toLowerCase() !== 'admin') {
+                        <button type="button" (click)="onVerify(user)"
+                          class="ui-btn-primary !px-3 !py-1.5 !text-label-lg inline-flex items-center gap-1">
+                          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">check_circle</span>
+                          {{ 'admin.users.verify' | translate }}
+                        </button>
+                      }
+                      <button type="button" (click)="onToggleBlock(user)"
+                        class="p-2 rounded-full transition-colors"
+                        [class]="user.isBlocked ? 'text-success-green hover:bg-secondary-container' : 'text-on-surface-variant hover:text-danger-red hover:bg-error-container'"
+                        [attr.aria-label]="user.isBlocked ? ('admin.users.unblock' | translate) : ('admin.users.block' | translate)">
+                        <span class="material-symbols-outlined text-[20px]" aria-hidden="true">
+                          {{ user.isBlocked ? 'lock_open' : 'block' }}
+                        </span>
+                      </button>
+                      <button type="button" (click)="openEditModal(user)"
+                        class="p-2 text-on-surface-variant hover:text-primary rounded-full hover:bg-surface-container transition-colors"
+                        [attr.aria-label]="'common.edit' | translate">
+                        <span class="material-symbols-outlined text-[20px]" aria-hidden="true">edit</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="p-12 text-center">
+                    <span class="material-symbols-outlined text-4xl text-outline mb-2" aria-hidden="true">person_off</span>
+                    <p class="font-body-lg text-body-lg text-on-surface-variant">{{ 'admin.users.noUsers' | translate }}</p>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="p-4 border-t border-outline-variant bg-surface-container-lowest flex flex-col sm:flex-row items-center justify-between gap-3 font-body-md text-body-md text-on-surface-variant">
+          <p>{{ displayName }}</p>
+          <div class="flex items-center gap-2">
+            <button type="button" (click)="goToPage(page() - 1)" [disabled]="page() <= 1"
+              class="p-1 rounded hover:bg-surface-container transition-colors"
+              [class.opacity-50]="page() <= 1"
+              [attr.aria-label]="'common.previous' | translate">
+              <span class="material-symbols-outlined icon-flip" aria-hidden="true">chevron_left</span>
+            </button>
+            <span class="px-2 font-medium text-on-surface">{{ 'admin.users.page' | translate: { current: page(), total: totalPages() } }}</span>
+            <button type="button" (click)="goToPage(page() + 1)" [disabled]="page() >= totalPages()"
+              class="p-1 rounded hover:bg-surface-container transition-colors"
+              [class.opacity-50]="page() >= totalPages()"
+              [attr.aria-label]="'common.next' | translate">
+              <span class="material-symbols-outlined icon-flip" aria-hidden="true">chevron_right</span>
+            </button>
+          </div>
+        </div>
+      }
     </section>
   </div>
 </main>
+
+<!-- Add User Modal -->
+@if (showAddModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" (click)="closeAddModal()">
+    <div class="bg-surface-container-lowest rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between p-6 border-b border-outline-variant">
+        <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">
+          {{ 'admin.users.addUser' | translate }}
+        </h3>
+        <button type="button" (click)="closeAddModal()" class="p-1 hover:bg-surface-container rounded-full text-on-surface-variant">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        @if (addError()) {
+          <p class="text-error font-label-sm" role="alert">{{ addError() }}</p>
+        }
+
+        <div>
+          <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'admin.users.role' | translate }}</label>
+          <select [(ngModel)]="addForm.role" class="ui-input w-full">
+            <option value="farm">{{ 'admin.users.roleFarm' | translate }}</option>
+            <option value="factory">{{ 'admin.users.roleFactory' | translate }}</option>
+            <option value="admin">{{ 'admin.users.roleAdmin' | translate }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'common.email' | translate }}</label>
+          <input type="email" [(ngModel)]="addForm.email" class="ui-input w-full" placeholder="user@example.com" />
+        </div>
+
+        <div>
+          <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'common.password' | translate }}</label>
+          <input type="password" [(ngModel)]="addForm.password" class="ui-input w-full" placeholder="••••••••" />
+        </div>
+
+        <div>
+          <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'common.confirmPassword' | translate }}</label>
+          <input type="password" [(ngModel)]="addForm.confirmPassword" class="ui-input w-full" placeholder="••••••••" />
+        </div>
+
+        @if (addForm.role === 'farm' || addForm.role === 'factory') {
+          <div>
+            <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'admin.users.businessName' | translate }}</label>
+            <input type="text" [(ngModel)]="addForm.name" class="ui-input w-full" [placeholder]="addForm.role === 'farm' ? ('admin.users.farmName' | translate) : ('admin.users.factoryName' | translate)" />
+          </div>
+
+          <div>
+            <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'admin.users.governorate' | translate }}</label>
+            <input type="text" [(ngModel)]="addForm.governorate" class="ui-input w-full" />
+          </div>
+        }
+
+        @if (addForm.role === 'farm') {
+          <div>
+            <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'admin.users.sizeInFeddans' | translate }}</label>
+            <input type="number" [(ngModel)]="addForm.sizeInFeddans" class="ui-input w-full" />
+          </div>
+        }
+      </div>
+
+      <div class="flex justify-end gap-3 p-6 border-t border-outline-variant">
+        <button type="button" (click)="closeAddModal()" class="ui-btn-secondary">
+          {{ 'common.cancel' | translate }}
+        </button>
+        <button type="button" (click)="onSubmitAdd()" [disabled]="addingUser()" class="ui-btn-primary flex items-center gap-2">
+          @if (addingUser()) {
+            <span class="material-symbols-outlined animate-spin text-sm" aria-hidden="true">progress_activity</span>
+          }
+          {{ 'admin.users.addUser' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Edit User Modal -->
+@if (showEditModal(); as user) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" (click)="closeEditModal()">
+    <div class="bg-surface-container-lowest rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between p-6 border-b border-outline-variant">
+        <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">
+          {{ 'admin.users.editUser' | translate }}
+        </h3>
+        <button type="button" (click)="closeEditModal()" class="p-1 hover:bg-surface-container rounded-full text-on-surface-variant">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        @if (editError()) {
+          <p class="text-error font-label-sm" role="alert">{{ editError() }}</p>
+        }
+
+        <div class="font-body-md text-body-md text-on-surface-variant pb-2 border-b border-outline-variant">
+          {{ editingUser()?.email }}
+        </div>
+
+        <div>
+          <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'admin.users.role' | translate }}</label>
+          <select [(ngModel)]="editForm.role" class="ui-input w-full">
+            <option value="farm">{{ 'admin.users.roleFarm' | translate }}</option>
+            <option value="factory">{{ 'admin.users.roleFactory' | translate }}</option>
+            <option value="admin">{{ 'admin.users.roleAdmin' | translate }}</option>
+          </select>
+        </div>
+
+        @if (editForm.role === 'farm' || editForm.role === 'factory') {
+          <div>
+            <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'admin.users.businessName' | translate }}</label>
+            <input type="text" [(ngModel)]="editForm.name" class="ui-input w-full" />
+          </div>
+
+          <div>
+            <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'admin.users.governorate' | translate }}</label>
+            <input type="text" [(ngModel)]="editForm.governorate" class="ui-input w-full" />
+          </div>
+        }
+
+        @if (editForm.role === 'farm') {
+          <div>
+            <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'admin.users.sizeInFeddans' | translate }}</label>
+            <input type="number" [(ngModel)]="editForm.sizeInFeddans" class="ui-input w-full" />
+          </div>
+        }
+
+        <div class="flex items-center gap-3 pt-2">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" [(ngModel)]="editForm.isVerified" class="w-4 h-4 rounded border-outline-variant text-primary" />
+            <span class="font-label-md text-label-md text-on-surface">{{ 'common.verified' | translate }}</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 p-6 border-t border-outline-variant">
+        <button type="button" (click)="closeEditModal()" class="ui-btn-secondary">
+          {{ 'common.cancel' | translate }}
+        </button>
+        <button type="button" (click)="onSubmitEdit()" [disabled]="savingEdit()" class="ui-btn-primary flex items-center gap-2">
+          @if (savingEdit()) {
+            <span class="material-symbols-outlined animate-spin text-sm" aria-hidden="true">progress_activity</span>
+          }
+          {{ 'common.save' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
