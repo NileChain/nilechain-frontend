@@ -38,6 +38,8 @@ export class RegisterComponent {
   readonly farmName = signal('');
   readonly farmGovernorate = signal('');
   readonly farmSize = signal<number>(0);
+  readonly factoryName = signal('');
+  readonly factoryGovernorate = signal('');
 
   onFarmSizeInput(value: string): void {
     this.farmSize.set(Number(value));
@@ -133,6 +135,11 @@ export class RegisterComponent {
       registerPayload.name = this.farmName();
       registerPayload.governorate = this.farmGovernorate();
       registerPayload.sizeInFeddans = this.farmSize();
+    }
+
+    if (role === 'factory') {
+      registerPayload.name = this.factoryName();
+      registerPayload.governorate = this.factoryGovernorate();
     }
 
     this.authService

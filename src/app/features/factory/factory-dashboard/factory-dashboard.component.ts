@@ -14,22 +14,10 @@ import {
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
-import { SidebarFactoryComponent } from '../../../shared/components/sidebar-factory/sidebar-factory.component';
-
-Chart.register(
-  LineController,
-  LineElement,
-  PointElement,
-  LinearScale,
-  CategoryScale,
-  Filler,
-  Legend,
-  Tooltip
-);
 
 @Component({
   selector: 'app-factory-dashboard',
-  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent, SidebarFactoryComponent],
+  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent],
   templateUrl: './factory-dashboard.component.html',
   styleUrl: './factory-dashboard.component.scss',
 })
@@ -39,6 +27,21 @@ export class FactoryDashboardComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    try {
+      Chart.register(
+        LineController,
+        LineElement,
+        PointElement,
+        LinearScale,
+        CategoryScale,
+        Filler,
+        Legend,
+        Tooltip
+      );
+    } catch {
+      return;
+    }
+
     const canvas = document.getElementById(
       'marketChart'
     ) as HTMLCanvasElement | null;
@@ -46,58 +49,67 @@ export class FactoryDashboardComponent implements AfterViewInit {
       return;
     }
 
-    new Chart(canvas.getContext('2d')!, {
-      type: 'line',
-      data: {
-        labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-        datasets: [
-          {
-            label: 'Potato',
-            data: [12000, 12500, 11800, 13200, 13500, 14000],
-            borderColor: '#1B5E20',
-            backgroundColor: 'rgba(27, 94, 32, 0.1)',
-            tension: 0.4,
-            fill: true,
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+
+    try {
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+          datasets: [
+            {
+              label: 'Potato',
+              data: [12000, 12500, 11800, 13200, 13500, 14000],
+              borderColor: '#1B5E20',
+              backgroundColor: 'rgba(27, 94, 32, 0.1)',
+              tension: 0.4,
+              fill: true,
+            },
+            {
+              label: 'Sugar Beet',
+              data: [8500, 8200, 8700, 9100, 8900, 9500],
+              borderColor: '#E65100',
+              backgroundColor: 'rgba(230, 81, 0, 0.1)',
+              tension: 0.4,
+              fill: true,
+            },
+            {
+              label: 'Wheat',
+              data: [15000, 15500, 15200, 15800, 16000, 16500],
+              borderColor: '#1B6D24',
+              backgroundColor: 'rgba(27, 109, 36, 0.1)',
+              tension: 0.4,
+              fill: true,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { font: { family: 'Work Sans', size: 12 } },
+            },
           },
-          {
-            label: 'Sugar Beet',
-            data: [8500, 8200, 8700, 9100, 8900, 9500],
-            borderColor: '#E65100',
-            backgroundColor: 'rgba(230, 81, 0, 0.1)',
-            tension: 0.4,
-            fill: true,
-          },
-          {
-            label: 'Wheat',
-            data: [15000, 15500, 15200, 15800, 16000, 16500],
-            borderColor: '#1B6D24',
-            backgroundColor: 'rgba(27, 109, 36, 0.1)',
-            tension: 0.4,
-            fill: true,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'top',
-            labels: { font: { family: 'Work Sans', size: 12 } },
+          scales: {
+            y: {
+              beginAtZero: false,
+              grid: { color: '#E8F5E9' },
+              ticks: { font: { family: 'Work Sans' } },
+            },
+            x: {
+              grid: { display: false },
+              ticks: { font: { family: 'Work Sans' } },
+            },
           },
         },
-        scales: {
-          y: {
-            beginAtZero: false,
-            grid: { color: '#E8F5E9' },
-            ticks: { font: { family: 'Work Sans' } },
-          },
-          x: {
-            grid: { display: false },
-            ticks: { font: { family: 'Work Sans' } },
-          },
-        },
-      },
-    });
+      });
+    } catch {
+      /* chart init failed */
+    }
   }
 }

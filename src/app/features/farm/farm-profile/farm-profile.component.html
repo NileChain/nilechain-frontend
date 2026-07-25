@@ -21,8 +21,13 @@
         <div class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant">
           <div class="text-end hidden sm:block">
             <p class="font-label-md text-label-md text-on-surface leading-tight">{{ currentUser()?.displayName || currentUser()?.email }}</p>
-            <p class="text-label-sm text-label-sm text-on-surface-variant">
-              {{ 'nav.premiumFarmer' | translate }}
+            <p class="text-label-sm text-label-sm text-on-surface-variant inline-flex items-center gap-1">
+              @if (profile()?.isVerified) {
+                <span class="material-symbols-outlined text-xs text-success-green" aria-hidden="true">verified</span>
+                <span>{{ 'common.verified' | translate }}</span>
+              } @else {
+                <span>{{ 'common.pending' | translate }}</span>
+              }
             </p>
           </div>
           <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary">
