@@ -1,13 +1,8 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
-  <header
-    class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
-  >
+  <header class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40">
     <div class="flex items-center gap-4">
-      <button
-        type="button"
-        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
-        [attr.aria-label]="'common.toggleMenu' | translate"
-      >
+      <button type="button" class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
+        [attr.aria-label]="'common.toggleMenu' | translate">
         <span class="material-symbols-outlined" aria-hidden="true">menu</span>
       </button>
       <h1 class="font-headline-md text-headline-md font-bold text-primary">
@@ -17,28 +12,20 @@
     <div class="flex items-center gap-2 sm:gap-4">
       <ui-language-toggle />
       <ui-theme-toggle />
-      <button
-        type="button"
-        class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant relative"
-        [attr.aria-label]="'common.notifications' | translate"
-      >
+      <button type="button" class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant relative"
+        [attr.aria-label]="'common.notifications' | translate">
         <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
-        <span
-          class="absolute top-2 end-2 w-2 h-2 bg-error rounded-full"
-          aria-hidden="true"
-        ></span>
+        @if (unreadCount() > 0) {
+          <span class="absolute top-2 end-2 w-2 h-2 bg-error rounded-full" aria-hidden="true"></span>
+        }
       </button>
       <div class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant">
         <div class="text-end hidden sm:block">
           <p class="font-label-md text-label-md text-on-surface leading-tight">{{ currentUser()?.displayName || currentUser()?.email }}</p>
-          <p class="text-label-sm text-label-sm text-on-surface-variant">
-            {{ 'nav.premiumFarmer' | translate }}
-          </p>
+          <p class="text-label-sm text-label-sm text-on-surface-variant">{{ 'nav.premiumFarmer' | translate }}</p>
         </div>
-        <div
-          class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary"
-        >
-          <span class="font-bold">{{ (currentUser()?.displayName || currentUser()?.email || '?').charAt(0).toUpperCase() }}{{ (currentUser()?.displayName || currentUser()?.email || '').split(' ').length > 1 ? (currentUser()?.displayName || currentUser()?.email || '').split(' ').pop()!.charAt(0).toUpperCase() : '' }}</span>
+        <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary">
+          <span class="font-bold">{{ firstLetter(currentUser()?.displayName || currentUser()?.email || '?') }}</span>
         </div>
       </div>
     </div>
@@ -54,220 +41,105 @@
           {{ 'notifications.subtitle' | translate }}
         </p>
       </div>
-      <div class="flex items-center gap-3">
-        <div class="relative hidden lg:block">
-          <label class="sr-only" for="notifications-search">{{ 'common.search' | translate }}</label>
-          <span
-            class="material-symbols-outlined absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]"
-            aria-hidden="true"
-            >search</span
-          >
-          <input
-            id="notifications-search"
-            class="ui-input w-64 pe-10"
-            type="search"
-            [attr.placeholder]="'notifications.searchPlaceholder' | translate"
-          />
-        </div>
-        <button
-          type="button"
-          class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors border border-outline-variant"
-          [attr.aria-label]="'common.filter' | translate"
-        >
-          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">filter_list</span>
-        </button>
-      </div>
     </section>
 
     <nav class="flex items-center gap-2 overflow-x-auto pb-2" [attr.aria-label]="'notifications.title' | translate">
-      <button
-        type="button"
-        class="px-6 py-2 rounded-full bg-primary-container text-on-primary-container font-title-md text-title-md whitespace-nowrap transition-colors"
-      >
-        {{ 'notifications.all' | translate }}
-      </button>
-      <button
-        type="button"
-        class="px-6 py-2 rounded-full border border-outline-variant bg-surface-container-lowest text-on-surface-variant font-title-md text-title-md hover:bg-surface-container whitespace-nowrap transition-colors"
-      >
-        {{ 'notifications.unread' | translate }}
-      </button>
-      <button
-        type="button"
-        class="px-6 py-2 rounded-full border border-outline-variant bg-surface-container-lowest text-on-surface-variant font-title-md text-title-md hover:bg-surface-container whitespace-nowrap transition-colors flex items-center gap-2"
-      >
-        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">hub</span>
-        {{ 'notifications.matches' | translate }}
-      </button>
-      <button
-        type="button"
-        class="px-6 py-2 rounded-full border border-outline-variant bg-surface-container-lowest text-on-surface-variant font-title-md text-title-md hover:bg-surface-container whitespace-nowrap transition-colors flex items-center gap-2"
-      >
-        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">warning</span>
-        {{ 'notifications.risks' | translate }}
-      </button>
+      @for (f of filterOptions; track f.key) {
+        <button type="button" (click)="setFilter(f.key)"
+          class="px-6 py-2 rounded-full font-title-md text-title-md whitespace-nowrap transition-colors"
+          [class]="filter() === f.key
+            ? 'bg-primary-container text-on-primary-container'
+            : 'border border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container'">
+          {{ f.label | translate }}
+        </button>
+      }
     </nav>
 
-    <div class="flex flex-col gap-4">
-      <h3 class="font-label-lg text-label-lg text-outline mt-2 mb-1 uppercase tracking-wider">
-        {{ 'notifications.today' | translate }}
-      </h3>
+    @if (loading()) {
+      <div class="space-y-4">
+        @for (_ of [1,2,3]; track $index) {
+          <article class="bg-surface-container-lowest rounded-xl p-4 animate-pulse border border-outline-variant flex items-start gap-4">
+            <div class="w-12 h-12 rounded-full bg-surface-container-high shrink-0"></div>
+            <div class="flex-1 space-y-2">
+              <div class="h-4 bg-surface-container-high rounded w-48"></div>
+              <div class="h-3 bg-surface-container-high rounded w-64"></div>
+            </div>
+          </article>
+        }
+      </div>
+    } @else if (allNotifications().length === 0) {
+      <section class="text-center py-20">
+        <div class="w-24 h-24 rounded-full bg-surface-container-high flex items-center justify-center mx-auto mb-6">
+          <span class="material-symbols-outlined text-5xl text-on-surface-variant">notifications_off</span>
+        </div>
+        <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-2">
+          No notifications yet
+        </h3>
+        <p class="text-body-md text-on-surface-variant max-w-md mx-auto">
+          When something needs your attention, notifications will appear here.
+        </p>
+      </section>
+    } @else if (notifications().length === 0) {
+      <section class="text-center py-20">
+        <div class="w-24 h-24 rounded-full bg-surface-container-high flex items-center justify-center mx-auto mb-6">
+          <span class="material-symbols-outlined text-5xl text-on-surface-variant">filter_alt_off</span>
+        </div>
+        <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-2">
+          No {{ typeLabel.toLowerCase() }} notifications
+        </h3>
+        <p class="text-body-md text-on-surface-variant max-w-md mx-auto">
+          Try a different filter to see more notifications.
+        </p>
+      </section>
+    } @else {
+      <div class="flex flex-col gap-4">
+        @for (group of groupedNotifications(); track group.key) {
+          <h3 class="font-label-lg text-label-lg text-outline mt-2 mb-1 uppercase tracking-wider">
+            @if (group.key === 'today') {
+              Today
+            } @else if (group.key === 'yesterday') {
+              Yesterday
+            } @else {
+              Earlier
+            }
+          </h3>
 
-      @for (item of todayItems; track item.id) {
-        <article
-          class="bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex items-start gap-4 border"
-          [class]="
-            item.type === 'risk'
-              ? 'border-error-container'
-              : 'border-outline-variant'
-          "
-        >
-          @if (item.unread) {
-            <div
-              class="absolute top-4 end-4 w-2 h-2 rounded-full"
-              [class]="item.type === 'risk' ? 'bg-error' : 'bg-primary'"
-              aria-hidden="true"
-            ></div>
-          }
-
-          @if (item.type === 'risk') {
-            <div
-              class="w-12 h-12 rounded-full bg-error-container flex items-center justify-center shrink-0"
-            >
-              <span class="material-symbols-outlined text-on-error-container text-[24px]" aria-hidden="true"
-                >warning</span
-              >
-            </div>
-          } @else if (item.type === 'match') {
-            <div
-              class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shrink-0"
-            >
-              <span
-                class="material-symbols-outlined fill text-on-primary-container text-[24px]"
-                aria-hidden="true"
-                >hub</span
-              >
-            </div>
-          } @else {
-            <div
-              class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center shrink-0 border border-outline-variant"
-            >
-              <span class="material-symbols-outlined text-primary text-[24px]" aria-hidden="true"
-                >contract</span
-              >
-            </div>
-          }
-
-          <div class="flex-1 min-w-0">
-            <div class="flex justify-between items-start mb-1 gap-2">
-              <h4
-                class="font-title-md text-title-md text-on-surface"
-                [class.pe-6]="item.unread"
-              >
-                {{ item.titleKey | translate }}
-              </h4>
-              <span class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">
-                {{ item.timeKey | translate }}
-              </span>
-            </div>
-            <p class="font-body-md text-body-md text-on-surface-variant mb-3">
-              {{ item.bodyKey | translate }}
-            </p>
-            <div class="flex items-center gap-3 flex-wrap">
-              @if (item.type === 'risk') {
-                <button type="button" class="px-4 py-1.5 rounded-lg bg-error text-on-error font-label-lg text-label-lg hover:opacity-90 transition-colors">
-                  {{ item.actionKey | translate }}
-                </button>
-                <span
-                  class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant flex items-center gap-1"
-                >
-                  <span class="material-symbols-outlined text-[14px]" aria-hidden="true">{{
-                    item.tagIcon
-                  }}</span>
-                  {{ item.tagKey | translate }}
-                </span>
-              } @else if (item.type === 'match') {
-                <button type="button" class="ui-btn-primary px-4 py-1.5 font-label-lg text-label-lg">
-                  {{ item.actionKey | translate }}
-                </button>
-                <span
-                  class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm flex items-center gap-1"
-                >
-                  <span class="material-symbols-outlined text-[14px]" aria-hidden="true">{{
-                    item.tagIcon
-                  }}</span>
-                  {{ item.tagKey | translate }}
-                </span>
-              } @else {
-                <button
-                  type="button"
-                  class="px-4 py-1.5 rounded-lg border-2 border-primary text-primary font-label-lg text-label-lg hover:bg-surface-container transition-colors"
-                >
-                  {{ item.actionKey | translate }}
-                </button>
+          @for (item of group.items; track item.notificationId) {
+            <article class="bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex items-start gap-4 border {{ notificationBorder(item.type) }}"
+              (click)="markAsRead(item.notificationId)">
+              @if (!item.isRead) {
+                <div class="absolute top-4 end-4 w-2 h-2 rounded-full {{ unreadDot(item.type) }}" aria-hidden="true"></div>
               }
-            </div>
-          </div>
-        </article>
+              <div class="w-12 h-12 rounded-full {{ notificationBg(item.type) }} flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined {{ notificationIconColor(item.type) }} text-[24px]"
+                  [class.fill]="item.type === 'match'" aria-hidden="true">{{ notificationIcon(item.type) }}</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-start mb-1 gap-2">
+                  <h4 class="font-title-md text-title-md text-on-surface" [class.pe-6]="!item.isRead">
+                    {{ item.title }}
+                  </h4>
+                  <span class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">
+                    {{ item.createdAt | date:'short' }}
+                  </span>
+                </div>
+                <p class="font-body-md text-body-md text-on-surface-variant mb-2">
+                  {{ item.message }}
+                </p>
+              </div>
+            </article>
+          }
+        }
+      </div>
+
+      @if (hasMore()) {
+        <div class="mt-4 text-center pb-8">
+          <button type="button" (click)="loadMore()"
+            class="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container transition-colors">
+            {{ 'common.loadMore' | translate }}
+          </button>
+        </div>
       }
-
-      <h3 class="font-label-lg text-label-lg text-outline mt-6 mb-1 uppercase tracking-wider">
-        {{ 'notifications.yesterday' | translate }}
-      </h3>
-
-      @for (item of yesterdayItems; track item.id) {
-        <article
-          class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant hover:shadow-md transition-shadow relative flex items-start gap-4 opacity-90"
-        >
-          <div
-            class="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-outline-variant relative"
-          >
-            <img
-              [src]="item.imageUrl"
-              [alt]="'notifications.senderAlt' | translate"
-              class="w-full h-full object-cover"
-            />
-            <div
-              class="absolute bottom-0 end-0 bg-surface-container-lowest w-4 h-4 rounded-full flex items-center justify-center border border-outline-variant"
-            >
-              <span class="material-symbols-outlined text-[10px] text-primary" aria-hidden="true"
-                >chat</span
-              >
-            </div>
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex justify-between items-start mb-1 gap-2">
-              <h4 class="font-title-md text-title-md text-on-surface">
-                {{ item.titleKey | translate }}
-              </h4>
-              <span class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">
-                {{ item.timeKey | translate }}
-              </span>
-            </div>
-            <p class="font-body-md text-body-md text-on-surface-variant mb-2 line-clamp-2">
-              {{ item.bodyKey | translate }}
-            </p>
-            <button
-              type="button"
-              class="text-primary font-label-lg text-label-lg hover:underline decoration-primary transition-all flex items-center gap-1"
-            >
-              {{ item.actionKey | translate }}
-              <span class="material-symbols-outlined text-[16px] icon-flip" aria-hidden="true"
-                >reply</span
-              >
-            </button>
-          </div>
-        </article>
-      }
-    </div>
-
-    <div class="mt-4 text-center pb-8">
-      <button
-        type="button"
-        class="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container transition-colors"
-      >
-        {{ 'common.loadMore' | translate }}
-      </button>
-    </div>
+    }
   </div>
 </main>
