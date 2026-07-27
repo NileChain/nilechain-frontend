@@ -6,6 +6,11 @@ import { environment } from '../../../../environments/environment';
 import { CropType, FarmDocument, FarmProfile } from '../../models/farm/farm-profile.model';
 import { UpdateFarmProfileRequest } from '../../models/farm/update-farm-profile-request.model';
 import { FarmDashboardData } from '../../models/farm/farm-dashboard.model';
+import { FarmContractItem } from '../../models/farm/farm-contract-item.model';
+import { ConversationItem } from '../../models/farm/conversation-item.model';
+import { MessageItem } from '../../models/farm/message-item.model';
+import { NotificationItem } from '../../models/farm/notification-item.model';
+
 
 @Injectable({
   providedIn: 'root'
@@ -48,6 +53,30 @@ export class FarmService {
 
   deleteCrop(cropTypeId: string): Observable<void> {
     return this.http.delete<void>(`${this.api}/crops/${cropTypeId}`);
+  }
+
+  getContracts(): Observable<FarmContractItem[]> {
+    return this.http.get<FarmContractItem[]>(`${this.api}/contracts`);
+  }
+
+  getConversations(): Observable<ConversationItem[]> {
+    return this.http.get<ConversationItem[]>(`${this.api}/conversations`);
+  }
+
+  getMessages(matchId: string): Observable<MessageItem[]> {
+    return this.http.get<MessageItem[]>(`${this.api}/conversations/${matchId}/messages`);
+  }
+
+  sendMessage(matchId: string, content: string): Observable<void> {
+    return this.http.post<void>(`${this.api}/conversations/${matchId}/messages`, { content });
+  }
+
+  getNotifications(): Observable<NotificationItem[]> {
+    return this.http.get<NotificationItem[]>(`${this.api}/notifications`);
+  }
+
+  markNotificationAsRead(notificationId: string): Observable<void> {
+    return this.http.put<void>(`${this.api}/notifications/${notificationId}/read`, {});
   }
 
 }

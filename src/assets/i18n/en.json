@@ -28,6 +28,7 @@
     "reject": "Reject",
     "accept": "Accept",
     "empty": "Nothing to show yet",
+    "noData": "No data available yet",
     "noResults": "No results found",
     "updatedAgo": "Updated {{time}} ago",
     "aiAssistant": "AI Assistant",
@@ -302,7 +303,8 @@
       "buyerRatings": "Buyer Ratings",
       "statusNegotiating": "Negotiating",
       "statusMatching": "Matching",
-      "statusOnHold": "On Hold"
+      "statusOnHold": "On Hold",
+      "statusExpired": "Expired"
     },
     "profile": {
       "title": "Farm profile",

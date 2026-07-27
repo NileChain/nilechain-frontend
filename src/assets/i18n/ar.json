@@ -28,6 +28,7 @@
     "reject": "رفض",
     "accept": "قبول",
     "empty": "لا يوجد محتوى للعرض بعد",
+    "noData": "لا توجد بيانات متاحة بعد",
     "noResults": "لم يتم العثور على نتائج",
     "updatedAgo": "تم التحديث منذ {{time}}",
     "aiAssistant": "مساعد الذكاء الاصطناعي",
@@ -302,7 +303,8 @@
       "buyerRatings": "تقييمات المشترين",
       "statusNegotiating": "قيد التفاوض",
       "statusMatching": "قيد المطابقة",
-      "statusOnHold": "معلّق"
+      "statusOnHold": "معلّق",
+      "statusExpired": "منتهي"
     },
     "profile": {
       "title": "ملف المزرعة",
