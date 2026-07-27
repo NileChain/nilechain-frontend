@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { CropType, FarmDocument, FarmProfile } from '../../models/farm/farm-profile.model';
 import { UpdateFarmProfileRequest } from '../../models/farm/update-farm-profile-request.model';
+import { FarmDashboardData } from '../../models/farm/farm-dashboard.model';
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +22,10 @@ export class FarmService {
 
   updateProfile(payload: UpdateFarmProfileRequest): Observable<void> {
     return this.http.put<void>(`${this.api}/profile`, payload);
+  }
+
+  getDashboard(): Observable<FarmDashboardData> {
+    return this.http.get<FarmDashboardData>(`${this.api}/dashboard`);
   }
 
   getCropTypes(): Observable<CropType[]> {

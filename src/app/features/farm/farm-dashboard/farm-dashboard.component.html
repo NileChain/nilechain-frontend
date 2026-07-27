@@ -1,6 +1,4 @@
-<!-- Main Content Canvas -->
 <main class="md:ms-[280px] min-h-screen bg-surface">
-  <!-- Top Navigation Bar -->
   <header
     class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40">
     <div class="flex items-center gap-4">
@@ -30,359 +28,345 @@
           </p>
         </div>
         <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary">
-          <span class="font-bold">{{ (currentUser()?.displayName || currentUser()?.email || '?').charAt(0).toUpperCase() }}{{ (currentUser()?.displayName || currentUser()?.email || '').split(' ').length > 1 ? (currentUser()?.displayName || currentUser()?.email || '').split(' ').pop()!.charAt(0).toUpperCase() : '' }}</span>
+          <span class="font-bold">{{ firstLetter(currentUser()?.displayName || currentUser()?.email || '?') }}</span>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- Scrollable Content Area -->
   <div class="p-margin-desktop max-w-[1440px] mx-auto space-y-gutter">
-    <!-- KPI Section (Grid of 4) -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
-      <!-- Risk Score Card -->
-      <div
-        class="glass-card p-md flex flex-col justify-between h-full group hover:border-primary transition-colors cursor-default">
-        <div class="flex justify-between items-start">
-          <div>
-            <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">
-              {{ 'farm.dashboard.reliabilityScore' | translate }}
-            </p>
-            <h3 class="font-headline-md text-headline-md text-primary mt-1">78/100</h3>
+    @if (dashData(); as data) {
+      <!-- KPI Section -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+        <!-- Risk Score Card -->
+        <div
+          class="glass-card p-md flex flex-col justify-between h-full group hover:border-primary transition-colors cursor-default">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">
+                {{ 'farm.dashboard.reliabilityScore' | translate }}
+              </p>
+              <h3 class="font-headline-md text-headline-md text-primary mt-1">{{ data.riskScore ?? '—' }}/100</h3>
+            </div>
+            <div
+              class="w-10 h-10 rounded-full {{ riskIconBg() }} flex items-center justify-center text-on-primary shadow-sm">
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1"
+                aria-hidden="true">{{ riskIcon() }}</span>
+            </div>
           </div>
-          <div
-            class="w-10 h-10 rounded-full bg-success-green flex items-center justify-center text-on-primary shadow-sm">
-            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1"
-              aria-hidden="true">verified</span>
+          <div class="mt-4 flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded-full {{ riskBadgeBg() }} text-label-sm">{{ riskLabel() }}</span>
+            <span class="text-label-sm text-on-surface-variant">{{ 'farm.dashboard.fromLastMonth' | translate: { percent: '' } }}</span>
           </div>
         </div>
-        <div class="mt-4 flex items-center gap-2">
-          <span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-label-sm">{{
-            'farm.dashboard.highHealth' | translate }}</span>
-          <span class="text-label-sm text-on-surface-variant">{{
-            'farm.dashboard.fromLastMonth' | translate: { percent: '+2%' }
-            }}</span>
-        </div>
-      </div>
 
-      <!-- Active Matches Card -->
-      <div
-        class="glass-card p-md flex flex-col justify-between h-full group hover:border-primary transition-colors cursor-default">
-        <div class="flex justify-between items-start">
-          <div>
-            <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">
-              {{ 'farm.dashboard.activeMatches' | translate }}
-            </p>
-            <h3 class="font-headline-md text-headline-md text-primary mt-1">12</h3>
+        <!-- Active Matches Card -->
+        <div
+          class="glass-card p-md flex flex-col justify-between h-full group hover:border-primary transition-colors cursor-default">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">
+                {{ 'farm.dashboard.activeMatches' | translate }}
+              </p>
+              <h3 class="font-headline-md text-headline-md text-primary mt-1">{{ data.activeMatchesCount }}</h3>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined" aria-hidden="true">dynamic_feed</span>
+            </div>
           </div>
-          <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
-            <span class="material-symbols-outlined" aria-hidden="true">dynamic_feed</span>
+          <div class="mt-4 flex items-center gap-2">
+            <span class="text-label-sm text-on-surface-variant">{{ 'farm.dashboard.activeMatchesHint' | translate: { count: data.activeMatchesCount } }}</span>
           </div>
         </div>
-        <div class="mt-4 flex items-center gap-2">
-          <span class="text-label-sm text-on-surface-variant">{{
-            'farm.dashboard.activeMatchesHint' | translate: { count: 4 }
-            }}</span>
-        </div>
-      </div>
 
-      <!-- Completed Contracts Card -->
-      <div
-        class="glass-card p-md flex flex-col justify-between h-full group hover:border-primary transition-colors cursor-default">
-        <div class="flex justify-between items-start">
-          <div>
-            <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">
-              {{ 'farm.dashboard.completedContracts' | translate }}
-            </p>
-            <h3 class="font-headline-md text-headline-md text-primary mt-1">146</h3>
+        <!-- Completed Contracts Card -->
+        <div
+          class="glass-card p-md flex flex-col justify-between h-full group hover:border-primary transition-colors cursor-default">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">
+                {{ 'farm.dashboard.completedContracts' | translate }}
+              </p>
+              <h3 class="font-headline-md text-headline-md text-primary mt-1">{{ data.completedContractsCount }}</h3>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined" aria-hidden="true">assignment_turned_in</span>
+            </div>
           </div>
-          <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
-            <span class="material-symbols-outlined" aria-hidden="true">assignment_turned_in</span>
+          <div class="mt-4 flex items-center gap-2">
+            <span class="text-label-sm text-on-surface-variant">{{ 'farm.dashboard.completedContracts' | translate }}</span>
           </div>
         </div>
-        <div class="mt-4 flex items-center gap-2">
-          <span class="text-label-sm text-on-surface-variant">{{
-            'farm.dashboard.transactionVolume' | translate: { amount: '2.4M' }
-            }}</span>
-        </div>
-      </div>
 
-      <!-- Avg Rating Card -->
-      <div
-        class="glass-card p-md flex flex-col justify-between h-full group hover:border-primary transition-colors cursor-default">
-        <div class="flex justify-between items-start">
-          <div>
-            <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">
-              {{ 'farm.dashboard.qualityRating' | translate }}
-            </p>
-            <h3 class="font-headline-md text-headline-md text-primary mt-1">4.9/5.0</h3>
+        <!-- Avg Rating Card -->
+        <div
+          class="glass-card p-md flex flex-col justify-between h-full group hover:border-primary transition-colors cursor-default">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">
+                {{ 'farm.dashboard.qualityRating' | translate }}
+              </p>
+              <h3 class="font-headline-md text-headline-md text-primary mt-1">{{ data.averageRating.toFixed(1) }}/5.0</h3>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1"
+                aria-hidden="true">star</span>
+            </div>
           </div>
-          <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
-            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1"
-              aria-hidden="true">star</span>
+          <div class="mt-4 flex items-center gap-2 text-label-sm">
+            <span class="text-on-surface-variant">{{ 'farm.dashboard.verifiedReviews' | translate: { count: data.ratingCount } }}</span>
           </div>
-        </div>
-        <div class="mt-4 flex items-center gap-2 text-label-sm">
-          <span class="text-on-surface-variant">{{
-            'farm.dashboard.verifiedReviews' | translate: { count: 82 }
-            }}</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Bento Layout: Matches and Score Breakdown -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
-      <!-- Recent Matches Table Section -->
-      <section class="lg:col-span-2 glass-card overflow-hidden">
-        <div class="p-md border-b border-card-border flex justify-between items-center">
-          <h3 class="font-headline-sm text-headline-sm text-primary">
-            {{ 'farm.dashboard.recentB2bMatches' | translate }}
-          </h3>
-          <button type="button"
-            class="text-primary font-label-md text-label-md hover:underline flex items-center gap-1">
-            {{ 'common.viewAll' | translate }}
-            <span class="material-symbols-outlined text-sm icon-flip" aria-hidden="true">arrow_forward</span>
-          </button>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-start">
-            <thead
-              class="bg-surface-container-low text-label-sm uppercase tracking-wider text-on-surface-variant border-b border-card-border">
-              <tr>
-                <th class="px-md py-4 font-semibold">
-                  {{ 'farm.dashboard.factoryBuyer' | translate }}
-                </th>
-                <th class="px-md py-4 font-semibold">
-                  {{ 'farm.dashboard.cropType' | translate }}
-                </th>
-                <th class="px-md py-4 font-semibold">
-                  {{ 'farm.dashboard.quantity' | translate }}
-                </th>
-                <th class="px-md py-4 font-semibold">
-                  {{ 'farm.dashboard.matchScore' | translate }}
-                </th>
-                <th class="px-md py-4 font-semibold">{{ 'common.status' | translate }}</th>
-                <th class="px-md py-4 font-semibold text-end">
-                  {{ 'common.actions' | translate }}
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-card-border">
-              <!-- Row 1 -->
-              <tr class="hover:bg-surface-container-lowest transition-colors">
-                <td class="px-md py-4">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="w-8 h-8 rounded bg-surface-container-highest flex items-center justify-center overflow-hidden">
-                      <img class="w-full h-full object-cover" [attr.alt]="'factory.dashboard.logoAlt' | translate"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_ywrFxLn4HLPx03a6PmYqhrtgGOJESsNXV1tLXNIkWZ1W-_IpsGjARhMSWPKefVRWG0orudDe14dQIKuvyWctwvA-6aK2p035qb-YPUGSrIlUGGAznU86dR34WEBBsKkCJM66gyOTM2tucg5q-FpdV-n_G6ZjztE8LupAl1rJw0g5Yy2dvLSa-gT3EYb-fYV3p_E51KTdOcuEE5gNTzvBZQ_sMufu2csWtB4Qi8NXMNvCzUUWuJBK" />
-                    </div>
-                    <span class="font-label-md text-on-surface">Delta Food Indust.</span>
-                  </div>
-                </td>
-                <td class="px-md py-4 text-on-surface-variant">White Onion</td>
-                <td class="px-md py-4 text-on-surface-variant">500 MT</td>
-                <td class="px-md py-4">
-                  <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-success-green" aria-hidden="true"></span>
-                    <span class="font-medium text-on-surface">96%</span>
-                  </div>
-                </td>
-                <td class="px-md py-4">
-                  <span
-                    class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase">{{
-                    'farm.dashboard.statusNegotiating' | translate }}</span>
-                </td>
-                <td class="px-md py-4 text-end">
-                  <button type="button"
-                    class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-sm hover:opacity-90 transition-opacity">
-                    {{ 'farm.dashboard.review' | translate }}
-                  </button>
-                </td>
-              </tr>
-              <!-- Row 2 -->
-              <tr class="hover:bg-surface-container-lowest transition-colors">
-                <td class="px-md py-4">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="w-8 h-8 rounded bg-surface-container-highest flex items-center justify-center overflow-hidden">
-                      <img class="w-full h-full object-cover" [attr.alt]="'factory.dashboard.logoAlt' | translate"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3RGIg3wpQ3TZCkL3abVqa2qxJ_0K2c9Iy_5iEEkJYVvwFcMI4Gekra1fSfKu5pwcKIZY9NeODmzMQH_APFDuWXrgg-N2WOxqNNmXu_cYWv8EnRCpcB0TD2g1-_VJE_7IyYDVCy7xYkhao-rm-BrU00lU_DliDLG4rBHVArcc-GWxH2Ev40917F-cFSTEzzyvkHmeARgMTOQtumsYe_z5t8H8dFUSzNj6y0vIJLDZKD0ak2xfL8c7M" />
-                    </div>
-                    <span class="font-label-md text-on-surface">Cairo Export Co.</span>
-                  </div>
-                </td>
-                <td class="px-md py-4 text-on-surface-variant">Long Grain Rice</td>
-                <td class="px-md py-4 text-on-surface-variant">1,200 MT</td>
-                <td class="px-md py-4">
-                  <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-success-green" aria-hidden="true"></span>
-                    <span class="font-medium text-on-surface">92%</span>
-                  </div>
-                </td>
-                <td class="px-md py-4">
-                  <span
-                    class="px-3 py-1 rounded-full bg-tertiary-container text-on-tertiary-container text-[10px] font-bold uppercase">{{
-                    'farm.dashboard.statusMatching' | translate }}</span>
-                </td>
-                <td class="px-md py-4 text-end">
-                  <button type="button"
-                    class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-sm hover:opacity-90 transition-opacity">
-                    {{ 'farm.dashboard.review' | translate }}
-                  </button>
-                </td>
-              </tr>
-              <!-- Row 3 -->
-              <tr class="hover:bg-surface-container-lowest transition-colors">
-                <td class="px-md py-4">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="w-8 h-8 rounded bg-surface-container-highest flex items-center justify-center overflow-hidden">
-                      <img class="w-full h-full object-cover" [attr.alt]="'factory.dashboard.logoAlt' | translate"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-GpDDWRZ55thscm_Q4JXXtOUHEvU-9p8UEAbCRimHUWQpta2DudTAOao6S7rKri0f4FJ0DX6QjmSXqIUpfmgraOb_jPaGDv4dPkSIvesMjKJUYp70PtB2dj3Xg6NHiPE74wQFptwPbppl2MLF1xacAZ6I5IuixHUgqTXdTkwu9eOwksCzqagqasoM6-zEw_Ip38aZlpEJNc7U93ZwtCnayRoQvnoZ6RcgPT6-lZdDXZ-q9ZjE683s" />
-                    </div>
-                    <span class="font-label-md text-on-surface">Alex Canning Inc.</span>
-                  </div>
-                </td>
-                <td class="px-md py-4 text-on-surface-variant">Red Tomatoes</td>
-                <td class="px-md py-4 text-on-surface-variant">250 MT</td>
-                <td class="px-md py-4">
-                  <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-warning-orange" aria-hidden="true"></span>
-                    <span class="font-medium text-on-surface">68%</span>
-                  </div>
-                </td>
-                <td class="px-md py-4">
-                  <span
-                    class="px-3 py-1 rounded-full bg-surface-container-highest text-on-surface-variant text-[10px] font-bold uppercase">{{
-                    'farm.dashboard.statusOnHold' | translate }}</span>
-                </td>
-                <td class="px-md py-4 text-end">
-                  <button type="button"
-                    class="border border-outline-variant text-on-surface px-4 py-2 rounded-lg font-label-sm hover:bg-surface-container-low transition-colors">
-                    {{ 'farm.dashboard.details' | translate }}
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </section>
 
-      <!-- Risk Score Breakdown Section -->
-      <section class="glass-card flex flex-col">
-        <div class="p-md border-b border-card-border">
-          <h3 class="font-headline-sm text-headline-sm text-primary">
-            {{ 'farm.dashboard.scoreAnalysis' | translate }}
-          </h3>
-          <p class="text-body-md text-on-surface-variant">
-            {{ 'farm.dashboard.scoreAnalysisHint' | translate }}
-          </p>
-        </div>
-        <div class="p-md space-y-6 flex-grow">
-          <div>
-            <div class="flex justify-between items-center mb-2">
-              <span class="font-label-md text-on-surface">{{
-                'farm.dashboard.profileCompletion' | translate
-                }}</span>
-              <span class="font-bold text-success-green">95%</span>
-            </div>
-            <div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
-              <div class="bg-success-green h-full w-[95%]"></div>
-            </div>
+      <!-- Bento Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+        <!-- Recent Matches Table -->
+        <section class="lg:col-span-2 glass-card overflow-hidden">
+          <div class="p-md border-b border-card-border flex justify-between items-center">
+            <h3 class="font-headline-sm text-headline-sm text-primary">
+              {{ 'farm.dashboard.recentB2bMatches' | translate }}
+            </h3>
+            <a routerLink="/farm/matches" type="button"
+              class="text-primary font-label-md text-label-md hover:underline flex items-center gap-1">
+              {{ 'common.viewAll' | translate }}
+              <span class="material-symbols-outlined text-sm icon-flip" aria-hidden="true">arrow_forward</span>
+            </a>
           </div>
-          <div>
-            <div class="flex justify-between items-center mb-2">
-              <span class="font-label-md text-on-surface">{{
-                'farm.dashboard.certifications' | translate
-                }}</span>
-              <span class="font-bold text-success-green">80%</span>
+          @if (data.recentMatches.length > 0) {
+            <div class="overflow-x-auto">
+              <table class="w-full text-start">
+                <thead class="bg-surface-container-low text-label-sm uppercase tracking-wider text-on-surface-variant border-b border-card-border">
+                  <tr>
+                    <th class="px-md py-4 font-semibold">{{ 'farm.dashboard.factoryBuyer' | translate }}</th>
+                    <th class="px-md py-4 font-semibold">{{ 'farm.dashboard.cropType' | translate }}</th>
+                    <th class="px-md py-4 font-semibold">{{ 'farm.dashboard.quantity' | translate }}</th>
+                    <th class="px-md py-4 font-semibold">{{ 'farm.dashboard.matchScore' | translate }}</th>
+                    <th class="px-md py-4 font-semibold">{{ 'common.status' | translate }}</th>
+                    <th class="px-md py-4 font-semibold text-end">{{ 'common.actions' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-card-border">
+                  @for (match of data.recentMatches; track match.matchId) {
+                    <tr class="hover:bg-surface-container-lowest transition-colors">
+                      <td class="px-md py-4">
+                        <div class="flex items-center gap-3">
+                          <div class="w-8 h-8 rounded bg-surface-container-highest flex items-center justify-center text-on-surface-variant font-bold text-sm">
+                            {{ firstLetter(match.factoryName) }}
+                          </div>
+                          <span class="font-label-md text-on-surface">{{ match.factoryName }}</span>
+                        </div>
+                      </td>
+                      <td class="px-md py-4 text-on-surface-variant">{{ match.cropName }}</td>
+                      <td class="px-md py-4 text-on-surface-variant">{{ match.quantityTons }} MT</td>
+                      <td class="px-md py-4">
+                        <div class="flex items-center gap-2">
+                          @if (match.matchScore !== null && match.matchScore >= 75) {
+                            <span class="w-2 h-2 rounded-full bg-success-green" aria-hidden="true"></span>
+                          } @else if (match.matchScore !== null && match.matchScore >= 50) {
+                            <span class="w-2 h-2 rounded-full bg-warning-orange" aria-hidden="true"></span>
+                          } @else {
+                            <span class="w-2 h-2 rounded-full bg-error" aria-hidden="true"></span>
+                          }
+                          <span class="font-medium text-on-surface">{{ match.matchScore ?? '—' }}%</span>
+                        </div>
+                      </td>
+                      <td class="px-md py-4">
+                        <span class="px-3 py-1 rounded-full {{ statusBadgeClass(match.status) }} text-[10px] font-bold uppercase">
+                          {{ statusLabelKey(match.status) | translate }}
+                        </span>
+                      </td>
+                      <td class="px-md py-4 text-end">
+                        <a routerLink="/farm/matches/{{ match.matchId }}" type="button"
+                          class="inline-block {{ match.status === 'Proposed' || match.status === 'Accepted' ? 'bg-primary text-on-primary' : 'border border-outline-variant text-on-surface hover:bg-surface-container-low' }} px-4 py-2 rounded-lg font-label-sm transition-colors">
+                          {{ actionLabelKey(match.status) | translate }}
+                        </a>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
             </div>
-            <div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
-              <div class="bg-success-green h-full w-[80%]"></div>
+          } @else {
+            <div class="p-md text-center text-on-surface-variant py-12">
+              <span class="material-symbols-outlined text-4xl mb-2" aria-hidden="true">dynamic_feed</span>
+              <p>{{ 'common.noData' | translate }}</p>
             </div>
+          }
+        </section>
+
+        <!-- Risk Score Breakdown -->
+        <section class="glass-card flex flex-col">
+          <div class="p-md border-b border-card-border">
+            <h3 class="font-headline-sm text-headline-sm text-primary">
+              {{ 'farm.dashboard.scoreAnalysis' | translate }}
+            </h3>
+            <p class="text-body-md text-on-surface-variant">
+              {{ 'farm.dashboard.scoreAnalysisHint' | translate }}
+            </p>
           </div>
-          <div>
-            <div class="flex justify-between items-center mb-2">
-              <span class="font-label-md text-on-surface">{{
-                'farm.dashboard.contractHistory' | translate
-                }}</span>
-              <span class="font-bold text-success-green">88%</span>
-            </div>
-            <div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
-              <div class="bg-success-green h-full w-[88%]"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between items-center mb-2">
-              <span class="font-label-md text-on-surface">{{
-                'farm.dashboard.buyerRatings' | translate
-                }}</span>
-              <span class="font-bold text-success-green">98%</span>
-            </div>
-            <div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
-              <div class="bg-success-green h-full w-[98%]"></div>
-            </div>
-          </div>
-          <div class="bg-primary-container/10 p-4 rounded-lg border border-primary/20 mt-4">
-            <div class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary" aria-hidden="true">lightbulb</span>
-              <div>
-                <p class="font-label-md text-primary">
-                  {{ 'farm.dashboard.optimizationTip' | translate }}
-                </p>
-                <p class="text-label-sm text-on-surface-variant leading-normal">
-                  {{ 'farm.dashboard.optimizationBody' | translate }}
-                </p>
+          <div class="p-md space-y-6 flex-grow">
+            @for (item of data.riskBreakdown; track item.label) {
+              <ui-progress-bar [value]="item.percentage" [label]="item.label" [showValue]="true" />
+            }
+            <div class="bg-primary-container/10 p-4 rounded-lg border border-primary/20 mt-4">
+              <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary" aria-hidden="true">lightbulb</span>
+                <div>
+                  <p class="font-label-md text-primary">{{ 'farm.dashboard.optimizationTip' | translate }}</p>
+                  <p class="text-label-sm text-on-surface-variant leading-normal">{{ 'farm.dashboard.optimizationBody' | translate }}</p>
+                </div>
               </div>
             </div>
           </div>
+          <div class="p-md mt-auto">
+            <button type="button" (click)="openImproveModal()"
+              class="w-full border-2 border-primary text-primary py-3 rounded-lg font-label-md hover:bg-primary hover:text-on-primary transition-all">
+              {{ 'farm.dashboard.improveScore' | translate }}
+            </button>
+          </div>
+        </section>
+      </div>
+    } @else {
+      <!-- Loading Skeleton -->
+      <div class="space-y-gutter">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+          @for (_ of [1,2,3,4]; track $index) {
+            <div class="glass-card p-md animate-pulse h-32">
+              <div class="h-4 bg-surface-container-high rounded w-24 mb-3"></div>
+              <div class="h-8 bg-surface-container-high rounded w-20"></div>
+            </div>
+          }
         </div>
-        <div class="p-md mt-auto">
-          <button type="button"
-            class="w-full border-2 border-primary text-primary py-3 rounded-lg font-label-md hover:bg-primary hover:text-on-primary transition-all">
-            {{ 'farm.dashboard.improveScore' | translate }}
-          </button>
+        <div class="glass-card p-md animate-pulse h-64">
+          <div class="h-6 bg-surface-container-high rounded w-48 mb-6"></div>
+          <div class="space-y-4">
+            @for (_ of [1,2,3]; track $index) {
+              <div class="h-12 bg-surface-container-high rounded"></div>
+            }
+          </div>
         </div>
-      </section>
-    </div>
+      </div>
+    }
 
-    <!-- Footer Section -->
+    <!-- Footer -->
     <footer
       class="w-full py-xl border-t border-outline-variant mt-12 flex flex-col md:flex-row justify-between items-center gap-6">
       <div class="flex flex-col items-center md:items-start gap-2">
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1"
             aria-hidden="true">agriculture</span>
-          <span class="font-bold text-primary font-headline-sm">{{
-            'app.name' | translate
-            }}</span>
+          <span class="font-bold text-primary font-headline-sm">{{ 'app.name' | translate }}</span>
         </div>
-        <p class="font-label-sm text-on-surface-variant">
-          {{ 'landing.footerRights' | translate }}
-        </p>
+        <p class="font-label-sm text-on-surface-variant">{{ 'landing.footerRights' | translate }}</p>
       </div>
       <div class="flex gap-gutter font-label-sm text-on-surface-variant">
-        <a class="hover:text-primary transition-colors" href="#">{{
-          'landing.privacy' | translate
-          }}</a>
-        <a class="hover:text-primary transition-colors" href="#">{{
-          'landing.terms' | translate
-          }}</a>
-        <a class="hover:text-primary transition-colors" href="#">{{
-          'landing.compliance' | translate
-          }}</a>
-        <a class="hover:text-primary transition-colors" href="#">{{
-          'landing.contact' | translate
-          }}</a>
+        <a class="hover:text-primary transition-colors" href="#">{{ 'landing.privacy' | translate }}</a>
+        <a class="hover:text-primary transition-colors" href="#">{{ 'landing.terms' | translate }}</a>
+        <a class="hover:text-primary transition-colors" href="#">{{ 'landing.compliance' | translate }}</a>
+        <a class="hover:text-primary transition-colors" href="#">{{ 'landing.contact' | translate }}</a>
       </div>
     </footer>
   </div>
 </main>
 
-<!-- FAB for Contextual Action -->
 <button type="button"
   class="fixed bottom-margin-desktop end-margin-desktop bg-primary text-on-primary px-6 py-4 rounded-full shadow-lg flex items-center gap-3 hover:scale-105 active:scale-95 transition-all z-50">
   <span class="material-symbols-outlined" aria-hidden="true">add</span>
   <span class="font-label-md">{{ 'farm.dashboard.newContract' | translate }}</span>
 </button>
+
+<!-- Score Improvement Modal -->
+@if (showImproveModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" (click)="closeImproveModal()">
+    <div class="bg-surface-container-lowest rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in" (click)="$event.stopPropagation()">
+      <!-- Header -->
+      <div class="flex items-center justify-between p-6 border-b border-outline-variant">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container">
+            <span class="material-symbols-outlined">insights</span>
+          </div>
+          <div>
+            <h3 class="font-headline-sm text-headline-sm text-primary font-bold">
+              Score Improvement Plan
+            </h3>
+            <p class="text-label-sm text-on-surface-variant">
+              Actionable steps to boost your farm's reliability score
+            </p>
+          </div>
+        </div>
+        <button type="button" (click)="closeImproveModal()"
+          class="p-2 hover:bg-surface-container rounded-full text-on-surface-variant transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6">
+        <!-- Summary Banner -->
+        <div class="flex items-center gap-4 p-4 rounded-xl {{ riskIconBg() }}/10 border {{ riskIconBg() }}/20 mb-6">
+          <div class="w-14 h-14 rounded-full {{ riskIconBg() }} flex items-center justify-center text-on-primary shadow-sm shrink-0">
+            <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1">{{ riskIcon() }}</span>
+          </div>
+          <div>
+            <p class="font-label-sm text-on-surface-variant">Current Score</p>
+            <p class="font-headline-md text-headline-md font-bold text-on-surface">{{ dashData()?.riskScore ?? '—' }}/100</p>
+            <span class="inline-block mt-1 px-3 py-0.5 rounded-full text-label-sm {{ riskBadgeBg() }}">{{ riskLabel() }}</span>
+          </div>
+        </div>
+
+        @if (sortedTips().length > 0) {
+          <p class="font-label-md text-on-surface mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-base">checklist</span>
+            {{ sortedTips().length }} area{{ sortedTips().length > 1 ? 's' : '' }} for improvement
+          </p>
+
+          <div class="space-y-4">
+            @for (tip of sortedTips(); track tip.category) {
+              <div class="rounded-xl border border-outline-variant overflow-hidden transition-all hover:border-primary/40 hover:shadow-sm">
+                <!-- Tip Header -->
+                <div class="flex items-start gap-4 p-4">
+                  <div class="w-10 h-10 rounded-lg {{ severityColor(tip.severity) }}/20 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-lg {{ severityColor(tip.severity) }}">{{ tip.icon }}</span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between gap-3 flex-wrap">
+                      <p class="font-label-lg text-label-md font-semibold text-on-surface">{{ tip.category }}</p>
+                      <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider {{ severityColor(tip.severity) }}">
+                        {{ tip.severity }}
+                      </span>
+                    </div>
+                    <p class="text-body-sm text-body-md text-on-surface-variant mt-1.5 leading-relaxed">{{ tip.message }}</p>
+                    <!-- Mini Score Bar -->
+                    <div class="flex items-center gap-3 mt-3">
+                      <div class="flex-1 h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all" [class.bg-success-green]="tip.currentScore >= 80" [class.bg-warning-orange]="tip.currentScore >= 50 && tip.currentScore < 80" [class.bg-error]="tip.currentScore < 50" [style.width.%]="tip.currentScore"></div>
+                      </div>
+                      <span class="text-label-sm font-medium text-on-surface-variant shrink-0">{{ tip.currentScore }}%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="text-center py-10">
+            <div class="w-16 h-16 rounded-full bg-secondary-container flex items-center justify-center mx-auto mb-4">
+              <span class="material-symbols-outlined text-3xl text-on-secondary-container">celebration</span>
+            </div>
+            <p class="font-headline-sm text-headline-sm text-primary font-bold">Looking Great!</p>
+            <p class="text-body-md text-on-surface-variant mt-2">All areas are performing well. Keep up the excellent work!</p>
+          </div>
+        }
+      </div>
+
+      <!-- Footer -->
+      <div class="flex justify-end gap-3 p-6 border-t border-outline-variant">
+        <button type="button" (click)="closeImproveModal()"
+          class="px-6 py-2.5 rounded-lg border-2 border-primary text-primary font-label-md hover:bg-primary hover:text-on-primary transition-all">
+          Got it
+        </button>
+      </div>
+    </div>
+  </div>
+}
