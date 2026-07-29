@@ -43,6 +43,10 @@ export class FarmService {
     return this.http.post<FarmDocument>(`${this.api}/documents`, formData);
   }
 
+  getDocuments(): Observable<FarmDocument[]> {
+    return this.http.get<FarmDocument[]>(`${this.api}/documents`);
+  }
+
   deleteDocument(documentId: string): Observable<void> {
     return this.http.delete<void>(`${this.api}/documents/${documentId}`);
   }

@@ -619,7 +619,13 @@
       "factoryName": "اسم المصنع",
       "governorate": "المحافظة",
       "sizeInFeddans": "المساحة (فدان)",
-      "editUser": "تعديل المستخدم"
+      "editUser": "تعديل المستخدم",
+      "joinedAt": "تاريخ الانضمام",
+      "deactivate": "تعطيل",
+      "activate": "تفعيل",
+      "allVerified": "الكل",
+      "verifiedOnly": "موثّق",
+      "unverifiedOnly": "غير موثّق"
     },
     "contracts": {
       "title": "العقود",

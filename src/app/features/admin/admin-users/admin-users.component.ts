@@ -6,14 +6,16 @@ import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-to
 import { AdminService } from '../../../core/services/admin.service';
 import { AdminUser, UpdateUserRequest } from '../../../core/models/admin-user.model';
 import { FormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 type RoleFilter = 'all' | 'farm' | 'factory' | 'admin';
+type VerifiedFilter = 'all' | 'verified' | 'unverified';
 
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent, FormsModule],
+  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent, FormsModule, DatePipe],
   templateUrl: './admin-users.component.html',
   styleUrl: './admin-users.component.scss',
 })
@@ -26,6 +28,7 @@ export class AdminUsersComponent implements OnInit {
   readonly error = signal('');
 
   readonly activeFilter = signal<RoleFilter>('all');
+  readonly verifiedFilter = signal<VerifiedFilter>('all');
   readonly searchTerm = signal('');
   readonly searchInput = signal('');
   private readonly searchSubject = new Subject<string>();
@@ -86,9 +89,11 @@ export class AdminUsersComponent implements OnInit {
 
     const filter = this.activeFilter();
     const role = filter === 'all' ? undefined : filter;
+    const vFilter = this.verifiedFilter();
+    const isVerified = vFilter === 'all' ? undefined : vFilter === 'verified';
     const search = this.searchTerm() || undefined;
 
-    this.adminService.getUsers(role, search, this.page(), this.pageSize()).subscribe({
+    this.adminService.getUsers(role, isVerified, search, this.page(), this.pageSize()).subscribe({
       next: (result) => {
         this.users.set(result.items);
         this.totalCount.set(result.totalCount);
@@ -113,6 +118,12 @@ export class AdminUsersComponent implements OnInit {
     this.loadUsers();
   }
 
+  setVerifiedFilter(filter: VerifiedFilter): void {
+    this.verifiedFilter.set(filter);
+    this.page.set(1);
+    this.loadUsers();
+  }
+
   goToPage(p: number): void {
     if (p < 1 || p > this.totalPages()) return;
     this.page.set(p);
@@ -123,6 +134,17 @@ export class AdminUsersComponent implements OnInit {
     this.adminService.verifyUser(user.id).subscribe({
       next: () => this.loadUsers(),
       error: () => this.error.set(`Failed to verify ${user.displayName || user.email}`),
+    });
+  }
+
+  onToggleActive(user: AdminUser): void {
+    const action = user.isActive
+      ? this.adminService.deactivateUser(user.id)
+      : this.adminService.reactivateUser(user.id);
+
+    action.subscribe({
+      next: () => this.loadUsers(),
+      error: () => this.error.set(`Failed to update ${user.displayName || user.email}`),
     });
   }
 
