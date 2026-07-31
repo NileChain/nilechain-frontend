@@ -12,18 +12,21 @@
     <div class="flex items-center gap-2 sm:gap-4">
       <ui-language-toggle />
       <ui-theme-toggle />
-      <button type="button" class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant relative"
-        [attr.aria-label]="'common.notifications' | translate">
-        <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
-        <span class="absolute top-2 end-2 w-2 h-2 bg-error rounded-full" aria-hidden="true"></span>
-      </button>
       <div class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant">
         <div class="text-end hidden sm:block">
-          <p class="font-label-md text-label-md text-on-surface leading-tight">{{ currentUser()?.displayName || currentUser()?.email }}</p>
-          <p class="text-label-sm text-label-sm text-on-surface-variant">{{ 'nav.premiumFarmer' | translate }}</p>
+          <p class="font-label-md text-label-md text-on-surface leading-tight">
+            {{ currentUser()?.displayName || currentUser()?.email }}
+          </p>
+          <p class="text-label-sm text-label-sm text-on-surface-variant">
+            {{ 'nav.premiumFarmer' | translate }}
+          </p>
         </div>
-        <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary">
-          <span class="font-bold">{{ firstLetter(currentUser()?.displayName || currentUser()?.email || '?') }}</span>
+        <div
+          class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary"
+        >
+          <span class="font-bold">{{
+            (currentUser()?.displayName || currentUser()?.email || '?').charAt(0).toUpperCase()
+          }}</span>
         </div>
       </div>
     </div>
@@ -42,105 +45,168 @@
     </section>
 
     @if (loading()) {
-      <section class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-start">
-            <thead class="bg-surface-container-low border-b border-outline-variant">
-              <tr>
-                @for (_ of [1,2,3,4,5,6,7]; track $index) {
-                  <th class="px-6 py-4"><div class="h-4 bg-surface-container-high rounded w-20 animate-pulse"></div></th>
-                }
-              </tr>
-            </thead>
-            <tbody>
-              @for (_ of [1,2,3]; track $index) {
-                <tr class="border-b border-outline-variant">
-                  @for (_ of [1,2,3,4,5,6,7]; track $index) {
-                    <td class="px-6 py-4"><div class="h-4 bg-surface-container-high rounded w-24 animate-pulse"></div></td>
-                  }
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </section>
-    } @else if (contracts().length === 0) {
-      <section class="text-center py-20">
-        <div class="w-24 h-24 rounded-full bg-surface-container-high flex items-center justify-center mx-auto mb-6">
-          <span class="material-symbols-outlined text-5xl text-on-surface-variant">description</span>
-        </div>
-        <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-2">
-          No contracts yet
-        </h3>
-        <p class="text-body-md text-on-surface-variant max-w-md mx-auto">
-          When a match is accepted, a contract will be created here automatically.
-        </p>
-      </section>
+      <div class="flex justify-center py-16"><ui-loader /></div>
+    } @else if (error()) {
+      <div class="ui-card p-6 text-center space-y-4">
+        <p class="text-on-error-container">{{ error() }}</p>
+        <button type="button" class="ui-btn-primary" (click)="loadContracts()">Retry</button>
+      </div>
     } @else {
-      <section class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-outline-variant">
+      <section
+        class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-outline-variant"
+      >
         <div class="overflow-x-auto">
-          <table class="w-full text-start">
-            <caption class="sr-only">{{ 'farm.contracts.title' | translate }}</caption>
-            <thead class="bg-surface-container-low border-b border-outline-variant">
-              <tr>
-                <th class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start">
-                  {{ 'farm.contracts.contractId' | translate }}
-                </th>
-                <th class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start">
-                  {{ 'farm.contracts.factory' | translate }}
-                </th>
-                <th class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start">
-                  {{ 'farm.contracts.crop' | translate }}
-                </th>
-                <th class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start">
-                  {{ 'farm.contracts.valueEgp' | translate }}
-                </th>
-                <th class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start">
-                  {{ 'farm.contracts.date' | translate }}
-                </th>
-                <th class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start">
-                  {{ 'common.status' | translate }}
-                </th>
-                <th class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start">
-                  {{ 'common.actions' | translate }}
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-outline-variant">
-              @for (row of contracts(); track row.contractId) {
-                <tr class="hover:bg-surface-container-low transition-colors">
-                  <td class="px-6 py-4 font-body-md text-body-md text-on-surface font-medium font-mono">
-                    {{ row.contractId.substring(0, 8) }}...
-                  </td>
-                  <td class="px-6 py-4 font-body-md text-body-md text-on-surface">{{ row.factoryName }}</td>
-                  <td class="px-6 py-4 font-body-md text-body-md text-on-surface">{{ row.cropName }}</td>
-                  <td class="px-6 py-4 font-body-md text-body-md text-on-surface font-semibold">
-                    @if (row.pricePerTon !== null) {
-                      {{ row.pricePerTon | number:'1.0-0' }} EGP/t
-                    } @else {
-                      —
-                    }
-                  </td>
-                  <td class="px-6 py-4 font-body-md text-body-md text-on-surface">
-                    {{ row.createdAt | date:'mediumDate' }}
-                  </td>
-                  <td class="px-6 py-4">
-                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border {{ statusBadgeClass(row.status) }}">
-                      {{ statusLabel(row.status) }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4">
-                    <button type="button" class="text-primary hover:opacity-80 font-label-lg text-label-lg font-bold flex items-center gap-1">
-                      {{ 'farm.contracts.viewContract' | translate }}
-                      <span class="material-symbols-outlined text-[18px]" aria-hidden="true">visibility</span>
-                    </button>
-                  </td>
+          @if (contracts().length === 0) {
+            <p class="p-6 text-on-surface-variant">No contracts yet.</p>
+          } @else {
+            <table class="w-full text-start">
+              <caption class="sr-only">{{ 'farm.contracts.title' | translate }}</caption>
+              <thead class="bg-surface-container-low border-b border-outline-variant">
+                <tr>
+                  <th class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start">
+                    {{ 'farm.contracts.contractId' | translate }}
+                  </th>
+                  <th class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start">
+                    {{ 'farm.contracts.factory' | translate }}
+                  </th>
+                  <th class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start">
+                    {{ 'farm.contracts.crop' | translate }}
+                  </th>
+                  <th class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start">
+                    {{ 'farm.contracts.valueEgp' | translate }}
+                  </th>
+                  <th class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start">
+                    {{ 'farm.contracts.date' | translate }}
+                  </th>
+                  <th class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start">
+                    {{ 'common.status' | translate }}
+                  </th>
+                  <th class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start">
+                    {{ 'common.actions' | translate }}
+                  </th>
                 </tr>
-              }
-            </tbody>
-          </table>
+              </thead>
+              <tbody class="divide-y divide-outline-variant">
+                @for (row of contracts(); track row.contractId) {
+                  <tr class="hover:bg-surface-container-low transition-colors">
+                    <td class="px-6 py-4 font-body-md text-body-md text-on-surface font-medium">
+                      {{ row.contractId.slice(0, 8) }}…
+                    </td>
+                    <td class="px-6 py-4 font-body-md text-body-md text-on-surface">
+                      {{ row.factoryName }}
+                    </td>
+                    <td class="px-6 py-4 font-body-md text-body-md text-on-surface">
+                      {{ row.cropName }}
+                    </td>
+                    <td class="px-6 py-4 font-body-md text-body-md text-on-surface font-semibold">
+                      {{
+                        contractValue(row) != null
+                          ? (contractValue(row)! | number: '1.0-0')
+                          : '—'
+                      }}
+                    </td>
+                    <td class="px-6 py-4 font-body-md text-body-md text-on-surface">
+                      {{ row.createdAt | date: 'mediumDate' }}
+                    </td>
+                    <td class="px-6 py-4">
+                      @if (isActive(row.status)) {
+                        <span
+                          class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-container text-on-primary-container border border-primary"
+                        >
+                          {{ row.status }}
+                        </span>
+                      } @else {
+                        <span
+                          class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-orange/15 text-warning-orange border border-warning-orange/30"
+                        >
+                          {{ row.status }}
+                        </span>
+                      }
+                    </td>
+                    <td class="px-6 py-4">
+                      <button
+                        type="button"
+                        class="text-primary hover:opacity-80 font-label-lg text-label-lg font-bold flex items-center gap-1"
+                        (click)="selectContract(row)"
+                      >
+                        {{ 'farm.contracts.viewContract' | translate }}
+                        <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+                          >visibility</span
+                        >
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+        <div
+          class="px-6 py-4 border-t border-outline-variant flex flex-col sm:flex-row items-center justify-between gap-3"
+        >
+          <span class="font-body-md text-body-md text-on-surface-variant">
+            {{ contracts().length }} contract(s)
+          </span>
         </div>
       </section>
+
+      @if (selected(); as contract) {
+        <section
+          class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant overflow-hidden"
+          [attr.aria-label]="'farm.contracts.signTitle' | translate"
+        >
+          <div
+            class="px-6 py-4 border-b border-outline-variant flex justify-between items-center gap-4 bg-surface"
+          >
+            <div>
+              <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+                {{ 'farm.contracts.previewTitle' | translate }}
+                {{ contract.contractId.slice(0, 8) }}…
+              </h2>
+              <p class="font-label-sm text-label-sm text-on-surface-variant mt-1">
+                {{ contract.factoryName }}
+              </p>
+            </div>
+          </div>
+
+          <div
+            class="p-6 overflow-y-auto font-body-md text-body-md text-on-surface leading-relaxed bg-surface"
+          >
+            <article
+              class="bg-surface-container-lowest p-6 md:p-8 border border-outline-variant shadow-sm rounded-lg"
+            >
+              <h3 class="text-center font-title-lg text-title-lg font-bold mb-6">
+                {{ 'farm.contracts.docTitle' | translate }}
+              </h3>
+              <ul class="list-disc list-inside mb-6 space-y-2 ps-4 text-on-surface-variant">
+                <li>
+                  <strong>{{ 'farm.contracts.partyBuyer' | translate }}:</strong>
+                  {{ contract.factoryName }}
+                  @if (contract.factoryLocation) {
+                    — {{ contract.factoryLocation }}
+                  }
+                </li>
+                <li>
+                  <strong>Crop:</strong> {{ contract.cropName }} ({{ contract.quantityTons }} ton)
+                </li>
+                <li>
+                  <strong>Status:</strong> {{ contract.status }}
+                </li>
+                @if (contract.deliveryDate) {
+                  <li>
+                    <strong>Delivery:</strong> {{ contract.deliveryDate | date: 'mediumDate' }}
+                  </li>
+                }
+                @if (contract.signedAt) {
+                  <li>
+                    <strong>Signed:</strong> {{ contract.signedAt | date: 'medium' }}
+                  </li>
+                }
+              </ul>
+            </article>
+          </div>
+        </section>
+      }
     }
   </div>
 </main>

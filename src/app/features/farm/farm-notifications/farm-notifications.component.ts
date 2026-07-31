@@ -1,158 +1,98 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { Title } from '@angular/platform-browser';
 import { DatePipe } from '@angular/common';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { FarmService } from '../../../core/services/farm/farm.service';
-import { NotificationItem } from '../../../core/models/farm/notification-item.model';
+import { FarmNotification } from '../../../core/models/farm/farm-notification.model';
 
 @Component({
   selector: 'app-farm-notifications',
   standalone: true,
-  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent, DatePipe],
+  imports: [
+    TranslatePipe,
+    SidebarFarmComponent,
+    UiLanguageToggleComponent,
+    UiThemeToggleComponent,
+    UiLoaderComponent,
+    DatePipe,
+  ],
   templateUrl: './farm-notifications.component.html',
 })
-export class FarmNotificationsComponent {
+export class FarmNotificationsComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly farmService = inject(FarmService);
-
   readonly currentUser = this.authService.currentUser;
-  readonly allNotifications = signal<NotificationItem[]>([]);
+
   readonly loading = signal(true);
-  readonly filter = signal<'all' | 'unread' | 'match' | 'risk'>('all');
-  readonly pageSize = 10;
-  readonly currentPage = signal(0);
+  readonly error = signal<string | null>(null);
+  readonly notifications = signal<FarmNotification[]>([]);
+  readonly filter = signal<'all' | 'unread'>('all');
+  readonly markingId = signal<string | null>(null);
 
-  readonly notifications = computed(() => {
-    const items = this.allNotifications();
-    const activeFilter = this.filter();
-
-    let filtered = items;
-    if (activeFilter === 'unread') filtered = items.filter(n => !n.isRead);
-    else if (activeFilter === 'match') filtered = items.filter(n => n.type === 'match');
-    else if (activeFilter === 'risk') filtered = items.filter(n => n.type === 'risk');
-
-    return filtered.slice(0, (this.currentPage() + 1) * this.pageSize);
+  readonly visible = computed(() => {
+    const items = this.notifications();
+    if (this.filter() === 'unread') {
+      return items.filter((n) => !n.isRead);
+    }
+    return items;
   });
 
-  readonly unreadCount = computed(() => this.allNotifications().filter(n => !n.isRead).length);
-  readonly hasMore = computed(() => this.notifications().length < this.allNotifications().length);
-
-  readonly filterOptions: { key: 'all' | 'unread' | 'match' | 'risk'; label: string }[] = [
-    { key: 'all', label: 'notifications.all' },
-    { key: 'unread', label: 'notifications.unread' },
-    { key: 'match', label: 'notifications.matches' },
-    { key: 'risk', label: 'notifications.risks' },
-  ];
-
-  readonly firstLetter = (name: string): string => name?.charAt(0)?.toUpperCase() ?? '?';
-
-  readonly groupKey = (createdAt: string): string => {
-    const now = new Date();
-    const date = new Date(createdAt);
-    const diff = now.getTime() - date.getTime();
-    const day = 24 * 60 * 60 * 1000;
-
-    if (diff < day && date.getDate() === now.getDate()) return 'today';
-    if (diff < 2 * day) return 'yesterday';
-    return 'earlier';
-  };
-
-  readonly groupedNotifications = computed(() => {
-    const groups: { key: string; items: NotificationItem[] }[] = [];
-    const map = new Map<string, NotificationItem[]>();
-
-    for (const n of this.notifications()) {
-      const key = this.groupKey(n.createdAt);
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(n);
-    }
-
-    for (const key of ['today', 'yesterday', 'earlier']) {
-      if (map.has(key)) groups.push({ key, items: map.get(key)! });
-    }
-
-    return groups;
-  });
-
-  readonly notificationIcon = (type: string | null): string => {
-    switch (type) {
-      case 'risk': return 'warning';
-      case 'match': return 'hub';
-      case 'message': return 'chat';
-      case 'contract': return 'contract';
-      default: return 'notifications';
-    }
-  };
-
-  readonly notificationBg = (type: string | null): string => {
-    switch (type) {
-      case 'risk': return 'bg-error-container';
-      case 'match': return 'bg-primary-container';
-      default: return 'bg-surface-container-high';
-    }
-  };
-
-  readonly notificationIconColor = (type: string | null): string => {
-    switch (type) {
-      case 'risk': return 'text-on-error-container';
-      case 'match': return 'text-on-primary-container';
-      default: return 'text-on-surface-variant';
-    }
-  };
-
-  readonly notificationBorder = (type: string | null): string => {
-    switch (type) {
-      case 'risk': return 'border-error-container';
-      default: return 'border-outline-variant';
-    }
-  };
-
-  readonly unreadDot = (type: string | null): string => {
-    switch (type) {
-      case 'risk': return 'bg-error';
-      default: return 'bg-primary';
-    }
-  };
-
-  constructor(title: Title) {
-    title.setTitle('NileChain - Notifications');
+  ngOnInit(): void {
     this.loadNotifications();
   }
 
-  private loadNotifications(): void {
+  loadNotifications(): void {
     this.loading.set(true);
-    this.farmService.getNotifications().subscribe(data => {
-      this.allNotifications.set(data);
-      this.loading.set(false);
-    });
+    this.error.set(null);
+    this.farmService
+      .getNotifications()
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (items) => this.notifications.set(items),
+        error: () => this.error.set('Failed to load notifications.'),
+      });
   }
 
-  setFilter(f: 'all' | 'unread' | 'match' | 'risk'): void {
-    this.filter.set(f);
-    this.currentPage.set(0);
+  setFilter(value: 'all' | 'unread'): void {
+    this.filter.set(value);
   }
 
-  loadMore(): void {
-    this.currentPage.update(p => p + 1);
+  markRead(notification: FarmNotification): void {
+    if (notification.isRead) {
+      return;
+    }
+    this.markingId.set(notification.notificationId);
+    this.farmService
+      .markNotificationAsRead(notification.notificationId)
+      .pipe(finalize(() => this.markingId.set(null)))
+      .subscribe({
+        next: () => {
+          this.notifications.update((list) =>
+            list.map((n) =>
+              n.notificationId === notification.notificationId ? { ...n, isRead: true } : n
+            )
+          );
+        },
+        error: () => this.error.set('Failed to mark notification as read.'),
+      });
   }
 
-  markAsRead(notificationId: string): void {
-    this.farmService.markNotificationAsRead(notificationId).subscribe(() => {
-      this.allNotifications.update(items =>
-        items.map(n => n.notificationId === notificationId ? { ...n, isRead: true } : n)
-      );
-    });
-  }
-
-  get typeLabel(): string {
-    switch (this.filter()) {
-      case 'unread': return 'Unread';
-      case 'match': return 'Matches';
-      case 'risk': return 'Risks';
-      default: return 'All';
+  iconFor(type: string | null): string {
+    switch ((type ?? '').toLowerCase()) {
+      case 'match':
+        return 'auto_awesome';
+      case 'contract':
+        return 'description';
+      case 'message':
+        return 'chat';
+      case 'risk':
+        return 'thermostat';
+      default:
+        return 'notifications';
     }
   }
 }

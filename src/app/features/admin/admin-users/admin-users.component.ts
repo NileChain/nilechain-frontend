@@ -1,305 +1,179 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
-import { Title } from '@angular/platform-browser';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
-import { AdminService } from '../../../core/services/admin.service';
-import { AdminUser, UpdateUserRequest } from '../../../core/models/admin-user.model';
-import { FormsModule } from '@angular/forms';
-import { DatePipe } from '@angular/common';
-import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
-
-type RoleFilter = 'all' | 'farm' | 'factory' | 'admin';
-type VerifiedFilter = 'all' | 'verified' | 'unverified';
+import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
+import { AdminService } from '../../../core/services/admin/admin.service';
+import { AdminUser, CreateUserRequest } from '../../../core/models/admin/admin-user.model';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent, FormsModule, DatePipe],
+  imports: [
+    TranslatePipe,
+    SidebarAdminComponent,
+    UiLanguageToggleComponent,
+    UiThemeToggleComponent,
+    UiLoaderComponent,
+    FormsModule,
+  ],
   templateUrl: './admin-users.component.html',
   styleUrl: './admin-users.component.scss',
 })
 export class AdminUsersComponent implements OnInit {
   private readonly adminService = inject(AdminService);
-  private readonly title = inject(Title);
+  private readonly authService = inject(AuthService);
+  readonly currentUser = this.authService.currentUser;
 
+  readonly loading = signal(true);
+  readonly actionLoading = signal<string | null>(null);
+  readonly error = signal<string | null>(null);
   readonly users = signal<AdminUser[]>([]);
-  readonly loading = signal(false);
-  readonly error = signal('');
-
-  readonly activeFilter = signal<RoleFilter>('all');
-  readonly verifiedFilter = signal<VerifiedFilter>('all');
-  readonly searchTerm = signal('');
-  readonly searchInput = signal('');
-  private readonly searchSubject = new Subject<string>();
-
-  readonly page = signal(1);
   readonly totalCount = signal(0);
-  readonly pageSize = signal(10);
-  readonly totalPages = signal(0);
+  readonly totalPages = signal(1);
+  readonly showCreate = signal(false);
 
-  // Add modal
-  readonly showAddModal = signal(false);
-  readonly addingUser = signal(false);
-  readonly addError = signal('');
+  page = 1;
+  pageSize = 10;
+  search = '';
+  roleFilter = '';
 
-  addForm = {
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: 'farm' as string,
-    name: '',
-    governorate: '',
-    sizeInFeddans: null as number | null,
-  };
-
-  // Edit modal
-  readonly showEditModal = signal(false);
-  readonly editingUser = signal<AdminUser | null>(null);
-  readonly savingEdit = signal(false);
-  readonly editError = signal('');
-
-  editForm = {
-    name: '',
-    role: 'farm' as string,
-    isVerified: false,
-    governorate: '',
-    sizeInFeddans: null as number | null,
-  };
-
-  constructor() {
-    this.title.setTitle('NileChain - Admin Users');
-  }
+  createEmail = '';
+  createPassword = '';
+  createConfirm = '';
+  createRole = 'Farm';
+  createName = '';
 
   ngOnInit(): void {
-    this.searchSubject
-      .pipe(debounceTime(300), distinctUntilChanged())
-      .subscribe((term) => {
-        this.searchTerm.set(term);
-        this.page.set(1);
-        this.loadUsers();
-      });
-
     this.loadUsers();
   }
 
   loadUsers(): void {
     this.loading.set(true);
-    this.error.set('');
-
-    const filter = this.activeFilter();
-    const role = filter === 'all' ? undefined : filter;
-    const vFilter = this.verifiedFilter();
-    const isVerified = vFilter === 'all' ? undefined : vFilter === 'verified';
-    const search = this.searchTerm() || undefined;
-
-    this.adminService.getUsers(role, isVerified, search, this.page(), this.pageSize()).subscribe({
-      next: (result) => {
-        this.users.set(result.items);
-        this.totalCount.set(result.totalCount);
-        this.totalPages.set(result.totalPages);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set('Failed to load users.');
-        this.loading.set(false);
-      },
-    });
+    this.error.set(null);
+    this.adminService
+      .getUsers({
+        page: this.page,
+        pageSize: this.pageSize,
+        search: this.search || null,
+        role: this.roleFilter || null,
+      })
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (result) => {
+          this.users.set(result.items);
+          this.totalCount.set(result.totalCount);
+          this.totalPages.set(result.totalPages || 1);
+        },
+        error: () => this.error.set('Failed to load users.'),
+      });
   }
 
-  onSearchInput(value: string): void {
-    this.searchInput.set(value);
-    this.searchSubject.next(value);
-  }
-
-  setFilter(filter: RoleFilter): void {
-    this.activeFilter.set(filter);
-    this.page.set(1);
+  setRoleFilter(role: string): void {
+    this.roleFilter = role;
+    this.page = 1;
     this.loadUsers();
   }
 
-  setVerifiedFilter(filter: VerifiedFilter): void {
-    this.verifiedFilter.set(filter);
-    this.page.set(1);
+  searchUsers(): void {
+    this.page = 1;
     this.loadUsers();
   }
 
-  goToPage(p: number): void {
-    if (p < 1 || p > this.totalPages()) return;
-    this.page.set(p);
+  prevPage(): void {
+    if (this.page <= 1) {
+      return;
+    }
+    this.page -= 1;
     this.loadUsers();
   }
 
-  onVerify(user: AdminUser): void {
-    this.adminService.verifyUser(user.id).subscribe({
-      next: () => this.loadUsers(),
-      error: () => this.error.set(`Failed to verify ${user.displayName || user.email}`),
-    });
-  }
-
-  onToggleActive(user: AdminUser): void {
-    const action = user.isActive
-      ? this.adminService.deactivateUser(user.id)
-      : this.adminService.reactivateUser(user.id);
-
-    action.subscribe({
-      next: () => this.loadUsers(),
-      error: () => this.error.set(`Failed to update ${user.displayName || user.email}`),
-    });
-  }
-
-  onToggleBlock(user: AdminUser): void {
-    const action = user.isBlocked
-      ? this.adminService.unblockUser(user.id)
-      : this.adminService.blockUser(user.id);
-
-    action.subscribe({
-      next: () => this.loadUsers(),
-      error: () => this.error.set(`Failed to update ${user.displayName || user.email}`),
-    });
-  }
-
-  // ---- Add Modal ----
-
-  openAddModal(): void {
-    this.addForm = {
-      email: '',
-      password: '',
-      confirmPassword: '',
-      role: 'farm',
-      name: '',
-      governorate: '',
-      sizeInFeddans: null,
-    };
-    this.addError.set('');
-    this.showAddModal.set(true);
-  }
-
-  closeAddModal(): void {
-    this.showAddModal.set(false);
-  }
-
-  onSubmitAdd(): void {
-    this.addError.set('');
-    this.addingUser.set(true);
-
-    const { email, password, confirmPassword, role, name, governorate, sizeInFeddans } = this.addForm;
-
-    if (!email || !password || !confirmPassword) {
-      this.addError.set('Email, password, and confirm password are required.');
-      this.addingUser.set(false);
+  nextPage(): void {
+    if (this.page >= this.totalPages()) {
       return;
     }
-
-    if (password !== confirmPassword) {
-      this.addError.set('Passwords do not match.');
-      this.addingUser.set(false);
-      return;
-    }
-
-    if ((role === 'farm' || role === 'factory') && !name) {
-      this.addError.set('Name is required for farms and factories.');
-      this.addingUser.set(false);
-      return;
-    }
-
-    this.adminService.createUser({
-      email,
-      password,
-      confirmPassword,
-      role,
-      name: name || undefined,
-      governorate: governorate || undefined,
-      sizeInFeddans: sizeInFeddans || undefined,
-    }).subscribe({
-      next: () => {
-        this.addingUser.set(false);
-        this.closeAddModal();
-        this.loadUsers();
-      },
-      error: (err) => {
-        this.addingUser.set(false);
-        this.addError.set(err.error?.error || 'Failed to create user.');
-      },
-    });
+    this.page += 1;
+    this.loadUsers();
   }
 
-  // ---- Edit Modal ----
-
-  openEditModal(user: AdminUser): void {
-    this.editingUser.set(user);
-    this.editForm = {
-      name: user.farmName || user.factoryName || user.displayName || '',
-      role: user.role.toLowerCase(),
-      isVerified: user.isVerified,
-      governorate: '',
-      sizeInFeddans: null,
-    };
-    this.editError.set('');
-    this.showEditModal.set(true);
+  displayName(user: AdminUser): string {
+    return user.displayName || user.farmName || user.factoryName || user.email;
   }
 
-  closeEditModal(): void {
-    this.showEditModal.set(false);
-    this.editingUser.set(null);
+  initial(user: AdminUser): string {
+    return this.displayName(user).charAt(0).toUpperCase();
   }
 
-  onSubmitEdit(): void {
-    this.editError.set('');
-    this.savingEdit.set(true);
+  roleKey(role: string): string {
+    return role.toLowerCase();
+  }
 
-    const user = this.editingUser();
-    if (!user) {
-      this.savingEdit.set(false);
-      return;
-    }
+  verify(user: AdminUser): void {
+    this.runAction(user.id, 'verify', () => this.adminService.verifyUser(user.id));
+  }
 
-    const payload: UpdateUserRequest = {
-      name: this.editForm.name || undefined,
-      role: this.editForm.role !== user.role.toLowerCase() ? this.editForm.role : undefined,
-      isVerified: this.editForm.isVerified !== user.isVerified ? this.editForm.isVerified : undefined,
-      governorate: this.editForm.governorate || undefined,
-      sizeInFeddans: this.editForm.sizeInFeddans || undefined,
+  block(user: AdminUser): void {
+    this.runAction(user.id, 'block', () => this.adminService.blockUser(user.id));
+  }
+
+  unblock(user: AdminUser): void {
+    this.runAction(user.id, 'unblock', () => this.adminService.unblockUser(user.id));
+  }
+
+  deactivate(user: AdminUser): void {
+    this.runAction(user.id, 'deactivate', () => this.adminService.deactivateUser(user.id));
+  }
+
+  reactivate(user: AdminUser): void {
+    this.runAction(user.id, 'reactivate', () => this.adminService.reactivateUser(user.id));
+  }
+
+  createUser(): void {
+    const payload: CreateUserRequest = {
+      email: this.createEmail.trim(),
+      password: this.createPassword,
+      confirmPassword: this.createConfirm,
+      role: this.createRole,
+      name: this.createName.trim() || null,
     };
 
-    if (!payload.name && !payload.role && payload.isVerified === undefined) {
-      this.editError.set('No changes to save.');
-      this.savingEdit.set(false);
-      return;
-    }
-
-    this.adminService.updateUser(user.id, payload).subscribe({
-      next: () => {
-        this.savingEdit.set(false);
-        this.closeEditModal();
-        this.loadUsers();
-      },
-      error: (err) => {
-        this.savingEdit.set(false);
-        this.editError.set(err.error?.error || 'Failed to update user.');
-      },
-    });
+    this.actionLoading.set('create');
+    this.error.set(null);
+    this.adminService
+      .createUser(payload)
+      .pipe(finalize(() => this.actionLoading.set(null)))
+      .subscribe({
+        next: () => {
+          this.showCreate.set(false);
+          this.createEmail = '';
+          this.createPassword = '';
+          this.createConfirm = '';
+          this.createName = '';
+          this.loadUsers();
+        },
+        error: (err) => {
+          this.error.set(err?.error?.error || 'Failed to create user.');
+        },
+      });
   }
 
-  highlightText(text: string | undefined | null): string {
-    const term = this.searchTerm();
-    if (!term || !text) return text || '';
-    const idx = text.toLowerCase().indexOf(term.toLowerCase());
-    if (idx === -1) return text;
-    const before = text.slice(0, idx);
-    const match = text.slice(idx, idx + term.length);
-    const after = text.slice(idx + term.length);
-    return `${before}<mark>${match}</mark>${after}`;
-  }
-
-  getInitial(name: string | undefined | null, email: string): string {
-    return (name || email).charAt(0).toUpperCase();
-  }
-
-  get displayName(): string {
-    const total = this.totalCount();
-    const from = (this.page() - 1) * this.pageSize() + 1;
-    const to = Math.min(this.page() * this.pageSize(), total);
-    return `Showing ${from}-${to} of ${total} users`;
+  private runAction(
+    id: string,
+    key: string,
+    call: () => ReturnType<AdminService['verifyUser']>
+  ): void {
+    this.actionLoading.set(`${key}:${id}`);
+    this.error.set(null);
+    call()
+      .pipe(finalize(() => this.actionLoading.set(null)))
+      .subscribe({
+        next: () => this.loadUsers(),
+        error: (err) => {
+          this.error.set(err?.error?.error || `Failed to ${key} user.`);
+        },
+      });
   }
 }

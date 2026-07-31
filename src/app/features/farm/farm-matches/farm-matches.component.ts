@@ -1,131 +1,82 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { Title } from '@angular/platform-browser';
-import { Router, RouterLink } from '@angular/router';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DecimalPipe, DatePipe } from '@angular/common';
+import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
 import { AuthService } from '../../../core/services/auth.service';
-import { MatchingService } from '../../../core/services/matching.service';
 import { FarmService } from '../../../core/services/farm/farm.service';
-import { FarmMatchItem } from '../../../core/models/farm/farm-match-item.model';
+import { FarmMatchItem } from '../../../core/models/farm/farm-match.model';
+import { CropType } from '../../../core/models/farm/farm-profile.model';
 
 @Component({
   selector: 'app-farm-matches',
-  imports: [TranslatePipe, RouterLink, UiLanguageToggleComponent, UiThemeToggleComponent, FormsModule, DecimalPipe, DatePipe],
+  standalone: true,
+  imports: [
+    TranslatePipe,
+    SidebarFarmComponent,
+    UiLanguageToggleComponent,
+    UiThemeToggleComponent,
+    UiLoaderComponent,
+    FormsModule,
+    DatePipe,
+    DecimalPipe,
+  ],
   templateUrl: './farm-matches.component.html',
 })
-export class FarmMatchesComponent {
-  private readonly matchingService = inject(MatchingService);
-  private readonly farmService = inject(FarmService);
+export class FarmMatchesComponent implements OnInit {
   private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
-
+  private readonly farmService = inject(FarmService);
   readonly currentUser = this.authService.currentUser;
 
-  readonly matches = signal<FarmMatchItem[]>([]);
-  readonly cropTypes = signal<{ cropTypeId: string; name: string }[]>([]);
   readonly loading = signal(true);
+  readonly error = signal<string | null>(null);
+  readonly matches = signal<FarmMatchItem[]>([]);
+  readonly cropTypes = signal<CropType[]>([]);
+  readonly respondingId = signal<string | null>(null);
 
-  readonly selectedStatus = signal('');
-  readonly selectedCropId = signal('');
+  statusFilter = '';
+  cropTypeFilter = '';
 
-  readonly filteredMatches = computed(() => {
-    const all = this.matches();
-    const status = this.selectedStatus();
-    const cropId = this.selectedCropId();
-
-    return all.filter(m => {
-      const statusMatch = status ? m.status === status : m.status !== 'Rejected';
-      const cropMatch = !cropId || m.cropTypeId === cropId;
-      return statusMatch && cropMatch;
+  ngOnInit(): void {
+    this.farmService.getCropTypes().subscribe({
+      next: (crops) => this.cropTypes.set(crops),
     });
-  });
-
-  constructor(title: Title) {
-    title.setTitle('NileChain - Farm Matches');
-    this.loadData();
+    this.loadMatches();
   }
 
-  private loadData(): void {
+  loadMatches(): void {
     this.loading.set(true);
-    this.matchingService.getFarmMatches().subscribe(data => {
-      this.matches.set(data);
-      this.loading.set(false);
-    });
-
-    this.farmService.getCropTypes().subscribe(types => {
-      this.cropTypes.set(types);
-    });
+    this.error.set(null);
+    this.farmService
+      .getMatches(this.statusFilter || null, this.cropTypeFilter || null)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (items) => this.matches.set(items),
+        error: () => this.error.set('Failed to load matches.'),
+      });
   }
 
-  readonly firstLetter = (name: string): string => name?.charAt(0)?.toUpperCase() ?? '?';
-
-  readonly matchScoreTone = (score: number | null): string => {
-    if (score === null) return 'neutral';
-    if (score >= 80) return 'success';
-    if (score >= 60) return 'warning';
-    return 'danger';
-  };
-
-  readonly riskScoreTone = (score: number | null): string => {
-    if (score === null) return 'neutral';
-    if (score >= 70) return 'success';
-    if (score >= 50) return 'warning';
-    return 'danger';
-  };
-
-  readonly riskScoreLabel = (score: number | null): string => {
-    if (score === null) return '—';
-    if (score >= 70) return 'Low Risk';
-    if (score >= 50) return 'Medium';
-    return 'High Risk';
-  };
-
-  readonly statusBadgeClass = (status: string): string => {
-    switch (status) {
-      case 'Proposed':
-        return 'bg-secondary-container text-on-secondary-container';
-      case 'Accepted':
-        return 'bg-primary-container text-on-primary-container';
-      case 'Rejected':
-        return 'bg-surface-container-highest text-on-surface-variant';
-      case 'Expired':
-        return 'bg-error-container text-on-error-container';
-      default:
-        return 'bg-surface-container-highest text-on-surface-variant';
-    }
-  };
-
-  readonly canRespond = (status: string): boolean => status === 'Proposed';
-
-  readonly statusFilterLabel = (status: string): string => {
-    switch (status) {
-      case 'Proposed': return 'Proposed';
-      case 'Accepted': return 'Accepted';
-      case 'Rejected': return 'Rejected';
-      case 'Expired': return 'Expired';
-      default: return 'Active (no rejected)';
-    }
-  };
-
-  acceptMatch(matchId: string): void {
-    this.matchingService.respondToMatch(matchId, 'accept').subscribe(() => {
-      this.matches.update(all =>
-        all.map(m => m.matchId === matchId ? { ...m, status: 'Accepted' } : m)
-      );
-      this.router.navigate(['/farm/contracts']);
-    });
+  resetFilters(): void {
+    this.statusFilter = '';
+    this.cropTypeFilter = '';
+    this.loadMatches();
   }
 
-  rejectMatch(matchId: string): void {
-    this.matchingService.respondToMatch(matchId, 'reject').subscribe({
-      next: () => {
-        this.matches.update(all =>
-          all.map(m => m.matchId === matchId ? { ...m, status: 'Rejected' } : m)
-        );
-      }
-    });
+  riskTone(score: number | null): 'safe' | 'risk' {
+    return score != null && score >= 70 ? 'safe' : 'risk';
+  }
+
+  respond(matchId: string, action: 'accept' | 'reject'): void {
+    this.respondingId.set(matchId);
+    this.farmService
+      .respondToMatch(matchId, action)
+      .pipe(finalize(() => this.respondingId.set(null)))
+      .subscribe({
+        next: () => this.loadMatches(),
+        error: () => this.error.set(`Failed to ${action} match.`),
+      });
   }
 }

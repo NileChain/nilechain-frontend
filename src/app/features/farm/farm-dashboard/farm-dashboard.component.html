@@ -1,3 +1,5 @@
+<app-sidebar-farm active="dashboard" />
+
 <main class="md:ms-[280px] min-h-screen bg-surface">
   <header
     class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40">
@@ -13,11 +15,11 @@
     <div class="flex items-center gap-2 sm:gap-4">
       <ui-language-toggle />
       <ui-theme-toggle />
-      <button type="button" class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant relative"
+      <a routerLink="/farm-notifications"
+        class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant relative"
         [attr.aria-label]="'common.notifications' | translate">
         <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
-        <span class="absolute top-2 end-2 w-2 h-2 bg-error rounded-full" aria-hidden="true"></span>
-      </button>
+      </a>
       <div class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant">
         <div class="text-end hidden sm:block">
           <p class="font-label-md text-label-md text-on-surface leading-tight">
@@ -28,41 +30,41 @@
           </p>
         </div>
         <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary">
-          <span class="font-bold">{{ firstLetter(currentUser()?.displayName || currentUser()?.email || '?') }}</span>
+          <span class="font-bold">{{ (currentUser()?.displayName || currentUser()?.email || '?').charAt(0).toUpperCase() }}</span>
         </div>
       </div>
     </div>
   </header>
 
   <div class="p-margin-desktop max-w-[1440px] mx-auto space-y-gutter">
-    @if (dashData(); as data) {
-      <!-- KPI Section -->
+    @if (loading()) {
+      <div class="flex justify-center py-16">
+        <ui-loader />
+      </div>
+    } @else if (error()) {
+      <div class="ui-card p-6 text-center space-y-4">
+        <p class="text-on-error-container">{{ error() }}</p>
+        <button type="button" class="ui-btn-primary" (click)="loadDashboard()">Retry</button>
+      </div>
+    } @else if (dashboard(); as data) {
       <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
-        <!-- Risk Score Card -->
-        <div
-          class="glass-card p-md flex flex-col justify-between h-full group hover:border-primary transition-colors cursor-default">
+        <div class="glass-card p-md flex flex-col justify-between h-full">
           <div class="flex justify-between items-start">
             <div>
               <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">
                 {{ 'farm.dashboard.reliabilityScore' | translate }}
               </p>
-              <h3 class="font-headline-md text-headline-md text-primary mt-1">{{ data.riskScore ?? '—' }}/100</h3>
+              <h3 class="font-headline-md text-headline-md text-primary mt-1">
+                {{ data.riskScore != null ? (data.riskScore | number: '1.0-0') + '/100' : '—' }}
+              </h3>
             </div>
-            <div
-              class="w-10 h-10 rounded-full {{ riskIconBg() }} flex items-center justify-center text-on-primary shadow-sm">
-              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1"
-                aria-hidden="true">{{ riskIcon() }}</span>
+            <div class="w-10 h-10 rounded-full bg-success-green flex items-center justify-center text-on-primary shadow-sm">
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1" aria-hidden="true">verified</span>
             </div>
-          </div>
-          <div class="mt-4 flex items-center gap-2">
-            <span class="px-2 py-0.5 rounded-full {{ riskBadgeBg() }} text-label-sm">{{ riskLabel() }}</span>
-            <span class="text-label-sm text-on-surface-variant">{{ 'farm.dashboard.fromLastMonth' | translate: { percent: '' } }}</span>
           </div>
         </div>
 
-        <!-- Active Matches Card -->
-        <div
-          class="glass-card p-md flex flex-col justify-between h-full group hover:border-primary transition-colors cursor-default">
+        <div class="glass-card p-md flex flex-col justify-between h-full">
           <div class="flex justify-between items-start">
             <div>
               <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">
@@ -74,14 +76,9 @@
               <span class="material-symbols-outlined" aria-hidden="true">dynamic_feed</span>
             </div>
           </div>
-          <div class="mt-4 flex items-center gap-2">
-            <span class="text-label-sm text-on-surface-variant">{{ 'farm.dashboard.activeMatchesHint' | translate: { count: data.activeMatchesCount } }}</span>
-          </div>
         </div>
 
-        <!-- Completed Contracts Card -->
-        <div
-          class="glass-card p-md flex flex-col justify-between h-full group hover:border-primary transition-colors cursor-default">
+        <div class="glass-card p-md flex flex-col justify-between h-full">
           <div class="flex justify-between items-start">
             <div>
               <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">
@@ -93,48 +90,46 @@
               <span class="material-symbols-outlined" aria-hidden="true">assignment_turned_in</span>
             </div>
           </div>
-          <div class="mt-4 flex items-center gap-2">
-            <span class="text-label-sm text-on-surface-variant">{{ 'farm.dashboard.completedContracts' | translate }}</span>
-          </div>
         </div>
 
-        <!-- Avg Rating Card -->
-        <div
-          class="glass-card p-md flex flex-col justify-between h-full group hover:border-primary transition-colors cursor-default">
+        <div class="glass-card p-md flex flex-col justify-between h-full">
           <div class="flex justify-between items-start">
             <div>
               <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">
                 {{ 'farm.dashboard.qualityRating' | translate }}
               </p>
-              <h3 class="font-headline-md text-headline-md text-primary mt-1">{{ data.averageRating.toFixed(1) }}/5.0</h3>
+              <h3 class="font-headline-md text-headline-md text-primary mt-1">
+                {{ data.averageRating | number: '1.1-1' }}/5.0
+              </h3>
             </div>
             <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
-              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1"
-                aria-hidden="true">star</span>
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1" aria-hidden="true">star</span>
             </div>
           </div>
           <div class="mt-4 flex items-center gap-2 text-label-sm">
-            <span class="text-on-surface-variant">{{ 'farm.dashboard.verifiedReviews' | translate: { count: data.ratingCount } }}</span>
+            <span class="text-on-surface-variant">
+              {{ 'farm.dashboard.verifiedReviews' | translate: { count: data.ratingCount } }}
+            </span>
           </div>
         </div>
       </section>
 
-      <!-- Bento Layout -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
-        <!-- Recent Matches Table -->
         <section class="lg:col-span-2 glass-card overflow-hidden">
           <div class="p-md border-b border-card-border flex justify-between items-center">
             <h3 class="font-headline-sm text-headline-sm text-primary">
               {{ 'farm.dashboard.recentB2bMatches' | translate }}
             </h3>
-            <a routerLink="/farm/matches" type="button"
+            <a routerLink="/farm-matches"
               class="text-primary font-label-md text-label-md hover:underline flex items-center gap-1">
               {{ 'common.viewAll' | translate }}
               <span class="material-symbols-outlined text-sm icon-flip" aria-hidden="true">arrow_forward</span>
             </a>
           </div>
-          @if (data.recentMatches.length > 0) {
-            <div class="overflow-x-auto">
+          <div class="overflow-x-auto">
+            @if (data.recentMatches.length === 0) {
+              <p class="p-md text-on-surface-variant">No recent matches.</p>
+            } @else {
               <table class="w-full text-start">
                 <thead class="bg-surface-container-low text-label-sm uppercase tracking-wider text-on-surface-variant border-b border-card-border">
                   <tr>
@@ -150,52 +145,37 @@
                   @for (match of data.recentMatches; track match.matchId) {
                     <tr class="hover:bg-surface-container-lowest transition-colors">
                       <td class="px-md py-4">
-                        <div class="flex items-center gap-3">
-                          <div class="w-8 h-8 rounded bg-surface-container-highest flex items-center justify-center text-on-surface-variant font-bold text-sm">
-                            {{ firstLetter(match.factoryName) }}
-                          </div>
-                          <span class="font-label-md text-on-surface">{{ match.factoryName }}</span>
-                        </div>
+                        <span class="font-label-md text-on-surface">{{ match.factoryName }}</span>
                       </td>
                       <td class="px-md py-4 text-on-surface-variant">{{ match.cropName }}</td>
                       <td class="px-md py-4 text-on-surface-variant">{{ match.quantityTons }} MT</td>
                       <td class="px-md py-4">
                         <div class="flex items-center gap-2">
-                          @if (match.matchScore !== null && match.matchScore >= 75) {
-                            <span class="w-2 h-2 rounded-full bg-success-green" aria-hidden="true"></span>
-                          } @else if (match.matchScore !== null && match.matchScore >= 50) {
-                            <span class="w-2 h-2 rounded-full bg-warning-orange" aria-hidden="true"></span>
-                          } @else {
-                            <span class="w-2 h-2 rounded-full bg-error" aria-hidden="true"></span>
-                          }
-                          <span class="font-medium text-on-surface">{{ match.matchScore ?? '—' }}%</span>
+                          <span class="w-2 h-2 rounded-full" [class]="scoreTone(match.matchScore)" aria-hidden="true"></span>
+                          <span class="font-medium text-on-surface">
+                            {{ match.matchScore != null ? (match.matchScore | number: '1.0-0') + '%' : '—' }}
+                          </span>
                         </div>
                       </td>
                       <td class="px-md py-4">
-                        <span class="px-3 py-1 rounded-full {{ statusBadgeClass(match.status) }} text-[10px] font-bold uppercase">
-                          {{ statusLabelKey(match.status) | translate }}
+                        <span class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase">
+                          {{ match.status }}
                         </span>
                       </td>
                       <td class="px-md py-4 text-end">
-                        <a routerLink="/farm/matches/{{ match.matchId }}" type="button"
-                          class="inline-block {{ match.status === 'Proposed' || match.status === 'Accepted' ? 'bg-primary text-on-primary' : 'border border-outline-variant text-on-surface hover:bg-surface-container-low' }} px-4 py-2 rounded-lg font-label-sm transition-colors">
-                          {{ actionLabelKey(match.status) | translate }}
+                        <a routerLink="/farm-matches"
+                          class="inline-block bg-primary text-on-primary px-4 py-2 rounded-lg font-label-sm hover:opacity-90 transition-opacity">
+                          {{ 'farm.dashboard.review' | translate }}
                         </a>
                       </td>
                     </tr>
                   }
                 </tbody>
               </table>
-            </div>
-          } @else {
-            <div class="p-md text-center text-on-surface-variant py-12">
-              <span class="material-symbols-outlined text-4xl mb-2" aria-hidden="true">dynamic_feed</span>
-              <p>{{ 'common.noData' | translate }}</p>
-            </div>
-          }
+            }
+          </div>
         </section>
 
-        <!-- Risk Score Breakdown -->
         <section class="glass-card flex flex-col">
           <div class="p-md border-b border-card-border">
             <h3 class="font-headline-sm text-headline-sm text-primary">
@@ -206,167 +186,42 @@
             </p>
           </div>
           <div class="p-md space-y-6 flex-grow">
-            @for (item of data.riskBreakdown; track item.label) {
-              <ui-progress-bar [value]="item.percentage" [label]="item.label" [showValue]="true" />
-            }
-            <div class="bg-primary-container/10 p-4 rounded-lg border border-primary/20 mt-4">
-              <div class="flex items-start gap-3">
-                <span class="material-symbols-outlined text-primary" aria-hidden="true">lightbulb</span>
+            @if (data.riskBreakdown.length === 0) {
+              <p class="text-on-surface-variant">No score breakdown available.</p>
+            } @else {
+              @for (item of data.riskBreakdown; track item.label) {
                 <div>
-                  <p class="font-label-md text-primary">{{ 'farm.dashboard.optimizationTip' | translate }}</p>
-                  <p class="text-label-sm text-on-surface-variant leading-normal">{{ 'farm.dashboard.optimizationBody' | translate }}</p>
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="font-label-md text-on-surface">{{ item.label }}</span>
+                    <span class="font-bold text-success-green">{{ item.percentage | number: '1.0-0' }}%</span>
+                  </div>
+                  <div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+                    <div class="bg-success-green h-full" [style.width.%]="item.percentage"></div>
+                  </div>
+                </div>
+              }
+            }
+
+            @for (tip of data.improvementTips; track tip.message) {
+              <div class="bg-primary-container/10 p-4 rounded-lg border border-primary/20 mt-4">
+                <div class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary" aria-hidden="true">{{ tip.icon || 'lightbulb' }}</span>
+                  <div>
+                    <p class="font-label-md text-primary">{{ tip.category }}</p>
+                    <p class="text-label-sm text-on-surface-variant leading-normal">{{ tip.message }}</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            }
           </div>
           <div class="p-md mt-auto">
-            <button type="button" (click)="openImproveModal()"
-              class="w-full border-2 border-primary text-primary py-3 rounded-lg font-label-md hover:bg-primary hover:text-on-primary transition-all">
+            <a routerLink="/farm-profile"
+              class="block text-center w-full border-2 border-primary text-primary py-3 rounded-lg font-label-md hover:bg-primary hover:text-on-primary transition-all">
               {{ 'farm.dashboard.improveScore' | translate }}
-            </button>
+            </a>
           </div>
         </section>
       </div>
-    } @else {
-      <!-- Loading Skeleton -->
-      <div class="space-y-gutter">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
-          @for (_ of [1,2,3,4]; track $index) {
-            <div class="glass-card p-md animate-pulse h-32">
-              <div class="h-4 bg-surface-container-high rounded w-24 mb-3"></div>
-              <div class="h-8 bg-surface-container-high rounded w-20"></div>
-            </div>
-          }
-        </div>
-        <div class="glass-card p-md animate-pulse h-64">
-          <div class="h-6 bg-surface-container-high rounded w-48 mb-6"></div>
-          <div class="space-y-4">
-            @for (_ of [1,2,3]; track $index) {
-              <div class="h-12 bg-surface-container-high rounded"></div>
-            }
-          </div>
-        </div>
-      </div>
     }
-
-    <!-- Footer -->
-    <footer
-      class="w-full py-xl border-t border-outline-variant mt-12 flex flex-col md:flex-row justify-between items-center gap-6">
-      <div class="flex flex-col items-center md:items-start gap-2">
-        <div class="flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1"
-            aria-hidden="true">agriculture</span>
-          <span class="font-bold text-primary font-headline-sm">{{ 'app.name' | translate }}</span>
-        </div>
-        <p class="font-label-sm text-on-surface-variant">{{ 'landing.footerRights' | translate }}</p>
-      </div>
-      <div class="flex gap-gutter font-label-sm text-on-surface-variant">
-        <a class="hover:text-primary transition-colors" href="#">{{ 'landing.privacy' | translate }}</a>
-        <a class="hover:text-primary transition-colors" href="#">{{ 'landing.terms' | translate }}</a>
-        <a class="hover:text-primary transition-colors" href="#">{{ 'landing.compliance' | translate }}</a>
-        <a class="hover:text-primary transition-colors" href="#">{{ 'landing.contact' | translate }}</a>
-      </div>
-    </footer>
   </div>
 </main>
-
-<button type="button"
-  class="fixed bottom-margin-desktop end-margin-desktop bg-primary text-on-primary px-6 py-4 rounded-full shadow-lg flex items-center gap-3 hover:scale-105 active:scale-95 transition-all z-50">
-  <span class="material-symbols-outlined" aria-hidden="true">add</span>
-  <span class="font-label-md">{{ 'farm.dashboard.newContract' | translate }}</span>
-</button>
-
-<!-- Score Improvement Modal -->
-@if (showImproveModal()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" (click)="closeImproveModal()">
-    <div class="bg-surface-container-lowest rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in" (click)="$event.stopPropagation()">
-      <!-- Header -->
-      <div class="flex items-center justify-between p-6 border-b border-outline-variant">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container">
-            <span class="material-symbols-outlined">insights</span>
-          </div>
-          <div>
-            <h3 class="font-headline-sm text-headline-sm text-primary font-bold">
-              Score Improvement Plan
-            </h3>
-            <p class="text-label-sm text-on-surface-variant">
-              Actionable steps to boost your farm's reliability score
-            </p>
-          </div>
-        </div>
-        <button type="button" (click)="closeImproveModal()"
-          class="p-2 hover:bg-surface-container rounded-full text-on-surface-variant transition-colors">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
-
-      <!-- Body -->
-      <div class="p-6">
-        <!-- Summary Banner -->
-        <div class="flex items-center gap-4 p-4 rounded-xl {{ riskIconBg() }}/10 border {{ riskIconBg() }}/20 mb-6">
-          <div class="w-14 h-14 rounded-full {{ riskIconBg() }} flex items-center justify-center text-on-primary shadow-sm shrink-0">
-            <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1">{{ riskIcon() }}</span>
-          </div>
-          <div>
-            <p class="font-label-sm text-on-surface-variant">Current Score</p>
-            <p class="font-headline-md text-headline-md font-bold text-on-surface">{{ dashData()?.riskScore ?? '—' }}/100</p>
-            <span class="inline-block mt-1 px-3 py-0.5 rounded-full text-label-sm {{ riskBadgeBg() }}">{{ riskLabel() }}</span>
-          </div>
-        </div>
-
-        @if (sortedTips().length > 0) {
-          <p class="font-label-md text-on-surface mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary text-base">checklist</span>
-            {{ sortedTips().length }} area{{ sortedTips().length > 1 ? 's' : '' }} for improvement
-          </p>
-
-          <div class="space-y-4">
-            @for (tip of sortedTips(); track tip.category) {
-              <div class="rounded-xl border border-outline-variant overflow-hidden transition-all hover:border-primary/40 hover:shadow-sm">
-                <!-- Tip Header -->
-                <div class="flex items-start gap-4 p-4">
-                  <div class="w-10 h-10 rounded-lg {{ severityColor(tip.severity) }}/20 flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-lg {{ severityColor(tip.severity) }}">{{ tip.icon }}</span>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between gap-3 flex-wrap">
-                      <p class="font-label-lg text-label-md font-semibold text-on-surface">{{ tip.category }}</p>
-                      <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider {{ severityColor(tip.severity) }}">
-                        {{ tip.severity }}
-                      </span>
-                    </div>
-                    <p class="text-body-sm text-body-md text-on-surface-variant mt-1.5 leading-relaxed">{{ tip.message }}</p>
-                    <!-- Mini Score Bar -->
-                    <div class="flex items-center gap-3 mt-3">
-                      <div class="flex-1 h-1.5 bg-surface-container-high rounded-full overflow-hidden">
-                        <div class="h-full rounded-full transition-all" [class.bg-success-green]="tip.currentScore >= 80" [class.bg-warning-orange]="tip.currentScore >= 50 && tip.currentScore < 80" [class.bg-error]="tip.currentScore < 50" [style.width.%]="tip.currentScore"></div>
-                      </div>
-                      <span class="text-label-sm font-medium text-on-surface-variant shrink-0">{{ tip.currentScore }}%</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
-        } @else {
-          <div class="text-center py-10">
-            <div class="w-16 h-16 rounded-full bg-secondary-container flex items-center justify-center mx-auto mb-4">
-              <span class="material-symbols-outlined text-3xl text-on-secondary-container">celebration</span>
-            </div>
-            <p class="font-headline-sm text-headline-sm text-primary font-bold">Looking Great!</p>
-            <p class="text-body-md text-on-surface-variant mt-2">All areas are performing well. Keep up the excellent work!</p>
-          </div>
-        }
-      </div>
-
-      <!-- Footer -->
-      <div class="flex justify-end gap-3 p-6 border-t border-outline-variant">
-        <button type="button" (click)="closeImproveModal()"
-          class="px-6 py-2.5 rounded-lg border-2 border-primary text-primary font-label-md hover:bg-primary hover:text-on-primary transition-all">
-          Got it
-        </button>
-      </div>
-    </div>
-  </div>
-}

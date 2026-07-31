@@ -12,161 +12,158 @@
     <div class="flex items-center gap-2 sm:gap-4">
       <ui-language-toggle />
       <ui-theme-toggle />
-      <button type="button" class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant relative"
-        [attr.aria-label]="'common.notifications' | translate">
-        <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
-        <span class="absolute top-2 end-2 w-2 h-2 bg-error rounded-full" aria-hidden="true"></span>
-      </button>
       <div class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant">
         <div class="text-end hidden sm:block">
-          <p class="font-label-md text-label-md text-on-surface leading-tight">{{ currentUser()?.displayName || currentUser()?.email }}</p>
-          <p class="text-label-sm text-label-sm text-on-surface-variant">{{ 'nav.premiumFarmer' | translate }}</p>
+          <p class="font-label-md text-label-md text-on-surface leading-tight">
+            {{ currentUser()?.displayName || currentUser()?.email }}
+          </p>
+          <p class="text-label-sm text-label-sm text-on-surface-variant">
+            {{ 'nav.premiumFarmer' | translate }}
+          </p>
         </div>
-        <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary">
-          <span class="font-bold">{{ firstLetter(currentUser()?.displayName || currentUser()?.email || '?') }}</span>
+        <div
+          class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary"
+        >
+          <span class="font-bold">{{
+            (currentUser()?.displayName || currentUser()?.email || '?').charAt(0).toUpperCase()
+          }}</span>
         </div>
       </div>
     </div>
   </header>
 
-  <div class="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-[calc(100vh-4rem)] animate-fade-in">
-    <!-- Conversations Sidebar -->
-    <section class="w-full lg:w-[360px] bg-surface-container-lowest flex flex-col border-b lg:border-b-0 lg:border-e border-outline-variant shrink-0 max-h-[40vh] lg:max-h-none"
-      [attr.aria-label]="'messages.title' | translate">
-      <div class="p-4 border-b border-outline-variant">
-        <h2 class="font-title-lg text-title-lg text-on-surface font-bold">Conversations</h2>
-      </div>
-      <div class="flex-1 overflow-y-auto">
-        @if (loadingConversations()) {
-          @for (_ of [1,2,3]; track $index) {
-            <article class="flex items-start p-4 gap-4 animate-pulse">
-              <div class="w-12 h-12 rounded-full bg-surface-container-high shrink-0"></div>
-              <div class="flex-1 space-y-2">
-                <div class="h-4 bg-surface-container-high rounded w-32"></div>
-                <div class="h-3 bg-surface-container-high rounded w-48"></div>
-              </div>
-            </article>
-          }
-        } @else {
-          @for (convo of conversations(); track convo.matchId) {
-            <article class="flex items-start p-4 cursor-default transition-colors border-s-4"
-              [class]="convo.matchId === selectedMatchId()
-                ? 'bg-surface-container border-primary'
-                : 'hover:bg-surface-container-low border-transparent'"
-              (click)="selectConversation(convo.matchId)">
-              <div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-title-lg font-bold shadow-sm shrink-0 me-4">
-                {{ firstLetter(convo.factoryName) }}
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex justify-between items-baseline mb-1 gap-2">
-                  <h2 class="font-title-md text-title-md text-on-surface truncate">{{ convo.factoryName }}</h2>
-                  @if (convo.lastMessageAt) {
-                    <span class="font-label-sm text-label-sm whitespace-nowrap text-on-surface-variant">
-                      {{ convo.lastMessageAt | date:'shortTime' }}
-                    </span>
+  @if (loading()) {
+    <div class="flex justify-center py-16"><ui-loader /></div>
+  } @else if (error() && conversations().length === 0) {
+    <div class="p-8 text-center space-y-4">
+      <p class="text-on-error-container">{{ error() }}</p>
+      <button type="button" class="ui-btn-primary" (click)="loadConversations()">Retry</button>
+    </div>
+  } @else {
+    <div
+      class="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-[calc(100vh-4rem)] animate-fade-in"
+    >
+      <section
+        class="w-full lg:w-[360px] bg-surface-container-lowest flex flex-col border-b lg:border-b-0 lg:border-e border-outline-variant shrink-0 max-h-[40vh] lg:max-h-none"
+        [attr.aria-label]="'messages.title' | translate"
+      >
+        <div class="flex-1 overflow-y-auto">
+          @if (conversations().length === 0) {
+            <p class="p-4 text-on-surface-variant">No conversations yet.</p>
+          } @else {
+            @for (convo of conversations(); track convo.matchId) {
+              <button
+                type="button"
+                class="w-full text-start flex items-start p-4 transition-colors border-s-4"
+                [class]="
+                  selectedMatchId() === convo.matchId
+                    ? 'bg-surface-container border-primary'
+                    : 'hover:bg-surface-container-low border-transparent'
+                "
+                (click)="selectConversation(convo.matchId)"
+              >
+                <div class="relative me-4 shrink-0">
+                  <div
+                    class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-title-lg font-bold shadow-sm"
+                  >
+                    {{ convo.factoryName.charAt(0).toUpperCase() }}
+                  </div>
+                  @if (convo.unreadCount > 0) {
+                    <span
+                      class="absolute -top-1 -end-1 min-w-5 h-5 px-1 bg-error text-on-error text-xs rounded-full flex items-center justify-center"
+                      >{{ convo.unreadCount }}</span
+                    >
                   }
                 </div>
-                <p class="font-body-md text-body-md text-on-surface-variant truncate">
-                  {{ convo.lastMessage || 'No messages yet' }}
-                </p>
-                @if (convo.cropName) {
-                  <span class="font-label-sm text-label-sm text-primary mt-1 inline-block">{{ convo.cropName }}</span>
-                }
-              </div>
-              @if (convo.unreadCount > 0) {
-                <span class="w-5 h-5 rounded-full bg-primary text-on-primary text-[10px] font-bold flex items-center justify-center shrink-0 ms-2">
-                  {{ convo.unreadCount }}
-                </span>
-              }
-            </article>
-          }
-        }
-      </div>
-    </section>
-
-    <!-- Chat Pane -->
-    <section class="flex-1 flex flex-col bg-surface min-h-0" [attr.aria-label]="'messages.title' | translate">
-      @if (selectedConversation(); as convo) {
-        <!-- Chat Header -->
-        <div class="h-auto min-h-[72px] bg-surface-container-lowest border-b border-outline-variant shadow-sm px-4 md:px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shadow-sm shrink-0">
-              <span class="font-bold">{{ firstLetter(convo.factoryName) }}</span>
-            </div>
-            <div>
-              <h2 class="font-title-md text-title-md text-on-surface">{{ convo.factoryName }}</h2>
-              @if (convo.cropName) {
-                <div class="flex items-center gap-2 mt-0.5 text-on-surface-variant">
-                  <span class="material-symbols-outlined text-[16px]" aria-hidden="true">eco</span>
-                  <span class="font-label-sm text-label-sm">{{ convo.cropName }}</span>
-                </div>
-              }
-            </div>
-          </div>
-        </div>
-
-        <!-- Messages -->
-        <div class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-6">
-          @if (loadingMessages()) {
-            <div class="flex-1 flex items-center justify-center">
-              <div class="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-hidden="true"></div>
-            </div>
-          } @else {
-            @for (msg of messages(); track msg.messageId) {
-              @if (msg.senderId === currentUser()?.id) {
-                <!-- Outgoing -->
-                <div class="flex flex-col items-end self-end max-w-[85%] sm:max-w-[70%]">
-                  <div class="bg-primary text-on-primary shadow-md p-4 rounded-ss-2xl rounded-se-2xl rounded-es-2xl rounded-ee-none">
-                    <p class="font-body-lg text-body-lg">{{ msg.content }}</p>
+                <div class="flex-1 min-w-0">
+                  <div class="flex justify-between items-baseline mb-1 gap-2">
+                    <h2 class="font-title-md text-title-md text-on-surface truncate">
+                      {{ convo.factoryName }}
+                    </h2>
+                    @if (convo.lastMessageAt) {
+                      <span class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">
+                        {{ convo.lastMessageAt | date: 'shortTime' }}
+                      </span>
+                    }
                   </div>
-                  <div class="flex items-center mt-1.5 me-2 gap-1">
-                    <span class="material-symbols-outlined text-[16px] text-primary fill" aria-hidden="true">done_all</span>
-                    <span class="text-label-sm font-label-sm text-on-surface-variant">{{ msg.createdAt | date:'shortTime' }}</span>
-                  </div>
+                  <p class="font-body-md text-body-md text-on-surface-variant truncate">
+                    {{ convo.lastMessage || convo.cropName || '—' }}
+                  </p>
                 </div>
-              } @else {
-                <!-- Incoming -->
-                <div class="flex flex-col items-start max-w-[85%] sm:max-w-[70%]">
-                  <div class="bg-surface-container shadow-sm p-4 rounded-ss-2xl rounded-se-2xl rounded-ee-2xl rounded-es-none text-on-surface">
-                    <p class="font-body-lg text-body-lg">{{ msg.content }}</p>
-                  </div>
-                  <span class="text-label-sm font-label-sm text-on-surface-variant mt-1.5 ms-2">{{ msg.createdAt | date:'shortTime' }}</span>
-                </div>
-              }
+              </button>
             }
           }
         </div>
+      </section>
 
-        <!-- Composer -->
-        <div class="p-4 bg-surface-container-lowest border-t border-outline-variant shrink-0">
-          <div class="max-w-4xl mx-auto flex items-end gap-3">
-            <div class="flex-1 relative bg-surface-container-low rounded-3xl border border-outline-variant focus-within:border-primary focus-within:bg-surface transition-all flex items-center px-4 py-2 min-h-[56px]">
-              <label class="sr-only" for="message-composer">{{ 'messages.placeholder' | translate }}</label>
-              <textarea id="message-composer"
-                class="w-full bg-transparent border-none focus:ring-0 resize-none font-body-lg text-body-lg text-on-surface max-h-32 py-1 leading-relaxed outline-none"
-                rows="1"
-                [attr.placeholder]="'messages.placeholder' | translate"
-                [(ngModel)]="messageContent"
-                (keydown.enter)="$event.preventDefault(); sendMessage()"></textarea>
-            </div>
-            <button type="button" (click)="sendMessage()" [disabled]="sending() || !messageContent().trim()"
-              class="w-14 h-14 shrink-0 rounded-full bg-primary hover:opacity-90 transition-transform hover:scale-105 flex items-center justify-center text-on-primary shadow-md disabled:opacity-50 disabled:hover:scale-100">
-              <span class="material-symbols-outlined icon-flip" aria-hidden="true">send</span>
+      <section class="flex-1 flex flex-col bg-surface min-h-0">
+        @if (selectedConversation(); as active) {
+          <div class="p-4 border-b border-outline-variant">
+            <h2 class="font-title-lg text-title-lg text-on-surface">{{ active.factoryName }}</h2>
+            @if (active.cropName) {
+              <p class="text-on-surface-variant font-body-md">{{ active.cropName }}</p>
+            }
+          </div>
+
+          <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            @if (messagesLoading()) {
+              <div class="flex justify-center py-8"><ui-loader /></div>
+            } @else if (messages().length === 0) {
+              <p class="text-on-surface-variant text-center py-8">No messages yet. Say hello.</p>
+            } @else {
+              @for (msg of messages(); track msg.messageId) {
+                <div
+                  class="flex"
+                  [class]="isOutgoing(msg) ? 'justify-end' : 'justify-start'"
+                >
+                  <div
+                    class="max-w-[75%] rounded-2xl px-4 py-3"
+                    [class]="
+                      isOutgoing(msg)
+                        ? 'bg-primary text-on-primary'
+                        : 'bg-surface-container-high text-on-surface'
+                    "
+                  >
+                    @if (!isOutgoing(msg)) {
+                      <p class="font-label-sm mb-1 opacity-80">{{ msg.senderName }}</p>
+                    }
+                    <p class="font-body-md whitespace-pre-wrap">{{ msg.content }}</p>
+                    <p class="font-label-sm mt-1 opacity-70">
+                      {{ msg.createdAt | date: 'shortTime' }}
+                    </p>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+
+          <form
+            class="p-4 border-t border-outline-variant flex gap-3"
+            (submit)="$event.preventDefault(); send()"
+          >
+            <label class="sr-only" for="message-draft">Message</label>
+            <input
+              id="message-draft"
+              class="ui-input flex-1"
+              type="text"
+              [(ngModel)]="draft"
+              name="draft"
+              placeholder="Type a message…"
+            />
+            <button
+              type="submit"
+              class="ui-btn-primary"
+              [disabled]="sending() || !draft.trim()"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">send</span>
             </button>
+          </form>
+        } @else {
+          <div class="flex-1 flex items-center justify-center text-on-surface-variant p-8">
+            Select a conversation
           </div>
-        </div>
-      } @else {
-        <!-- No Conversation Selected -->
-        <div class="flex-1 flex items-center justify-center">
-          <div class="text-center">
-            <div class="w-20 h-20 rounded-full bg-surface-container-high flex items-center justify-center mx-auto mb-4">
-              <span class="material-symbols-outlined text-4xl text-on-surface-variant">chat</span>
-            </div>
-            <h3 class="font-title-lg text-title-lg text-on-surface font-bold mb-1">No conversation selected</h3>
-            <p class="text-body-md text-on-surface-variant">Select a conversation from the sidebar to view messages.</p>
-          </div>
-        </div>
-      }
-    </section>
-  </div>
+        }
+      </section>
+    </div>
+  }
 </main>

@@ -1,5 +1,4 @@
 <main class="md:ms-[280px] min-h-screen bg-surface flex flex-col">
-  <!-- Topbar -->
   <header
     class="sticky top-0 z-30 bg-surface border-b border-outline-variant px-margin-mobile md:px-margin-desktop py-3"
   >
@@ -8,357 +7,165 @@
         <h1 class="font-title-lg text-title-lg font-bold text-on-surface truncate">
           {{ 'factory.matches.title' | translate }}
         </h1>
-        <span
-          class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-lg text-sm flex items-center gap-1 shrink-0"
-        >
-          <span class="material-symbols-outlined text-sm" aria-hidden="true">filter_list</span>
-          {{ 'factory.matches.activeFilters' | translate: { count: 3 } }}
-        </span>
+        @if (requestId()) {
+          <span
+            class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-lg text-sm shrink-0"
+          >
+            Request {{ requestId()!.slice(0, 8) }}…
+          </span>
+        }
       </div>
       <div class="flex items-center gap-2 sm:gap-4">
         <ui-language-toggle />
         <ui-theme-toggle />
-        <button
-          type="button"
-          class="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors"
-          [attr.aria-label]="'common.search' | translate"
+        <a
+          class="ui-btn-secondary !py-2 !px-4"
+          routerLink="/agent-progress"
+          [queryParams]="requestId() ? { requestId: requestId() } : {}"
         >
-          <span class="material-symbols-outlined" aria-hidden="true">search</span>
-        </button>
-        <button type="button" class="ui-btn-primary !py-2 !px-4">
-          <span class="material-symbols-outlined text-sm" aria-hidden="true">download</span>
-          {{ 'factory.matches.export' | translate }}
-        </button>
+          Run Agent
+        </a>
       </div>
     </div>
   </header>
 
-  <!-- Split view -->
-  <div class="flex-1 flex flex-col lg:flex-row min-h-0 max-w-[1440px] w-full mx-auto">
-    <!-- Farm cards panel -->
-    <section
-      class="w-full lg:w-[40%] border-e border-outline-variant bg-surface flex flex-col lg:max-h-[calc(100vh-4rem)] overflow-hidden"
-      [attr.aria-label]="'factory.matches.topMatches' | translate: { count: 12 }"
-    >
-      <div
-        class="p-4 border-b border-outline-variant flex justify-between items-center sticky top-0 z-10 bg-surface"
+  @if (!requestId()) {
+    <div class="p-margin-desktop max-w-3xl mx-auto text-center space-y-4 py-16">
+      <p class="font-body-lg text-on-surface-variant">
+        Provide a supply request id to load matches.
+      </p>
+      <p class="font-label-md text-on-surface-variant">
+        Open
+        <code class="bg-surface-container px-2 py-1 rounded">/factory-matches?requestId=&#123;guid&#125;</code>
+      </p>
+    </div>
+  } @else if (loading()) {
+    <div class="flex justify-center py-16"><ui-loader /></div>
+  } @else if (error()) {
+    <div class="p-8 text-center space-y-4">
+      <p class="text-on-error-container">{{ error() }}</p>
+      <button type="button" class="ui-btn-primary" (click)="loadMatches(requestId()!)">
+        Retry
+      </button>
+    </div>
+  } @else {
+    <div class="flex-1 flex flex-col lg:flex-row min-h-0 max-w-[1440px] w-full mx-auto">
+      <section
+        class="w-full lg:w-[40%] border-e border-outline-variant bg-surface flex flex-col lg:max-h-[calc(100vh-4rem)] overflow-hidden"
       >
-        <h2 class="font-title-lg text-title-lg text-on-surface">
-          {{ 'factory.matches.topMatches' | translate: { count: 12 } }}
-        </h2>
-        <button
-          type="button"
-          class="text-primary hover:bg-surface-container rounded-lg p-1 transition-colors flex items-center"
-          [attr.aria-label]="'factory.matches.sort' | translate"
-        >
-          <span class="material-symbols-outlined" aria-hidden="true">sort</span>
-        </button>
-      </div>
-
-      <div class="flex-1 overflow-y-auto p-4 space-y-4 animate-fade-in">
-        @for (farm of farms; track farm.id) {
-          <article
-            class="ui-card p-4 hover:shadow-md transition-shadow relative overflow-hidden"
-            [class.opacity-75]="farm.match < 70"
-          >
-            @if (farm.featured) {
-              <div
-                class="absolute top-0 start-0 w-1 h-full bg-primary rounded-s-xl"
-                aria-hidden="true"
-              ></div>
-            }
-            <div class="flex justify-between items-start mb-3 gap-3">
-              <div class="min-w-0">
-                <h3 class="font-title-lg text-title-lg text-on-surface font-bold flex items-center gap-2 flex-wrap">
-                  <span class="truncate">{{ farm.name }}</span>
-                  @if (farm.verified) {
-                    <span
-                      class="material-symbols-outlined text-primary text-lg fill shrink-0"
-                      [attr.title]="'common.verified' | translate"
-                      aria-hidden="true"
-                      >verified</span
-                    >
-                  }
-                </h3>
-                <p
-                  class="text-on-surface-variant font-body-md text-body-md flex items-center gap-1 mt-1"
-                >
-                  <span class="material-symbols-outlined text-sm" aria-hidden="true">location_on</span>
-                  {{ farm.location }}
-                </p>
-              </div>
-              @if (farm.match >= 70) {
-                <div
-                  class="bg-primary-container text-on-primary-container px-3 py-1 rounded-lg font-title-md text-title-md flex items-center gap-1 shrink-0"
-                >
-                  <span class="material-symbols-outlined text-sm" aria-hidden="true">auto_awesome</span>
-                  {{ farm.match }}%
-                </div>
-              } @else {
-                <div
-                  class="bg-surface-container-high text-on-surface px-3 py-1 rounded-lg font-title-md text-title-md flex items-center gap-1 shrink-0"
-                >
-                  <span class="material-symbols-outlined text-sm" aria-hidden="true">auto_awesome</span>
-                  {{ farm.match }}%
-                </div>
-              }
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-              <div class="bg-surface-container-low p-3 rounded-lg border border-outline-variant">
-                <div class="font-label-sm text-label-sm text-on-surface-variant mb-1">
-                  {{ 'factory.matches.cropLabel' | translate }}
-                </div>
-                <div class="font-title-md text-title-md text-on-surface">{{ farm.crop }}</div>
-              </div>
-              <div class="bg-surface-container-low p-3 rounded-lg border border-outline-variant">
-                <div class="font-label-sm text-label-sm text-on-surface-variant mb-1">
-                  {{ 'factory.matches.availableQty' | translate }}
-                </div>
-                <div class="font-title-md text-title-md text-on-surface">{{ farm.quantity }}</div>
-              </div>
-            </div>
-
-            <div
-              class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 border-t border-outline-variant pt-3"
-            >
-              <div class="flex items-center gap-2">
-                <span class="font-label-sm text-label-sm text-on-surface-variant">{{
-                  'factory.matches.riskScore' | translate
-                }}</span>
-                <span
-                  class="px-2 py-0.5 rounded font-bold text-sm text-on-primary"
-                  [class.bg-success-green]="farm.riskLevel === 'low'"
-                  [class.bg-warning-orange]="farm.riskLevel === 'medium'"
-                  [class.bg-danger-red]="farm.riskLevel === 'high'"
-                >
-                  {{ farm.risk }}
-                </span>
-              </div>
-              @if (farm.featured) {
-                <button type="button" class="ui-btn-primary !py-2 !px-4">
-                  {{ 'factory.matches.chooseFarm' | translate }}
-                </button>
-              } @else if (farm.match >= 70) {
-                <button type="button" class="ui-btn-secondary !py-2 !px-4">
-                  {{ 'factory.matches.viewDetails' | translate }}
-                </button>
-              } @else {
-                <button type="button" class="ui-btn-ghost !py-2">
-                  {{ 'factory.matches.exclude' | translate }}
-                </button>
-              }
-            </div>
-          </article>
-        }
-      </div>
-    </section>
-
-    <!-- Map + comparison panel -->
-    <section
-      class="hidden lg:flex flex-col w-[60%] relative bg-surface-container-low min-h-[480px]"
-      [attr.aria-label]="'factory.matches.mapPlaceholder' | translate"
-    >
-      <!-- Static map placeholder -->
-      <div
-        class="absolute inset-0 m-4 mb-48 rounded-xl bg-surface-container-high border border-outline-variant flex flex-col items-center justify-center gap-3"
-      >
-        <span class="material-symbols-outlined text-6xl text-on-surface-variant" aria-hidden="true"
-          >map</span
-        >
-        <p class="font-body-md text-body-md text-on-surface-variant text-center px-4">
-          {{ 'factory.matches.mapPlaceholder' | translate }}
-        </p>
-        <!-- Decorative pins -->
-        <div class="absolute top-1/3 start-1/3 flex flex-col items-center gap-1" aria-hidden="true">
-          <span
-            class="w-6 h-6 bg-primary rounded-full border-2 border-surface-container-lowest shadow-sm flex items-center justify-center animate-pulse"
-          >
-            <span class="material-symbols-outlined text-on-primary text-xs">location_on</span>
-          </span>
-        </div>
         <div
-          class="absolute top-1/4 end-1/4 w-4 h-4 bg-secondary-container rounded-full border-2 border-surface-container-lowest shadow-sm"
-          aria-hidden="true"
-        ></div>
-        <div
-          class="absolute bottom-1/3 start-1/2 w-4 h-4 bg-warning-orange rounded-full border-2 border-surface-container-lowest shadow-sm"
-          aria-hidden="true"
-        ></div>
-      </div>
-
-      <!-- Map controls -->
-      <div
-        class="absolute top-8 end-8 flex flex-col gap-1 bg-surface rounded-lg shadow-sm p-1 border border-outline-variant z-10"
-      >
-        <button
-          type="button"
-          class="p-2 hover:bg-surface-container rounded text-on-surface transition-colors"
-          [attr.aria-label]="'factory.matches.zoomIn' | translate"
+          class="p-4 border-b border-outline-variant flex justify-between items-center sticky top-0 z-10 bg-surface"
         >
-          <span class="material-symbols-outlined" aria-hidden="true">add</span>
-        </button>
-        <div class="h-px bg-outline-variant mx-2" aria-hidden="true"></div>
-        <button
-          type="button"
-          class="p-2 hover:bg-surface-container rounded text-on-surface transition-colors"
-          [attr.aria-label]="'factory.matches.zoomOut' | translate"
-        >
-          <span class="material-symbols-outlined" aria-hidden="true">remove</span>
-        </button>
-      </div>
-
-      <div
-        class="absolute top-8 start-8 bg-surface rounded-lg shadow-sm p-2 border border-outline-variant flex items-center gap-3 z-10 flex-wrap"
-      >
-        <span class="font-title-md text-title-md text-on-surface">{{
-          'factory.matches.viewModes' | translate
-        }}</span>
-        <div class="flex gap-1 bg-surface-container-low rounded p-1">
-          <button
-            type="button"
-            class="px-3 py-1 rounded bg-surface text-on-surface shadow-sm font-label-lg text-label-lg"
-          >
-            {{ 'factory.matches.satellite' | translate }}
-          </button>
-          <button
-            type="button"
-            class="px-3 py-1 rounded text-on-surface-variant hover:bg-surface-container font-label-lg text-label-lg"
-          >
-            {{ 'factory.matches.terrain' | translate }}
-          </button>
+          <h2 class="font-title-lg text-title-lg text-on-surface">
+            {{ 'factory.matches.topMatches' | translate: { count: matches().length } }}
+          </h2>
         </div>
-      </div>
 
-      <!-- Legend -->
-      <div
-        class="absolute bottom-56 end-8 bg-surface/90 backdrop-blur p-4 rounded-xl shadow-md border border-outline-variant z-10"
-      >
-        <h4
-          class="font-title-md text-title-md text-on-surface mb-2 border-b border-outline-variant pb-1"
-        >
-          {{ 'factory.matches.mapLegend' | translate }}
-        </h4>
-        <ul class="space-y-2">
-          <li class="flex items-center gap-2">
-            <span
-              class="w-4 h-4 rounded-full bg-primary border-2 border-surface-container-lowest shadow-sm shrink-0"
-              aria-hidden="true"
-            ></span>
-            <span class="font-body-md text-body-md text-on-surface-variant">{{
-              'factory.matches.selectedFarm' | translate
-            }}</span>
-          </li>
-          <li class="flex items-center gap-2">
-            <span
-              class="w-4 h-4 rounded-full bg-secondary-container border-2 border-surface-container-lowest shadow-sm shrink-0"
-              aria-hidden="true"
-            ></span>
-            <span class="font-body-md text-body-md text-on-surface-variant">{{
-              'factory.matches.highMatch' | translate
-            }}</span>
-          </li>
-          <li class="flex items-center gap-2">
-            <span
-              class="w-4 h-4 rounded-full bg-warning-orange border-2 border-surface-container-lowest shadow-sm shrink-0"
-              aria-hidden="true"
-            ></span>
-            <span class="font-body-md text-body-md text-on-surface-variant">{{
-              'factory.matches.mediumMatch' | translate
-            }}</span>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Comparison report panel -->
-      <div
-        class="absolute bottom-0 inset-x-0 bg-surface rounded-t-2xl shadow-md border-t border-outline-variant z-20 animate-slide-up"
-      >
-        <div class="w-full flex justify-center py-2" aria-hidden="true">
-          <div class="w-12 h-1.5 bg-outline-variant rounded-full"></div>
-        </div>
-        <div class="px-6 pb-6">
-          <div class="flex justify-between items-center mb-4 gap-3 flex-wrap">
-            <h3 class="font-title-lg text-title-lg text-on-surface font-bold flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary" aria-hidden="true">analytics</span>
-              {{ 'factory.matches.comparison' | translate }}
-            </h3>
-            <button type="button" class="ui-btn-ghost !py-1">
-              {{ 'factory.matches.fullReport' | translate }}
-            </button>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant">
-              <div class="font-label-sm text-label-sm text-on-surface-variant mb-2">
-                {{ 'factory.matches.bestRoute' | translate }}
-              </div>
-              <div class="font-title-md text-title-md text-on-surface font-bold">
-                Cairo–Ismailia corridor
-              </div>
-              <p class="text-sm text-success-green mt-1 flex items-center gap-1">
-                <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
-                  >trending_down</span
-                >
-                {{ 'factory.matches.costSaving' | translate }}
-              </p>
-            </div>
-            <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant">
-              <div class="font-label-sm text-label-sm text-on-surface-variant mb-2">
-                {{ 'factory.matches.avgExpectedPrice' | translate }}
-              </div>
-              <div class="font-title-md text-title-md text-on-surface font-bold">4,500 EGP / ton</div>
-              <p class="text-sm text-on-surface-variant mt-1">
-                {{ 'factory.matches.marketBased' | translate }}
-              </p>
-            </div>
-            <div
-              class="bg-surface-container-low p-4 rounded-xl border border-outline-variant flex items-center justify-between gap-3"
-            >
-              <div class="min-w-0">
-                <div class="font-label-sm text-label-sm text-on-surface-variant mb-1">
-                  {{ 'factory.matches.aiRecommends' | translate }}
-                </div>
-                <div class="font-title-md text-title-md text-on-surface font-bold truncate">
-                  Nile Valley Farm
-                </div>
-              </div>
+        <div class="flex-1 overflow-y-auto p-4 space-y-4 animate-fade-in">
+          @if (matches().length === 0) {
+            <p class="text-on-surface-variant">No matches for this request.</p>
+          } @else {
+            @for (farm of matches(); track farm.matchId) {
               <button
                 type="button"
-                class="bg-primary text-on-primary p-2 rounded-lg hover:opacity-90 transition-opacity shadow-sm shrink-0"
-                [attr.aria-label]="'factory.matches.chooseFarm' | translate"
+                class="w-full text-start ui-card p-4 hover:shadow-md transition-shadow relative overflow-hidden"
+                [class.ring-2]="selected()?.matchId === farm.matchId"
+                [class.ring-primary]="selected()?.matchId === farm.matchId"
+                (click)="select(farm)"
               >
-                <span class="material-symbols-outlined icon-flip" aria-hidden="true">arrow_forward</span>
+                <div class="flex justify-between items-start mb-3 gap-3">
+                  <div class="min-w-0">
+                    <h3
+                      class="font-title-lg text-title-lg text-on-surface font-bold flex items-center gap-2 flex-wrap"
+                    >
+                      <span class="truncate">{{ farm.farmName }}</span>
+                      @if (farm.farmIsVerified) {
+                        <span
+                          class="material-symbols-outlined text-primary text-lg fill shrink-0"
+                          aria-hidden="true"
+                          >verified</span
+                        >
+                      }
+                    </h3>
+                    <p
+                      class="text-on-surface-variant font-body-md text-body-md flex items-center gap-1 mt-1"
+                    >
+                      <span class="material-symbols-outlined text-sm" aria-hidden="true"
+                        >location_on</span
+                      >
+                      {{ farm.farmGovernorate || farm.farmLocation || '—' }}
+                    </p>
+                  </div>
+                  <div
+                    class="bg-primary-container text-on-primary-container px-3 py-1 rounded-lg font-title-md text-title-md flex items-center gap-1 shrink-0"
+                  >
+                    <span class="material-symbols-outlined text-sm" aria-hidden="true"
+                      >auto_awesome</span
+                    >
+                    {{
+                      farm.matchScore != null ? (farm.matchScore | number: '1.0-0') + '%' : '—'
+                    }}
+                  </div>
+                </div>
+                <div class="flex justify-between text-sm text-on-surface-variant">
+                  <span>Risk: {{ farm.riskScore != null ? (farm.riskScore | number: '1.0-0') : '—' }}</span>
+                  <span>{{ farm.status }}</span>
+                </div>
               </button>
-            </div>
-          </div>
+            }
+          }
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Mobile map / comparison fallback -->
-    <section class="lg:hidden p-margin-mobile space-y-4 pb-8">
-      <div
-        class="h-48 rounded-xl bg-surface-container-high border border-outline-variant flex flex-col items-center justify-center gap-2"
-      >
-        <span class="material-symbols-outlined text-4xl text-on-surface-variant" aria-hidden="true"
-          >map</span
-        >
-        <p class="font-body-md text-body-md text-on-surface-variant text-center px-4">
-          {{ 'factory.matches.mapPlaceholder' | translate }}
-        </p>
-      </div>
-      <div class="ui-card p-4 space-y-3">
-        <h3 class="font-title-md text-title-md text-on-surface font-bold flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary" aria-hidden="true">analytics</span>
-          {{ 'factory.matches.comparison' | translate }}
-        </h3>
-        <p class="font-body-md text-body-md text-on-surface-variant">
-          {{ 'factory.matches.aiRecommends' | translate }}: Nile Valley Farm
-        </p>
-        <button type="button" class="ui-btn-ghost">
-          {{ 'factory.matches.fullReport' | translate }}
-        </button>
-      </div>
-    </section>
-  </div>
+      <section class="flex-1 p-6 overflow-y-auto">
+        @if (selected(); as farm) {
+          <div class="space-y-4">
+            <h2 class="font-headline-md text-headline-md text-on-surface">{{ farm.farmName }}</h2>
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <dt class="text-on-surface-variant text-sm">Location</dt>
+                <dd>{{ farm.farmLocation || '—' }}</dd>
+              </div>
+              <div>
+                <dt class="text-on-surface-variant text-sm">Governorate</dt>
+                <dd>{{ farm.farmGovernorate || '—' }}</dd>
+              </div>
+              <div>
+                <dt class="text-on-surface-variant text-sm">Match score</dt>
+                <dd>{{ farm.matchScore != null ? (farm.matchScore | number: '1.0-0') : '—' }}</dd>
+              </div>
+              <div>
+                <dt class="text-on-surface-variant text-sm">Risk score</dt>
+                <dd>
+                  {{ farm.riskScore != null ? (farm.riskScore | number: '1.0-0') : '—' }}
+                  ({{ riskLevel(farm.riskScore) }})
+                </dd>
+              </div>
+              <div>
+                <dt class="text-on-surface-variant text-sm">Rating</dt>
+                <dd>{{ farm.farmAverageRating | number: '1.1-1' }}</dd>
+              </div>
+              <div>
+                <dt class="text-on-surface-variant text-sm">Created</dt>
+                <dd>{{ farm.createdAt | date: 'medium' }}</dd>
+              </div>
+            </dl>
+            <a
+              class="ui-btn-primary inline-flex"
+              routerLink="/contract-signing"
+              [queryParams]="{
+                requestId: requestId(),
+                farmId: farm.farmId,
+                farmName: farm.farmName,
+              }"
+            >
+              Generate contract
+            </a>
+          </div>
+        } @else {
+          <p class="text-on-surface-variant">Select a match to view details.</p>
+        }
+      </section>
+    </div>
+  }
 </main>

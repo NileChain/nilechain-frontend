@@ -1,59 +1,71 @@
-import { Component, inject, signal } from '@angular/core';
-import { Title } from '@angular/platform-browser';
 import { DatePipe, DecimalPipe } from '@angular/common';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { FarmService } from '../../../core/services/farm/farm.service';
-import { FarmContractItem } from '../../../core/models/farm/farm-contract-item.model';
+import { FarmContract } from '../../../core/models/farm/farm-contract.model';
 
 @Component({
   selector: 'app-farm-contracts',
   standalone: true,
-  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent, DatePipe, DecimalPipe],
+  imports: [
+    TranslatePipe,
+    SidebarFarmComponent,
+    UiLanguageToggleComponent,
+    UiThemeToggleComponent,
+    UiLoaderComponent,
+    DatePipe,
+    DecimalPipe,
+  ],
   templateUrl: './farm-contracts.component.html',
 })
-export class FarmContractsComponent {
+export class FarmContractsComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly farmService = inject(FarmService);
-
   readonly currentUser = this.authService.currentUser;
-  readonly contracts = signal<FarmContractItem[]>([]);
+
   readonly loading = signal(true);
+  readonly error = signal<string | null>(null);
+  readonly contracts = signal<FarmContract[]>([]);
+  readonly selected = signal<FarmContract | null>(null);
 
-  readonly firstLetter = (name: string): string => name?.charAt(0)?.toUpperCase() ?? '?';
-
-  readonly statusBadgeClass = (status: string): string => {
-    switch (status) {
-      case 'Signed': return 'bg-primary-container text-on-primary-container border-primary';
-      case 'PendingSignature': return 'bg-warning-container text-on-warning-container border-warning';
-      case 'Draft': return 'bg-surface-container-high text-on-surface-variant border-outline-variant';
-      case 'Cancelled': return 'bg-error-container text-on-error-container border-error-container';
-      default: return 'bg-surface-container-high text-on-surface-variant border-outline-variant';
-    }
-  };
-
-  readonly statusLabel = (status: string): string => {
-    switch (status) {
-      case 'Signed': return 'Signed';
-      case 'PendingSignature': return 'Pending Signature';
-      case 'Draft': return 'Draft';
-      case 'Cancelled': return 'Cancelled';
-      default: return status;
-    }
-  };
-
-  constructor(title: Title) {
-    title.setTitle('NileChain - Farm Contracts');
+  ngOnInit(): void {
     this.loadContracts();
   }
 
-  private loadContracts(): void {
+  loadContracts(): void {
     this.loading.set(true);
-    this.farmService.getContracts().subscribe(data => {
-      this.contracts.set(data);
-      this.loading.set(false);
-    });
+    this.error.set(null);
+    this.farmService
+      .getContracts()
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (items) => {
+          this.contracts.set(items);
+          if (items.length > 0 && !this.selected()) {
+            this.selected.set(items[0]);
+          }
+        },
+        error: () => this.error.set('Failed to load contracts.'),
+      });
+  }
+
+  selectContract(contract: FarmContract): void {
+    this.selected.set(contract);
+  }
+
+  contractValue(contract: FarmContract): number | null {
+    if (contract.pricePerTon == null) {
+      return null;
+    }
+    return Number(contract.quantityTons) * Number(contract.pricePerTon);
+  }
+
+  isActive(status: string): boolean {
+    return status.toLowerCase() === 'signed' || status.toLowerCase() === 'active';
   }
 }

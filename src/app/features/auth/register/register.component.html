@@ -97,46 +97,65 @@
               <input type="text" id="farm-name" name="farmName" [attr.placeholder]="'register.farmNamePlaceholder' | translate" required
                 (input)="farmName.set($any($event.target).value)"
                 class="w-full ps-4 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all" />
+              @if (submitted() && !farmName().trim()) {
+                <p class="text-error font-label-sm text-label-sm" role="alert">{{ 'register.errors.farmNameRequired' | translate }}</p>
+              }
             </div>
             <div class="space-y-xs">
               <label for="farm-governorate" class="font-label-sm text-label-sm text-on-surface-variant">{{ 'register.governorate' | translate }}</label>
-              <select id="farm-governorate" (change)="farmGovernorate.set($any($event.target).value)"
+              <select id="farm-governorate" required
+                (change)="farmGovernorate.set($any($event.target).value)"
                 class="w-full ps-4 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all">
                 <option value="">{{ 'common.select' | translate }}</option>
-                <option value="Alexandria">Alexandria</option>
-                <option value="Aswan">Aswan</option>
-                <option value="Asyut">Asyut</option>
-                <option value="Beheira">Beheira</option>
-                <option value="Beni Suef">Beni Suef</option>
-                <option value="Cairo">Cairo</option>
-                <option value="Dakahlia">Dakahlia</option>
-                <option value="Damietta">Damietta</option>
-                <option value="Faiyum">Faiyum</option>
-                <option value="Gharbia">Gharbia</option>
-                <option value="Giza">Giza</option>
-                <option value="Ismailia">Ismailia</option>
-                <option value="Kafr El Sheikh">Kafr El Sheikh</option>
-                <option value="Luxor">Luxor</option>
-                <option value="Matrouh">Matrouh</option>
-                <option value="Minya">Minya</option>
-                <option value="Monufia">Monufia</option>
-                <option value="New Valley">New Valley</option>
-                <option value="North Sinai">North Sinai</option>
-                <option value="Port Said">Port Said</option>
-                <option value="Qalyubia">Qalyubia</option>
-                <option value="Qena">Qena</option>
-                <option value="Red Sea">Red Sea</option>
-                <option value="Sharqia">Sharqia</option>
-                <option value="Sohag">Sohag</option>
-                <option value="South Sinai">South Sinai</option>
-                <option value="Suez">Suez</option>
+                @for (gov of governorates; track gov) {
+                  <option [value]="gov">{{ gov }}</option>
+                }
               </select>
+              @if (submitted() && !farmGovernorate().trim()) {
+                <p class="text-error font-label-sm text-label-sm" role="alert">{{ 'register.errors.governorateRequired' | translate }}</p>
+              }
             </div>
             <div class="space-y-xs">
               <label for="farm-size" class="font-label-sm text-label-sm text-on-surface-variant">{{ 'register.sizeInFeddans' | translate }}</label>
-              <input type="number" id="farm-size" name="farmSize" [attr.placeholder]="'register.sizePlaceholder' | translate" required
+              <input type="number" id="farm-size" name="farmSize" min="0.01" step="any"
+                [attr.placeholder]="'register.sizePlaceholder' | translate" required
                 (input)="onFarmSizeInput($any($event.target).value)"
+                [class.border-error]="submitted() && farmSizeInvalid()"
                 class="w-full ps-4 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all" />
+              @if (submitted() && farmSizeInvalid()) {
+                <p class="text-error font-label-sm text-label-sm" role="alert">{{ 'register.errors.sizeRequired' | translate }}</p>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Factory-specific fields -->
+        @if (selectedRole() === 'factory') {
+          <div class="space-y-md p-md bg-surface-container-low rounded-lg border border-outline-variant">
+            <p class="font-label-md text-label-md text-primary">{{ 'register.factoryDetails' | translate }}</p>
+            <div class="space-y-xs">
+              <label for="factory-name" class="font-label-sm text-label-sm text-on-surface-variant">{{ 'register.factoryName' | translate }}</label>
+              <input type="text" id="factory-name" name="factoryName"
+                [attr.placeholder]="'register.factoryNamePlaceholder' | translate" required
+                (input)="factoryName.set($any($event.target).value)"
+                class="w-full ps-4 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all" />
+              @if (submitted() && !factoryName().trim()) {
+                <p class="text-error font-label-sm text-label-sm" role="alert">{{ 'register.errors.factoryNameRequired' | translate }}</p>
+              }
+            </div>
+            <div class="space-y-xs">
+              <label for="factory-governorate" class="font-label-sm text-label-sm text-on-surface-variant">{{ 'register.governorate' | translate }}</label>
+              <select id="factory-governorate" required
+                (change)="factoryGovernorate.set($any($event.target).value)"
+                class="w-full ps-4 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all">
+                <option value="">{{ 'common.select' | translate }}</option>
+                @for (gov of governorates; track gov) {
+                  <option [value]="gov">{{ gov }}</option>
+                }
+              </select>
+              @if (submitted() && !factoryGovernorate().trim()) {
+                <p class="text-error font-label-sm text-label-sm" role="alert">{{ 'register.errors.governorateRequired' | translate }}</p>
+              }
             </div>
           </div>
         }
@@ -211,6 +230,8 @@
               name="email"
               [attr.placeholder]="'login.emailPlaceholder' | translate"
               required=""
+              autocomplete="email"
+              (input)="emailValue.set($any($event.target).value)"
               class="w-full ps-10 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all"
             />
           </div>
@@ -224,7 +245,7 @@
           >
             {{ 'register.password' | translate }}
             <span class="text-on-surface-variant/60">{{
-              'register.minPassword' | translate
+              'register.passwordPolicyHint' | translate
             }}</span>
           </label>
           <div class="relative">
@@ -239,7 +260,9 @@
               name="password"
               placeholder="••••••••"
               required=""
+              autocomplete="new-password"
               (input)="onPasswordInput($any($event.target).value)"
+              [class.border-error]="showPasswordErrors()"
               class="w-full ps-10 pe-12 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all"
             />
             <button
@@ -260,6 +283,25 @@
               >
             </button>
           </div>
+          @if (passwordValue() || submitted()) {
+            <ul class="mt-xs space-y-1 font-label-sm text-label-sm" aria-live="polite">
+              <li [class]="passwordChecks().minLength ? 'text-primary' : 'text-error'">
+                {{ 'register.passwordRules.minLength' | translate }}
+              </li>
+              <li [class]="passwordChecks().upper ? 'text-primary' : 'text-error'">
+                {{ 'register.passwordRules.upper' | translate }}
+              </li>
+              <li [class]="passwordChecks().lower ? 'text-primary' : 'text-error'">
+                {{ 'register.passwordRules.lower' | translate }}
+              </li>
+              <li [class]="passwordChecks().digit ? 'text-primary' : 'text-error'">
+                {{ 'register.passwordRules.digit' | translate }}
+              </li>
+              <li [class]="passwordChecks().special ? 'text-primary' : 'text-error'">
+                {{ 'register.passwordRules.special' | translate }}
+              </li>
+            </ul>
+          }
         </div>
 
         <!-- Confirm Password -->
@@ -349,7 +391,7 @@
         }
         <button
           type="submit"
-          [disabled]="isSubmitting()"
+          [disabled]="!canSubmit()"
           class="w-full bg-primary-container text-on-primary py-4 rounded-lg font-label-md text-label-md shadow-lg shadow-primary/20 hover:bg-primary transition-all active:scale-[0.98] duration-150 flex items-center justify-center gap-base disabled:opacity-70 disabled:cursor-not-allowed"
         >
           <span>{{

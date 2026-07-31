@@ -1,77 +1,104 @@
-import { Component, inject, signal } from '@angular/core';
-import { Title } from '@angular/platform-browser';
 import { DatePipe } from '@angular/common';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { FarmService } from '../../../core/services/farm/farm.service';
-import { ConversationItem } from '../../../core/models/farm/conversation-item.model';
-import { MessageItem } from '../../../core/models/farm/message-item.model';
+import { Conversation, Message } from '../../../core/models/farm/farm-message.model';
 
 @Component({
   selector: 'app-farm-messages',
   standalone: true,
-  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent, DatePipe, FormsModule],
+  imports: [
+    TranslatePipe,
+    SidebarFarmComponent,
+    UiLanguageToggleComponent,
+    UiThemeToggleComponent,
+    UiLoaderComponent,
+    FormsModule,
+    DatePipe,
+  ],
   templateUrl: './farm-messages.component.html',
 })
-export class FarmMessagesComponent {
+export class FarmMessagesComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly farmService = inject(FarmService);
-
   readonly currentUser = this.authService.currentUser;
-  readonly conversations = signal<ConversationItem[]>([]);
-  readonly messages = signal<MessageItem[]>([]);
-  readonly loadingConversations = signal(true);
-  readonly loadingMessages = signal(false);
-  readonly selectedMatchId = signal<string | null>(null);
-  readonly messageContent = signal('');
+
+  readonly loading = signal(true);
+  readonly messagesLoading = signal(false);
   readonly sending = signal(false);
+  readonly error = signal<string | null>(null);
+  readonly conversations = signal<Conversation[]>([]);
+  readonly messages = signal<Message[]>([]);
+  readonly selectedMatchId = signal<string | null>(null);
 
-  readonly selectedConversation = () =>
-    this.conversations().find(c => c.matchId === this.selectedMatchId()) ?? null;
+  draft = '';
 
-  readonly firstLetter = (name: string): string => name?.charAt(0)?.toUpperCase() ?? '?';
-
-  constructor(title: Title) {
-    title.setTitle('NileChain - Messages');
+  ngOnInit(): void {
     this.loadConversations();
   }
 
-  private loadConversations(): void {
-    this.loadingConversations.set(true);
-    this.farmService.getConversations().subscribe(data => {
-      this.conversations.set(data);
-      this.loadingConversations.set(false);
-      if (data.length > 0) {
-        this.selectConversation(data[0].matchId);
-      }
-    });
+  loadConversations(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.farmService
+      .getConversations()
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (items) => {
+          this.conversations.set(items);
+          if (items.length > 0 && !this.selectedMatchId()) {
+            this.selectConversation(items[0].matchId);
+          }
+        },
+        error: () => this.error.set('Failed to load conversations.'),
+      });
   }
 
   selectConversation(matchId: string): void {
     this.selectedMatchId.set(matchId);
-    this.loadingMessages.set(true);
-    this.messages.set([]);
-    this.farmService.getMessages(matchId).subscribe(data => {
-      this.messages.set(data);
-      this.loadingMessages.set(false);
-    });
+    this.messagesLoading.set(true);
+    this.farmService
+      .getMessages(matchId)
+      .pipe(finalize(() => this.messagesLoading.set(false)))
+      .subscribe({
+        next: (items) => this.messages.set(items),
+        error: () => this.error.set('Failed to load messages.'),
+      });
   }
 
-  sendMessage(): void {
+  selectedConversation(): Conversation | undefined {
+    const id = this.selectedMatchId();
+    return this.conversations().find((c) => c.matchId === id);
+  }
+
+  isOutgoing(message: Message): boolean {
+    return message.senderId === this.currentUser()?.id;
+  }
+
+  send(): void {
     const matchId = this.selectedMatchId();
-    const content = this.messageContent();
-    if (!matchId || !content?.trim() || this.sending()) return;
+    const content = this.draft.trim();
+    if (!matchId || !content) {
+      return;
+    }
 
     this.sending.set(true);
-    this.farmService.sendMessage(matchId, content.trim()).subscribe(() => {
-      this.messageContent.set('');
-      this.sending.set(false);
-      this.farmService.getMessages(matchId).subscribe(data => {
-        this.messages.set(data);
+    this.farmService
+      .sendMessage(matchId, content)
+      .pipe(finalize(() => this.sending.set(false)))
+      .subscribe({
+        next: () => {
+          this.draft = '';
+          this.selectConversation(matchId);
+          this.loadConversations();
+        },
+        error: () => this.error.set('Failed to send message.'),
       });
-    });
   }
 }

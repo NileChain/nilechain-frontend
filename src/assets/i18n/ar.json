@@ -233,6 +233,14 @@
     "imFactory": "أنا مصنع",
     "invalidEmail": "صيغة البريد الإلكتروني غير صحيحة",
     "minPassword": "8 أحرف على الأقل",
+    "passwordPolicyHint": "8 أحرف فأكثر، حرف كبير وصغير ورقم ورمز",
+    "passwordRules": {
+      "minLength": "8 أحرف على الأقل",
+      "upper": "حرف كبير واحد على الأقل (A–Z)",
+      "lower": "حرف صغير واحد على الأقل (a–z)",
+      "digit": "رقم واحد على الأقل (0–9)",
+      "special": "رمز خاص واحد على الأقل (مثل !@#$%)"
+    },
     "passwordsMismatch": "كلمتا المرور غير متطابقتين",
     "termsAgree": "أوافق على",
     "termsOfService": "شروط الخدمة",
@@ -243,8 +251,11 @@
     "accountCreated": "تم إنشاء الحساب بنجاح!",
     "and": "و",
     "farmDetails": "بيانات المزرعة",
+    "factoryDetails": "بيانات المصنع",
     "farmName": "اسم المزرعة",
     "farmNamePlaceholder": "مثال: السلام للمزرعة",
+    "factoryName": "اسم المصنع",
+    "factoryNamePlaceholder": "مثال: صناعات النيل الغذائية",
     "governorate": "المحافظة",
     "sizeInFeddans": "مساحة المزرعة (فدان)",
     "sizePlaceholder": "مثال: 150",
@@ -253,6 +264,12 @@
     "factoryNamePlaceholder": "مثال: مصنع النيل للتصنيع",
     "errors": {
       "required": "يرجى إكمال جميع الحقول المطلوبة.",
+      "selectRole": "يرجى اختيار نوع النشاط (مزرعة أو مصنع).",
+      "weakPassword": "كلمة المرور لا تستوفي متطلبات الأمان.",
+      "farmNameRequired": "اسم المزرعة مطلوب.",
+      "factoryNameRequired": "اسم المصنع مطلوب.",
+      "governorateRequired": "المحافظة مطلوبة.",
+      "sizeRequired": "يجب أن تكون مساحة المزرعة أكبر من صفر.",
       "failed": "تعذّر إنشاء الحساب الآن. يرجى المحاولة مرة أخرى."
     }
   },

@@ -12,20 +12,21 @@
     <div class="flex items-center gap-2 sm:gap-4">
       <ui-language-toggle />
       <ui-theme-toggle />
-      <button type="button" class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant relative"
-        [attr.aria-label]="'common.notifications' | translate">
-        <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
-        @if (unreadCount() > 0) {
-          <span class="absolute top-2 end-2 w-2 h-2 bg-error rounded-full" aria-hidden="true"></span>
-        }
-      </button>
       <div class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant">
         <div class="text-end hidden sm:block">
-          <p class="font-label-md text-label-md text-on-surface leading-tight">{{ currentUser()?.displayName || currentUser()?.email }}</p>
-          <p class="text-label-sm text-label-sm text-on-surface-variant">{{ 'nav.premiumFarmer' | translate }}</p>
+          <p class="font-label-md text-label-md text-on-surface leading-tight">
+            {{ currentUser()?.displayName || currentUser()?.email }}
+          </p>
+          <p class="text-label-sm text-label-sm text-on-surface-variant">
+            {{ 'nav.premiumFarmer' | translate }}
+          </p>
         </div>
-        <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary">
-          <span class="font-bold">{{ firstLetter(currentUser()?.displayName || currentUser()?.email || '?') }}</span>
+        <div
+          class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary"
+        >
+          <span class="font-bold">{{
+            (currentUser()?.displayName || currentUser()?.email || '?').charAt(0).toUpperCase()
+          }}</span>
         </div>
       </div>
     </div>
@@ -44,102 +45,82 @@
     </section>
 
     <nav class="flex items-center gap-2 overflow-x-auto pb-2" [attr.aria-label]="'notifications.title' | translate">
-      @for (f of filterOptions; track f.key) {
-        <button type="button" (click)="setFilter(f.key)"
-          class="px-6 py-2 rounded-full font-title-md text-title-md whitespace-nowrap transition-colors"
-          [class]="filter() === f.key
+      <button
+        type="button"
+        class="px-6 py-2 rounded-full font-title-md text-title-md whitespace-nowrap transition-colors"
+        [class]="
+          filter() === 'all'
             ? 'bg-primary-container text-on-primary-container'
-            : 'border border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container'">
-          {{ f.label | translate }}
-        </button>
-      }
+            : 'border border-outline-variant bg-surface-container-lowest text-on-surface-variant'
+        "
+        (click)="setFilter('all')"
+      >
+        {{ 'notifications.all' | translate }}
+      </button>
+      <button
+        type="button"
+        class="px-6 py-2 rounded-full font-title-md text-title-md whitespace-nowrap transition-colors"
+        [class]="
+          filter() === 'unread'
+            ? 'bg-primary-container text-on-primary-container'
+            : 'border border-outline-variant bg-surface-container-lowest text-on-surface-variant'
+        "
+        (click)="setFilter('unread')"
+      >
+        {{ 'notifications.unread' | translate }}
+      </button>
     </nav>
 
     @if (loading()) {
-      <div class="space-y-4">
-        @for (_ of [1,2,3]; track $index) {
-          <article class="bg-surface-container-lowest rounded-xl p-4 animate-pulse border border-outline-variant flex items-start gap-4">
-            <div class="w-12 h-12 rounded-full bg-surface-container-high shrink-0"></div>
-            <div class="flex-1 space-y-2">
-              <div class="h-4 bg-surface-container-high rounded w-48"></div>
-              <div class="h-3 bg-surface-container-high rounded w-64"></div>
+      <div class="flex justify-center py-16"><ui-loader /></div>
+    } @else if (error()) {
+      <div class="ui-card p-6 text-center space-y-4">
+        <p class="text-on-error-container">{{ error() }}</p>
+        <button type="button" class="ui-btn-primary" (click)="loadNotifications()">Retry</button>
+      </div>
+    } @else if (visible().length === 0) {
+      <p class="text-on-surface-variant text-center py-12">No notifications.</p>
+    } @else {
+      <section class="space-y-3">
+        @for (item of visible(); track item.notificationId) {
+          <article
+            class="ui-card p-4 flex gap-4 items-start"
+            [class.opacity-70]="item.isRead"
+            [class.border-primary]="!item.isRead"
+          >
+            <div
+              class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary shrink-0"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">{{
+                iconFor(item.type)
+              }}</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between gap-3 flex-wrap">
+                <h3 class="font-title-md text-title-md text-on-surface font-bold">
+                  {{ item.title }}
+                </h3>
+                <span class="font-label-sm text-on-surface-variant">
+                  {{ item.createdAt | date: 'medium' }}
+                </span>
+              </div>
+              <p class="font-body-md text-body-md text-on-surface-variant mt-1">
+                {{ item.message }}
+              </p>
+              @if (!item.isRead) {
+                <button
+                  type="button"
+                  class="mt-3 text-primary font-label-md hover:underline"
+                  [disabled]="markingId() === item.notificationId"
+                  (click)="markRead(item)"
+                >
+                  Mark as read
+                </button>
+              }
             </div>
           </article>
         }
-      </div>
-    } @else if (allNotifications().length === 0) {
-      <section class="text-center py-20">
-        <div class="w-24 h-24 rounded-full bg-surface-container-high flex items-center justify-center mx-auto mb-6">
-          <span class="material-symbols-outlined text-5xl text-on-surface-variant">notifications_off</span>
-        </div>
-        <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-2">
-          No notifications yet
-        </h3>
-        <p class="text-body-md text-on-surface-variant max-w-md mx-auto">
-          When something needs your attention, notifications will appear here.
-        </p>
       </section>
-    } @else if (notifications().length === 0) {
-      <section class="text-center py-20">
-        <div class="w-24 h-24 rounded-full bg-surface-container-high flex items-center justify-center mx-auto mb-6">
-          <span class="material-symbols-outlined text-5xl text-on-surface-variant">filter_alt_off</span>
-        </div>
-        <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-2">
-          No {{ typeLabel.toLowerCase() }} notifications
-        </h3>
-        <p class="text-body-md text-on-surface-variant max-w-md mx-auto">
-          Try a different filter to see more notifications.
-        </p>
-      </section>
-    } @else {
-      <div class="flex flex-col gap-4">
-        @for (group of groupedNotifications(); track group.key) {
-          <h3 class="font-label-lg text-label-lg text-outline mt-2 mb-1 uppercase tracking-wider">
-            @if (group.key === 'today') {
-              Today
-            } @else if (group.key === 'yesterday') {
-              Yesterday
-            } @else {
-              Earlier
-            }
-          </h3>
-
-          @for (item of group.items; track item.notificationId) {
-            <article class="bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex items-start gap-4 border {{ notificationBorder(item.type) }}"
-              (click)="markAsRead(item.notificationId)">
-              @if (!item.isRead) {
-                <div class="absolute top-4 end-4 w-2 h-2 rounded-full {{ unreadDot(item.type) }}" aria-hidden="true"></div>
-              }
-              <div class="w-12 h-12 rounded-full {{ notificationBg(item.type) }} flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined {{ notificationIconColor(item.type) }} text-[24px]"
-                  [class.fill]="item.type === 'match'" aria-hidden="true">{{ notificationIcon(item.type) }}</span>
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex justify-between items-start mb-1 gap-2">
-                  <h4 class="font-title-md text-title-md text-on-surface" [class.pe-6]="!item.isRead">
-                    {{ item.title }}
-                  </h4>
-                  <span class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">
-                    {{ item.createdAt | date:'short' }}
-                  </span>
-                </div>
-                <p class="font-body-md text-body-md text-on-surface-variant mb-2">
-                  {{ item.message }}
-                </p>
-              </div>
-            </article>
-          }
-        }
-      </div>
-
-      @if (hasMore()) {
-        <div class="mt-4 text-center pb-8">
-          <button type="button" (click)="loadMore()"
-            class="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container transition-colors">
-            {{ 'common.loadMore' | translate }}
-          </button>
-        </div>
-      }
     }
   </div>
 </main>

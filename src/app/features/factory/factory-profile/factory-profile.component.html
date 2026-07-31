@@ -1,265 +1,182 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
-  <header
-    class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40">
-    <div class="flex items-center gap-4">
-      <button type="button" class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
-        [attr.aria-label]="'common.toggleMenu' | translate">
-        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-      </button>
-      <h1 class="font-headline-md text-headline-md font-bold text-primary">
-        {{ 'factory.profile.title' | translate }}
-      </h1>
-    </div>
-    <div class="flex items-center gap-2 sm:gap-4">
-      <ui-language-toggle />
-      <ui-theme-toggle />
-      <button type="button" class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant relative"
-        [attr.aria-label]="'common.notifications' | translate">
-        <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
-        <span class="absolute top-2 end-2 w-2 h-2 bg-error rounded-full" aria-hidden="true"></span>
-      </button>
-      <div class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant">
-        <div class="text-end hidden sm:block">
-            <p class="font-label-md text-label-md text-on-surface leading-tight">{{ currentUser()?.displayName || currentUser()?.email }}</p>
-            <p class="text-label-sm text-label-sm text-on-surface-variant inline-flex items-center gap-1">
-              @if (profile()?.isVerified) {
-                <span class="material-symbols-outlined text-xs text-success-green" aria-hidden="true">verified</span>
-                <span>{{ 'common.verified' | translate }}</span>
-              } @else {
-                <span>{{ 'common.pending' | translate }}</span>
-              }
-            </p>
-        </div>
-        <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary">
-          <span class="font-bold">{{ (currentUser()?.displayName || currentUser()?.email || '?').charAt(0).toUpperCase() }}{{ (currentUser()?.displayName || currentUser()?.email || '').split(' ').length > 1 ? (currentUser()?.displayName || currentUser()?.email || '').split(' ').pop()!.charAt(0).toUpperCase() : '' }}</span>
-        </div>
+  <div class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in">
+    <header class="flex justify-between items-center gap-4 flex-wrap">
+      <div class="flex-1 min-w-[200px]">
+        <h1 class="font-headline-lg text-headline-lg text-on-surface">
+          {{ 'factory.profile.title' | translate }}
+        </h1>
+        <p class="font-body-lg text-body-lg text-on-surface-variant mt-2">
+          {{ 'factory.profile.subtitle' | translate }}
+        </p>
       </div>
-    </div>
-  </header>
-
-  @if (loading()) {
-    <div class="flex justify-center py-20">
-      <ui-loader size="lg" [label]="'common.loading' | translate" />
-    </div>
-  }
-
-  @else if (!profile()) {
-    <div class="flex justify-center py-20">
-      <div class="text-center max-w-md">
-        <span class="material-symbols-outlined text-6xl text-outline mb-4" aria-hidden="true">error</span>
-        <h2 class="font-headline-md text-headline-md text-on-surface mb-2">{{ error() }}</h2>
-        <button type="button" (click)="loadProfile()" class="ui-btn-primary mt-4">
-          {{ 'common.retry' | translate }}
+      <div class="flex items-center gap-2 sm:gap-4">
+        <ui-language-toggle />
+        <ui-theme-toggle />
+        <button
+          type="button"
+          class="ui-btn-primary shrink-0"
+          [disabled]="saving() || loading()"
+          (click)="save()"
+        >
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">save</span>
+          {{ 'factory.profile.saveChanges' | translate }}
         </button>
       </div>
-    </div>
-  }
+    </header>
 
-  @else {
-    @let p = profile()!;
+    @if (loading()) {
+      <div class="flex justify-center py-16"><ui-loader /></div>
+    } @else if (error() && !profile()) {
+      <div class="ui-card p-6 text-center space-y-4">
+        <p class="text-on-error-container">{{ error() }}</p>
+        <button type="button" class="ui-btn-primary" (click)="loadProfile()">Retry</button>
+      </div>
+    } @else if (profile(); as data) {
+      @if (error()) {
+        <p class="text-on-error-container">{{ error() }}</p>
+      }
+      @if (saveSuccess()) {
+        <p class="text-primary">Profile saved.</p>
+      }
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <div class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in">
-        <section class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
-          <div>
-            <h2 class="font-headline-lg text-headline-lg text-on-surface">
-              {{ 'factory.profile.title' | translate }}
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+        <div class="lg:col-span-4 flex flex-col gap-gutter">
+          <div class="ui-card p-6 relative overflow-hidden">
+            <div class="flex items-center gap-4">
+              <div
+                class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shrink-0"
+              >
+                <span
+                  class="material-symbols-outlined text-on-primary-container text-2xl fill"
+                  aria-hidden="true"
+                  >{{ data.isVerified ? 'verified' : 'pending' }}</span
+                >
+              </div>
+              <div>
+                <h2 class="font-title-lg text-title-lg text-primary font-bold">
+                  {{
+                    data.isVerified
+                      ? ('factory.profile.verifiedFactory' | translate)
+                      : 'Pending verification'
+                  }}
+                </h2>
+                <p class="font-body-md text-body-md text-on-surface-variant">
+                  Rating {{ data.averageRating | number: '1.1-1' }} ({{ data.ratingCount }})
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="ui-card p-6 flex flex-col items-center">
+            <h2 class="font-title-md text-title-md text-on-surface mb-4 self-start w-full">
+              {{ 'factory.profile.completion' | translate }}
             </h2>
-            <p class="font-body-lg text-body-lg text-on-surface-variant mt-2">
-              {{ 'factory.profile.subtitle' | translate }}
+            <div
+              class="relative w-32 h-32 mb-4 rounded-full"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-valuenow]="data.completionPercent"
+              [attr.aria-label]="'factory.profile.completion' | translate"
+              [style.background]="
+                'conic-gradient(var(--color-primary) 0% ' +
+                data.completionPercent +
+                '%, var(--color-surface-container-highest) ' +
+                data.completionPercent +
+                '% 100%)'
+              "
+            >
+              <div
+                class="absolute inset-[10px] rounded-full bg-surface-container-lowest flex flex-col items-center justify-center"
+              >
+                <span class="font-headline-lg text-headline-lg font-bold text-primary"
+                  >{{ data.completionPercent }}%</span
+                >
+              </div>
+            </div>
+            <p class="font-body-md text-body-md text-center text-on-surface-variant">
+              {{ 'factory.profile.completionHint' | translate }}
             </p>
           </div>
-          <div class="flex items-center gap-3">
-            <button type="submit" [disabled]="saving()" class="ui-btn-primary flex items-center justify-center gap-2 shrink-0">
-              @if (saving()) {
-                <ui-loader size="sm" />
-                <span>{{ 'common.saving' | translate }}</span>
-              } @else {
-                <span class="material-symbols-outlined" aria-hidden="true">save</span>
-                <span>{{ 'factory.profile.saveChanges' | translate }}</span>
-              }
-            </button>
-          </div>
-        </section>
+        </div>
 
-        @if (error()) {
-          <p class="text-error font-label-sm" role="alert">{{ error() }}</p>
-        }
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-          <div class="lg:col-span-4 flex flex-col gap-gutter">
-
-            @if (p.isVerified) {
-            <article
-              class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant relative overflow-hidden">
-              <div class="absolute -end-12 -top-12 w-32 h-32 bg-primary-container opacity-10 rounded-full"
-                aria-hidden="true"></div>
-              <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-on-primary-container text-2xl fill"
-                    aria-hidden="true">verified</span>
-                </div>
-                <div>
-                  <h3 class="font-title-lg text-title-lg text-primary font-bold">
-                    {{ 'factory.profile.verifiedFactory' | translate }}
-                  </h3>
-                  <p class="font-body-md text-body-md text-on-surface-variant">
-                    {{ 'factory.profile.verifiedByNile' | translate }}
-                  </p>
-                </div>
+        <div class="lg:col-span-8 flex flex-col gap-gutter">
+          <section class="ui-card p-6" [formGroup]="form">
+            <h2 class="font-title-lg text-title-lg text-on-surface mb-6 flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary" aria-hidden="true">info</span>
+              {{ 'factory.profile.basicInfo' | translate }}
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label
+                  class="block font-label-lg text-label-lg text-on-surface-variant mb-2"
+                  for="factory-name"
+                >
+                  {{ 'factory.profile.factoryName' | translate }}
+                </label>
+                <input id="factory-name" type="text" class="ui-input" formControlName="name" />
               </div>
-            </article>
-            }
-
-            <article
-              class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col items-center justify-center">
-              <h3 class="font-title-md text-title-md text-on-surface mb-4 self-start w-full">
-                {{ 'factory.profile.completion' | translate }}
-              </h3>
-              <div class="relative w-32 h-32 mb-4" role="img"
-                [attr.aria-label]="'factory.profile.completion' | translate">
-                <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100" aria-hidden="true">
-                  <circle cx="50" cy="50" r="45" fill="transparent" stroke="var(--color-surface-container-highest)"
-                    stroke-width="8"></circle>
-                  <circle cx="50" cy="50" r="45" fill="transparent" stroke="var(--color-primary-container)"
-                    stroke-width="8" stroke-dasharray="282.7" [attr.stroke-dashoffset]="282.7 - (282.7 * p.completionPercent / 100)"
-                    class="transition-all duration-1000 ease-out">
-                  </circle>
-                </svg>
-                <div class="absolute inset-0 flex flex-col items-center justify-center">
-                  <span class="font-headline-lg text-headline-lg font-bold text-primary">
-                    {{ p.completionPercent }}%
-                  </span>
-                </div>
+              <div>
+                <label
+                  class="block font-label-lg text-label-lg text-on-surface-variant mb-2"
+                  for="factory-gov"
+                >
+                  {{ 'factory.profile.governorate' | translate }}
+                </label>
+                <input
+                  id="factory-gov"
+                  type="text"
+                  class="ui-input"
+                  formControlName="governorate"
+                />
               </div>
-              <p class="font-body-md text-body-md text-center text-on-surface-variant">
-                {{ 'factory.profile.completionHint' | translate }}
-              </p>
-            </article>
-
-            <article class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant">
-              <h3 class="font-title-lg text-title-lg text-on-surface mb-4 flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary" aria-hidden="true">phone</span>
-                {{ 'factory.profile.phone' | translate }}
-              </h3>
-              <div class="flex items-center gap-3">
-                <input type="tel" class="ui-input flex-1" [value]="phoneNumber()" (input)="phoneNumber.set($any($event.target).value)"
-                  [attr.placeholder]="'factory.profile.phonePlaceholder' | translate" />
-                <button type="button" (click)="updatePhone()" [disabled]="updatingPhone() || !phoneNumber()"
-                  class="ui-btn-primary shrink-0">
-                  @if (updatingPhone()) {
-                    <ui-loader size="sm" />
-                  } @else {
-                    {{ 'common.update' | translate }}
-                  }
-                </button>
+              <div class="md:col-span-2">
+                <label
+                  class="block font-label-lg text-label-lg text-on-surface-variant mb-2"
+                  for="factory-address"
+                >
+                  {{ 'factory.profile.address' | translate }}
+                </label>
+                <input
+                  id="factory-address"
+                  type="text"
+                  class="ui-input"
+                  formControlName="location"
+                />
               </div>
-            </article>
-          </div>
-
-          <div class="lg:col-span-8 flex flex-col gap-gutter">
-            <article class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant">
-              <h3 class="font-title-lg text-title-lg text-on-surface mb-6 flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary" aria-hidden="true">info</span>
-                {{ 'factory.profile.basicInfo' | translate }}
-              </h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label class="block font-label-lg text-label-lg text-on-surface-variant mb-2" for="factory-name">
-                    {{ 'factory.profile.factoryName' | translate }}
-                  </label>
-                  <input id="factory-name" class="ui-input w-full" type="text" formControlName="name" />
-                  @if (form.controls.name.invalid && form.controls.name.touched) {
-                    <p class="text-error font-label-sm text-label-sm mt-1">{{ 'common.requiredField' | translate }}</p>
-                  }
-                </div>
-                <div>
-                  <label class="block font-label-lg text-label-lg text-on-surface-variant mb-2" for="factory-location">
-                    {{ 'factory.profile.address' | translate }}
-                  </label>
-                  <div class="relative">
-                    <span
-                      class="material-symbols-outlined absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
-                      aria-hidden="true">location_on</span>
-                    <input id="factory-location" class="ui-input w-full pe-10" type="text" formControlName="location" />
-                  </div>
-                </div>
-                <div>
-                  <label class="block font-label-lg text-label-lg text-on-surface-variant mb-2" for="factory-governorate">
-                    {{ 'factory.profile.governorate' | translate }}
-                  </label>
-                  <select id="factory-governorate" class="ui-input w-full appearance-none" formControlName="governorate">
-                    <option value="Alexandria">Alexandria</option>
-                    <option value="Aswan">Aswan</option>
-                    <option value="Asyut">Asyut</option>
-                    <option value="Beheira">Beheira</option>
-                    <option value="Beni Suef">Beni Suef</option>
-                    <option value="Cairo">Cairo</option>
-                    <option value="Dakahlia">Dakahlia</option>
-                    <option value="Damietta">Damietta</option>
-                    <option value="Faiyum">Faiyum</option>
-                    <option value="Gharbia">Gharbia</option>
-                    <option value="Giza">Giza</option>
-                    <option value="Ismailia">Ismailia</option>
-                    <option value="Kafr El Sheikh">Kafr El Sheikh</option>
-                    <option value="Luxor">Luxor</option>
-                    <option value="Matrouh">Matrouh</option>
-                    <option value="Minya">Minya</option>
-                    <option value="Monufia">Monufia</option>
-                    <option value="New Valley">New Valley</option>
-                    <option value="North Sinai">North Sinai</option>
-                    <option value="Port Said">Port Said</option>
-                    <option value="Qalyubia">Qalyubia</option>
-                    <option value="Qena">Qena</option>
-                    <option value="Red Sea">Red Sea</option>
-                    <option value="Sharqia">Sharqia</option>
-                    <option value="Sohag">Sohag</option>
-                    <option value="South Sinai">South Sinai</option>
-                    <option value="Suez">Suez</option>
-                  </select>
-                  @if (form.controls.governorate.invalid && form.controls.governorate.touched) {
-                    <p class="text-error font-label-sm text-label-sm mt-1">{{ 'common.requiredField' | translate }}</p>
-                  }
-                </div>
-                <div>
-                  <label class="block font-label-lg text-label-lg text-on-surface-variant mb-2" for="factory-industry">
-                    {{ 'factory.profile.industryType' | translate }}
-                  </label>
-                  <select id="factory-industry" class="ui-input w-full appearance-none" formControlName="industryType">
-                    <option value="">{{ 'common.select' | translate }}</option>
-                    <option value="Food Processing">Food Processing</option>
-                    <option value="Beverage Production">Beverage Production</option>
-                    <option value="Textile Manufacturing">Textile Manufacturing</option>
-                    <option value="Pharmaceutical">Pharmaceutical</option>
-                    <option value="Animal Feed">Animal Feed</option>
-                    <option value="Dairy Processing">Dairy Processing</option>
-                    <option value="Oil Extraction">Oil Extraction</option>
-                    <option value="Snack Manufacturing">Snack Manufacturing</option>
-                    <option value="Frozen Food">Frozen Food</option>
-                    <option value="Packaging">Packaging</option>
-                    <option value="Other">Other</option>
-                  </select>
-                  @if (form.controls.governorate.invalid && form.controls.governorate.touched) {
-                    <p class="text-error font-label-sm text-label-sm mt-1">{{ 'common.requiredField' | translate }}</p>
-                  }
-                </div>
+              <div class="md:col-span-2">
+                <label
+                  class="block font-label-lg text-label-lg text-on-surface-variant mb-2"
+                  for="factory-industry"
+                >
+                  Industry type
+                </label>
+                <input
+                  id="factory-industry"
+                  type="text"
+                  class="ui-input"
+                  formControlName="industryType"
+                />
               </div>
-            </article>
-          </div>
+              <div>
+                <label
+                  class="block font-label-lg text-label-lg text-on-surface-variant mb-2"
+                  for="factory-phone"
+                >
+                  Phone
+                </label>
+                <input
+                  id="factory-phone"
+                  type="text"
+                  class="ui-input"
+                  [value]="data.phone || ''"
+                  readonly
+                />
+              </div>
+            </div>
+          </section>
         </div>
       </div>
-    </form>
-  }
-  <!-- Success Toast -->
-  <div
-    [class.translate-y-20]="!showToast()"
-    [class.opacity-0]="!showToast()"
-    [class.translate-y-0]="showToast()"
-    [class.opacity-100]="showToast()"
-    class="fixed bottom-margin-desktop start-1/2 -translate-x-1/2 transform transition-all duration-300 bg-secondary text-on-secondary px-lg py-md rounded-full flex items-center gap-sm shadow-xl z-50"
-    role="status"
-  >
-    <span class="material-symbols-outlined" data-weight="fill" aria-hidden="true">check_circle</span>
-    <span class="font-label-md text-label-md">{{ toastMessage() | translate }}</span>
+    }
   </div>
 </main>
