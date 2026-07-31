@@ -1,4 +1,4 @@
-export interface FarmDashboard {
+export interface FarmDashboardData {
   riskScore: number | null;
   activeMatchesCount: number;
   completedContractsCount: number;
@@ -26,7 +26,7 @@ export interface RecentMatchItem {
 export interface ImprovementTip {
   category: string;
   currentScore: number;
-  severity: string;
+  severity: 'high' | 'medium' | 'low';
   message: string;
   icon: string;
 }

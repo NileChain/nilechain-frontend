@@ -303,6 +303,11 @@ export class RegisterComponent {
       registerPayload.governorate = this.factoryGovernorate().trim();
     }
 
+    if (role === 'factory') {
+      registerPayload.name = this.factoryName();
+      registerPayload.governorate = this.factoryGovernorate();
+    }
+
     this.authService
       .register(registerPayload)
       .pipe(finalize(() => this.isSubmitting.set(false)))

@@ -1,15 +1,9 @@
-<app-sidebar-farm active="matches" />
-
 <main class="md:ms-[280px] min-h-screen bg-surface">
   <header
-    class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
-  >
+    class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40">
     <div class="flex items-center gap-4">
-      <button
-        type="button"
-        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
-        [attr.aria-label]="'common.toggleMenu' | translate"
-      >
+      <button type="button" class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
+        [attr.aria-label]="'common.toggleMenu' | translate">
         <span class="material-symbols-outlined" aria-hidden="true">menu</span>
       </button>
       <h1 class="font-headline-md text-headline-md font-bold text-primary">
@@ -27,6 +21,7 @@
           <p class="text-label-sm text-label-sm text-on-surface-variant">
             {{ 'nav.premiumFarmer' | translate }}
           </p>
+          <p class="text-label-sm text-label-sm text-on-surface-variant">{{ 'nav.premiumFarmer' | translate }}</p>
         </div>
         <div
           class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary"
@@ -40,6 +35,7 @@
   </header>
 
   <div class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in">
+    <!-- Page Heading -->
     <section class="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-4">
       <div>
         <h2 class="font-headline-lg text-headline-lg font-bold text-on-surface">
@@ -51,15 +47,16 @@
       </div>
     </section>
 
+    <!-- Filters Bar -->
     <section
       class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant flex flex-wrap gap-4 items-center justify-between"
-      [attr.aria-label]="'farm.matches.filters' | translate"
-    >
+      [attr.aria-label]="'farm.matches.filters' | translate">
       <div class="flex gap-2 items-center text-outline font-title-md text-title-md">
         <span class="material-symbols-outlined" aria-hidden="true">filter_list</span>
         <span>{{ 'farm.matches.filters' | translate }}</span>
       </div>
       <div class="flex flex-wrap gap-4 flex-1">
+        <!-- Status Filter -->
         <div class="relative w-full sm:w-auto">
           <label class="sr-only" for="filter-status">{{ 'farm.matches.status' | translate }}</label>
           <select
@@ -74,6 +71,7 @@
             <option value="Rejected">Rejected</option>
           </select>
         </div>
+        <!-- Crop Filter -->
         <div class="relative w-full sm:w-auto">
           <label class="sr-only" for="filter-crop">{{ 'farm.matches.crop' | translate }}</label>
           <select

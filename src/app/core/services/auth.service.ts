@@ -196,7 +196,7 @@ export class AuthService {
       return null;
     }
 
-    const roles = this.extractRoles(payload);
+    const roles = this.extractRoles(payload as Record<string, unknown>);
     const email = payload.email ?? payload.unique_name ?? '';
     const id = payload.sub ?? payload.nameid;
 
@@ -224,17 +224,28 @@ export class AuthService {
     }
   }
 
-  private extractRoles(payload: JwtPayload): string[] {
-    if (Array.isArray(payload.roles)) {
-      return payload.roles;
+  private extractRoles(payload: Record<string, unknown>): string[] {
+    const roleClaim =
+      'http://schemas.microsoft.com/ws/2008/06/identity/claims/role';
+
+    if (Array.isArray(payload['roles'])) {
+      return payload['roles'] as string[];
     }
 
-    if (Array.isArray(payload.role)) {
-      return payload.role;
+    if (Array.isArray(payload['role'])) {
+      return payload['role'] as string[];
     }
 
-    if (typeof payload.role === 'string') {
-      return [payload.role];
+    if (Array.isArray(payload[roleClaim])) {
+      return payload[roleClaim] as string[];
+    }
+
+    if (typeof payload['role'] === 'string') {
+      return [payload['role'] as string];
+    }
+
+    if (typeof payload[roleClaim] === 'string') {
+      return [payload[roleClaim] as string];
     }
 
     // ASP.NET often uses the long claim URI

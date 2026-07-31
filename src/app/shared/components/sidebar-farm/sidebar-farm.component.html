@@ -1,58 +1,38 @@
-<aside
-  class="fixed start-0 top-0 h-full w-[280px] bg-surface-container-low border-e border-outline-variant flex-col p-4 space-y-2 z-50 hidden md:flex"
->
-  <!-- Brand -->
+<aside class="fixed left-0 top-0 h-full w-[280px] bg-surface-container-low border-r border-outline-variant flex flex-col p-4 space-y-2 z-50 hidden md:flex">
   <div class="px-2 py-4 mb-6">
     <div class="flex items-center gap-3">
-      <span
-        class="material-symbols-outlined text-primary text-4xl fill"
-        aria-hidden="true"
-        >agriculture</span
-      >
+      <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">agriculture</span>
       <div>
-        <p class="font-headline-sm text-headline-sm font-bold text-primary leading-tight">
-          {{ 'app.name' | translate }}
-        </p>
-        <p class="text-label-sm font-label-sm text-on-surface-variant opacity-70">
-          {{ 'nav.enterprisePortal' | translate }}
-        </p>
+        <h1 class="font-headline-sm text-headline-sm font-bold text-primary leading-tight">NileChain B2B</h1>
+        <p class="text-label-sm font-label-sm text-on-surface-variant opacity-70">Enterprise Portal</p>
       </div>
     </div>
   </div>
 
-  <!-- Main navigation -->
   <nav class="flex-grow space-y-1" [attr.aria-label]="'nav.dashboard' | translate">
     @for (item of items; track item.key) {
       <a
         [routerLink]="item.link"
         [class]="
-          active === item.key
+          active() === item.key
             ? 'sidebar-active flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-100 active:scale-95'
             : 'text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150'
         "
-        [attr.aria-current]="active === item.key ? 'page' : null"
+        [attr.aria-current]="active() === item.key ? 'page' : null"
       >
         <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
         {{ item.labelKey | translate }}
       </a>
     }
   </nav>
-
-  <!-- Footer navigation -->
   <div class="pt-4 border-t border-outline-variant space-y-1">
-    <a
-      href="#"
-      class="text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150"
-    >
-      <span class="material-symbols-outlined" aria-hidden="true">settings</span>
-      {{ 'nav.settings' | translate }}
+    <a href="#" class="text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150">
+      <span class="material-symbols-outlined">settings</span>
+      Settings
     </a>
-    <a
-      href="#"
-      class="text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150"
-    >
-      <span class="material-symbols-outlined" aria-hidden="true">help_center</span>
-      {{ 'nav.support' | translate }}
+    <a href="#" class="text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150">
+      <span class="material-symbols-outlined">help_center</span>
+      Support
     </a>
     <button
       type="button"

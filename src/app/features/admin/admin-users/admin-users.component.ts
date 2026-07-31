@@ -2,7 +2,6 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
-import { SidebarAdminComponent } from '../../../shared/components/sidebar-admin/sidebar-admin.component';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
@@ -22,6 +21,7 @@ import { AuthService } from '../../../core/services/auth.service';
     FormsModule,
   ],
   templateUrl: './admin-users.component.html',
+  styleUrl: './admin-users.component.scss',
 })
 export class AdminUsersComponent implements OnInit {
   private readonly adminService = inject(AdminService);

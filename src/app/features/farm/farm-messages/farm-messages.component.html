@@ -1,15 +1,8 @@
-<app-sidebar-farm active="messages" />
-
 <main class="md:ms-[280px] min-h-screen bg-surface flex flex-col">
-  <header
-    class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40 shrink-0"
-  >
+  <header class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40 shrink-0">
     <div class="flex items-center gap-4">
-      <button
-        type="button"
-        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
-        [attr.aria-label]="'common.toggleMenu' | translate"
-      >
+      <button type="button" class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
+        [attr.aria-label]="'common.toggleMenu' | translate">
         <span class="material-symbols-outlined" aria-hidden="true">menu</span>
       </button>
       <h1 class="font-headline-md text-headline-md font-bold text-primary">

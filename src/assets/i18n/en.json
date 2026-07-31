@@ -28,6 +28,7 @@
     "reject": "Reject",
     "accept": "Accept",
     "empty": "Nothing to show yet",
+    "noData": "No data available yet",
     "noResults": "No results found",
     "updatedAgo": "Updated {{time}} ago",
     "aiAssistant": "AI Assistant",
@@ -67,7 +68,11 @@
     "update": "Update",
     "saved": "Saved",
     "saving": "Saving…",
-    "retry": "Retry"
+    "retry": "Retry",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "blocked": "Blocked"
   },
   "nav": {
     "home": "Home",
@@ -254,6 +259,9 @@
     "governorate": "Governorate",
     "sizeInFeddans": "Farm Size (Feddans)",
     "sizePlaceholder": "e.g. 150",
+    "factoryDetails": "Factory Details",
+    "factoryName": "Factory Name",
+    "factoryNamePlaceholder": "e.g. Nile Processing Factory",
     "errors": {
       "required": "Please complete all required fields.",
       "selectRole": "Please select a business type (Farm or Factory).",
@@ -312,7 +320,8 @@
       "buyerRatings": "Buyer Ratings",
       "statusNegotiating": "Negotiating",
       "statusMatching": "Matching",
-      "statusOnHold": "On Hold"
+      "statusOnHold": "On Hold",
+      "statusExpired": "Expired"
     },
     "profile": {
       "title": "Farm profile",
@@ -465,7 +474,14 @@
       "documents": "Documents & files",
       "dropzoneTitle": "Drag and drop files here",
       "dropzoneHint": "Or click to browse files from your device",
-      "supportedFormats": "Supported formats: PDF, JPG, PNG (max 5 MB)"
+      "supportedFormats": "Supported formats: PDF, JPG, PNG (max 5 MB)",
+      "industryType": "Industry type",
+      "phone": "Phone Number",
+      "phonePlaceholder": "e.g. 01001234567",
+      "saved": "Profile saved successfully!",
+      "saveFailed": "Failed to save profile.",
+      "phoneUpdated": "Phone number updated!",
+      "phoneUpdateFailed": "Failed to update phone number."
     },
     "supplyRequest": {
       "title": "New supply request",
@@ -611,7 +627,22 @@
       "roleFactory": "Factory",
       "roleAdmin": "Admin",
       "advancedFilter": "Advanced filters",
-      "showingResults": "Showing 1 to 3 of 45 results"
+      "showingResults": "Showing 1 to 3 of 45 results",
+      "unblock": "Unblock",
+      "page": "Page {{current}} of {{total}}",
+      "noUsers": "No users found",
+      "businessName": "Business name",
+      "farmName": "Farm name",
+      "factoryName": "Factory name",
+      "governorate": "Governorate",
+      "sizeInFeddans": "Size (Feddans)",
+      "editUser": "Edit user",
+      "joinedAt": "Joined at",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "allVerified": "All",
+      "verifiedOnly": "Verified",
+      "unverifiedOnly": "Unverified"
     },
     "contracts": {
       "title": "Contracts",

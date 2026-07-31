@@ -21,11 +21,13 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   readonly roles = this.authService.roles;
 
   goToDashboard(): void {
-    const userRoles = this.roles();
+    const roles = this.roles().map((r) => r.toLowerCase());
 
-    if (userRoles.includes('Farm') || userRoles.includes('Admin')) {
+    if (roles.includes('admin')) {
+      void this.router.navigate(['/admin-dashboard']);
+    } else if (roles.includes('farm')) {
       void this.router.navigate(['/farm-dashboard']);
-    } else if (userRoles.includes('Factory')) {
+    } else if (roles.includes('factory')) {
       void this.router.navigate(['/factory-dashboard']);
     } else {
       void this.router.navigate(['/login']);
@@ -34,7 +36,8 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
 
   logout(): void {
     this.authService.logout().subscribe({
-      next: () => void this.router.navigate(['/landing']),
+      next: () => void this.router.navigate(['/login']),
+      error: () => void this.router.navigate(['/login']),
     });
   }
 

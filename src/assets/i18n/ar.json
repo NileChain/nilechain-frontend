@@ -28,6 +28,7 @@
     "reject": "رفض",
     "accept": "قبول",
     "empty": "لا يوجد محتوى للعرض بعد",
+    "noData": "لا توجد بيانات متاحة بعد",
     "noResults": "لم يتم العثور على نتائج",
     "updatedAgo": "تم التحديث منذ {{time}}",
     "aiAssistant": "مساعد الذكاء الاصطناعي",
@@ -67,7 +68,11 @@
     "update": "تحديث",
     "saved": "تم الحفظ",
     "saving": "جارٍ الحفظ…",
-    "retry": "إعادة المحاولة"
+    "retry": "إعادة المحاولة",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "blocked": "محظور"
   },
   "nav": {
     "home": "الرئيسية",
@@ -254,6 +259,9 @@
     "governorate": "المحافظة",
     "sizeInFeddans": "مساحة المزرعة (فدان)",
     "sizePlaceholder": "مثال: 150",
+    "factoryDetails": "بيانات المصنع",
+    "factoryName": "اسم المصنع",
+    "factoryNamePlaceholder": "مثال: مصنع النيل للتصنيع",
     "errors": {
       "required": "يرجى إكمال جميع الحقول المطلوبة.",
       "selectRole": "يرجى اختيار نوع النشاط (مزرعة أو مصنع).",
@@ -312,7 +320,8 @@
       "buyerRatings": "تقييمات المشترين",
       "statusNegotiating": "قيد التفاوض",
       "statusMatching": "قيد المطابقة",
-      "statusOnHold": "معلّق"
+      "statusOnHold": "معلّق",
+      "statusExpired": "منتهي"
     },
     "profile": {
       "title": "ملف المزرعة",
@@ -465,7 +474,14 @@
       "documents": "الوثائق والمستندات",
       "dropzoneTitle": "اسحب وأفلت الملفات هنا",
       "dropzoneHint": "أو انقر لتصفح الملفات من جهازك",
-      "supportedFormats": "صيغ مدعومة: PDF, JPG, PNG (الحد الأقصى 5 ميجابايت)"
+      "supportedFormats": "صيغ مدعومة: PDF, JPG, PNG (الحد الأقصى 5 ميجابايت)",
+      "industryType": "نوع الصناعة",
+      "phone": "رقم الهاتف",
+      "phonePlaceholder": "مثال: 01001234567",
+      "saved": "تم حفظ الملف الشخصي بنجاح!",
+      "saveFailed": "فشل حفظ الملف الشخصي.",
+      "phoneUpdated": "تم تحديث رقم الهاتف!",
+      "phoneUpdateFailed": "فشل تحديث رقم الهاتف."
     },
     "supplyRequest": {
       "title": "طلب توريد جديد",
@@ -611,7 +627,22 @@
       "roleFactory": "مصنع",
       "roleAdmin": "مشرف",
       "advancedFilter": "تصفية متقدمة",
-      "showingResults": "عرض ١ إلى ٣ من ٤٥ نتيجة"
+      "showingResults": "عرض ١ إلى ٣ من ٤٥ نتيجة",
+      "unblock": "إلغاء الحظر",
+      "page": "صفحة {{current}} من {{total}}",
+      "noUsers": "لم يتم العثور على مستخدمين",
+      "businessName": "اسم النشاط التجاري",
+      "farmName": "اسم المزرعة",
+      "factoryName": "اسم المصنع",
+      "governorate": "المحافظة",
+      "sizeInFeddans": "المساحة (فدان)",
+      "editUser": "تعديل المستخدم",
+      "joinedAt": "تاريخ الانضمام",
+      "deactivate": "تعطيل",
+      "activate": "تفعيل",
+      "allVerified": "الكل",
+      "verifiedOnly": "موثّق",
+      "unverifiedOnly": "غير موثّق"
     },
     "contracts": {
       "title": "العقود",
