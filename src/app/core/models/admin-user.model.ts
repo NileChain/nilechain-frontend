@@ -5,6 +5,7 @@ export interface AdminUser {
   role: string;
   isVerified: boolean;
   isBlocked: boolean;
+  isActive: boolean;
   createdAt: string;
   farmName?: string;
   factoryName?: string;

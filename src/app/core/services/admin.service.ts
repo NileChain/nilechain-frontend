@@ -9,9 +9,10 @@ export class AdminService {
   private readonly http = inject(HttpClient);
   private readonly api = `${environment.backendUrl}/admin`;
 
-  getUsers(role?: string, search?: string, page = 1, pageSize = 10): Observable<PagedResult<AdminUser>> {
+  getUsers(role?: string, isVerified?: boolean, search?: string, page = 1, pageSize = 10): Observable<PagedResult<AdminUser>> {
     let params = new HttpParams().set('page', page).set('pageSize', pageSize);
     if (role) params = params.set('role', role);
+    if (isVerified !== undefined) params = params.set('isVerified', isVerified);
     if (search) params = params.set('search', search);
     return this.http.get<PagedResult<AdminUser>>(`${this.api}/users`, { params });
   }
@@ -34,5 +35,13 @@ export class AdminService {
 
   unblockUser(id: string): Observable<void> {
     return this.http.put<void>(`${this.api}/users/${id}/unblock`, {});
+  }
+
+  deactivateUser(id: string): Observable<void> {
+    return this.http.put<void>(`${this.api}/users/${id}/deactivate`, {});
+  }
+
+  reactivateUser(id: string): Observable<void> {
+    return this.http.put<void>(`${this.api}/users/${id}/reactivate`, {});
   }
 }

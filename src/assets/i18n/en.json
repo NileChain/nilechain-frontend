@@ -619,7 +619,13 @@
       "factoryName": "Factory name",
       "governorate": "Governorate",
       "sizeInFeddans": "Size (Feddans)",
-      "editUser": "Edit user"
+      "editUser": "Edit user",
+      "joinedAt": "Joined at",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "allVerified": "All",
+      "verifiedOnly": "Verified",
+      "unverifiedOnly": "Unverified"
     },
     "contracts": {
       "title": "Contracts",
