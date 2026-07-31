@@ -1,66 +1,99 @@
-import { Component, inject } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { SidebarFarmComponent } from '../../../shared/components/sidebar-farm/sidebar-farm.component';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
 import { AuthService } from '../../../core/services/auth.service';
+import { FarmService } from '../../../core/services/farm/farm.service';
+import { FarmNotification } from '../../../core/models/farm/farm-notification.model';
 
 @Component({
   selector: 'app-farm-notifications',
   standalone: true,
-  imports: [TranslatePipe, SidebarFarmComponent, UiLanguageToggleComponent, UiThemeToggleComponent],
+  imports: [
+    TranslatePipe,
+    SidebarFarmComponent,
+    UiLanguageToggleComponent,
+    UiThemeToggleComponent,
+    UiLoaderComponent,
+    DatePipe,
+  ],
   templateUrl: './farm-notifications.component.html',
 })
-export class FarmNotificationsComponent {
+export class FarmNotificationsComponent implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly farmService = inject(FarmService);
   readonly currentUser = this.authService.currentUser;
-  readonly todayItems = [
-    {
-      id: 'n1',
-      type: 'risk' as const,
-      unread: true,
-      titleKey: 'notifications.riskTitle',
-      bodyKey: 'notifications.riskBody',
-      timeKey: 'notifications.ago10m',
-      actionKey: 'notifications.viewDetails',
-      tagKey: 'notifications.climateRisk',
-      tagIcon: 'thermostat',
-    },
-    {
-      id: 'n2',
-      type: 'match' as const,
-      unread: true,
-      titleKey: 'notifications.matchTitle',
-      bodyKey: 'notifications.matchBody',
-      timeKey: 'notifications.ago1h',
-      actionKey: 'notifications.reviewMatch',
-      tagKey: 'notifications.matchScore',
-      tagIcon: 'auto_awesome',
-    },
-    {
-      id: 'n3',
-      type: 'contract' as const,
-      unread: false,
-      titleKey: 'notifications.contractReadyTitle',
-      bodyKey: 'notifications.contractReadyBody',
-      timeKey: 'notifications.ago2h',
-      actionKey: 'notifications.viewContract',
-      tagKey: '',
-      tagIcon: '',
-    },
-  ] as const;
 
-  readonly yesterdayItems = [
-    {
-      id: 'n4',
-      type: 'message' as const,
-      unread: false,
-      titleKey: 'notifications.messageTitle',
-      bodyKey: 'notifications.messageBody',
-      timeKey: 'notifications.yesterdayTime',
-      actionKey: 'notifications.reply',
-      imageUrl:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuDpsb3al6kO-Ue5vKDIWZlJgf2ZxsmanGj7eFPpLwaKfK1jEavI3gKXzzs5Fj2-CN5ntXrRSBCsCtfRcm6NBHxSD7LFCs3sRpMnq21FTGN5NNtjK9qAFcuSBAyN0NN5hLfNb026VNbnRE76iH3VbCKcpqG3gAbiwj8xtFCz-h5uiDPBafD0LtWqMOc3OKXzmQaa5bGZcEt2zXQMV7BCaMOxRR610H8sRw8jidQeu7WwnGI-miJiP7FQPuQcQ99Uphzskn4sfyLdFoA',
-    },
-  ] as const;
+  readonly loading = signal(true);
+  readonly error = signal<string | null>(null);
+  readonly notifications = signal<FarmNotification[]>([]);
+  readonly filter = signal<'all' | 'unread'>('all');
+  readonly markingId = signal<string | null>(null);
+
+  readonly visible = computed(() => {
+    const items = this.notifications();
+    if (this.filter() === 'unread') {
+      return items.filter((n) => !n.isRead);
+    }
+    return items;
+  });
+
+  ngOnInit(): void {
+    this.loadNotifications();
+  }
+
+  loadNotifications(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.farmService
+      .getNotifications()
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (items) => this.notifications.set(items),
+        error: () => this.error.set('Failed to load notifications.'),
+      });
+  }
+
+  setFilter(value: 'all' | 'unread'): void {
+    this.filter.set(value);
+  }
+
+  markRead(notification: FarmNotification): void {
+    if (notification.isRead) {
+      return;
+    }
+    this.markingId.set(notification.notificationId);
+    this.farmService
+      .markNotificationAsRead(notification.notificationId)
+      .pipe(finalize(() => this.markingId.set(null)))
+      .subscribe({
+        next: () => {
+          this.notifications.update((list) =>
+            list.map((n) =>
+              n.notificationId === notification.notificationId ? { ...n, isRead: true } : n
+            )
+          );
+        },
+        error: () => this.error.set('Failed to mark notification as read.'),
+      });
+  }
+
+  iconFor(type: string | null): string {
+    switch ((type ?? '').toLowerCase()) {
+      case 'match':
+        return 'auto_awesome';
+      case 'contract':
+        return 'description';
+      case 'message':
+        return 'chat';
+      case 'risk':
+        return 'thermostat';
+      default:
+        return 'notifications';
+    }
+  }
 }

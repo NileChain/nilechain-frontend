@@ -84,9 +84,9 @@ export class FarmProfileComponent implements OnInit {
           this.phoneNumber.set(response.phone || '');
           this.form.patchValue({
             name: response.name,
-            location: response.location,
-            governorate: response.governorate,
-            sizeInFeddans: response.sizeInFeddans,
+            location: response.location ?? '',
+            governorate: response.governorate ?? '',
+            sizeInFeddans: response.sizeInFeddans ?? 0,
             soilType: response.soilType ?? '',
           });
         },

@@ -1,173 +1,154 @@
 <app-sidebar-factory active="matches" />
 
-<main class="md:ms-[280px] min-h-screen bg-surface flex flex-col">
-  <!-- Topbar -->
+<main class="md:ms-[280px] min-h-screen bg-surface">
   <header
-    class="w-full bg-surface border-b border-outline-variant sticky top-0 z-30 h-16 flex items-center px-margin-mobile md:px-margin-desktop justify-between gap-4"
+    class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
   >
-    <div class="flex items-center gap-3 min-w-0">
-      <span class="material-symbols-outlined text-primary text-2xl shrink-0" aria-hidden="true"
-        >agriculture</span
-      >
-      <span class="font-title-lg text-title-lg text-primary font-semibold truncate">{{
-        'app.name' | translate
-      }}</span>
-    </div>
+    <h1 class="font-headline-md text-headline-md font-bold text-primary">
+      {{ 'factory.progress.title' | translate }}
+    </h1>
     <div class="flex items-center gap-2 sm:gap-4">
       <ui-language-toggle />
       <ui-theme-toggle />
     </div>
   </header>
 
-  <div
-    class="flex-1 overflow-y-auto p-margin-mobile md:p-margin-desktop flex flex-col items-center"
-  >
-    <div class="w-full max-w-3xl mb-8 text-center animate-fade-in">
-      <h1 class="font-headline-lg text-headline-lg text-on-surface mb-2">
-        {{ 'factory.progress.title' | translate }}
-      </h1>
-      <p
-        class="font-body-lg text-body-lg text-on-surface-variant flex items-center justify-center gap-2 flex-wrap"
-      >
-        <span class="material-symbols-outlined text-primary animate-spin" aria-hidden="true"
-          >sync</span
-        >
-        {{ 'factory.progress.eta' | translate: { seconds: 45 } }}
-      </p>
-      <p class="font-body-md text-body-md text-on-surface-variant mt-2">
-        {{ 'factory.progress.subtitle' | translate }}
-      </p>
-    </div>
-
-    <!-- Request summary -->
-    <div
-      class="w-full max-w-3xl ui-card p-4 sm:p-6 mb-8 grid grid-cols-2 md:grid-cols-4 gap-4 animate-slide-up"
-    >
-      @for (item of summary; track item.labelKey) {
-        <div class="flex flex-col min-w-0">
-          <span class="font-label-lg text-label-lg text-on-surface-variant">{{
-            item.labelKey | translate
-          }}</span>
-          <span class="font-title-md text-title-md text-on-surface font-semibold truncate">{{
-            item.value
-          }}</span>
-        </div>
-      }
-    </div>
-
-    <!-- Workflow steps -->
-    <div class="w-full max-w-3xl ui-card p-6 sm:p-8 relative">
-      <div
-        class="absolute start-[39px] top-10 bottom-10 w-0.5 bg-surface-container-high -z-0"
-        aria-hidden="true"
-      ></div>
-      <ol class="space-y-6 relative z-10">
-        @for (step of steps; track step.id) {
-          <li
-            class="flex items-start gap-4 sm:gap-6 animate-fade-in"
-            [class.opacity-50]="step.status === 'pending'"
+  <div class="p-margin-mobile md:p-margin-desktop max-w-4xl mx-auto space-y-gutter animate-fade-in">
+    @if (!requestId()) {
+      <div class="ui-card p-6 space-y-3">
+        <p class="text-on-surface-variant">
+          Open with a supply request id:
+          <code class="bg-surface-container px-2 py-1 rounded"
+            >/agent-progress?requestId=&#123;guid&#125;</code
           >
-            @if (step.status === 'done') {
-              <div
-                class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 shadow-sm border-2 border-surface-container-lowest"
-              >
-                <span class="material-symbols-outlined text-sm fill" aria-hidden="true">check</span>
-              </div>
-              <div class="flex-1 pt-1 min-w-0">
-                <h2 class="font-title-md text-title-md text-on-surface">
-                  {{ step.titleKey | translate }}
-                </h2>
-                @if (step.descKey) {
-                  <p class="font-body-md text-body-md text-on-surface-variant mt-1">
-                    {{ step.descKey | translate }}
-                  </p>
-                }
-              </div>
-            } @else if (step.status === 'active') {
-              <div
-                class="w-8 h-8 rounded-full bg-surface-container-lowest border-2 border-primary flex items-center justify-center shrink-0"
-              >
-                <span
-                  class="material-symbols-outlined text-primary text-sm animate-spin"
-                  aria-hidden="true"
-                  >progress_activity</span
-                >
-              </div>
-              <div
-                class="flex-1 pt-1 bg-surface-container p-4 rounded-lg border border-outline-variant min-w-0"
-                role="status"
-                aria-live="polite"
-              >
-                <div class="flex justify-between items-center mb-2 gap-2 flex-wrap">
-                  <h2
-                    class="font-title-md text-title-md text-primary font-bold flex items-center gap-2"
-                  >
-                    <span class="material-symbols-outlined text-xl" aria-hidden="true"
-                      >query_stats</span
-                    >
-                    {{ step.titleKey | translate }}
-                  </h2>
-                  <span
-                    class="bg-primary-container text-on-primary-container px-2 py-1 rounded-lg font-label-sm text-label-sm"
-                  >
-                    {{ 'factory.progress.inProgress' | translate }}
-                  </span>
-                </div>
-                @if (step.descKey) {
-                  <p class="font-body-md text-body-md text-on-surface-variant">
-                    {{ step.descKey | translate }}
-                  </p>
-                }
-                <div
-                  class="mt-3 h-2 rounded-full bg-surface-container-high overflow-hidden"
-                  role="progressbar"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  aria-valuenow="65"
-                  [attr.aria-label]="'factory.progress.step4' | translate"
-                >
-                  <div class="h-full w-[65%] bg-primary rounded-full transition-all"></div>
-                </div>
-              </div>
-            } @else {
-              <div
-                class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center shrink-0 border-2 border-surface-container-lowest"
-              >
-                <span class="material-symbols-outlined text-sm" aria-hidden="true">more_horiz</span>
-              </div>
-              <div class="flex-1 pt-1 min-w-0">
-                <h2 class="font-title-md text-title-md text-on-surface">
-                  {{ step.titleKey | translate }}
-                </h2>
-                @if (step.descKey) {
-                  <div
-                    class="mt-2 bg-surface-container-high rounded-md p-3 border border-outline-variant"
-                  >
-                    <p
-                      class="font-body-md text-body-md text-on-surface-variant flex items-start gap-2"
-                    >
-                      <span class="material-symbols-outlined text-base shrink-0" aria-hidden="true"
-                        >info</span
-                      >
-                      {{ step.descKey | translate }}
-                    </p>
-                  </div>
-                }
-              </div>
-            }
-          </li>
-        }
-      </ol>
-    </div>
+        </p>
+      </div>
+    } @else {
+      <section class="ui-card p-6 space-y-4">
+        <p class="font-label-md text-on-surface-variant">
+          Request: {{ requestId() }}
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-label-md mb-1" for="agent-crop">Crop type</label>
+            <input id="agent-crop" class="ui-input" [(ngModel)]="cropType" name="cropType" />
+          </div>
+          <div>
+            <label class="block font-label-md mb-1" for="agent-qty">Quantity (tons)</label>
+            <input
+              id="agent-qty"
+              type="number"
+              class="ui-input"
+              [(ngModel)]="quantityTons"
+              name="quantityTons"
+            />
+          </div>
+          <div>
+            <label class="block font-label-md mb-1" for="agent-price">Price / ton</label>
+            <input
+              id="agent-price"
+              type="number"
+              class="ui-input"
+              [(ngModel)]="pricePerTon"
+              name="pricePerTon"
+            />
+          </div>
+          <div>
+            <label class="block font-label-md mb-1" for="agent-date">Delivery date</label>
+            <input
+              id="agent-date"
+              type="date"
+              class="ui-input"
+              [(ngModel)]="deliveryDate"
+              name="deliveryDate"
+            />
+          </div>
+          <div>
+            <label class="block font-label-md mb-1" for="agent-gov">Factory governorate</label>
+            <input
+              id="agent-gov"
+              class="ui-input"
+              [(ngModel)]="factoryGovernorate"
+              name="factoryGovernorate"
+            />
+          </div>
+          <div>
+            <label class="block font-label-md mb-1" for="agent-quality">Quality specs</label>
+            <input
+              id="agent-quality"
+              class="ui-input"
+              [(ngModel)]="qualitySpecs"
+              name="qualitySpecs"
+            />
+          </div>
+        </div>
+        <button
+          type="button"
+          class="ui-btn-primary"
+          [disabled]="loading()"
+          (click)="runAgent()"
+        >
+          {{ loading() ? 'Running…' : 'Run Agent' }}
+        </button>
+      </section>
+    }
 
-    <div class="w-full max-w-3xl mt-8 flex justify-center animate-fade-in pb-8">
-      <button
-        type="button"
-        class="px-6 py-3 rounded-lg font-title-md text-title-md bg-error-container text-on-error-container hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2"
-      >
-        <span class="material-symbols-outlined" aria-hidden="true">cancel</span>
-        {{ 'factory.progress.cancel' | translate }}
-      </button>
-    </div>
+    @if (loading()) {
+      <div class="flex justify-center py-8"><ui-loader /></div>
+    }
+
+    @if (error()) {
+      <p class="text-on-error-container">{{ error() }}</p>
+    }
+
+    @if (response(); as result) {
+      <section class="ui-card p-6 space-y-4">
+        <h2 class="font-title-lg text-on-surface">Results</h2>
+        @if (result.comparisonReport) {
+          <p class="whitespace-pre-wrap text-on-surface-variant">{{ result.comparisonReport }}</p>
+        }
+        @if (topMatches().length === 0) {
+          <p class="text-on-surface-variant">No matches returned.</p>
+        } @else {
+          <ul class="space-y-3">
+            @for (match of topMatches(); track match.farmId) {
+              <li class="border border-outline-variant rounded-lg p-4 flex justify-between gap-4 flex-wrap">
+                <div>
+                  <p class="font-title-md text-on-surface font-bold">{{ match.farmName }}</p>
+                  <p class="text-on-surface-variant text-sm">
+                    {{ match.governorate }} · Risk {{ match.riskLevel }}
+                    ({{ match.riskScore | number: '1.0-0' }})
+                  </p>
+                  <p class="text-sm text-on-surface-variant">
+                    Crops: {{ match.cropTypes.join(', ') || '—' }}
+                  </p>
+                </div>
+                <div class="text-end space-y-2">
+                  <p class="font-bold text-primary">{{ match.matchScore | number: '1.0-0' }}%</p>
+                  <a
+                    class="ui-btn-secondary !py-1 !px-3 inline-flex"
+                    routerLink="/contract-signing"
+                    [queryParams]="{
+                      requestId: requestId(),
+                      farmId: match.farmId,
+                      farmName: match.farmName,
+                    }"
+                  >
+                    Generate contract
+                  </a>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+        <a
+          class="ui-btn-primary inline-flex"
+          routerLink="/factory-matches"
+          [queryParams]="{ requestId: requestId() }"
+        >
+          View persisted matches
+        </a>
+      </section>
+    }
   </div>
 </main>

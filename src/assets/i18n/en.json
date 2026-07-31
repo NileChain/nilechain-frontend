@@ -228,6 +228,14 @@
     "imFactory": "I'm a Factory",
     "invalidEmail": "Invalid email format",
     "minPassword": "Min. 8 characters",
+    "passwordPolicyHint": "8+ chars, upper, lower, digit, special",
+    "passwordRules": {
+      "minLength": "At least 8 characters",
+      "upper": "At least one uppercase letter (A–Z)",
+      "lower": "At least one lowercase letter (a–z)",
+      "digit": "At least one number (0–9)",
+      "special": "At least one special character (e.g. !@#$%)"
+    },
     "passwordsMismatch": "Passwords do not match",
     "termsAgree": "I agree to the",
     "termsOfService": "Terms of Service",
@@ -238,13 +246,22 @@
     "accountCreated": "Account created successfully!",
     "and": "and",
     "farmDetails": "Farm Details",
+    "factoryDetails": "Factory Details",
     "farmName": "Farm Name",
     "farmNamePlaceholder": "e.g. El Salam Farm",
+    "factoryName": "Factory Name",
+    "factoryNamePlaceholder": "e.g. Nile Food Industries",
     "governorate": "Governorate",
     "sizeInFeddans": "Farm Size (Feddans)",
     "sizePlaceholder": "e.g. 150",
     "errors": {
       "required": "Please complete all required fields.",
+      "selectRole": "Please select a business type (Farm or Factory).",
+      "weakPassword": "Password does not meet the security requirements.",
+      "farmNameRequired": "Farm name is required.",
+      "factoryNameRequired": "Factory name is required.",
+      "governorateRequired": "Governorate is required.",
+      "sizeRequired": "Farm size must be greater than 0.",
       "failed": "Unable to create account right now. Please try again."
     }
   },

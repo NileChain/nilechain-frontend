@@ -1,77 +1,105 @@
-import { Component, inject } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { SidebarFarmComponent } from '../../../shared/components/sidebar-farm/sidebar-farm.component';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
 import { AuthService } from '../../../core/services/auth.service';
+import { FarmService } from '../../../core/services/farm/farm.service';
+import { Conversation, Message } from '../../../core/models/farm/farm-message.model';
 
 @Component({
   selector: 'app-farm-messages',
   standalone: true,
-  imports: [TranslatePipe, SidebarFarmComponent, UiLanguageToggleComponent, UiThemeToggleComponent],
+  imports: [
+    TranslatePipe,
+    SidebarFarmComponent,
+    UiLanguageToggleComponent,
+    UiThemeToggleComponent,
+    UiLoaderComponent,
+    FormsModule,
+    DatePipe,
+  ],
   templateUrl: './farm-messages.component.html',
 })
-export class FarmMessagesComponent {
+export class FarmMessagesComponent implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly farmService = inject(FarmService);
   readonly currentUser = this.authService.currentUser;
-  readonly conversations = [
-    {
-      id: 'c1',
-      name: 'Modern Valley Farms',
-      previewKey: 'messages.preview1',
-      timeKey: 'messages.now',
-      active: true,
-      online: true,
-      avatarType: 'initial' as const,
-      initial: 'M',
-      imageUrl: '',
-    },
-    {
-      id: 'c2',
-      name: 'Nile Export Co.',
-      previewKey: 'messages.preview2',
-      timeKey: 'messages.timeMorning',
-      active: false,
-      online: false,
-      avatarType: 'image' as const,
-      initial: '',
-      imageUrl:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuAM5dU2rz0_IKwFiHkSl0ynP5A0BXQUehASz-Go580-eL7FXwwrIb62pwo7a9UXJTI5Q3IpVVFuibaQelPe4gCRZdq8M34RrER57stigAkyK8jiYHKQSGwmB-Nv56_SRnaQC9lbcAo_PRRER1w2g-9804klXd1HgorDjNfghX_rQ2mBEQ75FI3WxSLUSRsuWmznaShIJDOlUq7VIIeVyOF-CpGBykRhjt8tBEeBJxa6wwORJ1Y97LC4oUWx4MTzXoC616RypaDaEfw',
-    },
-    {
-      id: 'c3',
-      name: 'Delta Silos',
-      previewKey: 'messages.preview3',
-      timeKey: 'messages.yesterday',
-      active: false,
-      online: false,
-      avatarType: 'initial' as const,
-      initial: 'D',
-      imageUrl: '',
-    },
-  ] as const;
 
-  readonly chatMessages = [
-    {
-      id: 'm1',
-      kind: 'incoming' as const,
-      bodyKey: 'messages.msg1',
-      time: '09:45 AM',
-      hasAttachment: false,
-    },
-    {
-      id: 'm2',
-      kind: 'incoming' as const,
-      bodyKey: 'messages.msg2',
-      time: '09:47 AM',
-      hasAttachment: true,
-    },
-    {
-      id: 'm3',
-      kind: 'outgoing' as const,
-      bodyKey: 'messages.msg3',
-      time: '09:55 AM',
-      hasAttachment: false,
-    },
-  ] as const;
+  readonly loading = signal(true);
+  readonly messagesLoading = signal(false);
+  readonly sending = signal(false);
+  readonly error = signal<string | null>(null);
+  readonly conversations = signal<Conversation[]>([]);
+  readonly messages = signal<Message[]>([]);
+  readonly selectedMatchId = signal<string | null>(null);
+
+  draft = '';
+
+  ngOnInit(): void {
+    this.loadConversations();
+  }
+
+  loadConversations(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.farmService
+      .getConversations()
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (items) => {
+          this.conversations.set(items);
+          if (items.length > 0 && !this.selectedMatchId()) {
+            this.selectConversation(items[0].matchId);
+          }
+        },
+        error: () => this.error.set('Failed to load conversations.'),
+      });
+  }
+
+  selectConversation(matchId: string): void {
+    this.selectedMatchId.set(matchId);
+    this.messagesLoading.set(true);
+    this.farmService
+      .getMessages(matchId)
+      .pipe(finalize(() => this.messagesLoading.set(false)))
+      .subscribe({
+        next: (items) => this.messages.set(items),
+        error: () => this.error.set('Failed to load messages.'),
+      });
+  }
+
+  selectedConversation(): Conversation | undefined {
+    const id = this.selectedMatchId();
+    return this.conversations().find((c) => c.matchId === id);
+  }
+
+  isOutgoing(message: Message): boolean {
+    return message.senderId === this.currentUser()?.id;
+  }
+
+  send(): void {
+    const matchId = this.selectedMatchId();
+    const content = this.draft.trim();
+    if (!matchId || !content) {
+      return;
+    }
+
+    this.sending.set(true);
+    this.farmService
+      .sendMessage(matchId, content)
+      .pipe(finalize(() => this.sending.set(false)))
+      .subscribe({
+        next: () => {
+          this.draft = '';
+          this.selectConversation(matchId);
+          this.loadConversations();
+        },
+        error: () => this.error.set('Failed to send message.'),
+      });
+  }
 }

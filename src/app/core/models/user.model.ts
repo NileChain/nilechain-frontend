@@ -29,27 +29,29 @@ export interface ResetPasswordRequest {
   token: string;
 }
 
-export interface AuthTokens {
-  accessToken: string;
-  refreshToken?: string;
-  expiresInSeconds?: number;
-}
-
+/** Maps to backend AuthResponse */
 export interface AuthResponse {
   accessToken: string;
-  refreshToken?: string;
-  expiresAt?: string;
-  user?: UserProfile;
+  refreshToken: string;
+  expiresAt: string;
+  user: UserResponse;
+}
+
+/** Maps to backend UserResponse / CurrentUserResponse */
+export interface UserResponse {
+  id: string;
+  email: string;
+  role: string;
+  emailConfirmed: boolean;
+  isVerified: boolean;
 }
 
 export interface UserProfile {
   id?: string;
   email: string;
   displayName?: string;
-
   role?: string;
   roles?: string[];
-
   emailConfirmed?: boolean;
   isVerified?: boolean;
 }

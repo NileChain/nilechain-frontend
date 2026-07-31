@@ -1,45 +1,72 @@
-import { Component, inject } from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { SidebarFarmComponent } from '../../../shared/components/sidebar-farm/sidebar-farm.component';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
 import { AuthService } from '../../../core/services/auth.service';
+import { FarmService } from '../../../core/services/farm/farm.service';
+import { FarmContract } from '../../../core/models/farm/farm-contract.model';
 
 @Component({
   selector: 'app-farm-contracts',
   standalone: true,
-  imports: [TranslatePipe, SidebarFarmComponent, UiLanguageToggleComponent, UiThemeToggleComponent],
+  imports: [
+    TranslatePipe,
+    SidebarFarmComponent,
+    UiLanguageToggleComponent,
+    UiThemeToggleComponent,
+    UiLoaderComponent,
+    DatePipe,
+    DecimalPipe,
+  ],
   templateUrl: './farm-contracts.component.html',
 })
-export class FarmContractsComponent {
+export class FarmContractsComponent implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly farmService = inject(FarmService);
   readonly currentUser = this.authService.currentUser;
-  readonly contracts = [
-    {
-      id: 'NCH-2026-084',
-      factory: 'Al-Wadi Food Industries',
-      crop: 'Hard Wheat',
-      amount: '250,000',
-      date: '12 May 2026',
-      status: 'review' as const,
-    },
-    {
-      id: 'NCH-2026-038',
-      factory: 'Nile Sugar Company',
-      crop: 'Sugar Beet',
-      amount: '820,000',
-      date: '05 May 2026',
-      status: 'active' as const,
-    },
-    {
-      id: 'NCH-2026-041',
-      factory: 'Al-Wadi Food Industries',
-      crop: 'Hard Wheat',
-      amount: '250,000',
-      date: '12 May 2026',
-      status: 'review' as const,
-    },
-  ] as const;
 
-  readonly pages = [1, 2] as const;
+  readonly loading = signal(true);
+  readonly error = signal<string | null>(null);
+  readonly contracts = signal<FarmContract[]>([]);
+  readonly selected = signal<FarmContract | null>(null);
+
+  ngOnInit(): void {
+    this.loadContracts();
+  }
+
+  loadContracts(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.farmService
+      .getContracts()
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (items) => {
+          this.contracts.set(items);
+          if (items.length > 0 && !this.selected()) {
+            this.selected.set(items[0]);
+          }
+        },
+        error: () => this.error.set('Failed to load contracts.'),
+      });
+  }
+
+  selectContract(contract: FarmContract): void {
+    this.selected.set(contract);
+  }
+
+  contractValue(contract: FarmContract): number | null {
+    if (contract.pricePerTon == null) {
+      return null;
+    }
+    return Number(contract.quantityTons) * Number(contract.pricePerTon);
+  }
+
+  isActive(status: string): boolean {
+    return status.toLowerCase() === 'signed' || status.toLowerCase() === 'active';
+  }
 }

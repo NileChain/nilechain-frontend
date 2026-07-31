@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable, of, tap } from 'rxjs';
+import { catchError, map, Observable, of, switchMap, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AuthResponse,
@@ -11,6 +11,7 @@ import {
   RegisterRequest,
   ResetPasswordRequest,
   UserProfile,
+  UserResponse,
 } from '../models/user.model';
 import { TokenStorageService } from './token-storage.service';
 
@@ -52,10 +53,7 @@ export class AuthService {
   login(payload: LoginRequest): Observable<UserProfile> {
     return this.http
       .post<AuthResponse>(this.getUrl(environment.auth.endpoints.login), payload)
-      .pipe(
-        tap((response) => this.establishSession(response)),
-        map(() => this.userSignal() as UserProfile)
-      );
+      .pipe(switchMap((response) => this.afterAuth(response)));
   }
 
   register(payload: RegisterRequest): Observable<UserProfile> {
@@ -64,10 +62,7 @@ export class AuthService {
         this.getUrl(environment.auth.endpoints.register),
         payload
       )
-      .pipe(
-        tap((response) => this.establishSession(response)),
-        map(() => this.userSignal() as UserProfile)
-      );
+      .pipe(switchMap((response) => this.afterAuth(response)));
   }
 
   logout(): Observable<void> {
@@ -99,45 +94,80 @@ export class AuthService {
   refreshToken(): Observable<AuthResponse> {
     const refreshToken = this.tokenStorage.getRefreshToken();
     return this.http
-      .post<AuthResponse>(this.getUrl(environment.auth.endpoints.refresh), { refreshToken } as RefreshTokenRequest)
+      .post<AuthResponse>(this.getUrl(environment.auth.endpoints.refresh), {
+        refreshToken,
+      } as RefreshTokenRequest)
       .pipe(
-        tap((response) => this.establishSession(response))
+        switchMap((response) =>
+          this.afterAuth(response).pipe(map(() => response))
+        )
       );
   }
 
-  getMe(): Observable<UserProfile> {
-    return this.http.get<UserProfile>(this.getUrl(environment.auth.endpoints.me));
+  getMe(): Observable<UserResponse> {
+    return this.http.get<UserResponse>(this.getUrl(environment.auth.endpoints.me));
   }
 
   forgotPassword(payload: ForgotPasswordRequest): Observable<void> {
-    return this.http.post<void>(this.getUrl(environment.auth.endpoints.forgotPassword), payload);
+    return this.http.post<void>(
+      this.getUrl(environment.auth.endpoints.forgotPassword),
+      payload
+    );
   }
 
   resetPassword(payload: ResetPasswordRequest): Observable<void> {
-    return this.http.post<void>(this.getUrl(environment.auth.endpoints.resetPassword), payload);
+    return this.http.post<void>(
+      this.getUrl(environment.auth.endpoints.resetPassword),
+      payload
+    );
   }
 
   confirmEmail(userId: string, token: string): Observable<void> {
-    return this.http.get<void>(`${this.getUrl(environment.auth.endpoints.confirmEmail)}?userId=${userId}&token=${encodeURIComponent(token)}`);
+    return this.http.get<void>(
+      `${this.getUrl(environment.auth.endpoints.confirmEmail)}?userId=${userId}&token=${encodeURIComponent(token)}`
+    );
   }
 
   updatePhone(phoneNumber: string): Observable<void> {
-    return this.http.put<void>(this.getUrl(environment.auth.endpoints.phone), { phoneNumber });
+    return this.http.put<void>(this.getUrl(environment.auth.endpoints.phone), {
+      phoneNumber,
+    });
+  }
+
+  private afterAuth(response: AuthResponse): Observable<UserProfile> {
+    this.establishSession(response);
+    return this.hydrateCurrentUser();
+  }
+
+  private hydrateCurrentUser(): Observable<UserProfile> {
+    return this.getMe().pipe(
+      tap((me) => this.applyUserResponse(me)),
+      map(() => this.userSignal() as UserProfile),
+      catchError(() => of(this.userSignal() as UserProfile))
+    );
+  }
+
+  private applyUserResponse(me: UserResponse): void {
+    const fromToken = this.buildUserFromToken(this.accessTokenSignal());
+    this.userSignal.set({
+      id: me.id,
+      email: me.email,
+      role: me.role,
+      roles: me.role ? [me.role] : [],
+      emailConfirmed: me.emailConfirmed,
+      isVerified: me.isVerified,
+      displayName: fromToken?.displayName ?? me.email,
+    });
   }
 
   private establishSession(response: AuthResponse): void {
     this.tokenStorage.setTokens(response.accessToken, response.refreshToken);
     this.accessTokenSignal.set(response.accessToken);
 
-    const userFromToken = this.buildUserFromToken(response.accessToken);
-
     if (response.user) {
-      this.userSignal.set({
-        ...response.user,
-        roles: response.user.role ? [response.user.role] : [],
-      });
+      this.applyUserResponse(response.user);
     } else {
-      this.userSignal.set(userFromToken);
+      this.userSignal.set(this.buildUserFromToken(response.accessToken));
     }
   }
 
@@ -174,6 +204,7 @@ export class AuthService {
       id,
       email,
       displayName: payload.unique_name,
+      role: roles[0],
       roles,
     };
   }
@@ -204,6 +235,18 @@ export class AuthService {
 
     if (typeof payload.role === 'string') {
       return [payload.role];
+    }
+
+    // ASP.NET often uses the long claim URI
+    const claimRole =
+      (payload as Record<string, unknown>)[
+        'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+      ];
+    if (typeof claimRole === 'string') {
+      return [claimRole];
+    }
+    if (Array.isArray(claimRole)) {
+      return claimRole as string[];
     }
 
     return [];

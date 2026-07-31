@@ -1,59 +1,100 @@
-import { Component } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { SidebarFactoryComponent } from '../../../shared/components/sidebar-factory/sidebar-factory.component';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
+import { AgentService } from '../../../core/services/agent/agent.service';
+import { AgentRequest, AgentResponse, MatchResult } from '../../../core/models/agent/agent.model';
+import { saveAgentSession } from '../../../core/utils/agent-session';
 
 @Component({
   selector: 'app-agent-progress',
   standalone: true,
-  imports: [TranslatePipe, SidebarFactoryComponent, UiLanguageToggleComponent, UiThemeToggleComponent],
+  imports: [
+    TranslatePipe,
+    SidebarFactoryComponent,
+    UiLanguageToggleComponent,
+    UiThemeToggleComponent,
+    UiLoaderComponent,
+    FormsModule,
+    RouterLink,
+    DecimalPipe,
+  ],
   templateUrl: './agent-progress.component.html',
 })
-export class AgentProgressComponent {
-  readonly summary = [
-    { labelKey: 'factory.progress.cropLabel', value: 'Durum Wheat' },
-    { labelKey: 'factory.progress.quantityLabel', value: '500 ton' },
-    { labelKey: 'factory.progress.priceLabel', value: '12,000 EGP / ton' },
-    { labelKey: 'factory.progress.deliveryLabel', value: '15 Aug 2026' },
-  ] as const;
+export class AgentProgressComponent implements OnInit {
+  private readonly agentService = inject(AgentService);
+  private readonly route = inject(ActivatedRoute);
 
-  readonly steps = [
-    {
-      id: 's1',
-      titleKey: 'factory.progress.step1',
-      descKey: 'factory.progress.step1Desc',
-      status: 'done' as const,
-    },
-    {
-      id: 's2',
-      titleKey: 'factory.progress.step2',
-      descKey: 'factory.progress.step2Desc',
-      status: 'done' as const,
-    },
-    {
-      id: 's3',
-      titleKey: 'factory.progress.step3',
-      descKey: 'factory.progress.step3Desc',
-      status: 'done' as const,
-    },
-    {
-      id: 's4',
-      titleKey: 'factory.progress.step4',
-      descKey: 'factory.progress.step4Desc',
-      status: 'active' as const,
-    },
-    {
-      id: 's5',
-      titleKey: 'factory.progress.step5',
-      descKey: 'factory.progress.step5Desc',
-      status: 'pending' as const,
-    },
-    {
-      id: 's6',
-      titleKey: 'factory.progress.step6',
-      descKey: null,
-      status: 'pending' as const,
-    },
-  ] as const;
+  readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
+  readonly response = signal<AgentResponse | null>(null);
+  readonly requestId = signal<string | null>(null);
+
+  cropType = 'Wheat';
+  quantityTons = 100;
+  qualitySpecs = '';
+  pricePerTon = 10000;
+  deliveryDate = '';
+  factoryGovernorate = 'Giza';
+
+  ngOnInit(): void {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 30);
+    this.deliveryDate = tomorrow.toISOString().slice(0, 10);
+
+    this.route.queryParamMap.subscribe((params) => {
+      const id = params.get('requestId');
+      this.requestId.set(id);
+    });
+  }
+
+  runAgent(): void {
+    const id = this.requestId();
+    if (!id) {
+      this.error.set('requestId query parameter is required.');
+      return;
+    }
+
+    const payload: AgentRequest = {
+      cropType: this.cropType,
+      quantityTons: this.quantityTons,
+      qualitySpecs: this.qualitySpecs,
+      pricePerTon: this.pricePerTon,
+      deliveryDate: new Date(this.deliveryDate).toISOString(),
+      factoryGovernorate: this.factoryGovernorate,
+    };
+
+    this.loading.set(true);
+    this.error.set(null);
+    this.agentService
+      .run(id, payload)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (result) => {
+          this.response.set(result);
+          saveAgentSession({
+            requestId: id,
+            agentRequest: payload,
+            response: result,
+          });
+        },
+        error: (err) => {
+          const message =
+            typeof err?.error === 'string'
+              ? err.error
+              : err?.error?.message || 'Agent run failed.';
+          this.error.set(message);
+        },
+      });
+  }
+
+  topMatches(): MatchResult[] {
+    return this.response()?.topMatches ?? [];
+  }
 }

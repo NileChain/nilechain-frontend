@@ -1,7 +1,9 @@
 ﻿<app-sidebar-factory active="dashboard" />
 
+<!-- Application shell: sidebar + scrollable column (content + footer in document flow) -->
+<div class="md:ms-[280px] min-h-screen flex flex-col bg-surface">
 <!-- Main Canvas -->
-<main class="md:ms-[280px] flex-1 p-margin-mobile md:p-margin-desktop overflow-y-auto bg-surface pb-24 min-h-screen">
+<main class="flex-1 p-margin-mobile md:p-margin-desktop">
   <!-- Header -->
   <header class="flex justify-between items-center mb-xl gap-4 flex-wrap">
     <div>
@@ -323,9 +325,9 @@
   </div>
 </main>
 
-<!-- Footer -->
+<!-- Footer (in document flow — not fixed to viewport) -->
 <footer
-  class="fixed bottom-0 start-[280px] end-0 bg-surface-container-highest border-t border-outline-variant z-40"
+  class="mt-auto bg-surface-container-highest border-t border-outline-variant"
 >
   <div
     class="flex flex-col md:flex-row justify-between items-center px-margin-desktop py-4 w-full gap-4"
@@ -357,3 +359,4 @@
     </div>
   </div>
 </footer>
+</div>
