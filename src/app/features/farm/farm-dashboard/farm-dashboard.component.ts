@@ -7,7 +7,6 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
-import { SidebarFarmComponent } from '../../../shared/components/sidebar-farm/sidebar-farm.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { FarmService } from '../../../core/services/farm/farm.service';
 import { FarmDashboard } from '../../../core/models/farm/farm-dashboard.model';
@@ -18,7 +17,6 @@ import { FarmDashboard } from '../../../core/models/farm/farm-dashboard.model';
     TranslatePipe,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
-    SidebarFarmComponent,
     UiLoaderComponent,
     RouterLink,
     DecimalPipe,

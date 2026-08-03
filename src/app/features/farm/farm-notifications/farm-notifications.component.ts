@@ -14,7 +14,6 @@ import { FarmNotification } from '../../../core/models/farm/farm-notification.mo
   standalone: true,
   imports: [
     TranslatePipe,
-    SidebarFarmComponent,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
     UiLoaderComponent,

@@ -16,7 +16,6 @@ import { CropType } from '../../../core/models/farm/farm-profile.model';
   standalone: true,
   imports: [
     TranslatePipe,
-    SidebarFarmComponent,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
     UiLoaderComponent,

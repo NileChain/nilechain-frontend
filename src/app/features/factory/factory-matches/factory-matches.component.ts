@@ -14,7 +14,6 @@ import { FactoryMatchItem } from '../../../core/models/factory/factory-match.mod
   standalone: true,
   imports: [
     TranslatePipe,
-    SidebarFactoryComponent,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
     UiLoaderComponent,

@@ -15,7 +15,6 @@ import { UpdateFactoryProfileRequest } from '../../../core/models/factory/factor
   standalone: true,
   imports: [
     TranslatePipe,
-    SidebarFactoryComponent,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
     UiLoaderComponent,

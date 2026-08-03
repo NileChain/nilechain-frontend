@@ -259,9 +259,6 @@
     "governorate": "Governorate",
     "sizeInFeddans": "Farm Size (Feddans)",
     "sizePlaceholder": "e.g. 150",
-    "factoryDetails": "Factory Details",
-    "factoryName": "Factory Name",
-    "factoryNamePlaceholder": "e.g. Nile Processing Factory",
     "errors": {
       "required": "Please complete all required fields.",
       "selectRole": "Please select a business type (Farm or Factory).",

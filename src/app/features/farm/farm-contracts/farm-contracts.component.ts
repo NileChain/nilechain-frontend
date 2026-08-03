@@ -14,7 +14,6 @@ import { FarmContract } from '../../../core/models/farm/farm-contract.model';
   standalone: true,
   imports: [
     TranslatePipe,
-    SidebarFarmComponent,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
     UiLoaderComponent,

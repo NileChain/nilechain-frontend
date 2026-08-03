@@ -14,7 +14,6 @@ import { AuthService } from '../../../core/services/auth.service';
   standalone: true,
   imports: [
     TranslatePipe,
-    SidebarAdminComponent,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
     UiLoaderComponent,

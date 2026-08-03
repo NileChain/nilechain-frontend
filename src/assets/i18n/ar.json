@@ -259,9 +259,6 @@
     "governorate": "المحافظة",
     "sizeInFeddans": "مساحة المزرعة (فدان)",
     "sizePlaceholder": "مثال: 150",
-    "factoryDetails": "بيانات المصنع",
-    "factoryName": "اسم المصنع",
-    "factoryNamePlaceholder": "مثال: مصنع النيل للتصنيع",
     "errors": {
       "required": "يرجى إكمال جميع الحقول المطلوبة.",
       "selectRole": "يرجى اختيار نوع النشاط (مزرعة أو مصنع).",

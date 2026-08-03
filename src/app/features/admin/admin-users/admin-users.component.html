@@ -103,8 +103,6 @@
           name="search"
           (keyup.enter)="searchUsers()"
           [attr.placeholder]="'admin.users.searchPlaceholder' | translate"
-          [ngModel]="searchInput()"
-          (ngModelChange)="onSearchInput($event)"
         />
       </div>
       <button type="button" class="ui-btn-secondary" (click)="searchUsers()">Search</button>
@@ -200,7 +198,7 @@
                           {{ displayName(user) }}
                         </p>
                         <p class="font-label-sm text-label-sm text-on-surface-variant">
-                          ID: {{ user.id.slice(0, 8) }}…
+                          ID: {{ user.id.slice(0, 8) }}ΓÇª
                         </p>
                       </div>
                     </div>
@@ -302,7 +300,7 @@
         <div
           class="p-4 border-t border-outline-variant bg-surface-container-lowest flex flex-col sm:flex-row items-center justify-between gap-3 font-body-md text-body-md text-on-surface-variant"
         >
-          <p>{{ totalCount() }} user(s) · page {{ page }} / {{ totalPages() }}</p>
+          <p>{{ totalCount() }} user(s) ┬╖ page {{ page }} / {{ totalPages() }}</p>
           <div class="flex items-center gap-2">
             <button
               type="button"
@@ -333,153 +331,3 @@
     }
   </div>
 </main>
-
-<!-- Add User Modal -->
-@if (showAddModal()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" (click)="closeAddModal()">
-    <div class="bg-surface-container-lowest rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
-      <div class="flex items-center justify-between p-6 border-b border-outline-variant">
-        <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">
-          {{ 'admin.users.addUser' | translate }}
-        </h3>
-        <button type="button" (click)="closeAddModal()" class="p-1 hover:bg-surface-container rounded-full text-on-surface-variant">
-          <span class="material-symbols-outlined" aria-hidden="true">close</span>
-        </button>
-      </div>
-
-      <div class="p-6 space-y-4">
-        @if (addError()) {
-          <p class="text-error font-label-sm" role="alert">{{ addError() }}</p>
-        }
-
-        <div>
-          <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'admin.users.role' | translate }}</label>
-          <select [(ngModel)]="addForm.role" class="ui-input w-full">
-            <option value="farm">{{ 'admin.users.roleFarm' | translate }}</option>
-            <option value="factory">{{ 'admin.users.roleFactory' | translate }}</option>
-            <option value="admin">{{ 'admin.users.roleAdmin' | translate }}</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'common.email' | translate }}</label>
-          <input type="email" [(ngModel)]="addForm.email" class="ui-input w-full" placeholder="user@example.com" />
-        </div>
-
-        <div>
-          <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'common.password' | translate }}</label>
-          <input type="password" [(ngModel)]="addForm.password" class="ui-input w-full" placeholder="••••••••" />
-        </div>
-
-        <div>
-          <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'common.confirmPassword' | translate }}</label>
-          <input type="password" [(ngModel)]="addForm.confirmPassword" class="ui-input w-full" placeholder="••••••••" />
-        </div>
-
-        @if (addForm.role === 'farm' || addForm.role === 'factory') {
-          <div>
-            <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'admin.users.businessName' | translate }}</label>
-            <input type="text" [(ngModel)]="addForm.name" class="ui-input w-full" [placeholder]="addForm.role === 'farm' ? ('admin.users.farmName' | translate) : ('admin.users.factoryName' | translate)" />
-          </div>
-
-          <div>
-            <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'admin.users.governorate' | translate }}</label>
-            <input type="text" [(ngModel)]="addForm.governorate" class="ui-input w-full" />
-          </div>
-        }
-
-        @if (addForm.role === 'farm') {
-          <div>
-            <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'admin.users.sizeInFeddans' | translate }}</label>
-            <input type="number" [(ngModel)]="addForm.sizeInFeddans" class="ui-input w-full" />
-          </div>
-        }
-      </div>
-
-      <div class="flex justify-end gap-3 p-6 border-t border-outline-variant">
-        <button type="button" (click)="closeAddModal()" class="ui-btn-secondary">
-          {{ 'common.cancel' | translate }}
-        </button>
-        <button type="button" (click)="onSubmitAdd()" [disabled]="addingUser()" class="ui-btn-primary flex items-center gap-2">
-          @if (addingUser()) {
-            <span class="material-symbols-outlined animate-spin text-sm" aria-hidden="true">progress_activity</span>
-          }
-          {{ 'admin.users.addUser' | translate }}
-        </button>
-      </div>
-    </div>
-  </div>
-}
-
-<!-- Edit User Modal -->
-@if (showEditModal(); as user) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" (click)="closeEditModal()">
-    <div class="bg-surface-container-lowest rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
-      <div class="flex items-center justify-between p-6 border-b border-outline-variant">
-        <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">
-          {{ 'admin.users.editUser' | translate }}
-        </h3>
-        <button type="button" (click)="closeEditModal()" class="p-1 hover:bg-surface-container rounded-full text-on-surface-variant">
-          <span class="material-symbols-outlined" aria-hidden="true">close</span>
-        </button>
-      </div>
-
-      <div class="p-6 space-y-4">
-        @if (editError()) {
-          <p class="text-error font-label-sm" role="alert">{{ editError() }}</p>
-        }
-
-        <div class="font-body-md text-body-md text-on-surface-variant pb-2 border-b border-outline-variant">
-          {{ editingUser()?.email }}
-        </div>
-
-        <div>
-          <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'admin.users.role' | translate }}</label>
-          <select [(ngModel)]="editForm.role" class="ui-input w-full">
-            <option value="farm">{{ 'admin.users.roleFarm' | translate }}</option>
-            <option value="factory">{{ 'admin.users.roleFactory' | translate }}</option>
-            <option value="admin">{{ 'admin.users.roleAdmin' | translate }}</option>
-          </select>
-        </div>
-
-        @if (editForm.role === 'farm' || editForm.role === 'factory') {
-          <div>
-            <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'admin.users.businessName' | translate }}</label>
-            <input type="text" [(ngModel)]="editForm.name" class="ui-input w-full" />
-          </div>
-
-          <div>
-            <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'admin.users.governorate' | translate }}</label>
-            <input type="text" [(ngModel)]="editForm.governorate" class="ui-input w-full" />
-          </div>
-        }
-
-        @if (editForm.role === 'farm') {
-          <div>
-            <label class="block font-label-md text-label-md text-on-surface mb-1">{{ 'admin.users.sizeInFeddans' | translate }}</label>
-            <input type="number" [(ngModel)]="editForm.sizeInFeddans" class="ui-input w-full" />
-          </div>
-        }
-
-        <div class="flex items-center gap-3 pt-2">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" [(ngModel)]="editForm.isVerified" class="w-4 h-4 rounded border-outline-variant text-primary" />
-            <span class="font-label-md text-label-md text-on-surface">{{ 'common.verified' | translate }}</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="flex justify-end gap-3 p-6 border-t border-outline-variant">
-        <button type="button" (click)="closeEditModal()" class="ui-btn-secondary">
-          {{ 'common.cancel' | translate }}
-        </button>
-        <button type="button" (click)="onSubmitEdit()" [disabled]="savingEdit()" class="ui-btn-primary flex items-center gap-2">
-          @if (savingEdit()) {
-            <span class="material-symbols-outlined animate-spin text-sm" aria-hidden="true">progress_activity</span>
-          }
-          {{ 'common.save' | translate }}
-        </button>
-      </div>
-    </div>
-  </div>
-}

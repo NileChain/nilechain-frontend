@@ -16,7 +16,6 @@ import { saveAgentSession } from '../../../core/utils/agent-session';
   standalone: true,
   imports: [
     TranslatePipe,
-    SidebarFactoryComponent,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
     UiLoaderComponent,

@@ -160,53 +160,6 @@
           </div>
         }
 
-        <!-- Factory-specific fields -->
-        @if (selectedRole() === 'factory') {
-          <div class="space-y-md p-md bg-surface-container-low rounded-lg border border-outline-variant">
-            <p class="font-label-md text-label-md text-primary">{{ 'register.factoryDetails' | translate }}</p>
-            <div class="space-y-xs">
-              <label for="factory-name" class="font-label-sm text-label-sm text-on-surface-variant">{{ 'register.factoryName' | translate }}</label>
-              <input type="text" id="factory-name" name="factoryName" [attr.placeholder]="'register.factoryNamePlaceholder' | translate" required
-                (input)="factoryName.set($any($event.target).value)"
-                class="w-full ps-4 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all" />
-            </div>
-            <div class="space-y-xs">
-              <label for="factory-governorate" class="font-label-sm text-label-sm text-on-surface-variant">{{ 'register.governorate' | translate }}</label>
-              <select id="factory-governorate" (change)="factoryGovernorate.set($any($event.target).value)"
-                class="w-full ps-4 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all">
-                <option value="">{{ 'common.select' | translate }}</option>
-                <option value="Alexandria">Alexandria</option>
-                <option value="Aswan">Aswan</option>
-                <option value="Asyut">Asyut</option>
-                <option value="Beheira">Beheira</option>
-                <option value="Beni Suef">Beni Suef</option>
-                <option value="Cairo">Cairo</option>
-                <option value="Dakahlia">Dakahlia</option>
-                <option value="Damietta">Damietta</option>
-                <option value="Faiyum">Faiyum</option>
-                <option value="Gharbia">Gharbia</option>
-                <option value="Giza">Giza</option>
-                <option value="Ismailia">Ismailia</option>
-                <option value="Kafr El Sheikh">Kafr El Sheikh</option>
-                <option value="Luxor">Luxor</option>
-                <option value="Matrouh">Matrouh</option>
-                <option value="Minya">Minya</option>
-                <option value="Monufia">Monufia</option>
-                <option value="New Valley">New Valley</option>
-                <option value="North Sinai">North Sinai</option>
-                <option value="Port Said">Port Said</option>
-                <option value="Qalyubia">Qalyubia</option>
-                <option value="Qena">Qena</option>
-                <option value="Red Sea">Red Sea</option>
-                <option value="Sharqia">Sharqia</option>
-                <option value="Sohag">Sohag</option>
-                <option value="South Sinai">South Sinai</option>
-                <option value="Suez">Suez</option>
-              </select>
-            </div>
-          </div>
-        }
-
         <!-- Email Input -->
         <div class="space-y-xs">
           <label

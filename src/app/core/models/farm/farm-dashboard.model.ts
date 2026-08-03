@@ -1,4 +1,4 @@
-export interface FarmDashboardData {
+export interface FarmDashboard {
   riskScore: number | null;
   activeMatchesCount: number;
   completedContractsCount: number;

@@ -15,7 +15,6 @@ import { Conversation, Message } from '../../../core/models/farm/farm-message.mo
   standalone: true,
   imports: [
     TranslatePipe,
-    SidebarFarmComponent,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
     UiLoaderComponent,
