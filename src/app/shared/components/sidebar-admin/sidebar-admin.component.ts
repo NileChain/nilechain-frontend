@@ -23,6 +23,10 @@ export class SidebarAdminComponent {
     { key: 'knowledgeBase', icon: 'auto_stories', labelKey: 'nav.knowledgeBase', link: '/knowledge-base' },
   ];
 
+  isActive(key: string): boolean {
+    return this.active === key;
+  }
+
   logout(): void {
     this.authService.logout().subscribe({
       next: () => void this.router.navigate(['/landing']),

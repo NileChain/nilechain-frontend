@@ -6,7 +6,7 @@ import { AuthService } from '../../../core/services/auth.service';
 @Component({
   selector: 'app-sidebar-factory',
   standalone: true,
-  imports: [],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './sidebar-factory.component.html'
 })
 export class SidebarFactoryComponent {

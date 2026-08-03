@@ -59,7 +59,7 @@
         @for (farm of farms; track farm.id) {
           <article
             class="ui-card p-4 hover:shadow-md transition-shadow relative overflow-hidden"
-            [class.opacity-75]="farm.match < 70"
+            [class.opacity-75]="farm.matchScore < 70"
           >
             @if (farm.featured) {
               <div
@@ -87,19 +87,19 @@
                   {{ farm.location }}
                 </p>
               </div>
-              @if (farm.match >= 70) {
+              @if (farm.matchScore >= 70) {
                 <div
                   class="bg-primary-container text-on-primary-container px-3 py-1 rounded-lg font-title-md text-title-md flex items-center gap-1 shrink-0"
                 >
                   <span class="material-symbols-outlined text-sm" aria-hidden="true">auto_awesome</span>
-                  {{ farm.match }}%
+                  {{ farm.matchScore }}%
                 </div>
               } @else {
                 <div
                   class="bg-surface-container-high text-on-surface px-3 py-1 rounded-lg font-title-md text-title-md flex items-center gap-1 shrink-0"
                 >
                   <span class="material-symbols-outlined text-sm" aria-hidden="true">auto_awesome</span>
-                  {{ farm.match }}%
+                  {{ farm.matchScore }}%
                 </div>
               }
             </div>
@@ -109,13 +109,13 @@
                 <div class="font-label-sm text-label-sm text-on-surface-variant mb-1">
                   {{ 'factory.matches.cropLabel' | translate }}
                 </div>
-                <div class="font-title-md text-title-md text-on-surface">{{ farm.crop }}</div>
+                <div class="font-title-md text-title-md text-on-surface">{{ farm.cropType }}</div>
               </div>
               <div class="bg-surface-container-low p-3 rounded-lg border border-outline-variant">
                 <div class="font-label-sm text-label-sm text-on-surface-variant mb-1">
                   {{ 'factory.matches.availableQty' | translate }}
                 </div>
-                <div class="font-title-md text-title-md text-on-surface">{{ farm.quantity }}</div>
+                <div class="font-title-md text-title-md text-on-surface">{{ farm.quantityTons }} ton</div>
               </div>
             </div>
 
@@ -127,19 +127,17 @@
                   'factory.matches.riskScore' | translate
                 }}</span>
                 <span
-                  class="px-2 py-0.5 rounded font-bold text-sm text-on-primary"
-                  [class.bg-success-green]="farm.riskLevel === 'low'"
-                  [class.bg-warning-orange]="farm.riskLevel === 'medium'"
-                  [class.bg-danger-red]="farm.riskLevel === 'high'"
+                  class="px-2 py-0.5 rounded font-bold text-sm text-white"
+                  [style.background-color]="riskBadgeColor(farm.riskLevel)"
                 >
-                  {{ farm.risk }}
+                  {{ farm.riskScore }}
                 </span>
               </div>
               @if (farm.featured) {
                 <button type="button" class="ui-btn-primary !py-2 !px-4">
                   {{ 'factory.matches.chooseFarm' | translate }}
                 </button>
-              } @else if (farm.match >= 70) {
+              } @else if (farm.matchScore >= 70) {
                 <button type="button" class="ui-btn-secondary !py-2 !px-4">
                   {{ 'factory.matches.viewDetails' | translate }}
                 </button>
@@ -159,33 +157,10 @@
       class="hidden lg:flex flex-col w-[60%] relative bg-surface-container-low min-h-[480px]"
       [attr.aria-label]="'factory.matches.mapPlaceholder' | translate"
     >
-      <!-- Static map placeholder -->
       <div
-        class="absolute inset-0 m-4 mb-48 rounded-xl bg-surface-container-high border border-outline-variant flex flex-col items-center justify-center gap-3"
-      >
-        <span class="material-symbols-outlined text-6xl text-on-surface-variant" aria-hidden="true"
-          >map</span
-        >
-        <p class="font-body-md text-body-md text-on-surface-variant text-center px-4">
-          {{ 'factory.matches.mapPlaceholder' | translate }}
-        </p>
-        <!-- Decorative pins -->
-        <div class="absolute top-1/3 start-1/3 flex flex-col items-center gap-1" aria-hidden="true">
-          <span
-            class="w-6 h-6 bg-primary rounded-full border-2 border-surface-container-lowest shadow-sm flex items-center justify-center animate-pulse"
-          >
-            <span class="material-symbols-outlined text-on-primary text-xs">location_on</span>
-          </span>
-        </div>
-        <div
-          class="absolute top-1/4 end-1/4 w-4 h-4 bg-secondary-container rounded-full border-2 border-surface-container-lowest shadow-sm"
-          aria-hidden="true"
-        ></div>
-        <div
-          class="absolute bottom-1/3 start-1/2 w-4 h-4 bg-warning-orange rounded-full border-2 border-surface-container-lowest shadow-sm"
-          aria-hidden="true"
-        ></div>
-      </div>
+        id="factory-matches-map"
+        class="absolute inset-0 m-4 mb-48 rounded-xl border border-outline-variant overflow-hidden z-0"
+      ></div>
 
       <!-- Map controls -->
       <div
@@ -195,6 +170,7 @@
           type="button"
           class="p-2 hover:bg-surface-container rounded text-on-surface transition-colors"
           [attr.aria-label]="'factory.matches.zoomIn' | translate"
+          (click)="zoomIn()"
         >
           <span class="material-symbols-outlined" aria-hidden="true">add</span>
         </button>
@@ -203,6 +179,7 @@
           type="button"
           class="p-2 hover:bg-surface-container rounded text-on-surface transition-colors"
           [attr.aria-label]="'factory.matches.zoomOut' | translate"
+          (click)="zoomOut()"
         >
           <span class="material-symbols-outlined" aria-hidden="true">remove</span>
         </button>
@@ -217,13 +194,23 @@
         <div class="flex gap-1 bg-surface-container-low rounded p-1">
           <button
             type="button"
-            class="px-3 py-1 rounded bg-surface text-on-surface shadow-sm font-label-lg text-label-lg"
+            class="px-3 py-1 rounded font-label-lg text-label-lg transition-colors hover:bg-surface-container"
+            [class.bg-surface]="mapViewMode() === 'satellite'"
+            [class.text-on-surface]="mapViewMode() === 'satellite'"
+            [class.shadow-sm]="mapViewMode() === 'satellite'"
+            [class.text-on-surface-variant]="mapViewMode() !== 'satellite'"
+            (click)="setMapViewMode('satellite')"
           >
             {{ 'factory.matches.satellite' | translate }}
           </button>
           <button
             type="button"
-            class="px-3 py-1 rounded text-on-surface-variant hover:bg-surface-container font-label-lg text-label-lg"
+            class="px-3 py-1 rounded font-label-lg text-label-lg transition-colors hover:bg-surface-container"
+            [class.bg-surface]="mapViewMode() === 'terrain'"
+            [class.text-on-surface]="mapViewMode() === 'terrain'"
+            [class.shadow-sm]="mapViewMode() === 'terrain'"
+            [class.text-on-surface-variant]="mapViewMode() !== 'terrain'"
+            (click)="setMapViewMode('terrain')"
           >
             {{ 'factory.matches.terrain' | translate }}
           </button>
