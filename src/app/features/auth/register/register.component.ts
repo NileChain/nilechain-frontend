@@ -327,8 +327,23 @@ export class RegisterComponent {
 
           void this.router.navigate(['/landing']);
         },
-        error: () => {
-          this.errorMessage.set('register.errors.failed');
+        error: (err: unknown) => {
+          const httpErr = err as {
+            status?: number;
+            error?: { message?: string; detail?: string };
+          };
+          const rawMsg =
+            httpErr?.error?.message ||
+            httpErr?.error?.detail ||
+            (typeof err === 'object' && err !== null && 'message' in err
+              ? String((err as { message?: unknown }).message)
+              : '');
+
+          const message = rawMsg
+            ? rawMsg.replace(/^(Auth\.\w+:\s*)/i, '')
+            : 'register.errors.failed';
+
+          this.errorMessage.set(message);
         },
       });
   }
