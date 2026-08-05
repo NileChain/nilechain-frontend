@@ -14,7 +14,10 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   template: `
     <div class="space-y-2">
       @if (label) {
-        <label [attr.for]="inputId" class="font-label-md text-label-md text-on-surface-variant block">
+        <label
+          [attr.for]="inputId"
+          class="font-label-md text-label-md text-on-surface-variant block"
+        >
           {{ label }}
         </label>
       }

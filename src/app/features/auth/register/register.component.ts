@@ -128,7 +128,8 @@ export class RegisterComponent {
   });
 
   readonly showMatchError = computed(
-    () => (this.confirmTouched() || this.submitted()) && this.passwordsMismatch()
+    () =>
+      (this.confirmTouched() || this.submitted()) && this.passwordsMismatch()
   );
 
   readonly showPasswordErrors = computed(

@@ -33,7 +33,9 @@ export class AdminService {
       params = params.set('search', query.search);
     }
 
-    return this.http.get<PagedResult<AdminUser>>(`${this.api}/users`, { params });
+    return this.http.get<PagedResult<AdminUser>>(`${this.api}/users`, {
+      params,
+    });
   }
 
   createUser(payload: CreateUserRequest): Observable<AdminUser> {

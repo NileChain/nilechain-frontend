@@ -8,7 +8,7 @@ import { SidebarFarmComponent } from '../../shared/components/sidebar-farm/sideb
   standalone: true,
   imports: [SidebarFarmComponent, RouterOutlet],
   templateUrl: './farm-layout.component.html',
-  styleUrl: './farm-layout.component.scss'
+  styleUrl: './farm-layout.component.scss',
 })
 export class FarmLayoutComponent {
   constructor(title: Title) {

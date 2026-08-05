@@ -5,9 +5,12 @@ import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
-import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
+import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
+import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
+import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { FarmService } from '../../../core/services/farm/farm.service';
+import { MobileNavService } from '../../../core/services/mobile-nav.service';
 import { FarmMatchItem } from '../../../core/models/farm/farm-match.model';
 import { CropType } from '../../../core/models/farm/farm-profile.model';
 
@@ -18,7 +21,9 @@ import { CropType } from '../../../core/models/farm/farm-profile.model';
     TranslatePipe,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
-    UiLoaderComponent,
+    UiErrorStateComponent,
+    UiEmptyStateComponent,
+    UiSkeletonComponent,
     FormsModule,
     DatePipe,
     DecimalPipe,
@@ -29,6 +34,7 @@ export class FarmMatchesComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly farmService = inject(FarmService);
   readonly currentUser = this.authService.currentUser;
+  readonly mobileNav = inject(MobileNavService);
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);

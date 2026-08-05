@@ -8,7 +8,7 @@ import { SidebarFactoryComponent } from '../../shared/components/sidebar-factory
   standalone: true,
   imports: [SidebarFactoryComponent, RouterOutlet],
   templateUrl: './factory-layout.component.html',
-  styleUrl: './factory-layout.component.scss'
+  styleUrl: './factory-layout.component.scss',
 })
 export class FactoryLayoutComponent {
   constructor(title: Title) {

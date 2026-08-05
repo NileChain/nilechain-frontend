@@ -1,24 +1,38 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
   <header
-    class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
+    class="h-16 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
   >
-    <h1 class="font-headline-md text-headline-md font-bold text-primary">
-      {{ 'contractSign.title' | translate }}
-    </h1>
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant shrink-0"
+        (click)="mobileNav.toggleMenu()"
+        [attr.aria-label]="'common.toggleMenu' | translate"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+      </button>
+      <h1 class="font-headline-md text-headline-md font-bold text-primary">
+        {{ 'contractSign.title' | translate }}
+      </h1>
+    </div>
     <div class="flex items-center gap-2 sm:gap-4">
       <ui-language-toggle />
       <ui-theme-toggle />
     </div>
   </header>
 
-  <div class="p-margin-mobile md:p-margin-desktop max-w-4xl mx-auto space-y-gutter animate-fade-in">
+  <div
+    class="p-margin-mobile md:p-margin-desktop max-w-4xl mx-auto space-y-gutter animate-fade-in"
+  >
     <section class="ui-card p-6 space-y-4">
       <p class="font-body-md text-on-surface-variant">
         Generate an AI contract draft for the selected farm match.
       </p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block font-label-md mb-1" for="factory-name-contract">Factory name</label>
+          <label class="block font-label-md mb-1" for="factory-name-contract"
+            >Factory name</label
+          >
           <input
             id="factory-name-contract"
             class="ui-input"
@@ -54,7 +68,7 @@
     }
 
     @if (error()) {
-      <p class="text-on-error-container">{{ error() }}</p>
+      <ui-error-state [message]="error()" (retry)="generate()" />
     }
 
     @if (contractText(); as text) {
@@ -62,8 +76,7 @@
         <h2 class="font-title-lg text-on-surface mb-4">Contract draft</h2>
         <pre
           class="whitespace-pre-wrap font-body-md text-body-md text-on-surface leading-relaxed bg-surface-container-low p-4 rounded-lg border border-outline-variant overflow-x-auto"
-          >{{ text }}</pre
-        >
+          >{{ text }}</pre>
       </section>
     }
   </div>

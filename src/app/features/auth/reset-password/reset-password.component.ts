@@ -70,11 +70,15 @@ export class ResetPasswordComponent implements OnInit {
     this.isSubmitting.set(true);
     this.errorMessage.set('');
 
-    this.authService.resetPassword({ email, token, newPassword, confirmPassword })
+    this.authService
+      .resetPassword({ email, token, newPassword, confirmPassword })
       .pipe(finalize(() => this.isSubmitting.set(false)))
       .subscribe({
         next: () => this.submitted.set(true),
-        error: () => this.errorMessage.set('Failed to reset password. The link may have expired.'),
+        error: () =>
+          this.errorMessage.set(
+            'Failed to reset password. The link may have expired.'
+          ),
       });
   }
 }

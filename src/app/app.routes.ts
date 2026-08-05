@@ -109,9 +109,9 @@ export const routes: Routes = [
       {
         path: 'notifications',
         loadComponent: () =>
-          import(
-            './features/farm/farm-notifications/farm-notifications.component'
-          ).then((m) => m.FarmNotificationsComponent),
+          import('./features/farm/farm-notifications/farm-notifications.component').then(
+            (m) => m.FarmNotificationsComponent
+          ),
       },
     ],
   },
@@ -122,7 +122,11 @@ export const routes: Routes = [
   { path: 'farm-matches', redirectTo: 'farm/matches', pathMatch: 'full' },
   { path: 'farm-contracts', redirectTo: 'farm/contracts', pathMatch: 'full' },
   { path: 'farm-messages', redirectTo: 'farm/messages', pathMatch: 'full' },
-  { path: 'farm-notifications', redirectTo: 'farm/notifications', pathMatch: 'full' },
+  {
+    path: 'farm-notifications',
+    redirectTo: 'farm/notifications',
+    pathMatch: 'full',
+  },
 
   // Factory (Factory + Admin)
   {
@@ -142,37 +146,37 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () =>
-          import(
-            './features/factory/factory-dashboard/factory-dashboard.component'
-          ).then((m) => m.FactoryDashboardComponent),
+          import('./features/factory/factory-dashboard/factory-dashboard.component').then(
+            (m) => m.FactoryDashboardComponent
+          ),
       },
       {
         path: 'profile',
         loadComponent: () =>
-          import(
-            './features/factory/factory-profile/factory-profile.component'
-          ).then((m) => m.FactoryProfileComponent),
+          import('./features/factory/factory-profile/factory-profile.component').then(
+            (m) => m.FactoryProfileComponent
+          ),
       },
       {
         path: 'supply-request',
         loadComponent: () =>
-          import(
-            './features/factory/supply-request/supply-request.component'
-          ).then((m) => m.SupplyRequestComponent),
+          import('./features/factory/supply-request/supply-request.component').then(
+            (m) => m.SupplyRequestComponent
+          ),
       },
       {
         path: 'matches',
         loadComponent: () =>
-          import(
-            './features/factory/factory-matches/factory-matches.component'
-          ).then((m) => m.FactoryMatchesComponent),
+          import('./features/factory/factory-matches/factory-matches.component').then(
+            (m) => m.FactoryMatchesComponent
+          ),
       },
       {
         path: 'agent-progress',
         loadComponent: () =>
-          import(
-            './features/factory/agent-progress/agent-progress.component'
-          ).then((m) => m.AgentProgressComponent),
+          import('./features/factory/agent-progress/agent-progress.component').then(
+            (m) => m.AgentProgressComponent
+          ),
       },
       {
         path: 'risk-report',
@@ -184,37 +188,61 @@ export const routes: Routes = [
       {
         path: 'contract-signing',
         loadComponent: () =>
-          import(
-            './features/factory/contract-signing/contract-signing.component'
-          ).then((m) => m.ContractSigningComponent),
+          import('./features/factory/contract-signing/contract-signing.component').then(
+            (m) => m.ContractSigningComponent
+          ),
       },
       {
         path: 'messages',
         loadComponent: () =>
-          import(
-            './features/factory/factory-messages/factory-messages.component'
-          ).then((m) => m.FactoryMessagesComponent),
+          import('./features/factory/factory-messages/factory-messages.component').then(
+            (m) => m.FactoryMessagesComponent
+          ),
       },
       {
         path: 'notifications',
         loadComponent: () =>
-          import(
-            './features/factory/factory-notifications/factory-notifications.component'
-          ).then((m) => m.FactoryNotificationsComponent),
+          import('./features/factory/factory-notifications/factory-notifications.component').then(
+            (m) => m.FactoryNotificationsComponent
+          ),
       },
     ],
   },
 
   // Backward-compatible redirects
-  { path: 'factory-dashboard', redirectTo: 'factory/dashboard', pathMatch: 'full' },
+  {
+    path: 'factory-dashboard',
+    redirectTo: 'factory/dashboard',
+    pathMatch: 'full',
+  },
   { path: 'factory-profile', redirectTo: 'factory/profile', pathMatch: 'full' },
-  { path: 'supply-request', redirectTo: 'factory/supply-request', pathMatch: 'full' },
+  {
+    path: 'supply-request',
+    redirectTo: 'factory/supply-request',
+    pathMatch: 'full',
+  },
   { path: 'factory-matches', redirectTo: 'factory/matches', pathMatch: 'full' },
-  { path: 'agent-progress', redirectTo: 'factory/agent-progress', pathMatch: 'full' },
+  {
+    path: 'agent-progress',
+    redirectTo: 'factory/agent-progress',
+    pathMatch: 'full',
+  },
   { path: 'risk-report', redirectTo: 'factory/risk-report', pathMatch: 'full' },
-  { path: 'contract-signing', redirectTo: 'factory/contract-signing', pathMatch: 'full' },
-  { path: 'factory-messages', redirectTo: 'factory/messages', pathMatch: 'full' },
-  { path: 'factory-notifications', redirectTo: 'factory/notifications', pathMatch: 'full' },
+  {
+    path: 'contract-signing',
+    redirectTo: 'factory/contract-signing',
+    pathMatch: 'full',
+  },
+  {
+    path: 'factory-messages',
+    redirectTo: 'factory/messages',
+    pathMatch: 'full',
+  },
+  {
+    path: 'factory-notifications',
+    redirectTo: 'factory/notifications',
+    pathMatch: 'full',
+  },
 
   // Admin (Admin only)
   {
@@ -234,9 +262,9 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () =>
-          import(
-            './features/admin/admin-dashboard/admin-dashboard.component'
-          ).then((m) => m.AdminDashboardComponent),
+          import('./features/admin/admin-dashboard/admin-dashboard.component').then(
+            (m) => m.AdminDashboardComponent
+          ),
       },
       {
         path: 'users',
@@ -266,7 +294,11 @@ export const routes: Routes = [
   { path: 'admin-dashboard', redirectTo: 'admin/dashboard', pathMatch: 'full' },
   { path: 'admin-users', redirectTo: 'admin/users', pathMatch: 'full' },
   { path: 'admin-contracts', redirectTo: 'admin/contracts', pathMatch: 'full' },
-  { path: 'knowledge-base', redirectTo: 'admin/knowledge-base', pathMatch: 'full' },
+  {
+    path: 'knowledge-base',
+    redirectTo: 'admin/knowledge-base',
+    pathMatch: 'full',
+  },
 
   { path: '**', redirectTo: 'landing' },
 ];

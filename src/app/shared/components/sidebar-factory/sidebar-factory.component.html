@@ -1,11 +1,18 @@
-<aside class="fixed left-0 top-0 h-full w-[280px] bg-surface-container-low border-r border-outline-variant flex flex-col p-4 space-y-2 z-50">
+<ng-template #navBody>
   <div class="px-2 py-4 mb-6">
-    <h1 class="font-headline-sm text-headline-sm font-bold text-primary">NileChain B2B</h1>
-    <p class="font-label-sm text-label-sm text-on-surface-variant">Enterprise Portal</p>
+    <h1 class="font-headline-sm text-headline-sm font-bold text-primary">
+      NileChain B2B
+    </h1>
+    <p class="font-label-sm text-label-sm text-on-surface-variant">
+      Enterprise Portal
+    </p>
   </div>
 
   <!-- Main navigation -->
-  <nav class="flex-grow space-y-1" [attr.aria-label]="'nav.dashboard' | translate">
+  <nav
+    class="flex-grow space-y-1"
+    [attr.aria-label]="'nav.dashboard' | translate"
+  >
     @for (item of items; track item.key) {
       <a
         [routerLink]="item.link"
@@ -16,20 +23,14 @@
         "
         [attr.aria-current]="active() === item.key ? 'page' : null"
       >
-        <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
+        <span class="material-symbols-outlined" aria-hidden="true">{{
+          item.icon
+        }}</span>
         {{ item.labelKey | translate }}
       </a>
     }
   </nav>
   <div class="pt-4 border-t border-outline-variant space-y-1">
-    <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all font-label-md">
-      <span class="material-symbols-outlined">settings</span>
-      Settings
-    </a>
-    <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all font-label-md">
-      <span class="material-symbols-outlined">help_center</span>
-      Support
-    </a>
     <button
       type="button"
       (click)="logout()"
@@ -39,4 +40,42 @@
       {{ 'nav.logout' | translate }}
     </button>
   </div>
+</ng-template>
+
+<aside
+  class="fixed start-0 top-0 h-full w-[280px] bg-surface-container-low border-e border-outline-variant flex flex-col p-4 space-y-2 z-50 hidden md:flex"
+>
+  <ng-container *ngTemplateOutlet="navBody" />
 </aside>
+
+@if (mobileNav.open()) {
+  <div
+    class="fixed inset-0 z-[60] md:hidden"
+    [attr.aria-label]="'common.toggleMenu' | translate"
+  >
+    <div
+      class="absolute inset-0 bg-black/50 animate-fade-in"
+      (click)="mobileNav.closeMenu()"
+      [attr.aria-hidden]="true"
+    ></div>
+    <aside
+      class="absolute start-0 top-0 h-full w-[280px] bg-surface-container-low border-e border-outline-variant flex flex-col p-4 space-y-2"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="flex justify-end">
+        <button
+          type="button"
+          class="p-2 hover:bg-surface-container-high rounded-full text-on-surface-variant"
+          (click)="mobileNav.closeMenu()"
+          [attr.aria-label]="'common.close' | translate"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true"
+            >close</span
+          >
+        </button>
+      </div>
+      <ng-container *ngTemplateOutlet="navBody" />
+    </aside>
+  </div>
+}

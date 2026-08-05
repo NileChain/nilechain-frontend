@@ -1,8 +1,14 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
-  <header class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40">
+  <header
+    class="h-16 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
+  >
     <div class="flex items-center gap-4">
-      <button type="button" class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
-        [attr.aria-label]="'common.toggleMenu' | translate">
+      <button
+        type="button"
+        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
+        (click)="mobileNav.toggleMenu()"
+        [attr.aria-label]="'common.toggleMenu' | translate"
+      >
         <span class="material-symbols-outlined" aria-hidden="true">menu</span>
       </button>
       <h1 class="font-headline-md text-headline-md font-bold text-primary">
@@ -12,7 +18,9 @@
     <div class="flex items-center gap-2 sm:gap-4">
       <ui-language-toggle />
       <ui-theme-toggle />
-      <div class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant">
+      <div
+        class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant"
+      >
         <div class="text-end hidden sm:block">
           <p class="font-label-md text-label-md text-on-surface leading-tight">
             {{ currentUser()?.displayName || currentUser()?.email }}
@@ -25,15 +33,21 @@
           class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary"
         >
           <span class="font-bold">{{
-            (currentUser()?.displayName || currentUser()?.email || '?').charAt(0).toUpperCase()
+            (currentUser()?.displayName || currentUser()?.email || '?')
+              .charAt(0)
+              .toUpperCase()
           }}</span>
         </div>
       </div>
     </div>
   </header>
 
-  <div class="p-margin-mobile md:p-margin-desktop max-w-5xl mx-auto space-y-gutter animate-fade-in">
-    <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+  <div
+    class="p-margin-mobile md:p-margin-desktop max-w-5xl mx-auto space-y-gutter animate-fade-in"
+  >
+    <section
+      class="flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+    >
       <div>
         <h2 class="font-headline-lg text-headline-lg font-bold text-on-surface">
           {{ 'notifications.title' | translate }}
@@ -44,7 +58,10 @@
       </div>
     </section>
 
-    <nav class="flex items-center gap-2 overflow-x-auto pb-2" [attr.aria-label]="'notifications.title' | translate">
+    <nav
+      class="flex items-center gap-2 overflow-x-auto pb-2"
+      [attr.aria-label]="'notifications.title' | translate"
+    >
       <button
         type="button"
         class="px-6 py-2 rounded-full font-title-md text-title-md whitespace-nowrap transition-colors"
@@ -72,14 +89,28 @@
     </nav>
 
     @if (loading()) {
-      <div class="flex justify-center py-16"><ui-loader /></div>
-    } @else if (error()) {
-      <div class="ui-card p-6 text-center space-y-4">
-        <p class="text-on-error-container">{{ error() }}</p>
-        <button type="button" class="ui-btn-primary" (click)="loadNotifications()">Retry</button>
+      <div class="space-y-3" role="status" [attr.aria-busy]="true">
+        @for (i of [1, 2, 3, 4]; track $index) {
+          <div class="ui-card p-4 flex gap-4 items-start">
+            <ui-skeleton width="2.5rem" height="2.5rem" rounded="full" />
+            <div class="flex-1 space-y-2">
+              <div class="flex justify-between gap-3">
+                <ui-skeleton height="1rem" width="40%" />
+                <ui-skeleton height="0.75rem" width="20%" />
+              </div>
+              <ui-skeleton height="0.875rem" width="75%" />
+            </div>
+          </div>
+        }
       </div>
+    } @else if (error()) {
+      <ui-error-state [message]="error()" (retry)="loadNotifications()" />
     } @else if (visible().length === 0) {
-      <p class="text-on-surface-variant text-center py-12">No notifications.</p>
+      <ui-empty-state
+        titleKey="notifications.empty"
+        bodyKey="notifications.emptyBody"
+        icon="notifications_off"
+      />
     } @else {
       <section class="space-y-3">
         @for (item of visible(); track item.notificationId) {
@@ -97,7 +128,9 @@
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex justify-between gap-3 flex-wrap">
-                <h3 class="font-title-md text-title-md text-on-surface font-bold">
+                <h3
+                  class="font-title-md text-title-md text-on-surface font-bold"
+                >
                   {{ item.title }}
                 </h3>
                 <span class="font-label-sm text-on-surface-variant">
@@ -114,7 +147,7 @@
                   [disabled]="markingId() === item.notificationId"
                   (click)="markRead(item)"
                 >
-                  Mark as read
+                  {{ 'notifications.markRead' | translate }}
                 </button>
               }
             </div>

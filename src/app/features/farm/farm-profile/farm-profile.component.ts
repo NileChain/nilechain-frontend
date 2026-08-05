@@ -1,13 +1,19 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
+import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { FarmService } from '../../../core/services/farm/farm.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { CropType, FarmProfile } from '../../../core/models/farm/farm-profile.model';
+import { MobileNavService } from '../../../core/services/mobile-nav.service';
+import {
+  CropType,
+  FarmProfile,
+} from '../../../core/models/farm/farm-profile.model';
 import { UpdateFarmProfileRequest } from '../../../core/models/farm/update-farm-profile-request.model';
 
 @Component({
@@ -19,16 +25,18 @@ import { UpdateFarmProfileRequest } from '../../../core/models/farm/update-farm-
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
     UiLoaderComponent,
+    UiErrorStateComponent,
+    RouterLink,
   ],
   templateUrl: './farm-profile.component.html',
 })
 export class FarmProfileComponent implements OnInit {
-
   private readonly farmService = inject(FarmService);
   private readonly authService = inject(AuthService);
   private readonly fb = inject(FormBuilder);
 
   readonly currentUser = this.authService.currentUser;
+  readonly mobileNav = inject(MobileNavService);
 
   private readonly SOIL_TYPE_MAP: Record<string, number> = {
     Clay: 0,
@@ -52,6 +60,7 @@ export class FarmProfileComponent implements OnInit {
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly mutationError = signal<string | null>(null);
   readonly saving = signal(false);
   readonly saveSuccess = signal(false);
 
@@ -98,7 +107,7 @@ export class FarmProfileComponent implements OnInit {
   loadCropTypes(): void {
     this.farmService.getCropTypes().subscribe({
       next: (types) => this.cropTypes.set(types),
-      error: (err) => console.error('Failed to load crop types', err),
+      error: () => this.mutationError.set('Failed to load crop types.'),
     });
   }
 
@@ -115,7 +124,9 @@ export class FarmProfileComponent implements OnInit {
     const raw = this.form.getRawValue();
     const payload: UpdateFarmProfileRequest = {
       ...raw,
-      soilType: raw.soilType ? (this.SOIL_TYPE_MAP[raw.soilType] ?? null) : null,
+      soilType: raw.soilType
+        ? (this.SOIL_TYPE_MAP[raw.soilType] ?? null)
+        : null,
     };
 
     this.farmService
@@ -145,22 +156,30 @@ export class FarmProfileComponent implements OnInit {
     if (!cropTypeId) return;
 
     this.addingCrop.set(true);
-    this.farmService.addCrop(cropTypeId).pipe(finalize(() => this.addingCrop.set(false))).subscribe({
-      next: () => {
-        this.selectedCropTypeId.set('');
-        this.loadProfile();
-      },
-      error: (err) => console.error('Failed to add crop', err),
-    });
+    this.mutationError.set(null);
+    this.farmService
+      .addCrop(cropTypeId)
+      .pipe(finalize(() => this.addingCrop.set(false)))
+      .subscribe({
+        next: () => {
+          this.selectedCropTypeId.set('');
+          this.loadProfile();
+        },
+        error: () => this.mutationError.set('Failed to add crop.'),
+      });
   }
 
   deleteCrop(cropTypeId: string): void {
     if (!confirm('Are you sure you want to remove this crop?')) return;
     this.deletingCropId.set(cropTypeId);
-    this.farmService.deleteCrop(cropTypeId).pipe(finalize(() => this.deletingCropId.set(null))).subscribe({
-      next: () => this.loadProfile(),
-      error: (err) => console.error('Failed to delete crop', err),
-    });
+    this.mutationError.set(null);
+    this.farmService
+      .deleteCrop(cropTypeId)
+      .pipe(finalize(() => this.deletingCropId.set(null)))
+      .subscribe({
+        next: () => this.loadProfile(),
+        error: () => this.mutationError.set('Failed to delete crop.'),
+      });
   }
 
   onFileSelected(event: Event): void {
@@ -169,22 +188,32 @@ export class FarmProfileComponent implements OnInit {
     if (!file) return;
 
     this.uploadingDocument.set(true);
-    this.farmService.addDocument(file).pipe(finalize(() => {
-      this.uploadingDocument.set(false);
-      input.value = '';
-    })).subscribe({
-      next: () => this.loadProfile(),
-      error: (err) => console.error('Failed to upload document', err),
-    });
+    this.mutationError.set(null);
+    this.farmService
+      .addDocument(file)
+      .pipe(
+        finalize(() => {
+          this.uploadingDocument.set(false);
+          input.value = '';
+        })
+      )
+      .subscribe({
+        next: () => this.loadProfile(),
+        error: () => this.mutationError.set('Failed to upload document.'),
+      });
   }
 
   deleteDocument(documentId: string): void {
     if (!confirm('Are you sure you want to delete this document?')) return;
     this.deletingDocumentId.set(documentId);
-    this.farmService.deleteDocument(documentId).pipe(finalize(() => this.deletingDocumentId.set(null))).subscribe({
-      next: () => this.loadProfile(),
-      error: (err) => console.error('Failed to delete document', err),
-    });
+    this.mutationError.set(null);
+    this.farmService
+      .deleteDocument(documentId)
+      .pipe(finalize(() => this.deletingDocumentId.set(null)))
+      .subscribe({
+        next: () => this.loadProfile(),
+        error: () => this.mutationError.set('Failed to delete document.'),
+      });
   }
 
   updatePhone(): void {
@@ -192,13 +221,20 @@ export class FarmProfileComponent implements OnInit {
     if (!phone) return;
 
     this.updatingPhone.set(true);
-    this.authService.updatePhone(phone).pipe(finalize(() => this.updatingPhone.set(false))).subscribe({
-      next: () => this.loadProfile(),
-      error: (err) => console.error('Failed to update phone', err),
-    });
+    this.mutationError.set(null);
+    this.authService
+      .updatePhone(phone)
+      .pipe(finalize(() => this.updatingPhone.set(false)))
+      .subscribe({
+        next: () => this.loadProfile(),
+        error: () => this.mutationError.set('Failed to update phone.'),
+      });
   }
 
   isCropAdded(cropTypeId: string): boolean {
-    return this.profile()?.cropTypes.some((c) => c.cropTypeId === cropTypeId) ?? false;
+    return (
+      this.profile()?.cropTypes.some((c) => c.cropTypeId === cropTypeId) ??
+      false
+    );
   }
 }

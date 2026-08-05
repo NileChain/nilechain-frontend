@@ -6,9 +6,11 @@ import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
-import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
+import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
+import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { FarmService } from '../../../core/services/farm/farm.service';
+import { MobileNavService } from '../../../core/services/mobile-nav.service';
 import { FarmDashboard } from '../../../core/models/farm/farm-dashboard.model';
 
 @Component({
@@ -17,7 +19,8 @@ import { FarmDashboard } from '../../../core/models/farm/farm-dashboard.model';
     TranslatePipe,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
-    UiLoaderComponent,
+    UiErrorStateComponent,
+    UiSkeletonComponent,
     RouterLink,
     DecimalPipe,
   ],
@@ -28,6 +31,7 @@ export class FarmDashboardComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly farmService = inject(FarmService);
   readonly currentUser = this.authService.currentUser;
+  readonly mobileNav = inject(MobileNavService);
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);

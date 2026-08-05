@@ -1,15 +1,28 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
-  <div class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in">
+  <div
+    class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
+  >
+    <ui-preview-banner />
     <!-- Header -->
     <header class="flex justify-between items-center gap-4 flex-wrap">
-      <div>
-        <h1 class="font-headline-lg text-headline-lg text-on-surface">
-          {{ 'factory.riskReport.title' | translate }}
-        </h1>
-        <p class="font-body-md text-body-md text-on-surface-variant">
-          {{ 'factory.riskReport.subtitle' | translate }}
-          <span class="text-on-surface">Green Valley Farm</span>
-        </p>
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant shrink-0"
+          (click)="mobileNav.toggleMenu()"
+          [attr.aria-label]="'common.toggleMenu' | translate"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+        </button>
+        <div>
+          <h1 class="font-headline-lg text-headline-lg text-on-surface">
+            {{ 'factory.riskReport.title' | translate }}
+          </h1>
+          <p class="font-body-md text-body-md text-on-surface-variant">
+            {{ 'factory.riskReport.subtitle' | translate }}
+            <span class="text-on-surface">Green Valley Farm</span>
+          </p>
+        </div>
       </div>
       <div class="flex items-center gap-2 sm:gap-4">
         <ui-language-toggle />
@@ -22,19 +35,25 @@
       <span
         class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm"
       >
-        <span class="material-symbols-outlined text-[16px]" aria-hidden="true">smart_toy</span>
+        <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
+          >smart_toy</span
+        >
         {{ 'factory.riskReport.aiGenerated' | translate }}
       </span>
       <span
         class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm"
       >
-        <span class="material-symbols-outlined text-[16px]" aria-hidden="true">calendar_today</span>
+        <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
+          >calendar_today</span
+        >
         11 Nov 2024
       </span>
       <span
         class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm"
       >
-        <span class="material-symbols-outlined text-[16px]" aria-hidden="true">menu_book</span>
+        <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
+          >menu_book</span
+        >
         RAG Knowledge Base v3
       </span>
     </div>
@@ -46,7 +65,10 @@
         class="ui-card p-6 flex flex-col items-center justify-center text-center animate-slide-up"
         aria-labelledby="trust-score-heading"
       >
-        <h2 id="trust-score-heading" class="font-title-lg text-title-lg text-primary mb-2">
+        <h2
+          id="trust-score-heading"
+          class="font-title-lg text-title-lg text-primary mb-2"
+        >
           {{ 'factory.riskReport.trustScore' | translate }}
         </h2>
         <p class="font-body-md text-body-md text-on-surface-variant mb-6">
@@ -69,13 +91,18 @@
           <div
             class="absolute inset-[12px] rounded-full bg-surface-container-lowest flex items-center justify-center"
           >
-            <span class="font-headline-lg text-headline-lg text-primary font-bold">85</span>
+            <span
+              class="font-headline-lg text-headline-lg text-primary font-bold"
+              >85</span
+            >
           </div>
         </div>
         <div
           class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-container text-on-primary-container font-title-md text-title-md"
         >
-          <span class="material-symbols-outlined text-[20px] fill" aria-hidden="true"
+          <span
+            class="material-symbols-outlined text-[20px] fill"
+            aria-hidden="true"
             >check_circle</span
           >
           {{ 'factory.riskReport.lowRisk' | translate }}
@@ -89,7 +116,9 @@
             id="factors-heading"
             class="font-title-md text-title-md text-primary mb-4 flex items-center gap-2"
           >
-            <span class="material-symbols-outlined" aria-hidden="true">analytics</span>
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >analytics</span
+            >
             {{ 'factory.riskReport.factorBreakdown' | translate }}
           </h3>
           <div class="space-y-4">
@@ -111,9 +140,15 @@
                 >
                   <div
                     class="h-2 rounded-full transition-all"
-                    [class.bg-primary-container]="factor.barClass === 'bg-primary-container'"
-                    [class.bg-secondary-container]="factor.barClass === 'bg-secondary-container'"
-                    [class.bg-success-green]="factor.barClass === 'bg-success-green'"
+                    [class.bg-primary-container]="
+                      factor.barClass === 'bg-primary-container'
+                    "
+                    [class.bg-secondary-container]="
+                      factor.barClass === 'bg-secondary-container'
+                    "
+                    [class.bg-success-green]="
+                      factor.barClass === 'bg-success-green'
+                    "
                     [style.width.%]="factor.value"
                   ></div>
                 </div>
@@ -130,12 +165,16 @@
             id="narrative-heading"
             class="font-title-md text-title-md text-primary mb-3 flex items-center gap-2"
           >
-            <span class="material-symbols-outlined text-primary" aria-hidden="true"
+            <span
+              class="material-symbols-outlined text-primary"
+              aria-hidden="true"
               >psychology</span
             >
             {{ 'factory.riskReport.narrative' | translate }}
           </h3>
-          <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+          <p
+            class="font-body-md text-body-md text-on-surface-variant leading-relaxed"
+          >
             {{ 'factory.riskReport.narrativeBody' | translate }}
           </p>
         </section>
@@ -152,7 +191,9 @@
           id="sources-heading"
           class="font-title-md text-title-md text-primary mb-4 flex items-center gap-2"
         >
-          <span class="material-symbols-outlined" aria-hidden="true">source</span>
+          <span class="material-symbols-outlined" aria-hidden="true"
+            >source</span
+          >
           {{ 'factory.riskReport.sources' | translate }}
         </h3>
         <ul class="space-y-3 font-body-md text-body-md text-on-surface-variant">
@@ -160,22 +201,29 @@
             <li
               class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-container-low transition-colors"
             >
-              <span class="material-symbols-outlined text-[20px] text-primary" aria-hidden="true">{{
-                source.icon
-              }}</span>
+              <span
+                class="material-symbols-outlined text-[20px] text-primary"
+                aria-hidden="true"
+                >{{ source.icon }}</span
+              >
               {{ source.key | translate }}
             </li>
           }
         </ul>
       </section>
 
-      <section class="ui-card p-6 flex flex-col justify-between" aria-labelledby="rec-heading">
+      <section
+        class="ui-card p-6 flex flex-col justify-between"
+        aria-labelledby="rec-heading"
+      >
         <div>
           <h3
             id="rec-heading"
             class="font-title-md text-title-md text-primary mb-2 flex items-center gap-2"
           >
-            <span class="material-symbols-outlined" aria-hidden="true">recommend</span>
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >recommend</span
+            >
             {{ 'factory.riskReport.recommendation' | translate }}
           </h3>
           <p class="font-body-md text-body-md text-on-surface-variant mb-6">
@@ -184,11 +232,19 @@
         </div>
         <div class="flex flex-col gap-3">
           <button type="button" class="ui-btn-primary w-full">
-            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">check</span>
+            <span
+              class="material-symbols-outlined text-[20px]"
+              aria-hidden="true"
+              >check</span
+            >
             {{ 'factory.riskReport.selectFarm' | translate }}
           </button>
           <button type="button" class="ui-btn-secondary w-full">
-            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">download</span>
+            <span
+              class="material-symbols-outlined text-[20px]"
+              aria-hidden="true"
+              >download</span
+            >
             {{ 'factory.riskReport.downloadPdf' | translate }}
           </button>
         </div>

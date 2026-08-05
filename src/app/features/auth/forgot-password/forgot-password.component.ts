@@ -38,11 +38,15 @@ export class ForgotPasswordComponent {
     this.isSubmitting.set(true);
     this.errorMessage.set('');
 
-    this.authService.forgotPassword({ email }).pipe(
-      finalize(() => this.isSubmitting.set(false))
-    ).subscribe({
-      next: () => this.submitted.set(true),
-      error: () => this.errorMessage.set('Unable to send reset email. Please try again.'),
-    });
+    this.authService
+      .forgotPassword({ email })
+      .pipe(finalize(() => this.isSubmitting.set(false)))
+      .subscribe({
+        next: () => this.submitted.set(true),
+        error: () =>
+          this.errorMessage.set(
+            'Unable to send reset email. Please try again.'
+          ),
+      });
   }
 }

@@ -1,15 +1,23 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { UiPreviewBannerComponent } from '../../../shared/ui/preview-banner/preview-banner.component';
+import { MobileNavService } from '../../../core/services/mobile-nav.service';
 
 @Component({
   selector: 'app-factory-messages',
   standalone: true,
-  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent],
+  imports: [
+    TranslatePipe,
+    UiLanguageToggleComponent,
+    UiThemeToggleComponent,
+    UiPreviewBannerComponent,
+  ],
   templateUrl: './factory-messages.component.html',
 })
 export class FactoryMessagesComponent {
+  readonly mobileNav = inject(MobileNavService);
   readonly conversations = [
     {
       id: 'c1',

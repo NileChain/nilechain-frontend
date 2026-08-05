@@ -1,9 +1,14 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
   <header
-    class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40">
+    class="h-16 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
+  >
     <div class="flex items-center gap-4">
-      <button type="button" class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
-        [attr.aria-label]="'common.toggleMenu' | translate">
+      <button
+        type="button"
+        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
+        (click)="mobileNav.toggleMenu()"
+        [attr.aria-label]="'common.toggleMenu' | translate"
+      >
         <span class="material-symbols-outlined" aria-hidden="true">menu</span>
       </button>
       <h1 class="font-headline-md text-headline-md font-bold text-primary">
@@ -13,7 +18,9 @@
     <div class="flex items-center gap-2 sm:gap-4">
       <ui-language-toggle />
       <ui-theme-toggle />
-      <div class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant">
+      <div
+        class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant"
+      >
         <div class="text-end hidden sm:block">
           <p class="font-label-md text-label-md text-on-surface leading-tight">
             {{ currentUser()?.displayName || currentUser()?.email }}
@@ -21,22 +28,27 @@
           <p class="text-label-sm text-label-sm text-on-surface-variant">
             {{ 'nav.premiumFarmer' | translate }}
           </p>
-          <p class="text-label-sm text-label-sm text-on-surface-variant">{{ 'nav.premiumFarmer' | translate }}</p>
         </div>
         <div
           class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary"
         >
           <span class="font-bold">{{
-            (currentUser()?.displayName || currentUser()?.email || '?').charAt(0).toUpperCase()
+            (currentUser()?.displayName || currentUser()?.email || '?')
+              .charAt(0)
+              .toUpperCase()
           }}</span>
         </div>
       </div>
     </div>
   </header>
 
-  <div class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in">
+  <div
+    class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
+  >
     <!-- Page Heading -->
-    <section class="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-4">
+    <section
+      class="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-4"
+    >
       <div>
         <h2 class="font-headline-lg text-headline-lg font-bold text-on-surface">
           {{ 'farm.matches.pageHeading' | translate }}
@@ -50,15 +62,22 @@
     <!-- Filters Bar -->
     <section
       class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant flex flex-wrap gap-4 items-center justify-between"
-      [attr.aria-label]="'farm.matches.filters' | translate">
-      <div class="flex gap-2 items-center text-outline font-title-md text-title-md">
-        <span class="material-symbols-outlined" aria-hidden="true">filter_list</span>
+      [attr.aria-label]="'farm.matches.filters' | translate"
+    >
+      <div
+        class="flex gap-2 items-center text-outline font-title-md text-title-md"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true"
+          >filter_list</span
+        >
         <span>{{ 'farm.matches.filters' | translate }}</span>
       </div>
       <div class="flex flex-wrap gap-4 flex-1">
         <!-- Status Filter -->
         <div class="relative w-full sm:w-auto">
-          <label class="sr-only" for="filter-status">{{ 'farm.matches.status' | translate }}</label>
+          <label class="sr-only" for="filter-status">{{
+            'farm.matches.status' | translate
+          }}</label>
           <select
             id="filter-status"
             class="ui-input w-full sm:w-48 appearance-none pe-10"
@@ -73,7 +92,9 @@
         </div>
         <!-- Crop Filter -->
         <div class="relative w-full sm:w-auto">
-          <label class="sr-only" for="filter-crop">{{ 'farm.matches.crop' | translate }}</label>
+          <label class="sr-only" for="filter-crop">{{
+            'farm.matches.crop' | translate
+          }}</label>
           <select
             id="filter-crop"
             class="ui-input w-full sm:w-48 appearance-none pe-10"
@@ -97,14 +118,38 @@
     </section>
 
     @if (loading()) {
-      <div class="flex justify-center py-16"><ui-loader /></div>
-    } @else if (error()) {
-      <div class="ui-card p-6 text-center space-y-4">
-        <p class="text-on-error-container">{{ error() }}</p>
-        <button type="button" class="ui-btn-primary" (click)="loadMatches()">Retry</button>
+      <div
+        class="grid grid-cols-1 lg:grid-cols-2 gap-gutter"
+        role="status"
+        [attr.aria-busy]="true"
+      >
+        @for (i of [1, 2, 3, 4]; track $index) {
+          <div
+            class="bg-surface-container-lowest rounded-xl p-6 space-y-4 border border-outline-variant"
+          >
+            <div class="flex justify-between items-start gap-4">
+              <div class="flex-1 space-y-2">
+                <ui-skeleton height="1.25rem" width="40%" />
+                <ui-skeleton height="0.875rem" width="60%" />
+              </div>
+              <ui-skeleton rounded="full" width="6rem" height="1.75rem" />
+            </div>
+            <ui-skeleton height="4rem" />
+            <div class="flex gap-3">
+              <ui-skeleton height="2.75rem" width="50%" />
+              <ui-skeleton height="2.75rem" width="50%" />
+            </div>
+          </div>
+        }
       </div>
+    } @else if (error()) {
+      <ui-error-state [message]="error()" (retry)="loadMatches()" />
     } @else if (matches().length === 0) {
-      <p class="text-on-surface-variant text-center py-12">No matches found.</p>
+      <ui-empty-state
+        titleKey="farm.matches.empty"
+        bodyKey="farm.matches.emptyBody"
+        icon="search_off"
+      />
     } @else {
       <section
         class="grid grid-cols-1 lg:grid-cols-2 gap-gutter"
@@ -116,28 +161,40 @@
           >
             <div class="flex justify-between items-start gap-4">
               <div class="min-w-0">
-                <h3 class="font-title-lg text-title-lg font-bold text-on-surface mb-1">
+                <h3
+                  class="font-title-lg text-title-lg font-bold text-on-surface mb-1"
+                >
                   {{ match.factoryName }}
                 </h3>
-                <p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1">
-                  <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
+                <p
+                  class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1"
+                >
+                  <span
+                    class="material-symbols-outlined text-[16px]"
+                    aria-hidden="true"
                     >location_on</span
                   >
                   {{ match.factoryLocation || '—' }}
                 </p>
-                <p class="font-label-sm text-on-surface-variant mt-1">{{ match.status }}</p>
+                <p class="font-label-sm text-on-surface-variant mt-1">
+                  {{ match.status }}
+                </p>
               </div>
               <div class="flex gap-2 flex-col items-end shrink-0">
                 <div
                   class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full flex items-center gap-1 shadow-sm"
                 >
-                  <span class="material-symbols-outlined text-[16px] fill" aria-hidden="true"
+                  <span
+                    class="material-symbols-outlined text-[16px] fill"
+                    aria-hidden="true"
                     >auto_awesome</span
                   >
                   <span class="font-label-lg text-label-lg font-bold"
                     >{{ 'farm.matches.aiScore' | translate }}
                     {{
-                      match.matchScore != null ? (match.matchScore | number: '1.0-0') : '—'
+                      match.matchScore != null
+                        ? (match.matchScore | number: '1.0-0')
+                        : '—'
                     }}%</span
                   >
                 </div>
@@ -149,26 +206,36 @@
                       : 'bg-error-container text-on-error-container border-error-container'
                   "
                 >
-                  <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
+                  <span
+                    class="material-symbols-outlined text-[16px]"
+                    aria-hidden="true"
                     >security</span
                   >
                   <span class="font-label-lg text-label-lg"
                     >{{ 'farm.matches.safetyScore' | translate }}
                     {{
-                      match.riskScore != null ? (match.riskScore | number: '1.0-0') : '—'
+                      match.riskScore != null
+                        ? (match.riskScore | number: '1.0-0')
+                        : '—'
                     }}</span
                   >
                 </div>
               </div>
             </div>
 
-            <div class="bg-surface-container rounded-lg p-4 grid grid-cols-2 gap-4">
+            <div
+              class="bg-surface-container rounded-lg p-4 grid grid-cols-2 gap-4"
+            >
               <div class="flex flex-col">
                 <span class="font-label-sm text-label-sm text-outline mb-1">{{
                   'farm.matches.crop' | translate
                 }}</span>
-                <div class="flex items-center gap-2 text-on-surface font-title-md text-title-md">
-                  <span class="material-symbols-outlined text-primary" aria-hidden="true"
+                <div
+                  class="flex items-center gap-2 text-on-surface font-title-md text-title-md"
+                >
+                  <span
+                    class="material-symbols-outlined text-primary"
+                    aria-hidden="true"
                     >grass</span
                   >
                   {{ match.cropName }}
@@ -178,8 +245,12 @@
                 <span class="font-label-sm text-label-sm text-outline mb-1">{{
                   'farm.matches.quantity' | translate
                 }}</span>
-                <div class="flex items-center gap-2 text-on-surface font-title-md text-title-md">
-                  <span class="material-symbols-outlined text-primary" aria-hidden="true"
+                <div
+                  class="flex items-center gap-2 text-on-surface font-title-md text-title-md"
+                >
+                  <span
+                    class="material-symbols-outlined text-primary"
+                    aria-hidden="true"
                     >scale</span
                   >
                   {{ match.quantityTons }} ton
@@ -189,8 +260,12 @@
                 <span class="font-label-sm text-label-sm text-outline mb-1">{{
                   'farm.matches.price' | translate
                 }}</span>
-                <div class="flex items-center gap-2 text-on-surface font-title-md text-title-md">
-                  <span class="material-symbols-outlined text-primary" aria-hidden="true"
+                <div
+                  class="flex items-center gap-2 text-on-surface font-title-md text-title-md"
+                >
+                  <span
+                    class="material-symbols-outlined text-primary"
+                    aria-hidden="true"
                     >payments</span
                   >
                   {{
@@ -204,8 +279,12 @@
                 <span class="font-label-sm text-label-sm text-outline mb-1">{{
                   'farm.matches.deliveryDate' | translate
                 }}</span>
-                <div class="flex items-center gap-2 text-on-surface font-title-md text-title-md">
-                  <span class="material-symbols-outlined text-primary" aria-hidden="true"
+                <div
+                  class="flex items-center gap-2 text-on-surface font-title-md text-title-md"
+                >
+                  <span
+                    class="material-symbols-outlined text-primary"
+                    aria-hidden="true"
                     >calendar_month</span
                   >
                   {{
@@ -225,7 +304,9 @@
                   [disabled]="respondingId() === match.matchId"
                   (click)="respond(match.matchId, 'accept')"
                 >
-                  <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                  <span class="material-symbols-outlined" aria-hidden="true"
+                    >check_circle</span
+                  >
                   {{ 'farm.matches.acceptOffer' | translate }}
                 </button>
                 <button
@@ -234,7 +315,9 @@
                   [disabled]="respondingId() === match.matchId"
                   (click)="respond(match.matchId, 'reject')"
                 >
-                  <span class="material-symbols-outlined" aria-hidden="true">cancel</span>
+                  <span class="material-symbols-outlined" aria-hidden="true"
+                    >cancel</span
+                  >
                   {{ 'farm.matches.declineOffer' | translate }}
                 </button>
               </div>

@@ -1,15 +1,23 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { UiPreviewBannerComponent } from '../../../shared/ui/preview-banner/preview-banner.component';
+import { MobileNavService } from '../../../core/services/mobile-nav.service';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent],
+  imports: [
+    TranslatePipe,
+    UiLanguageToggleComponent,
+    UiThemeToggleComponent,
+    UiPreviewBannerComponent,
+  ],
   templateUrl: './admin-dashboard.component.html',
 })
 export class AdminDashboardComponent {
+  readonly mobileNav = inject(MobileNavService);
   readonly monthlyBars = [
     { label: 'Jan', height: '72%' },
     { label: 'Feb', height: '66%' },

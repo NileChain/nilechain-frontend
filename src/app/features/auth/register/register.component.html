@@ -1,7 +1,9 @@
 ﻿<div
   class="min-h-screen flex flex-col items-center justify-center p-margin-mobile md:p-margin-desktop overflow-x-hidden bg-surface"
 >
-  <header class="fixed top-0 inset-x-0 z-50 flex justify-end items-center gap-1 px-margin-mobile md:px-margin-desktop h-16">
+  <header
+    class="fixed top-0 inset-x-0 z-50 flex justify-end items-center gap-1 px-margin-mobile md:px-margin-desktop h-16"
+  >
     <ui-language-toggle />
     <ui-theme-toggle />
   </header>
@@ -90,40 +92,78 @@
 
         <!-- Farm-specific fields -->
         @if (selectedRole() === 'farm') {
-          <div class="space-y-md p-md bg-surface-container-low rounded-lg border border-outline-variant">
-            <p class="font-label-md text-label-md text-primary">{{ 'register.farmDetails' | translate }}</p>
+          <div
+            class="space-y-md p-md bg-surface-container-low rounded-lg border border-outline-variant"
+          >
+            <p class="font-label-md text-label-md text-primary">
+              {{ 'register.farmDetails' | translate }}
+            </p>
             <div class="space-y-xs">
-              <label for="farm-name" class="font-label-sm text-label-sm text-on-surface-variant">{{ 'register.farmName' | translate }}</label>
-              <input type="text" id="farm-name" name="farmName" [attr.placeholder]="'register.farmNamePlaceholder' | translate" required
+              <label
+                for="farm-name"
+                class="font-label-sm text-label-sm text-on-surface-variant"
+                >{{ 'register.farmName' | translate }}</label
+              >
+              <input
+                type="text"
+                id="farm-name"
+                name="farmName"
+                [attr.placeholder]="'register.farmNamePlaceholder' | translate"
+                required
                 (input)="farmName.set($any($event.target).value)"
-                class="w-full ps-4 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all" />
+                class="w-full ps-4 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all"
+              />
               @if (submitted() && !farmName().trim()) {
-                <p class="text-error font-label-sm text-label-sm" role="alert">{{ 'register.errors.farmNameRequired' | translate }}</p>
+                <p class="text-error font-label-sm text-label-sm" role="alert">
+                  {{ 'register.errors.farmNameRequired' | translate }}
+                </p>
               }
             </div>
             <div class="space-y-xs">
-              <label for="farm-governorate" class="font-label-sm text-label-sm text-on-surface-variant">{{ 'register.governorate' | translate }}</label>
-              <select id="farm-governorate" required
+              <label
+                for="farm-governorate"
+                class="font-label-sm text-label-sm text-on-surface-variant"
+                >{{ 'register.governorate' | translate }}</label
+              >
+              <select
+                id="farm-governorate"
+                required
                 (change)="farmGovernorate.set($any($event.target).value)"
-                class="w-full ps-4 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all">
+                class="w-full ps-4 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all"
+              >
                 <option value="">{{ 'common.select' | translate }}</option>
                 @for (gov of governorates; track gov) {
                   <option [value]="gov">{{ gov }}</option>
                 }
               </select>
               @if (submitted() && !farmGovernorate().trim()) {
-                <p class="text-error font-label-sm text-label-sm" role="alert">{{ 'register.errors.governorateRequired' | translate }}</p>
+                <p class="text-error font-label-sm text-label-sm" role="alert">
+                  {{ 'register.errors.governorateRequired' | translate }}
+                </p>
               }
             </div>
             <div class="space-y-xs">
-              <label for="farm-size" class="font-label-sm text-label-sm text-on-surface-variant">{{ 'register.sizeInFeddans' | translate }}</label>
-              <input type="number" id="farm-size" name="farmSize" min="0.01" step="any"
-                [attr.placeholder]="'register.sizePlaceholder' | translate" required
+              <label
+                for="farm-size"
+                class="font-label-sm text-label-sm text-on-surface-variant"
+                >{{ 'register.sizeInFeddans' | translate }}</label
+              >
+              <input
+                type="number"
+                id="farm-size"
+                name="farmSize"
+                min="0.01"
+                step="any"
+                [attr.placeholder]="'register.sizePlaceholder' | translate"
+                required
                 (input)="onFarmSizeInput($any($event.target).value)"
                 [class.border-error]="submitted() && farmSizeInvalid()"
-                class="w-full ps-4 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all" />
+                class="w-full ps-4 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all"
+              />
               @if (submitted() && farmSizeInvalid()) {
-                <p class="text-error font-label-sm text-label-sm" role="alert">{{ 'register.errors.sizeRequired' | translate }}</p>
+                <p class="text-error font-label-sm text-label-sm" role="alert">
+                  {{ 'register.errors.sizeRequired' | translate }}
+                </p>
               }
             </div>
           </div>
@@ -131,30 +171,56 @@
 
         <!-- Factory-specific fields -->
         @if (selectedRole() === 'factory') {
-          <div class="space-y-md p-md bg-surface-container-low rounded-lg border border-outline-variant">
-            <p class="font-label-md text-label-md text-primary">{{ 'register.factoryDetails' | translate }}</p>
+          <div
+            class="space-y-md p-md bg-surface-container-low rounded-lg border border-outline-variant"
+          >
+            <p class="font-label-md text-label-md text-primary">
+              {{ 'register.factoryDetails' | translate }}
+            </p>
             <div class="space-y-xs">
-              <label for="factory-name" class="font-label-sm text-label-sm text-on-surface-variant">{{ 'register.factoryName' | translate }}</label>
-              <input type="text" id="factory-name" name="factoryName"
-                [attr.placeholder]="'register.factoryNamePlaceholder' | translate" required
+              <label
+                for="factory-name"
+                class="font-label-sm text-label-sm text-on-surface-variant"
+                >{{ 'register.factoryName' | translate }}</label
+              >
+              <input
+                type="text"
+                id="factory-name"
+                name="factoryName"
+                [attr.placeholder]="
+                  'register.factoryNamePlaceholder' | translate
+                "
+                required
                 (input)="factoryName.set($any($event.target).value)"
-                class="w-full ps-4 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all" />
+                class="w-full ps-4 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all"
+              />
               @if (submitted() && !factoryName().trim()) {
-                <p class="text-error font-label-sm text-label-sm" role="alert">{{ 'register.errors.factoryNameRequired' | translate }}</p>
+                <p class="text-error font-label-sm text-label-sm" role="alert">
+                  {{ 'register.errors.factoryNameRequired' | translate }}
+                </p>
               }
             </div>
             <div class="space-y-xs">
-              <label for="factory-governorate" class="font-label-sm text-label-sm text-on-surface-variant">{{ 'register.governorate' | translate }}</label>
-              <select id="factory-governorate" required
+              <label
+                for="factory-governorate"
+                class="font-label-sm text-label-sm text-on-surface-variant"
+                >{{ 'register.governorate' | translate }}</label
+              >
+              <select
+                id="factory-governorate"
+                required
                 (change)="factoryGovernorate.set($any($event.target).value)"
-                class="w-full ps-4 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all">
+                class="w-full ps-4 pe-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface input-focus-effect outline-none transition-all"
+              >
                 <option value="">{{ 'common.select' | translate }}</option>
                 @for (gov of governorates; track gov) {
                   <option [value]="gov">{{ gov }}</option>
                 }
               </select>
               @if (submitted() && !factoryGovernorate().trim()) {
-                <p class="text-error font-label-sm text-label-sm" role="alert">{{ 'register.errors.governorateRequired' | translate }}</p>
+                <p class="text-error font-label-sm text-label-sm" role="alert">
+                  {{ 'register.errors.governorateRequired' | translate }}
+                </p>
               }
             </div>
           </div>
@@ -237,20 +303,37 @@
             </button>
           </div>
           @if (passwordValue() || submitted()) {
-            <ul class="mt-xs space-y-1 font-label-sm text-label-sm" aria-live="polite">
-              <li [class]="passwordChecks().minLength ? 'text-primary' : 'text-error'">
+            <ul
+              class="mt-xs space-y-1 font-label-sm text-label-sm"
+              aria-live="polite"
+            >
+              <li
+                [class]="
+                  passwordChecks().minLength ? 'text-primary' : 'text-error'
+                "
+              >
                 {{ 'register.passwordRules.minLength' | translate }}
               </li>
-              <li [class]="passwordChecks().upper ? 'text-primary' : 'text-error'">
+              <li
+                [class]="passwordChecks().upper ? 'text-primary' : 'text-error'"
+              >
                 {{ 'register.passwordRules.upper' | translate }}
               </li>
-              <li [class]="passwordChecks().lower ? 'text-primary' : 'text-error'">
+              <li
+                [class]="passwordChecks().lower ? 'text-primary' : 'text-error'"
+              >
                 {{ 'register.passwordRules.lower' | translate }}
               </li>
-              <li [class]="passwordChecks().digit ? 'text-primary' : 'text-error'">
+              <li
+                [class]="passwordChecks().digit ? 'text-primary' : 'text-error'"
+              >
                 {{ 'register.passwordRules.digit' | translate }}
               </li>
-              <li [class]="passwordChecks().special ? 'text-primary' : 'text-error'">
+              <li
+                [class]="
+                  passwordChecks().special ? 'text-primary' : 'text-error'
+                "
+              >
                 {{ 'register.passwordRules.special' | translate }}
               </li>
             </ul>
@@ -325,13 +408,13 @@
             class="font-body-md text-[12px] text-on-surface-variant leading-tight"
           >
             {{ 'register.termsAgree' | translate }}
-            <a href="#" class="text-primary font-bold hover:underline">{{
+            <span class="text-primary font-bold">{{
               'register.termsOfService' | translate
-            }}</a>
+            }}</span>
             {{ 'register.and' | translate }}
-            <a href="#" class="text-primary font-bold hover:underline">{{
+            <span class="text-primary font-bold">{{
               'register.privacyPolicy' | translate
-            }}</a
+            }}</span
             >.
           </label>
         </div>
@@ -352,7 +435,9 @@
               ? ('register.creatingAccount' | translate)
               : ('register.completeRegistration' | translate)
           }}</span>
-          <span class="material-symbols-outlined text-[18px] icon-flip" aria-hidden="true"
+          <span
+            class="material-symbols-outlined text-[18px] icon-flip"
+            aria-hidden="true"
             >arrow_forward</span
           >
         </button>
@@ -379,16 +464,12 @@
         {{ 'landing.footerRights' | translate }}
       </p>
       <div class="flex justify-center gap-gutter mt-sm">
-        <a
-          href="#"
-          class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary"
-          >{{ 'landing.compliance' | translate }}</a
-        >
-        <a
-          href="#"
-          class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary"
-          >{{ 'common.support' | translate }}</a
-        >
+        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
+          'landing.compliance' | translate
+        }}</span>
+        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
+          'common.support' | translate
+        }}</span>
       </div>
     </footer>
   </main>
@@ -403,7 +484,10 @@
     class="fixed bottom-margin-desktop start-1/2 -translate-x-1/2 transform transition-all duration-300 bg-secondary text-on-secondary px-lg py-md rounded-full flex items-center gap-sm shadow-xl z-50"
     role="status"
   >
-    <span class="material-symbols-outlined" data-weight="fill" aria-hidden="true"
+    <span
+      class="material-symbols-outlined"
+      data-weight="fill"
+      aria-hidden="true"
       >check_circle</span
     >
     <span class="font-label-md text-label-md">{{

@@ -1,17 +1,29 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
   <header
-    class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
+    class="h-16 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
   >
-    <h1 class="font-headline-md text-headline-md font-bold text-primary">
-      {{ 'factory.progress.title' | translate }}
-    </h1>
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant shrink-0"
+        (click)="mobileNav.toggleMenu()"
+        [attr.aria-label]="'common.toggleMenu' | translate"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+      </button>
+      <h1 class="font-headline-md text-headline-md font-bold text-primary">
+        {{ 'factory.progress.title' | translate }}
+      </h1>
+    </div>
     <div class="flex items-center gap-2 sm:gap-4">
       <ui-language-toggle />
       <ui-theme-toggle />
     </div>
   </header>
 
-  <div class="p-margin-mobile md:p-margin-desktop max-w-4xl mx-auto space-y-gutter animate-fade-in">
+  <div
+    class="p-margin-mobile md:p-margin-desktop max-w-4xl mx-auto space-y-gutter animate-fade-in"
+  >
     @if (!requestId()) {
       <div class="ui-card p-6 space-y-3">
         <p class="text-on-surface-variant">
@@ -28,11 +40,20 @@
         </p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block font-label-md mb-1" for="agent-crop">Crop type</label>
-            <input id="agent-crop" class="ui-input" [(ngModel)]="cropType" name="cropType" />
+            <label class="block font-label-md mb-1" for="agent-crop"
+              >Crop type</label
+            >
+            <input
+              id="agent-crop"
+              class="ui-input"
+              [(ngModel)]="cropType"
+              name="cropType"
+            />
           </div>
           <div>
-            <label class="block font-label-md mb-1" for="agent-qty">Quantity (tons)</label>
+            <label class="block font-label-md mb-1" for="agent-qty"
+              >Quantity (tons)</label
+            >
             <input
               id="agent-qty"
               type="number"
@@ -42,7 +63,9 @@
             />
           </div>
           <div>
-            <label class="block font-label-md mb-1" for="agent-price">Price / ton</label>
+            <label class="block font-label-md mb-1" for="agent-price"
+              >Price / ton</label
+            >
             <input
               id="agent-price"
               type="number"
@@ -52,7 +75,9 @@
             />
           </div>
           <div>
-            <label class="block font-label-md mb-1" for="agent-date">Delivery date</label>
+            <label class="block font-label-md mb-1" for="agent-date"
+              >Delivery date</label
+            >
             <input
               id="agent-date"
               type="date"
@@ -62,7 +87,9 @@
             />
           </div>
           <div>
-            <label class="block font-label-md mb-1" for="agent-gov">Factory governorate</label>
+            <label class="block font-label-md mb-1" for="agent-gov"
+              >Factory governorate</label
+            >
             <input
               id="agent-gov"
               class="ui-input"
@@ -71,7 +98,9 @@
             />
           </div>
           <div>
-            <label class="block font-label-md mb-1" for="agent-quality">Quality specs</label>
+            <label class="block font-label-md mb-1" for="agent-quality"
+              >Quality specs</label
+            >
             <input
               id="agent-quality"
               class="ui-input"
@@ -96,33 +125,42 @@
     }
 
     @if (error()) {
-      <p class="text-on-error-container">{{ error() }}</p>
+      <ui-error-state [message]="error()" (retry)="runAgent()" />
     }
 
     @if (response(); as result) {
       <section class="ui-card p-6 space-y-4">
         <h2 class="font-title-lg text-on-surface">Results</h2>
         @if (result.comparisonReport) {
-          <p class="whitespace-pre-wrap text-on-surface-variant">{{ result.comparisonReport }}</p>
+          <p class="whitespace-pre-wrap text-on-surface-variant">
+            {{ result.comparisonReport }}
+          </p>
         }
         @if (topMatches().length === 0) {
           <p class="text-on-surface-variant">No matches returned.</p>
         } @else {
           <ul class="space-y-3">
             @for (match of topMatches(); track match.farmId) {
-              <li class="border border-outline-variant rounded-lg p-4 flex justify-between gap-4 flex-wrap">
+              <li
+                class="border border-outline-variant rounded-lg p-4 flex justify-between gap-4 flex-wrap"
+              >
                 <div>
-                  <p class="font-title-md text-on-surface font-bold">{{ match.farmName }}</p>
+                  <p class="font-title-md text-on-surface font-bold">
+                    {{ match.farmName }}
+                  </p>
                   <p class="text-on-surface-variant text-sm">
-                    {{ match.governorate }} · Risk {{ match.riskLevel }}
-                    ({{ match.riskScore | number: '1.0-0' }})
+                    {{ match.governorate }} · Risk {{ match.riskLevel }} ({{
+                      match.riskScore | number: '1.0-0'
+                    }})
                   </p>
                   <p class="text-sm text-on-surface-variant">
                     Crops: {{ match.cropTypes.join(', ') || '—' }}
                   </p>
                 </div>
                 <div class="text-end space-y-2">
-                  <p class="font-bold text-primary">{{ match.matchScore | number: '1.0-0' }}%</p>
+                  <p class="font-bold text-primary">
+                    {{ match.matchScore | number: '1.0-0' }}%
+                  </p>
                   <a
                     class="ui-btn-secondary !py-1 !px-3 inline-flex"
                     routerLink="/contract-signing"

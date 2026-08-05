@@ -5,8 +5,11 @@ import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
-import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
+import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
+import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
+import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
 import { FactoryService } from '../../../core/services/factory/factory.service';
+import { MobileNavService } from '../../../core/services/mobile-nav.service';
 import { FactoryMatchItem } from '../../../core/models/factory/factory-match.model';
 
 @Component({
@@ -16,7 +19,9 @@ import { FactoryMatchItem } from '../../../core/models/factory/factory-match.mod
     TranslatePipe,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
-    UiLoaderComponent,
+    UiErrorStateComponent,
+    UiEmptyStateComponent,
+    UiSkeletonComponent,
     RouterLink,
     DatePipe,
     DecimalPipe,
@@ -26,6 +31,7 @@ import { FactoryMatchItem } from '../../../core/models/factory/factory-match.mod
 export class FactoryMatchesComponent implements OnInit {
   private readonly factoryService = inject(FactoryService);
   private readonly route = inject(ActivatedRoute);
+  readonly mobileNav = inject(MobileNavService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);

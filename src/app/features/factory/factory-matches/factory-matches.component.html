@@ -2,9 +2,21 @@
   <header
     class="sticky top-0 z-30 bg-surface border-b border-outline-variant px-margin-mobile md:px-margin-desktop py-3"
   >
-    <div class="max-w-[1440px] mx-auto flex justify-between items-center gap-4 flex-wrap">
+    <div
+      class="max-w-[1440px] mx-auto flex justify-between items-center gap-4 flex-wrap"
+    >
       <div class="flex items-center gap-3 flex-wrap min-w-0">
-        <h1 class="font-title-lg text-title-lg font-bold text-on-surface truncate">
+        <button
+          type="button"
+          class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant shrink-0"
+          (click)="mobileNav.toggleMenu()"
+          [attr.aria-label]="'common.toggleMenu' | translate"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+        </button>
+        <h1
+          class="font-title-lg text-title-lg font-bold text-on-surface truncate"
+        >
           {{ 'factory.matches.title' | translate }}
         </h1>
         @if (requestId()) {
@@ -36,20 +48,41 @@
       </p>
       <p class="font-label-md text-on-surface-variant">
         Open
-        <code class="bg-surface-container px-2 py-1 rounded">/factory-matches?requestId=&#123;guid&#125;</code>
+        <code class="bg-surface-container px-2 py-1 rounded"
+          >/factory-matches?requestId=&#123;guid&#125;</code
+        >
       </p>
     </div>
   } @else if (loading()) {
-    <div class="flex justify-center py-16"><ui-loader /></div>
+    <div
+      class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-4"
+      role="status"
+      [attr.aria-busy]="true"
+    >
+      @for (i of [1, 2, 3]; track $index) {
+        <div class="ui-card p-4 space-y-3">
+          <div class="flex justify-between items-start gap-3">
+            <div class="flex-1 space-y-2">
+              <ui-skeleton height="1.25rem" width="40%" />
+              <ui-skeleton height="0.875rem" width="55%" />
+            </div>
+            <ui-skeleton width="4rem" height="1.75rem" />
+          </div>
+          <div class="flex justify-between">
+            <ui-skeleton height="0.875rem" width="25%" />
+            <ui-skeleton height="0.875rem" width="15%" />
+          </div>
+        </div>
+      }
+    </div>
   } @else if (error()) {
-    <div class="p-8 text-center space-y-4">
-      <p class="text-on-error-container">{{ error() }}</p>
-      <button type="button" class="ui-btn-primary" (click)="loadMatches(requestId()!)">
-        Retry
-      </button>
+    <div class="p-margin-mobile md:p-margin-desktop">
+      <ui-error-state [message]="error()" (retry)="loadMatches(requestId()!)" />
     </div>
   } @else {
-    <div class="flex-1 flex flex-col lg:flex-row min-h-0 max-w-[1440px] w-full mx-auto">
+    <div
+      class="flex-1 flex flex-col lg:flex-row min-h-0 max-w-[1440px] w-full mx-auto"
+    >
       <section
         class="w-full lg:w-[40%] border-e border-outline-variant bg-surface flex flex-col lg:max-h-[calc(100vh-4rem)] overflow-hidden"
       >
@@ -57,13 +90,20 @@
           class="p-4 border-b border-outline-variant flex justify-between items-center sticky top-0 z-10 bg-surface"
         >
           <h2 class="font-title-lg text-title-lg text-on-surface">
-            {{ 'factory.matches.topMatches' | translate: { count: matches().length } }}
+            {{
+              'factory.matches.topMatches'
+                | translate: { count: matches().length }
+            }}
           </h2>
         </div>
 
         <div class="flex-1 overflow-y-auto p-4 space-y-4 animate-fade-in">
           @if (matches().length === 0) {
-            <p class="text-on-surface-variant">No matches for this request.</p>
+            <ui-empty-state
+              titleKey="factory.matches.empty"
+              bodyKey="factory.matches.emptyBody"
+              icon="hub"
+            />
           } @else {
             @for (farm of matches(); track farm.matchId) {
               <button
@@ -90,7 +130,9 @@
                     <p
                       class="text-on-surface-variant font-body-md text-body-md flex items-center gap-1 mt-1"
                     >
-                      <span class="material-symbols-outlined text-sm" aria-hidden="true"
+                      <span
+                        class="material-symbols-outlined text-sm"
+                        aria-hidden="true"
                         >location_on</span
                       >
                       {{ farm.farmGovernorate || farm.farmLocation || '—' }}
@@ -99,16 +141,29 @@
                   <div
                     class="bg-primary-container text-on-primary-container px-3 py-1 rounded-lg font-title-md text-title-md flex items-center gap-1 shrink-0"
                   >
-                    <span class="material-symbols-outlined text-sm" aria-hidden="true"
+                    <span
+                      class="material-symbols-outlined text-sm"
+                      aria-hidden="true"
                       >auto_awesome</span
                     >
                     {{
-                      farm.matchScore != null ? (farm.matchScore | number: '1.0-0') + '%' : '—'
+                      farm.matchScore != null
+                        ? (farm.matchScore | number: '1.0-0') + '%'
+                        : '—'
                     }}
                   </div>
                 </div>
-                <div class="flex justify-between text-sm text-on-surface-variant">
-                  <span>Risk: {{ farm.riskScore != null ? (farm.riskScore | number: '1.0-0') : '—' }}</span>
+                <div
+                  class="flex justify-between text-sm text-on-surface-variant"
+                >
+                  <span
+                    >Risk:
+                    {{
+                      farm.riskScore != null
+                        ? (farm.riskScore | number: '1.0-0')
+                        : '—'
+                    }}</span
+                  >
                   <span>{{ farm.status }}</span>
                 </div>
               </button>
@@ -120,7 +175,9 @@
       <section class="flex-1 p-6 overflow-y-auto">
         @if (selected(); as farm) {
           <div class="space-y-4">
-            <h2 class="font-headline-md text-headline-md text-on-surface">{{ farm.farmName }}</h2>
+            <h2 class="font-headline-md text-headline-md text-on-surface">
+              {{ farm.farmName }}
+            </h2>
             <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <dt class="text-on-surface-variant text-sm">Location</dt>
@@ -132,12 +189,22 @@
               </div>
               <div>
                 <dt class="text-on-surface-variant text-sm">Match score</dt>
-                <dd>{{ farm.matchScore != null ? (farm.matchScore | number: '1.0-0') : '—' }}</dd>
+                <dd>
+                  {{
+                    farm.matchScore != null
+                      ? (farm.matchScore | number: '1.0-0')
+                      : '—'
+                  }}
+                </dd>
               </div>
               <div>
                 <dt class="text-on-surface-variant text-sm">Risk score</dt>
                 <dd>
-                  {{ farm.riskScore != null ? (farm.riskScore | number: '1.0-0') : '—' }}
+                  {{
+                    farm.riskScore != null
+                      ? (farm.riskScore | number: '1.0-0')
+                      : '—'
+                  }}
                   ({{ riskLevel(farm.riskScore) }})
                 </dd>
               </div>

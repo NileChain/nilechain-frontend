@@ -14,7 +14,9 @@ import { Component, Input } from '@angular/core';
           >
             {{ label }}
           </p>
-          <h3 class="font-headline-md text-headline-md text-primary mt-1 truncate">
+          <h3
+            class="font-headline-md text-headline-md text-primary mt-1 truncate"
+          >
             {{ value }}
           </h3>
         </div>

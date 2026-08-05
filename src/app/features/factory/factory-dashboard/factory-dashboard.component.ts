@@ -1,4 +1,4 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, inject } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import {
   Chart,
@@ -14,14 +14,23 @@ import {
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { UiPreviewBannerComponent } from '../../../shared/ui/preview-banner/preview-banner.component';
+import { MobileNavService } from '../../../core/services/mobile-nav.service';
 
 @Component({
   selector: 'app-factory-dashboard',
-  imports: [TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent],
+  imports: [
+    TranslatePipe,
+    UiLanguageToggleComponent,
+    UiThemeToggleComponent,
+    UiPreviewBannerComponent,
+  ],
   templateUrl: './factory-dashboard.component.html',
   styleUrl: './factory-dashboard.component.scss',
 })
 export class FactoryDashboardComponent implements AfterViewInit {
+  readonly mobileNav = inject(MobileNavService);
+
   constructor(title: Title) {
     title.setTitle('NileChain - Factory Dashboard');
   }

@@ -15,7 +15,8 @@ import { NgClass } from '@angular/common';
   `,
 })
 export class UiChipComponent {
-  @Input() tone: 'success' | 'warning' | 'danger' | 'info' | 'neutral' = 'neutral';
+  @Input() tone: 'success' | 'warning' | 'danger' | 'info' | 'neutral' =
+    'neutral';
 
   get toneClass(): string {
     switch (this.tone) {

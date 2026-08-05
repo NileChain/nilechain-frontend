@@ -18,7 +18,9 @@ import { NgClass } from '@angular/common';
         >progress_activity</span
       >
       @if (label) {
-        <span class="font-label-md text-label-md text-on-surface-variant">{{ label }}</span>
+        <span class="font-label-md text-label-md text-on-surface-variant">{{
+          label
+        }}</span>
       }
     </div>
   `,
@@ -29,6 +31,8 @@ export class UiLoaderComponent {
   @Input() ariaLabel = '';
 
   get sizeClass(): string {
-    return { sm: 'text-[18px]', md: 'text-[28px]', lg: 'text-[40px]' }[this.size];
+    return { sm: 'text-[18px]', md: 'text-[28px]', lg: 'text-[40px]' }[
+      this.size
+    ];
   }
 }

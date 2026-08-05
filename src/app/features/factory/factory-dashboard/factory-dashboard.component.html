@@ -1,360 +1,420 @@
 ﻿<!-- Application shell: sidebar + scrollable column (content + footer in document flow) -->
 <div class="md:ms-[280px] min-h-screen flex flex-col bg-surface">
-<!-- Main Canvas -->
-<main class="flex-1 p-margin-mobile md:p-margin-desktop">
-  <!-- Header -->
-  <header class="flex justify-between items-center mb-xl gap-4 flex-wrap">
-    <div>
-      <h2 class="font-headline-lg text-headline-lg text-on-surface">
-        {{ 'factory.dashboard.title' | translate }}
-      </h2>
-      <p class="font-body-md text-body-md text-on-surface-variant">
-        {{ 'factory.dashboard.overviewSubtitle' | translate }}
-      </p>
-    </div>
-    <div class="flex items-center gap-2 sm:gap-4">
-      <ui-language-toggle />
-      <ui-theme-toggle />
-      <button
-        type="button"
-        class="bg-primary-container text-on-primary-container px-lg py-sm rounded-lg font-label-md flex items-center gap-2 hover:opacity-90 transition-opacity"
-      >
-        <span class="material-symbols-outlined text-[20px]" aria-hidden="true">add</span>
-        {{ 'factory.dashboard.newRequest' | translate }}
-      </button>
-    </div>
-  </header>
-
-  <!-- KPI Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-xl">
-    <div class="glass-card rounded-lg p-md flex flex-col justify-between">
-      <div>
-        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
-          {{ 'factory.dashboard.openRequests' | translate }}
-        </p>
-        <h3 class="font-headline-md text-headline-md text-primary mt-1">12</h3>
-      </div>
-      <div class="mt-4 flex items-center text-primary font-label-sm">
-        <span class="material-symbols-outlined text-[16px] me-1 icon-flip" aria-hidden="true"
-          >trending_up</span
-        >
-        <span>{{ 'factory.dashboard.fromLastWeek' | translate: { count: 2 } }}</span>
-      </div>
-    </div>
-    <div class="glass-card rounded-lg p-md flex flex-col justify-between">
-      <div>
-        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
-          {{ 'factory.dashboard.matchesFound' | translate }}
-        </p>
-        <h3 class="font-headline-md text-headline-md text-primary mt-1">48</h3>
-      </div>
-      <div class="mt-4 flex items-center text-primary font-label-sm">
-        <span class="material-symbols-outlined text-[16px] me-1" aria-hidden="true"
-          >check_circle</span
-        >
-        <span>{{ 'factory.dashboard.matchRate' | translate: { percent: '85%' } }}</span>
-      </div>
-    </div>
-    <div class="glass-card rounded-lg p-md flex flex-col justify-between">
-      <div>
-        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
-          {{ 'factory.dashboard.contracts' | translate }}
-        </p>
-        <h3 class="font-headline-md text-headline-md text-primary mt-1">24</h3>
-      </div>
-      <div class="mt-4 flex items-center text-on-surface-variant font-label-sm">
-        <span class="material-symbols-outlined text-[16px] me-1" aria-hidden="true"
-          >calendar_today</span
-        >
-        <span>{{
-          'factory.dashboard.nextDelivery' | translate: { date: 'Oct 12' }
-        }}</span>
-      </div>
-    </div>
-    <div class="glass-card rounded-lg p-md flex flex-col justify-between">
-      <div>
-        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
-          {{ 'factory.dashboard.totalProcurement' | translate }}
-        </p>
-        <h3 class="font-headline-md text-headline-md text-primary mt-1">EGP 1.2M</h3>
-      </div>
-      <div class="mt-4 flex items-center text-primary font-label-sm">
-        <span class="material-symbols-outlined text-[16px] me-1" aria-hidden="true"
-          >payments</span
-        >
-        <span>{{ 'factory.dashboard.fiscalYear' | translate: { year: 2024 } }}</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Charts & Analysis Section -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter mb-xl">
-    <!-- Market Price Trends (Line Chart) -->
-    <div class="lg:col-span-2 glass-card rounded-lg p-lg">
-      <div class="flex justify-between items-center mb-lg gap-4 flex-wrap">
-        <h4 class="font-headline-sm text-headline-sm text-on-surface">
-          {{ 'factory.dashboard.marketPriceTrends' | translate }}
-        </h4>
-        <label class="sr-only" for="market-range">{{
-          'factory.dashboard.marketPriceTrends' | translate
-        }}</label>
-        <select
-          id="market-range"
-          class="bg-surface-container-low border border-outline-variant rounded-lg font-label-sm text-on-surface-variant px-3 py-1 outline-none"
-        >
-          <option>{{ 'factory.dashboard.last6Months' | translate }}</option>
-          <option>{{ 'factory.dashboard.yearToDate' | translate }}</option>
-        </select>
-      </div>
-      <div class="h-[300px] w-full relative">
-        <canvas id="marketChart"></canvas>
-      </div>
-    </div>
-
-    <!-- Supply Risk Score -->
-    <div class="glass-card rounded-lg overflow-hidden flex flex-col">
-      <div class="p-lg border-b border-outline-variant bg-surface-container-lowest">
-        <h4 class="font-headline-sm text-headline-sm text-on-surface">
-          {{ 'factory.dashboard.supplyHealth' | translate }}
-        </h4>
-      </div>
-      <div class="p-lg flex-1 flex flex-col justify-center items-center text-center">
-        <div
-          class="w-32 h-32 rounded-full border-8 border-secondary-container flex items-center justify-center mb-md"
-        >
-          <span class="font-headline-lg text-headline-lg text-primary">88</span>
-        </div>
-        <span
-          class="bg-secondary-container text-on-secondary-container font-label-sm px-4 py-1 rounded-full uppercase"
-          >{{ 'factory.dashboard.optimal' | translate }}</span
-        >
-        <p class="font-body-md text-body-md text-on-surface-variant mt-md px-4">
-          {{ 'factory.dashboard.supplyHealthBody' | translate }}
-        </p>
-      </div>
-      <div class="p-lg bg-surface-container-low border-t border-outline-variant">
+  <!-- Main Canvas -->
+  <main class="flex-1 p-margin-mobile md:p-margin-desktop">
+    <ui-preview-banner class="mb-xl block" />
+    <!-- Header -->
+    <header class="flex justify-between items-center mb-xl gap-4 flex-wrap">
+      <div class="flex items-center gap-2">
         <button
           type="button"
-          class="w-full py-2 bg-secondary text-on-secondary rounded-lg font-label-md hover:opacity-90 transition-opacity"
+          class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant shrink-0"
+          (click)="mobileNav.toggleMenu()"
+          [attr.aria-label]="'common.toggleMenu' | translate"
         >
-          {{ 'factory.dashboard.viewDetailedAudit' | translate }}
+          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
         </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Recent Requests Table -->
-  <div class="glass-card rounded-lg overflow-hidden mb-xl">
-    <div
-      class="p-lg border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest"
-    >
-      <h4 class="font-headline-sm text-headline-sm text-on-surface">
-        {{ 'factory.dashboard.recentProcurementRequests' | translate }}
-      </h4>
-      <a href="#" class="text-primary font-label-md hover:underline">{{
-        'common.viewAll' | translate
-      }}</a>
-    </div>
-    <div class="overflow-x-auto">
-      <table class="w-full text-start font-body-md">
-        <thead class="bg-surface-container text-on-surface-variant border-b border-outline-variant">
-          <tr>
-            <th class="px-lg py-md font-label-md">
-              {{ 'factory.dashboard.requestId' | translate }}
-            </th>
-            <th class="px-lg py-md font-label-md">
-              {{ 'factory.dashboard.commodity' | translate }}
-            </th>
-            <th class="px-lg py-md font-label-md">
-              {{ 'factory.dashboard.quantityTons' | translate }}
-            </th>
-            <th class="px-lg py-md font-label-md">
-              {{ 'factory.dashboard.budgetEgp' | translate }}
-            </th>
-            <th class="px-lg py-md font-label-md">{{ 'common.status' | translate }}</th>
-            <th class="px-lg py-md font-label-md">
-              {{ 'factory.dashboard.date' | translate }}
-            </th>
-            <th class="px-lg py-md font-label-md">{{ 'common.actions' | translate }}</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-outline-variant text-on-surface">
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="px-lg py-md">#REQ-4022</td>
-            <td class="px-lg py-md font-bold">Premium Wheat</td>
-            <td class="px-lg py-md">500</td>
-            <td class="px-lg py-md">1.2M</td>
-            <td class="px-lg py-md">
-              <span
-                class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-label-sm"
-                >{{ 'common.active' | translate }}</span
-              >
-            </td>
-            <td class="px-lg py-md">Oct 02, 2024</td>
-            <td class="px-lg py-md">
-              <button
-                type="button"
-                class="text-primary material-symbols-outlined"
-                [attr.aria-label]="'common.actions' | translate"
-              >
-                more_horiz
-              </button>
-            </td>
-          </tr>
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="px-lg py-md">#REQ-4019</td>
-            <td class="px-lg py-md font-bold">Sugar Beet</td>
-            <td class="px-lg py-md">250</td>
-            <td class="px-lg py-md">450K</td>
-            <td class="px-lg py-md">
-              <span
-                class="bg-primary-container text-on-primary px-3 py-1 rounded-full text-label-sm"
-                >{{ 'factory.dashboard.statusMatched' | translate }}</span
-              >
-            </td>
-            <td class="px-lg py-md">Sep 28, 2024</td>
-            <td class="px-lg py-md">
-              <button
-                type="button"
-                class="text-primary material-symbols-outlined"
-                [attr.aria-label]="'common.actions' | translate"
-              >
-                more_horiz
-              </button>
-            </td>
-          </tr>
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="px-lg py-md">#REQ-3988</td>
-            <td class="px-lg py-md font-bold">Idaho Potato</td>
-            <td class="px-lg py-md">100</td>
-            <td class="px-lg py-md">180K</td>
-            <td class="px-lg py-md">
-              <span
-                class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-label-sm"
-                >{{ 'factory.dashboard.statusDraft' | translate }}</span
-              >
-            </td>
-            <td class="px-lg py-md">Sep 25, 2024</td>
-            <td class="px-lg py-md">
-              <button
-                type="button"
-                class="text-primary material-symbols-outlined"
-                [attr.aria-label]="'common.actions' | translate"
-              >
-                more_horiz
-              </button>
-            </td>
-          </tr>
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="px-lg py-md">#REQ-3942</td>
-            <td class="px-lg py-md font-bold">Milling Wheat</td>
-            <td class="px-lg py-md">1200</td>
-            <td class="px-lg py-md">2.8M</td>
-            <td class="px-lg py-md">
-              <span
-                class="bg-error-container text-on-error-container px-3 py-1 rounded-full text-label-sm"
-                >{{ 'factory.dashboard.statusPendingApproval' | translate }}</span
-              >
-            </td>
-            <td class="px-lg py-md">Sep 20, 2024</td>
-            <td class="px-lg py-md">
-              <button
-                type="button"
-                class="text-primary material-symbols-outlined"
-                [attr.aria-label]="'common.actions' | translate"
-              >
-                more_horiz
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Bottom Banner -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
-    <div class="relative rounded-lg overflow-hidden h-48 group cursor-pointer">
-      <div
-        class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-        [attr.aria-label]="'factory.dashboard.supplyChainInsights' | translate"
-        role="img"
-        style="
-          background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCYgTYtp34jtYPGHYPPqfYrqnGLEHbZqvBxnrYdXZDu3KP_ckiTVd1oJG5TwHvWlx3D4jj2fr4mEge5t-8A2_6jm98Umo-fbbj0mj75KXumNDTbDOX0QllWKGcyjrJteJ_c-cx-0Ulq8F0jfRZ8BTIVHC_PYS0cDo0yNV9fdH-Em-IWCAQm2WmKgFda1FAoYCP7syP5e2gI8W5BdZczCugwbvrzkO1C32DvK0KSO7rpDhEhjANZfiVy');
-        "
-      ></div>
-      <div
-        class="absolute inset-0 bg-gradient-to-r from-primary/80 to-transparent p-lg flex flex-col justify-end text-on-primary"
-      >
-        <h5 class="font-headline-sm text-headline-sm">
-          {{ 'factory.dashboard.supplyChainInsights' | translate }}
-        </h5>
-        <p class="font-body-md text-body-md opacity-90">
-          {{ 'factory.dashboard.marketReport' | translate }}
-        </p>
-      </div>
-    </div>
-    <div class="glass-card rounded-lg p-lg flex items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <div
-          class="w-16 h-16 rounded-full bg-secondary-container flex items-center justify-center shrink-0"
-        >
-          <span class="material-symbols-outlined text-primary text-3xl" aria-hidden="true"
-            >support_agent</span
-          >
-        </div>
         <div>
-          <h5 class="font-headline-sm text-headline-sm text-on-surface">
-            {{ 'factory.dashboard.dedicatedManager' | translate }}
-          </h5>
+          <h2 class="font-headline-lg text-headline-lg text-on-surface">
+            {{ 'factory.dashboard.title' | translate }}
+          </h2>
           <p class="font-body-md text-body-md text-on-surface-variant">
-            {{ 'factory.dashboard.dedicatedManagerBody' | translate }}
+            {{ 'factory.dashboard.overviewSubtitle' | translate }}
           </p>
         </div>
       </div>
-      <button
-        type="button"
-        class="bg-primary text-on-primary p-sm rounded-full material-symbols-outlined hover:bg-primary-container transition-colors shrink-0"
-        [attr.aria-label]="'common.messages' | translate"
-      >
-        chat
-      </button>
-    </div>
-  </div>
-</main>
+      <div class="flex items-center gap-2 sm:gap-4">
+        <ui-language-toggle />
+        <ui-theme-toggle />
+        <button
+          type="button"
+          class="bg-primary-container text-on-primary-container px-lg py-sm rounded-lg font-label-md flex items-center gap-2 hover:opacity-90 transition-opacity"
+        >
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+            >add</span
+          >
+          {{ 'factory.dashboard.newRequest' | translate }}
+        </button>
+      </div>
+    </header>
 
-<!-- Footer (in document flow — not fixed to viewport) -->
-<footer
-  class="mt-auto bg-surface-container-highest border-t border-outline-variant"
->
-  <div
-    class="flex flex-col md:flex-row justify-between items-center px-margin-desktop py-4 w-full gap-4"
-  >
-    <span class="font-label-sm text-label-sm text-on-surface-variant">{{
-      'landing.footerRights' | translate
-    }}</span>
-    <div class="flex gap-lg">
-      <a
-        class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary"
-        href="#"
-        >{{ 'landing.privacy' | translate }}</a
-      >
-      <a
-        class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary"
-        href="#"
-        >{{ 'landing.terms' | translate }}</a
-      >
-      <a
-        class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary"
-        href="#"
-        >{{ 'landing.compliance' | translate }}</a
-      >
-      <a
-        class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary"
-        href="#"
-        >{{ 'landing.contact' | translate }}</a
-      >
+    <!-- KPI Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-xl">
+      <div class="glass-card rounded-lg p-md flex flex-col justify-between">
+        <div>
+          <p
+            class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider"
+          >
+            {{ 'factory.dashboard.openRequests' | translate }}
+          </p>
+          <h3 class="font-headline-md text-headline-md text-primary mt-1">
+            12
+          </h3>
+        </div>
+        <div class="mt-4 flex items-center text-primary font-label-sm">
+          <span
+            class="material-symbols-outlined text-[16px] me-1 icon-flip"
+            aria-hidden="true"
+            >trending_up</span
+          >
+          <span>{{
+            'factory.dashboard.fromLastWeek' | translate: { count: 2 }
+          }}</span>
+        </div>
+      </div>
+      <div class="glass-card rounded-lg p-md flex flex-col justify-between">
+        <div>
+          <p
+            class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider"
+          >
+            {{ 'factory.dashboard.matchesFound' | translate }}
+          </p>
+          <h3 class="font-headline-md text-headline-md text-primary mt-1">
+            48
+          </h3>
+        </div>
+        <div class="mt-4 flex items-center text-primary font-label-sm">
+          <span
+            class="material-symbols-outlined text-[16px] me-1"
+            aria-hidden="true"
+            >check_circle</span
+          >
+          <span>{{
+            'factory.dashboard.matchRate' | translate: { percent: '85%' }
+          }}</span>
+        </div>
+      </div>
+      <div class="glass-card rounded-lg p-md flex flex-col justify-between">
+        <div>
+          <p
+            class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider"
+          >
+            {{ 'factory.dashboard.contracts' | translate }}
+          </p>
+          <h3 class="font-headline-md text-headline-md text-primary mt-1">
+            24
+          </h3>
+        </div>
+        <div
+          class="mt-4 flex items-center text-on-surface-variant font-label-sm"
+        >
+          <span
+            class="material-symbols-outlined text-[16px] me-1"
+            aria-hidden="true"
+            >calendar_today</span
+          >
+          <span>{{
+            'factory.dashboard.nextDelivery' | translate: { date: 'Oct 12' }
+          }}</span>
+        </div>
+      </div>
+      <div class="glass-card rounded-lg p-md flex flex-col justify-between">
+        <div>
+          <p
+            class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider"
+          >
+            {{ 'factory.dashboard.totalProcurement' | translate }}
+          </p>
+          <h3 class="font-headline-md text-headline-md text-primary mt-1">
+            EGP 1.2M
+          </h3>
+        </div>
+        <div class="mt-4 flex items-center text-primary font-label-sm">
+          <span
+            class="material-symbols-outlined text-[16px] me-1"
+            aria-hidden="true"
+            >payments</span
+          >
+          <span>{{
+            'factory.dashboard.fiscalYear' | translate: { year: 2024 }
+          }}</span>
+        </div>
+      </div>
     </div>
-  </div>
-</footer>
+
+    <!-- Charts & Analysis Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter mb-xl">
+      <!-- Market Price Trends (Line Chart) -->
+      <div class="lg:col-span-2 glass-card rounded-lg p-lg">
+        <div class="flex justify-between items-center mb-lg gap-4 flex-wrap">
+          <h4 class="font-headline-sm text-headline-sm text-on-surface">
+            {{ 'factory.dashboard.marketPriceTrends' | translate }}
+          </h4>
+          <label class="sr-only" for="market-range">{{
+            'factory.dashboard.marketPriceTrends' | translate
+          }}</label>
+          <select
+            id="market-range"
+            class="bg-surface-container-low border border-outline-variant rounded-lg font-label-sm text-on-surface-variant px-3 py-1 outline-none"
+          >
+            <option>{{ 'factory.dashboard.last6Months' | translate }}</option>
+            <option>{{ 'factory.dashboard.yearToDate' | translate }}</option>
+          </select>
+        </div>
+        <div class="h-[300px] w-full relative">
+          <canvas id="marketChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Supply Risk Score -->
+      <div class="glass-card rounded-lg overflow-hidden flex flex-col">
+        <div
+          class="p-lg border-b border-outline-variant bg-surface-container-lowest"
+        >
+          <h4 class="font-headline-sm text-headline-sm text-on-surface">
+            {{ 'factory.dashboard.supplyHealth' | translate }}
+          </h4>
+        </div>
+        <div
+          class="p-lg flex-1 flex flex-col justify-center items-center text-center"
+        >
+          <div
+            class="w-32 h-32 rounded-full border-8 border-secondary-container flex items-center justify-center mb-md"
+          >
+            <span class="font-headline-lg text-headline-lg text-primary"
+              >88</span
+            >
+          </div>
+          <span
+            class="bg-secondary-container text-on-secondary-container font-label-sm px-4 py-1 rounded-full uppercase"
+            >{{ 'factory.dashboard.optimal' | translate }}</span
+          >
+          <p
+            class="font-body-md text-body-md text-on-surface-variant mt-md px-4"
+          >
+            {{ 'factory.dashboard.supplyHealthBody' | translate }}
+          </p>
+        </div>
+        <div
+          class="p-lg bg-surface-container-low border-t border-outline-variant"
+        >
+          <button
+            type="button"
+            class="w-full py-2 bg-secondary text-on-secondary rounded-lg font-label-md hover:opacity-90 transition-opacity"
+          >
+            {{ 'factory.dashboard.viewDetailedAudit' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Requests Table -->
+    <div class="glass-card rounded-lg overflow-hidden mb-xl">
+      <div
+        class="p-lg border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest"
+      >
+        <h4 class="font-headline-sm text-headline-sm text-on-surface">
+          {{ 'factory.dashboard.recentProcurementRequests' | translate }}
+        </h4>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-start font-body-md">
+          <thead
+            class="bg-surface-container text-on-surface-variant border-b border-outline-variant"
+          >
+            <tr>
+              <th class="px-lg py-md font-label-md">
+                {{ 'factory.dashboard.requestId' | translate }}
+              </th>
+              <th class="px-lg py-md font-label-md">
+                {{ 'factory.dashboard.commodity' | translate }}
+              </th>
+              <th class="px-lg py-md font-label-md">
+                {{ 'factory.dashboard.quantityTons' | translate }}
+              </th>
+              <th class="px-lg py-md font-label-md">
+                {{ 'factory.dashboard.budgetEgp' | translate }}
+              </th>
+              <th class="px-lg py-md font-label-md">
+                {{ 'common.status' | translate }}
+              </th>
+              <th class="px-lg py-md font-label-md">
+                {{ 'factory.dashboard.date' | translate }}
+              </th>
+              <th class="px-lg py-md font-label-md">
+                {{ 'common.actions' | translate }}
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-outline-variant text-on-surface">
+            <tr class="hover:bg-surface-container-low transition-colors">
+              <td class="px-lg py-md">#REQ-4022</td>
+              <td class="px-lg py-md font-bold">Premium Wheat</td>
+              <td class="px-lg py-md">500</td>
+              <td class="px-lg py-md">1.2M</td>
+              <td class="px-lg py-md">
+                <span
+                  class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-label-sm"
+                  >{{ 'common.active' | translate }}</span
+                >
+              </td>
+              <td class="px-lg py-md">Oct 02, 2024</td>
+              <td class="px-lg py-md">
+                <button
+                  type="button"
+                  class="text-primary material-symbols-outlined"
+                  [attr.aria-label]="'common.actions' | translate"
+                >
+                  more_horiz
+                </button>
+              </td>
+            </tr>
+            <tr class="hover:bg-surface-container-low transition-colors">
+              <td class="px-lg py-md">#REQ-4019</td>
+              <td class="px-lg py-md font-bold">Sugar Beet</td>
+              <td class="px-lg py-md">250</td>
+              <td class="px-lg py-md">450K</td>
+              <td class="px-lg py-md">
+                <span
+                  class="bg-primary-container text-on-primary px-3 py-1 rounded-full text-label-sm"
+                  >{{ 'factory.dashboard.statusMatched' | translate }}</span
+                >
+              </td>
+              <td class="px-lg py-md">Sep 28, 2024</td>
+              <td class="px-lg py-md">
+                <button
+                  type="button"
+                  class="text-primary material-symbols-outlined"
+                  [attr.aria-label]="'common.actions' | translate"
+                >
+                  more_horiz
+                </button>
+              </td>
+            </tr>
+            <tr class="hover:bg-surface-container-low transition-colors">
+              <td class="px-lg py-md">#REQ-3988</td>
+              <td class="px-lg py-md font-bold">Idaho Potato</td>
+              <td class="px-lg py-md">100</td>
+              <td class="px-lg py-md">180K</td>
+              <td class="px-lg py-md">
+                <span
+                  class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-label-sm"
+                  >{{ 'factory.dashboard.statusDraft' | translate }}</span
+                >
+              </td>
+              <td class="px-lg py-md">Sep 25, 2024</td>
+              <td class="px-lg py-md">
+                <button
+                  type="button"
+                  class="text-primary material-symbols-outlined"
+                  [attr.aria-label]="'common.actions' | translate"
+                >
+                  more_horiz
+                </button>
+              </td>
+            </tr>
+            <tr class="hover:bg-surface-container-low transition-colors">
+              <td class="px-lg py-md">#REQ-3942</td>
+              <td class="px-lg py-md font-bold">Milling Wheat</td>
+              <td class="px-lg py-md">1200</td>
+              <td class="px-lg py-md">2.8M</td>
+              <td class="px-lg py-md">
+                <span
+                  class="bg-error-container text-on-error-container px-3 py-1 rounded-full text-label-sm"
+                  >{{
+                    'factory.dashboard.statusPendingApproval' | translate
+                  }}</span
+                >
+              </td>
+              <td class="px-lg py-md">Sep 20, 2024</td>
+              <td class="px-lg py-md">
+                <button
+                  type="button"
+                  class="text-primary material-symbols-outlined"
+                  [attr.aria-label]="'common.actions' | translate"
+                >
+                  more_horiz
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Bottom Banner -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+      <div
+        class="relative rounded-lg overflow-hidden h-48 group cursor-pointer"
+      >
+        <div
+          class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+          [attr.aria-label]="
+            'factory.dashboard.supplyChainInsights' | translate
+          "
+          role="img"
+          style="
+            background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCYgTYtp34jtYPGHYPPqfYrqnGLEHbZqvBxnrYdXZDu3KP_ckiTVd1oJG5TwHvWlx3D4jj2fr4mEge5t-8A2_6jm98Umo-fbbj0mj75KXumNDTbDOX0QllWKGcyjrJteJ_c-cx-0Ulq8F0jfRZ8BTIVHC_PYS0cDo0yNV9fdH-Em-IWCAQm2WmKgFda1FAoYCP7syP5e2gI8W5BdZczCugwbvrzkO1C32DvK0KSO7rpDhEhjANZfiVy');
+          "
+        ></div>
+        <div
+          class="absolute inset-0 bg-gradient-to-r from-primary/80 to-transparent p-lg flex flex-col justify-end text-on-primary"
+        >
+          <h5 class="font-headline-sm text-headline-sm">
+            {{ 'factory.dashboard.supplyChainInsights' | translate }}
+          </h5>
+          <p class="font-body-md text-body-md opacity-90">
+            {{ 'factory.dashboard.marketReport' | translate }}
+          </p>
+        </div>
+      </div>
+      <div
+        class="glass-card rounded-lg p-lg flex items-center justify-between gap-4"
+      >
+        <div class="flex items-center gap-4">
+          <div
+            class="w-16 h-16 rounded-full bg-secondary-container flex items-center justify-center shrink-0"
+          >
+            <span
+              class="material-symbols-outlined text-primary text-3xl"
+              aria-hidden="true"
+              >support_agent</span
+            >
+          </div>
+          <div>
+            <h5 class="font-headline-sm text-headline-sm text-on-surface">
+              {{ 'factory.dashboard.dedicatedManager' | translate }}
+            </h5>
+            <p class="font-body-md text-body-md text-on-surface-variant">
+              {{ 'factory.dashboard.dedicatedManagerBody' | translate }}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="bg-primary text-on-primary p-sm rounded-full material-symbols-outlined hover:bg-primary-container transition-colors shrink-0"
+          [attr.aria-label]="'common.messages' | translate"
+        >
+          chat
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer (in document flow — not fixed to viewport) -->
+  <footer
+    class="mt-auto bg-surface-container-highest border-t border-outline-variant"
+  >
+    <div
+      class="flex flex-col md:flex-row justify-between items-center px-margin-desktop py-4 w-full gap-4"
+    >
+      <span class="font-label-sm text-label-sm text-on-surface-variant">{{
+        'landing.footerRights' | translate
+      }}</span>
+      <div class="flex gap-lg">
+        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
+          'landing.privacy' | translate
+        }}</span>
+        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
+          'landing.terms' | translate
+        }}</span>
+        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
+          'landing.compliance' | translate
+        }}</span>
+        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
+          'landing.contact' | translate
+        }}</span>
+      </div>
+    </div>
+  </footer>
 </div>
