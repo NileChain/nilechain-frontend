@@ -13,11 +13,6 @@
       }}</span>
     </a>
     <div class="flex items-center gap-1 sm:gap-3">
-      <a
-        href="#"
-        class="hidden md:inline font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors"
-        >{{ 'login.helpCenter' | translate }}</a
-      >
       <span
         class="hidden md:inline font-label-md text-label-md text-primary font-bold border-b-2 border-primary"
         >{{ 'landing.login' | translate }}</span
@@ -27,11 +22,15 @@
     </div>
   </header>
 
-  <main class="flex-grow flex items-center justify-center pt-24 pb-12 px-margin-mobile">
+  <main
+    class="flex-grow flex items-center justify-center pt-24 pb-12 px-margin-mobile"
+  >
     <div
       class="w-full max-w-[440px] bg-surface-container-lowest border border-outline-variant rounded-xl login-card-shadow overflow-hidden animate-scale-in"
     >
-      <div class="p-8 text-center border-b border-outline-variant bg-surface-bright">
+      <div
+        class="p-8 text-center border-b border-outline-variant bg-surface-bright"
+      >
         <div class="mb-4 flex justify-center">
           <img
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPEIWYWtZnyIwQbN_iGXmWsV8pwt4C_0C-YEczE-9FPtMT4B0E7BoecK9TwkOO9Zzp5gN1Atmh1x9H9b_ZHzKAiaXQM7UKpJm4kGC95Y5zk6bvAjKZ-p5id-P2joyNy0QZplSbH8QetsSXawxym6RYPZunyTHfyEJwkHxv8IZkAzA8RSytLpZRSE6hGh6SsnSOl4UX2jrXhRUM0ZvFdNRmmThMBeY2DEuc0s6fqVimVB5Miu7XRqwX"
@@ -49,9 +48,11 @@
 
       <form class="p-8 space-y-6" (submit)="onSubmit($event)" novalidate>
         <div class="space-y-2">
-          <label for="email" class="font-label-md text-label-md text-on-surface-variant block">{{
-            'login.email' | translate
-          }}</label>
+          <label
+            for="email"
+            class="font-label-md text-label-md text-on-surface-variant block"
+            >{{ 'login.email' | translate }}</label
+          >
           <div class="relative group">
             <span
               class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors"
@@ -72,12 +73,16 @@
 
         <div class="space-y-2">
           <div class="flex justify-between items-center gap-2">
-            <label for="password" class="font-label-md text-label-md text-on-surface-variant">{{
-              'login.password' | translate
-            }}</label>
-            <a [routerLink]="'/forgot-password'" class="font-label-sm text-label-sm text-primary hover:underline">{{
-              'login.forgot' | translate
-            }}</a>
+            <label
+              for="password"
+              class="font-label-md text-label-md text-on-surface-variant"
+              >{{ 'login.password' | translate }}</label
+            >
+            <a
+              [routerLink]="'/forgot-password'"
+              class="font-label-sm text-label-sm text-primary hover:underline"
+              >{{ 'login.forgot' | translate }}</a
+            >
           </div>
           <div class="relative group">
             <span
@@ -118,9 +123,11 @@
             name="rememberMe"
             class="w-4 h-4 text-primary border-outline-variant rounded focus:ring-primary-container"
           />
-          <label for="remember" class="font-label-sm text-label-sm text-on-surface-variant select-none">{{
-            'login.rememberMe' | translate
-          }}</label>
+          <label
+            for="remember"
+            class="font-label-sm text-label-sm text-on-surface-variant select-none"
+            >{{ 'login.rememberMe' | translate }}</label
+          >
         </div>
 
         @if (errorMessage()) {
@@ -129,11 +136,19 @@
           </p>
         }
 
-        <button type="submit" [disabled]="isSubmitting()" class="ui-btn-primary w-full !py-4">
+        <button
+          type="submit"
+          [disabled]="isSubmitting()"
+          class="ui-btn-primary w-full !py-4"
+        >
           {{
-            isSubmitting() ? ('login.signingIn' | translate) : ('login.loginCta' | translate)
+            isSubmitting()
+              ? ('login.signingIn' | translate)
+              : ('login.loginCta' | translate)
           }}
-          <span class="material-symbols-outlined icon-flip" aria-hidden="true">arrow_forward</span>
+          <span class="material-symbols-outlined icon-flip" aria-hidden="true"
+            >arrow_forward</span
+          >
         </button>
 
         <div class="relative py-2">
@@ -141,9 +156,10 @@
             <div class="w-full border-t border-outline-variant"></div>
           </div>
           <div class="relative flex justify-center text-xs uppercase">
-            <span class="bg-surface-container-lowest px-2 text-outline font-label-sm">{{
-              'login.newToNileChain' | translate
-            }}</span>
+            <span
+              class="bg-surface-container-lowest px-2 text-outline font-label-sm"
+              >{{ 'login.newToNileChain' | translate }}</span
+            >
           </div>
         </div>
 
@@ -153,7 +169,11 @@
             class="inline-flex items-center gap-2 font-label-md text-label-md text-primary font-bold hover:bg-surface-container-low px-4 py-2 rounded-lg transition-colors"
           >
             {{ 'login.registerBusiness' | translate }}
-            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">corporate_fare</span>
+            <span
+              class="material-symbols-outlined text-[20px]"
+              aria-hidden="true"
+              >corporate_fare</span
+            >
           </a>
         </div>
       </form>
@@ -171,18 +191,18 @@
         </p>
       </div>
       <nav class="flex flex-wrap justify-center gap-6" aria-label="Legal">
-        <a href="#" class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors">{{
+        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
           'landing.privacy' | translate
-        }}</a>
-        <a href="#" class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors">{{
+        }}</span>
+        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
           'landing.terms' | translate
-        }}</a>
-        <a href="#" class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors">{{
+        }}</span>
+        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
           'landing.compliance' | translate
-        }}</a>
-        <a href="#" class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors">{{
+        }}</span>
+        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
           'landing.contact' | translate
-        }}</a>
+        }}</span>
       </nav>
     </div>
   </footer>

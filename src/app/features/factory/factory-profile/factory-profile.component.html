@@ -1,13 +1,25 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
-  <div class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in">
+  <div
+    class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
+  >
     <header class="flex justify-between items-center gap-4 flex-wrap">
-      <div class="flex-1 min-w-[200px]">
-        <h1 class="font-headline-lg text-headline-lg text-on-surface">
-          {{ 'factory.profile.title' | translate }}
-        </h1>
-        <p class="font-body-lg text-body-lg text-on-surface-variant mt-2">
-          {{ 'factory.profile.subtitle' | translate }}
-        </p>
+      <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+        <button
+          type="button"
+          class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant shrink-0"
+          (click)="mobileNav.toggleMenu()"
+          [attr.aria-label]="'common.toggleMenu' | translate"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+        </button>
+        <div class="flex-1 min-w-0">
+          <h1 class="font-headline-lg text-headline-lg text-on-surface">
+            {{ 'factory.profile.title' | translate }}
+          </h1>
+          <p class="font-body-lg text-body-lg text-on-surface-variant mt-2">
+            {{ 'factory.profile.subtitle' | translate }}
+          </p>
+        </div>
       </div>
       <div class="flex items-center gap-2 sm:gap-4">
         <ui-language-toggle />
@@ -18,19 +30,24 @@
           [disabled]="saving() || loading()"
           (click)="save()"
         >
-          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">save</span>
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+            >save</span
+          >
           {{ 'factory.profile.saveChanges' | translate }}
         </button>
       </div>
     </header>
 
     @if (loading()) {
-      <div class="flex justify-center py-16"><ui-loader /></div>
-    } @else if (error() && !profile()) {
-      <div class="ui-card p-6 text-center space-y-4">
-        <p class="text-on-error-container">{{ error() }}</p>
-        <button type="button" class="ui-btn-primary" (click)="loadProfile()">Retry</button>
+      <div
+        class="flex justify-center py-16"
+        role="status"
+        [attr.aria-busy]="true"
+      >
+        <ui-loader />
       </div>
+    } @else if (error() && !profile()) {
+      <ui-error-state [message]="error()" (retry)="loadProfile()" />
     } @else if (profile(); as data) {
       @if (error()) {
         <p class="text-on-error-container">{{ error() }}</p>
@@ -61,14 +78,18 @@
                   }}
                 </h2>
                 <p class="font-body-md text-body-md text-on-surface-variant">
-                  Rating {{ data.averageRating | number: '1.1-1' }} ({{ data.ratingCount }})
+                  Rating {{ data.averageRating | number: '1.1-1' }} ({{
+                    data.ratingCount
+                  }})
                 </p>
               </div>
             </div>
           </div>
 
           <div class="ui-card p-6 flex flex-col items-center">
-            <h2 class="font-title-md text-title-md text-on-surface mb-4 self-start w-full">
+            <h2
+              class="font-title-md text-title-md text-on-surface mb-4 self-start w-full"
+            >
               {{ 'factory.profile.completion' | translate }}
             </h2>
             <div
@@ -89,12 +110,15 @@
               <div
                 class="absolute inset-[10px] rounded-full bg-surface-container-lowest flex flex-col items-center justify-center"
               >
-                <span class="font-headline-lg text-headline-lg font-bold text-primary"
+                <span
+                  class="font-headline-lg text-headline-lg font-bold text-primary"
                   >{{ data.completionPercent }}%</span
                 >
               </div>
             </div>
-            <p class="font-body-md text-body-md text-center text-on-surface-variant">
+            <p
+              class="font-body-md text-body-md text-center text-on-surface-variant"
+            >
               {{ 'factory.profile.completionHint' | translate }}
             </p>
           </div>
@@ -102,8 +126,14 @@
 
         <div class="lg:col-span-8 flex flex-col gap-gutter">
           <section class="ui-card p-6" [formGroup]="form">
-            <h2 class="font-title-lg text-title-lg text-on-surface mb-6 flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary" aria-hidden="true">info</span>
+            <h2
+              class="font-title-lg text-title-lg text-on-surface mb-6 flex items-center gap-2"
+            >
+              <span
+                class="material-symbols-outlined text-primary"
+                aria-hidden="true"
+                >info</span
+              >
               {{ 'factory.profile.basicInfo' | translate }}
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -114,7 +144,12 @@
                 >
                   {{ 'factory.profile.factoryName' | translate }}
                 </label>
-                <input id="factory-name" type="text" class="ui-input" formControlName="name" />
+                <input
+                  id="factory-name"
+                  type="text"
+                  class="ui-input"
+                  formControlName="name"
+                />
               </div>
               <div>
                 <label

@@ -35,7 +35,10 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
       ) {
         return authService.refreshToken().pipe(
           switchMap((response) => {
-            const newHeaders = clonedReq.headers.set('Authorization', `Bearer ${response.accessToken}`);
+            const newHeaders = clonedReq.headers.set(
+              'Authorization',
+              `Bearer ${response.accessToken}`
+            );
             return next(clonedReq.clone({ headers: newHeaders }));
           }),
           catchError(() => {

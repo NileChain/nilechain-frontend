@@ -10,37 +10,63 @@
         [attr.alt]="'app.name' | translate"
         class="h-10 w-auto"
       />
-      <span class="font-headline-md text-headline-md font-bold text-primary hidden md:block">{{
-        'app.name' | translate
-      }}</span>
+      <span
+        class="font-headline-md text-headline-md font-bold text-primary hidden md:block"
+        >{{ 'app.name' | translate }}</span
+      >
     </a>
 
-    <div class="hidden md:flex gap-8 items-center font-label-md text-label-md text-on-surface-variant">
-      <a href="#features" class="hover:text-primary transition-colors">{{ 'landing.marketplace' | translate }}</a>
-      <a href="#how-it-works" class="hover:text-primary transition-colors">{{ 'landing.solutions' | translate }}</a>
-      <a href="#trusted" class="hover:text-primary transition-colors">{{ 'landing.resources' | translate }}</a>
+    <div
+      class="hidden md:flex gap-8 items-center font-label-md text-label-md text-on-surface-variant"
+    >
+      <a href="#how-it-works" class="hover:text-primary transition-colors">{{
+        'landing.solutions' | translate
+      }}</a>
+      <a href="#trusted" class="hover:text-primary transition-colors">{{
+        'landing.resources' | translate
+      }}</a>
     </div>
 
     <div class="flex items-center gap-1 sm:gap-2">
       <ui-language-toggle />
       <ui-theme-toggle />
       @if (isAuthenticated()) {
-        <div class="flex items-center gap-2 sm:gap-3 ms-2 ps-2 sm:ps-4 border-s border-outline-variant">
+        <div
+          class="flex items-center gap-2 sm:gap-3 ms-2 ps-2 sm:ps-4 border-s border-outline-variant"
+        >
           <div class="text-end hidden sm:block">
-            <p class="font-label-md text-label-md text-on-surface leading-tight">
+            <p
+              class="font-label-md text-label-md text-on-surface leading-tight"
+            >
               {{ currentUser()?.displayName || currentUser()?.email }}
             </p>
           </div>
-          <div class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container text-sm font-bold">
-            {{ (currentUser()?.displayName || currentUser()?.email || '?').charAt(0).toUpperCase() }}
+          <div
+            class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container text-sm font-bold"
+          >
+            {{
+              (currentUser()?.displayName || currentUser()?.email || '?')
+                .charAt(0)
+                .toUpperCase()
+            }}
           </div>
         </div>
-        <button type="button" (click)="goToDashboard()" class="ui-btn-primary !py-2 !px-4 text-sm">
-          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">dashboard</span>
-          <span class="hidden sm:inline">{{ 'nav.dashboard' | translate }}</span>
+        <button
+          type="button"
+          (click)="goToDashboard()"
+          class="ui-btn-primary !py-2 !px-4 text-sm"
+        >
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+            >dashboard</span
+          >
+          <span class="hidden sm:inline">{{
+            'nav.dashboard' | translate
+          }}</span>
         </button>
         <button type="button" (click)="logout()" class="ui-btn-ghost !px-3">
-          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">logout</span>
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+            >logout</span
+          >
           <span class="hidden sm:inline">{{ 'nav.logout' | translate }}</span>
         </button>
       } @else {
@@ -51,7 +77,11 @@
         >
           {{ 'landing.login' | translate }}
         </button>
-        <button type="button" [routerLink]="'/register'" class="ui-btn-primary !py-2 !px-5">
+        <button
+          type="button"
+          [routerLink]="'/register'"
+          class="ui-btn-primary !py-2 !px-5"
+        >
           {{ 'landing.register' | translate }}
         </button>
       }
@@ -62,42 +92,71 @@
   <header
     class="hero-gradient relative min-h-[85vh] flex flex-col justify-center items-center px-4 py-xl md:py-0 overflow-hidden"
   >
-    <div class="absolute top-20 start-10 opacity-10 pointer-events-none" aria-hidden="true">
-      <span class="material-symbols-outlined text-[120px] text-primary">agriculture</span>
+    <div
+      class="absolute top-20 start-10 opacity-10 pointer-events-none"
+      aria-hidden="true"
+    >
+      <span class="material-symbols-outlined text-[120px] text-primary"
+        >agriculture</span
+      >
     </div>
-    <div class="absolute bottom-20 end-10 opacity-10 pointer-events-none" aria-hidden="true">
-      <span class="material-symbols-outlined text-[120px] text-primary">factory</span>
+    <div
+      class="absolute bottom-20 end-10 opacity-10 pointer-events-none"
+      aria-hidden="true"
+    >
+      <span class="material-symbols-outlined text-[120px] text-primary"
+        >factory</span
+      >
     </div>
 
     <div class="max-w-4xl w-full text-center z-10 animate-fade-in">
       <div
         class="inline-flex items-center gap-2 bg-secondary-container px-3 py-1 rounded-full mb-6"
       >
-        <span class="material-symbols-outlined text-[18px] text-on-secondary-container" aria-hidden="true"
+        <span
+          class="material-symbols-outlined text-[18px] text-on-secondary-container"
+          aria-hidden="true"
           >verified</span
         >
-        <span class="text-label-sm font-label-sm text-on-secondary-container tracking-wider">{{
-          'landing.badgeEgypt' | translate
-        }}</span>
+        <span
+          class="text-label-sm font-label-sm text-on-secondary-container tracking-wider"
+          >{{ 'landing.badgeEgypt' | translate }}</span
+        >
       </div>
 
-      <h1 class="font-headline-lg text-headline-lg md:text-5xl lg:text-6xl text-on-background mb-4 leading-tight">
+      <h1
+        class="font-headline-lg text-headline-lg md:text-5xl lg:text-6xl text-on-background mb-4 leading-tight"
+      >
         {{ 'landing.titleLine1' | translate }}
         <br class="hidden md:block" />
         <span class="text-primary">{{ 'landing.titleLine2' | translate }}</span>
       </h1>
 
-      <p class="font-body-lg text-body-lg text-on-surface-variant mb-10 max-w-2xl mx-auto">
+      <p
+        class="font-body-lg text-body-lg text-on-surface-variant mb-10 max-w-2xl mx-auto"
+      >
         {{ 'landing.subtitle' | translate }}
       </p>
 
       <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-        <button type="button" [routerLink]="'/register'" class="ui-btn-primary w-full sm:w-auto shadow-md">
-          <span class="material-symbols-outlined" aria-hidden="true">agriculture</span>
+        <button
+          type="button"
+          [routerLink]="'/register'"
+          class="ui-btn-primary w-full sm:w-auto shadow-md"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true"
+            >agriculture</span
+          >
           {{ 'landing.joinFarm' | translate }}
         </button>
-        <button type="button" [routerLink]="'/register'" class="ui-btn-secondary w-full sm:w-auto">
-          <span class="material-symbols-outlined" aria-hidden="true">factory</span>
+        <button
+          type="button"
+          [routerLink]="'/register'"
+          class="ui-btn-secondary w-full sm:w-auto"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true"
+            >factory</span
+          >
           {{ 'landing.joinFactory' | translate }}
         </button>
       </div>
@@ -116,10 +175,16 @@
           <div
             class="aspect-video bg-secondary-container/30 rounded-lg flex-1 flex items-center justify-center"
           >
-            <span class="material-symbols-outlined text-primary text-4xl">trending_up</span>
+            <span class="material-symbols-outlined text-primary text-4xl"
+              >trending_up</span
+            >
           </div>
-          <div class="aspect-video bg-primary/10 rounded-lg flex-1 flex items-center justify-center">
-            <span class="material-symbols-outlined text-primary text-4xl">query_stats</span>
+          <div
+            class="aspect-video bg-primary/10 rounded-lg flex-1 flex items-center justify-center"
+          >
+            <span class="material-symbols-outlined text-primary text-4xl"
+              >query_stats</span
+            >
           </div>
         </div>
       </div>
@@ -131,24 +196,38 @@
     class="bg-surface-container-lowest py-10 px-4 md:px-margin-desktop border-y border-outline-variant"
     aria-label="Platform statistics"
   >
-    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-center text-center">
+    <div
+      class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-center text-center"
+    >
       <div class="flex flex-col items-center animate-slide-up">
         <h2 class="font-headline-lg text-headline-lg text-primary">500+</h2>
-        <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">
+        <p
+          class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest"
+        >
           {{ 'landing.statsFarmsLabel' | translate }}
         </p>
       </div>
-      <div class="hidden md:block stat-divider mx-auto" aria-hidden="true"></div>
+      <div
+        class="hidden md:block stat-divider mx-auto"
+        aria-hidden="true"
+      ></div>
       <div class="flex flex-col items-center animate-slide-up">
         <h2 class="font-headline-lg text-headline-lg text-primary">120+</h2>
-        <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">
+        <p
+          class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest"
+        >
           {{ 'landing.statsFactoriesLabel' | translate }}
         </p>
       </div>
-      <div class="hidden md:block stat-divider mx-auto" aria-hidden="true"></div>
+      <div
+        class="hidden md:block stat-divider mx-auto"
+        aria-hidden="true"
+      ></div>
       <div class="flex flex-col items-center animate-slide-up">
         <h2 class="font-headline-lg text-headline-lg text-primary">2,000+</h2>
-        <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">
+        <p
+          class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest"
+        >
           {{ 'landing.statsContractsLabel' | translate }}
         </p>
       </div>
@@ -156,12 +235,17 @@
   </section>
 
   <!-- How it works -->
-  <section id="how-it-works" class="py-xl px-4 md:px-margin-desktop max-w-7xl mx-auto">
+  <section
+    id="how-it-works"
+    class="py-xl px-4 md:px-margin-desktop max-w-7xl mx-auto"
+  >
     <div class="text-center mb-16">
       <h2 class="font-headline-lg text-headline-lg text-on-background mb-4">
         {{ 'landing.howTitle' | translate }}
       </h2>
-      <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">
+      <p
+        class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto"
+      >
         {{ 'landing.howSubtitle' | translate }}
       </p>
     </div>
@@ -178,12 +262,18 @@
         <div
           class="w-20 h-20 bg-secondary-container rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm"
         >
-          <span class="material-symbols-outlined text-4xl text-on-secondary-container" aria-hidden="true"
+          <span
+            class="material-symbols-outlined text-4xl text-on-secondary-container"
+            aria-hidden="true"
             >inventory</span
           >
         </div>
-        <h3 class="font-headline-sm text-headline-sm mb-2">{{ 'landing.howStep1Title' | translate }}</h3>
-        <p class="font-body-md text-body-md text-on-surface-variant">{{ 'landing.howStep1Body' | translate }}</p>
+        <h3 class="font-headline-sm text-headline-sm mb-2">
+          {{ 'landing.howStep1Title' | translate }}
+        </h3>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {{ 'landing.howStep1Body' | translate }}
+        </p>
       </article>
 
       <article
@@ -192,12 +282,18 @@
         <div
           class="w-20 h-20 bg-primary-container rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm"
         >
-          <span class="material-symbols-outlined text-4xl text-on-primary-container" aria-hidden="true"
+          <span
+            class="material-symbols-outlined text-4xl text-on-primary-container"
+            aria-hidden="true"
             >psychology</span
           >
         </div>
-        <h3 class="font-headline-sm text-headline-sm mb-2">{{ 'landing.howStep2Title' | translate }}</h3>
-        <p class="font-body-md text-body-md text-on-surface-variant">{{ 'landing.howStep2Body' | translate }}</p>
+        <h3 class="font-headline-sm text-headline-sm mb-2">
+          {{ 'landing.howStep2Title' | translate }}
+        </h3>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {{ 'landing.howStep2Body' | translate }}
+        </p>
       </article>
 
       <article
@@ -206,12 +302,18 @@
         <div
           class="w-20 h-20 bg-secondary-container rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm"
         >
-          <span class="material-symbols-outlined text-4xl text-on-secondary-container" aria-hidden="true"
+          <span
+            class="material-symbols-outlined text-4xl text-on-secondary-container"
+            aria-hidden="true"
             >contract_edit</span
           >
         </div>
-        <h3 class="font-headline-sm text-headline-sm mb-2">{{ 'landing.howStep3Title' | translate }}</h3>
-        <p class="font-body-md text-body-md text-on-surface-variant">{{ 'landing.howStep3Body' | translate }}</p>
+        <h3 class="font-headline-sm text-headline-sm mb-2">
+          {{ 'landing.howStep3Title' | translate }}
+        </h3>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {{ 'landing.howStep3Body' | translate }}
+        </p>
       </article>
     </div>
   </section>
@@ -219,7 +321,9 @@
   <!-- Trusted by -->
   <section id="trusted" class="py-16 bg-surface-container-low overflow-hidden">
     <div class="max-w-6xl mx-auto px-4">
-      <p class="text-center font-label-md text-label-md text-outline uppercase tracking-[0.2em] mb-10">
+      <p
+        class="text-center font-label-md text-label-md text-outline uppercase tracking-[0.2em] mb-10"
+      >
         {{ 'landing.trustedBy' | translate }}
       </p>
       <div
@@ -259,7 +363,7 @@
   <footer
     class="bg-surface-container-highest py-16 px-4 md:px-margin-desktop border-t border-outline-variant"
   >
-    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
       <div>
         <div class="flex items-center gap-2 mb-4">
           <img
@@ -267,7 +371,9 @@
             [attr.alt]="'app.name' | translate"
             class="h-8"
           />
-          <span class="font-bold text-primary text-headline-sm">{{ 'app.name' | translate }}</span>
+          <span class="font-bold text-primary text-headline-sm">{{
+            'app.name' | translate
+          }}</span>
         </div>
         <p class="font-body-md text-body-md text-on-surface-variant">
           {{ 'landing.footerTagline' | translate }}
@@ -275,64 +381,32 @@
       </div>
 
       <div>
-        <h3 class="font-label-md text-label-md text-on-surface mb-6 uppercase tracking-wider">
-          {{ 'landing.footerMarketplace' | translate }}
-        </h3>
-        <ul class="space-y-3 font-label-sm text-label-sm text-on-surface-variant">
-          <li>
-            <a href="#" class="hover:text-primary transition-colors">{{ 'landing.findSupply' | translate }}</a>
-          </li>
-          <li>
-            <a href="#" class="hover:text-primary transition-colors">{{ 'landing.farmProfiles' | translate }}</a>
-          </li>
-          <li>
-            <a href="#" class="hover:text-primary transition-colors">{{
-              'landing.contractTemplates' | translate
-            }}</a>
-          </li>
-          <li>
-            <a href="#" class="hover:text-primary transition-colors">{{ 'landing.pricingIndex' | translate }}</a>
-          </li>
-        </ul>
-      </div>
-
-      <div>
-        <h3 class="font-label-md text-label-md text-on-surface mb-6 uppercase tracking-wider">
-          {{ 'landing.footerCompany' | translate }}
-        </h3>
-        <ul class="space-y-3 font-label-sm text-label-sm text-on-surface-variant">
-          <li>
-            <a href="#" class="hover:text-primary transition-colors">{{ 'landing.aboutUs' | translate }}</a>
-          </li>
-          <li>
-            <a href="#" class="hover:text-primary transition-colors">{{ 'landing.careers' | translate }}</a>
-          </li>
-          <li>
-            <a href="#" class="hover:text-primary transition-colors">{{ 'landing.impactReport' | translate }}</a>
-          </li>
-          <li>
-            <a href="#" class="hover:text-primary transition-colors">{{ 'landing.newsroom' | translate }}</a>
-          </li>
-        </ul>
-      </div>
-
-      <div>
-        <h3 class="font-label-md text-label-md text-on-surface mb-6 uppercase tracking-wider">
+        <h3
+          class="font-label-md text-label-md text-on-surface mb-6 uppercase tracking-wider"
+        >
           {{ 'landing.footerNewsletter' | translate }}
         </h3>
         <p class="font-body-md text-body-md text-on-surface-variant mb-4">
           {{ 'landing.footerNewsletterHint' | translate }}
         </p>
         <form class="flex gap-2" (submit)="$event.preventDefault()">
-          <label class="sr-only" for="newsletter-email">{{ 'landing.newsletterEmail' | translate }}</label>
+          <label class="sr-only" for="newsletter-email">{{
+            'landing.newsletterEmail' | translate
+          }}</label>
           <input
             id="newsletter-email"
             type="email"
             [attr.placeholder]="'landing.newsletterEmail' | translate"
             class="ui-input flex-1 !py-2"
           />
-          <button type="submit" class="ui-btn-primary !px-3 !py-2" [attr.aria-label]="'common.submit' | translate">
-            <span class="material-symbols-outlined icon-flip" aria-hidden="true">send</span>
+          <button
+            type="submit"
+            class="ui-btn-primary !px-3 !py-2"
+            [attr.aria-label]="'common.submit' | translate"
+          >
+            <span class="material-symbols-outlined icon-flip" aria-hidden="true"
+              >send</span
+            >
           </button>
         </form>
       </div>
@@ -344,11 +418,6 @@
       <p class="font-label-sm text-label-sm text-on-surface-variant">
         {{ 'landing.footerRights' | translate }}
       </p>
-      <div class="flex gap-6 font-label-sm text-label-sm text-on-surface-variant">
-        <a href="#" class="hover:text-primary transition-all">{{ 'landing.privacy' | translate }}</a>
-        <a href="#" class="hover:text-primary transition-all">{{ 'landing.terms' | translate }}</a>
-        <a href="#" class="hover:text-primary transition-all">{{ 'landing.compliance' | translate }}</a>
-      </div>
     </div>
   </footer>
 </div>

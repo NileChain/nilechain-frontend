@@ -1,5 +1,9 @@
-<div class="min-h-screen flex flex-col items-center justify-center p-margin-mobile md:p-margin-desktop bg-surface">
-  <header class="fixed top-0 inset-x-0 z-50 flex justify-end items-center gap-1 px-margin-mobile md:px-margin-desktop h-16">
+<div
+  class="min-h-screen flex flex-col items-center justify-center p-margin-mobile md:p-margin-desktop bg-surface"
+>
+  <header
+    class="fixed top-0 inset-x-0 z-50 flex justify-end items-center gap-1 px-margin-mobile md:px-margin-desktop h-16"
+  >
     <ui-language-toggle />
     <ui-theme-toggle />
   </header>
@@ -7,12 +11,20 @@
   <main class="w-full max-w-[440px] z-10 animate-fade-in pt-16">
     <div class="glass-panel rounded-xl p-lg md:p-xl text-center space-y-md">
       @if (status() === 'loading') {
-        <span class="material-symbols-outlined text-5xl text-primary animate-spin" aria-hidden="true">sync</span>
+        <span
+          class="material-symbols-outlined text-5xl text-primary animate-spin"
+          aria-hidden="true"
+          >sync</span
+        >
         <p class="font-body-md text-body-md text-on-surface-variant">
           {{ 'confirmEmail.verifying' | translate }}
         </p>
       } @else if (status() === 'success') {
-        <span class="material-symbols-outlined text-5xl text-success-green" aria-hidden="true">check_circle</span>
+        <span
+          class="material-symbols-outlined text-5xl text-success-green"
+          aria-hidden="true"
+          >check_circle</span
+        >
         <h1 class="font-headline-md text-headline-md text-on-surface font-bold">
           {{ 'confirmEmail.success' | translate }}
         </h1>
@@ -23,7 +35,11 @@
           {{ 'login.title' | translate }}
         </a>
       } @else {
-        <span class="material-symbols-outlined text-5xl text-error" aria-hidden="true">error</span>
+        <span
+          class="material-symbols-outlined text-5xl text-error"
+          aria-hidden="true"
+          >error</span
+        >
         <h1 class="font-headline-md text-headline-md text-on-surface font-bold">
           {{ 'confirmEmail.failed' | translate }}
         </h1>

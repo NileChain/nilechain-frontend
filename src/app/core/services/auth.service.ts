@@ -52,7 +52,10 @@ export class AuthService {
 
   login(payload: LoginRequest): Observable<UserProfile> {
     return this.http
-      .post<AuthResponse>(this.getUrl(environment.auth.endpoints.login), payload)
+      .post<AuthResponse>(
+        this.getUrl(environment.auth.endpoints.login),
+        payload
+      )
       .pipe(switchMap((response) => this.afterAuth(response)));
   }
 
@@ -105,7 +108,9 @@ export class AuthService {
   }
 
   getMe(): Observable<UserResponse> {
-    return this.http.get<UserResponse>(this.getUrl(environment.auth.endpoints.me));
+    return this.http.get<UserResponse>(
+      this.getUrl(environment.auth.endpoints.me)
+    );
   }
 
   forgotPassword(payload: ForgotPasswordRequest): Observable<void> {
@@ -249,10 +254,9 @@ export class AuthService {
     }
 
     // ASP.NET often uses the long claim URI
-    const claimRole =
-      (payload as Record<string, unknown>)[
-        'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
-      ];
+    const claimRole = (payload as Record<string, unknown>)[
+      'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+    ];
     if (typeof claimRole === 'string') {
       return [claimRole];
     }

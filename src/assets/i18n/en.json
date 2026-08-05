@@ -69,6 +69,10 @@
     "saved": "Saved",
     "saving": "Saving…",
     "retry": "Retry",
+    "previewTitle": "Preview",
+    "previewBody": "This section is a preview and is not yet connected to live data.",
+    "errorTitle": "Something went wrong",
+    "errorBody": "We couldn't load this content. Please try again.",
     "email": "Email",
     "password": "Password",
     "confirmPassword": "Confirm password",
@@ -318,7 +322,9 @@
       "statusNegotiating": "Negotiating",
       "statusMatching": "Matching",
       "statusOnHold": "On Hold",
-      "statusExpired": "Expired"
+      "statusExpired": "Expired",
+      "noRecentMatches": "No recent matches.",
+      "noBreakdown": "No score breakdown available."
     },
     "profile": {
       "title": "Farm profile",
@@ -374,7 +380,9 @@
       "quantity": "Quantity",
       "price": "Price",
       "deliveryDate": "Delivery date",
-      "safetyScore": "Safety"
+      "safetyScore": "Safety",
+      "empty": "No matches yet",
+      "emptyBody": "There are no factory matches that fit your crops right now."
     },
     "contracts": {
       "title": "Contracts",
@@ -405,7 +413,9 @@
       "clause3Title": "Clause 3: Blockchain-backed payment terms (NileChain)",
       "clause3Body": "Settlement is executed automatically via smart contracts on NileChain upon receipt and inspection confirmation by the first party. The total value (250,000 EGP) is deposited into the second party's linked bank account within 24 hours.",
       "signBuyer": "First party signature (Buyer)",
-      "signSupplier": "Second party signature (Supplier)"
+      "signSupplier": "Second party signature (Supplier)",
+      "empty": "No contracts yet",
+      "emptyBody": "When factories send you contracts, they'll appear here."
     }
   },
   "factory": {
@@ -536,7 +546,9 @@
       "costSaving": "15% cost savings",
       "avgExpectedPrice": "Average expected price",
       "marketBased": "Based on current market analysis",
-      "aiRecommends": "AI recommends"
+      "aiRecommends": "AI recommends",
+      "empty": "No matches for this request",
+      "emptyBody": "Try creating a new supply request or adjusting its criteria."
     },
     "progress": {
       "title": "AI matching in progress",
@@ -628,6 +640,7 @@
       "unblock": "Unblock",
       "page": "Page {{current}} of {{total}}",
       "noUsers": "No users found",
+      "emptyBody": "Try adjusting your search or filters.",
       "businessName": "Business name",
       "farmName": "Farm name",
       "factoryName": "Factory name",
@@ -699,6 +712,10 @@
     "online": "Online",
     "offline": "Offline",
     "empty": "Select a conversation",
+    "emptyList": "No conversations yet",
+    "emptyListBody": "When factories start a chat with you, it will appear here.",
+    "emptyThread": "No messages yet. Say hello.",
+    "selectConversation": "Select a conversation",
     "now": "Now",
     "yesterday": "Yesterday",
     "timeMorning": "10:30 AM",
@@ -721,6 +738,7 @@
     "risks": "Risks",
     "markRead": "Mark as read",
     "empty": "You're all caught up",
+    "emptyBody": "We'll let you know when something new arrives.",
     "subtitle": "Alerts and key events across your supply chain.",
     "searchPlaceholder": "Search notifications…",
     "today": "Today",

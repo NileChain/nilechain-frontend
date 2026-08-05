@@ -1,14 +1,27 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
-  <div class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in">
+  <div
+    class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
+  >
+    <ui-preview-banner />
     <!-- Header -->
     <header class="flex justify-between items-start gap-4 flex-wrap">
-      <div>
-        <h1 class="font-headline-lg text-headline-lg text-on-surface">
-          {{ 'notifications.title' | translate }}
-        </h1>
-        <p class="font-body-md text-body-md text-on-surface-variant mt-1">
-          {{ 'notifications.subtitle' | translate }}
-        </p>
+      <div class="flex items-start gap-2">
+        <button
+          type="button"
+          class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant shrink-0"
+          (click)="mobileNav.toggleMenu()"
+          [attr.aria-label]="'common.toggleMenu' | translate"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+        </button>
+        <div>
+          <h1 class="font-headline-lg text-headline-lg text-on-surface">
+            {{ 'notifications.title' | translate }}
+          </h1>
+          <p class="font-body-md text-body-md text-on-surface-variant mt-1">
+            {{ 'notifications.subtitle' | translate }}
+          </p>
+        </div>
       </div>
       <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
         <div class="relative hidden lg:block">
@@ -32,7 +45,9 @@
           class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors border border-outline-variant"
           [attr.aria-label]="'common.filter' | translate"
         >
-          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">filter_list</span>
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+            >filter_list</span
+          >
         </button>
         <ui-language-toggle />
         <ui-theme-toggle />
@@ -59,9 +74,11 @@
           [class.text-on-surface-variant]="!tab.active"
         >
           @if (tab.icon) {
-            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">{{
-              tab.icon
-            }}</span>
+            <span
+              class="material-symbols-outlined text-[18px]"
+              aria-hidden="true"
+              >{{ tab.icon }}</span
+            >
           }
           {{ tab.labelKey | translate }}
         </button>
@@ -115,20 +132,25 @@
               <div
                 class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center shrink-0 border border-outline-variant"
               >
-                <span class="material-symbols-outlined text-primary text-[24px]" aria-hidden="true"
+                <span
+                  class="material-symbols-outlined text-primary text-[24px]"
+                  aria-hidden="true"
                   >contract</span
                 >
               </div>
             }
 
             <div class="flex-1 min-w-0">
-              <div class="flex justify-between items-start mb-1 gap-2 flex-wrap">
+              <div
+                class="flex justify-between items-start mb-1 gap-2 flex-wrap"
+              >
                 <h3 class="font-title-md text-title-md text-on-surface pe-6">
                   {{ item.titleKey | translate }}
                 </h3>
-                <time class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">{{
-                  item.timeKey | translate
-                }}</time>
+                <time
+                  class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap"
+                  >{{ item.timeKey | translate }}</time
+                >
               </div>
               <p class="font-body-md text-body-md text-on-surface-variant mb-3">
                 {{ item.bodyKey | translate }}
@@ -161,9 +183,11 @@
                     [class.border-outline-variant]="item.type !== 'match'"
                   >
                     @if (item.chipIcon) {
-                      <span class="material-symbols-outlined text-[14px]" aria-hidden="true">{{
-                        item.chipIcon
-                      }}</span>
+                      <span
+                        class="material-symbols-outlined text-[14px]"
+                        aria-hidden="true"
+                        >{{ item.chipIcon }}</span
+                      >
                     }
                     {{ item.chipKey | translate }}
                   </span>
@@ -199,26 +223,35 @@
               <div
                 class="absolute bottom-0 end-0 bg-surface w-4 h-4 rounded-full flex items-center justify-center border border-outline-variant"
               >
-                <span class="material-symbols-outlined text-[10px] text-primary" aria-hidden="true"
+                <span
+                  class="material-symbols-outlined text-[10px] text-primary"
+                  aria-hidden="true"
                   >chat</span
                 >
               </div>
             </div>
             <div class="flex-1 min-w-0">
-              <div class="flex justify-between items-start mb-1 gap-2 flex-wrap">
+              <div
+                class="flex justify-between items-start mb-1 gap-2 flex-wrap"
+              >
                 <h3 class="font-title-md text-title-md text-on-surface">
                   {{ item.titleKey | translate }}
                 </h3>
-                <time class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">{{
-                  item.timeKey | translate
-                }}</time>
+                <time
+                  class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap"
+                  >{{ item.timeKey | translate }}</time
+                >
               </div>
-              <p class="font-body-md text-body-md text-on-surface-variant mb-2 line-clamp-2">
+              <p
+                class="font-body-md text-body-md text-on-surface-variant mb-2 line-clamp-2"
+              >
                 {{ item.bodyKey | translate }}
               </p>
               <button type="button" class="ui-btn-ghost !px-0 !py-1">
                 {{ item.actionKey | translate }}
-                <span class="material-symbols-outlined text-[16px] icon-flip" aria-hidden="true"
+                <span
+                  class="material-symbols-outlined text-[16px] icon-flip"
+                  aria-hidden="true"
                   >reply</span
                 >
               </button>

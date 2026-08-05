@@ -36,12 +36,15 @@ export class ConfirmEmailComponent implements OnInit {
         this.errorMessage.set('Invalid or missing confirmation link.');
         return;
       }
-      this.authService.confirmEmail(decodeURIComponent(userId), decodeURIComponent(token))
+      this.authService
+        .confirmEmail(decodeURIComponent(userId), decodeURIComponent(token))
         .subscribe({
           next: () => this.status.set('success'),
           error: () => {
             this.status.set('error');
-            this.errorMessage.set('Email confirmation failed. The link may have expired.');
+            this.errorMessage.set(
+              'Email confirmation failed. The link may have expired.'
+            );
           },
         });
     });

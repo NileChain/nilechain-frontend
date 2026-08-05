@@ -3,10 +3,17 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { CropType, FarmDocument, FarmProfile } from '../../models/farm/farm-profile.model';
+import {
+  CropType,
+  FarmDocument,
+  FarmProfile,
+} from '../../models/farm/farm-profile.model';
 import { UpdateFarmProfileRequest } from '../../models/farm/update-farm-profile-request.model';
 import { FarmDashboard } from '../../models/farm/farm-dashboard.model';
-import { FarmMatchItem, RespondToMatchRequest } from '../../models/farm/farm-match.model';
+import {
+  FarmMatchItem,
+  RespondToMatchRequest,
+} from '../../models/farm/farm-match.model';
 import { FarmContract } from '../../models/farm/farm-contract.model';
 import {
   Conversation,
@@ -60,7 +67,10 @@ export class FarmService {
     return this.http.delete<void>(`${this.api}/crops/${cropTypeId}`);
   }
 
-  getMatches(status?: string | null, cropTypeId?: string | null): Observable<FarmMatchItem[]> {
+  getMatches(
+    status?: string | null,
+    cropTypeId?: string | null
+  ): Observable<FarmMatchItem[]> {
     let params = new HttpParams();
     if (status) {
       params = params.set('status', status);
@@ -71,7 +81,10 @@ export class FarmService {
     return this.http.get<FarmMatchItem[]>(`${this.api}/matches`, { params });
   }
 
-  respondToMatch(matchId: string, action: RespondToMatchRequest['action']): Observable<void> {
+  respondToMatch(
+    matchId: string,
+    action: RespondToMatchRequest['action']
+  ): Observable<void> {
     return this.http.put<void>(`${this.api}/matches/${matchId}/respond`, {
       action,
     } satisfies RespondToMatchRequest);
@@ -86,13 +99,18 @@ export class FarmService {
   }
 
   getMessages(matchId: string): Observable<Message[]> {
-    return this.http.get<Message[]>(`${this.api}/conversations/${matchId}/messages`);
+    return this.http.get<Message[]>(
+      `${this.api}/conversations/${matchId}/messages`
+    );
   }
 
   sendMessage(matchId: string, content: string): Observable<void> {
-    return this.http.post<void>(`${this.api}/conversations/${matchId}/messages`, {
-      content,
-    } satisfies SendMessageRequest);
+    return this.http.post<void>(
+      `${this.api}/conversations/${matchId}/messages`,
+      {
+        content,
+      } satisfies SendMessageRequest
+    );
   }
 
   getNotifications(): Observable<FarmNotification[]> {
@@ -100,6 +118,9 @@ export class FarmService {
   }
 
   markNotificationAsRead(notificationId: string): Observable<void> {
-    return this.http.put<void>(`${this.api}/notifications/${notificationId}/read`, {});
+    return this.http.put<void>(
+      `${this.api}/notifications/${notificationId}/read`,
+      {}
+    );
   }
 }

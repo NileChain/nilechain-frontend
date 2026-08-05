@@ -6,7 +6,9 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
   standalone: true,
   imports: [TranslatePipe],
   template: `
-    <header class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+    <header
+      class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between"
+    >
       <div>
         <h1 class="font-headline-md text-headline-md text-primary font-bold">
           {{ titleKey | translate }}

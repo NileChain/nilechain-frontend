@@ -4,10 +4,16 @@ import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
-import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
+import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
+import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
+import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
 import { AdminService } from '../../../core/services/admin/admin.service';
-import { AdminUser, CreateUserRequest } from '../../../core/models/admin/admin-user.model';
+import {
+  AdminUser,
+  CreateUserRequest,
+} from '../../../core/models/admin/admin-user.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { MobileNavService } from '../../../core/services/mobile-nav.service';
 
 @Component({
   selector: 'app-admin-users',
@@ -16,7 +22,9 @@ import { AuthService } from '../../../core/services/auth.service';
     TranslatePipe,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
-    UiLoaderComponent,
+    UiErrorStateComponent,
+    UiEmptyStateComponent,
+    UiSkeletonComponent,
     FormsModule,
   ],
   templateUrl: './admin-users.component.html',
@@ -26,6 +34,7 @@ export class AdminUsersComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly authService = inject(AuthService);
   readonly currentUser = this.authService.currentUser;
+  readonly mobileNav = inject(MobileNavService);
 
   readonly loading = signal(true);
   readonly actionLoading = signal<string | null>(null);
@@ -111,23 +120,33 @@ export class AdminUsersComponent implements OnInit {
   }
 
   verify(user: AdminUser): void {
-    this.runAction(user.id, 'verify', () => this.adminService.verifyUser(user.id));
+    this.runAction(user.id, 'verify', () =>
+      this.adminService.verifyUser(user.id)
+    );
   }
 
   block(user: AdminUser): void {
-    this.runAction(user.id, 'block', () => this.adminService.blockUser(user.id));
+    this.runAction(user.id, 'block', () =>
+      this.adminService.blockUser(user.id)
+    );
   }
 
   unblock(user: AdminUser): void {
-    this.runAction(user.id, 'unblock', () => this.adminService.unblockUser(user.id));
+    this.runAction(user.id, 'unblock', () =>
+      this.adminService.unblockUser(user.id)
+    );
   }
 
   deactivate(user: AdminUser): void {
-    this.runAction(user.id, 'deactivate', () => this.adminService.deactivateUser(user.id));
+    this.runAction(user.id, 'deactivate', () =>
+      this.adminService.deactivateUser(user.id)
+    );
   }
 
   reactivate(user: AdminUser): void {
-    this.runAction(user.id, 'reactivate', () => this.adminService.reactivateUser(user.id));
+    this.runAction(user.id, 'reactivate', () =>
+      this.adminService.reactivateUser(user.id)
+    );
   }
 
   createUser(): void {

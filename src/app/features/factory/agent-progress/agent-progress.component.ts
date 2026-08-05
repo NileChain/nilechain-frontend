@@ -7,8 +7,14 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
+import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { AgentService } from '../../../core/services/agent/agent.service';
-import { AgentRequest, AgentResponse, MatchResult } from '../../../core/models/agent/agent.model';
+import { MobileNavService } from '../../../core/services/mobile-nav.service';
+import {
+  AgentRequest,
+  AgentResponse,
+  MatchResult,
+} from '../../../core/models/agent/agent.model';
 import { saveAgentSession } from '../../../core/utils/agent-session';
 
 @Component({
@@ -19,6 +25,7 @@ import { saveAgentSession } from '../../../core/utils/agent-session';
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
     UiLoaderComponent,
+    UiErrorStateComponent,
     FormsModule,
     RouterLink,
     DecimalPipe,
@@ -28,6 +35,7 @@ import { saveAgentSession } from '../../../core/utils/agent-session';
 export class AgentProgressComponent implements OnInit {
   private readonly agentService = inject(AgentService);
   private readonly route = inject(ActivatedRoute);
+  readonly mobileNav = inject(MobileNavService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);

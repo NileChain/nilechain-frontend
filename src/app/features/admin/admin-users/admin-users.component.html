@@ -6,6 +6,7 @@
       <button
         type="button"
         class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
+        (click)="mobileNav.toggleMenu()"
         [attr.aria-label]="'common.toggleMenu' | translate"
       >
         <span class="material-symbols-outlined" aria-hidden="true">menu</span>
@@ -17,7 +18,9 @@
     <div class="flex items-center gap-2 sm:gap-4">
       <ui-language-toggle />
       <ui-theme-toggle />
-      <div class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant">
+      <div
+        class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant"
+      >
         <div class="text-end hidden sm:block">
           <p class="font-label-md text-label-md text-on-surface leading-tight">
             {{ currentUser()?.email || 'Admin' }}
@@ -35,8 +38,12 @@
     </div>
   </header>
 
-  <div class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in">
-    <section class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+  <div
+    class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
+  >
+    <section
+      class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4"
+    >
       <div class="space-y-1">
         <h1 class="font-headline-lg text-headline-lg font-bold text-on-surface">
           {{ 'admin.users.title' | translate }}
@@ -50,7 +57,9 @@
         class="ui-btn-primary inline-flex items-center gap-2 shrink-0"
         (click)="showCreate.set(!showCreate())"
       >
-        <span class="material-symbols-outlined text-[20px]" aria-hidden="true">add</span>
+        <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+          >add</span
+        >
         {{ 'admin.users.addUser' | translate }}
       </button>
     </section>
@@ -59,8 +68,18 @@
       <section class="ui-card p-6 space-y-4">
         <h2 class="font-title-lg">Create user</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input class="ui-input" placeholder="Email" [(ngModel)]="createEmail" name="createEmail" />
-          <input class="ui-input" placeholder="Name" [(ngModel)]="createName" name="createName" />
+          <input
+            class="ui-input"
+            placeholder="Email"
+            [(ngModel)]="createEmail"
+            name="createEmail"
+          />
+          <input
+            class="ui-input"
+            placeholder="Name"
+            [(ngModel)]="createName"
+            name="createName"
+          />
           <input
             class="ui-input"
             type="password"
@@ -94,7 +113,9 @@
 
     <section class="flex flex-col lg:flex-row gap-3 lg:items-center">
       <div class="relative flex-1 max-w-md">
-        <label class="sr-only" for="admin-users-search">{{ 'common.search' | translate }}</label>
+        <label class="sr-only" for="admin-users-search">{{
+          'common.search' | translate
+        }}</label>
         <input
           id="admin-users-search"
           type="search"
@@ -105,12 +126,18 @@
           [attr.placeholder]="'admin.users.searchPlaceholder' | translate"
         />
       </div>
-      <button type="button" class="ui-btn-secondary" (click)="searchUsers()">Search</button>
+      <button type="button" class="ui-btn-secondary" (click)="searchUsers()">
+        Search
+      </button>
       <div class="flex flex-wrap gap-2">
         <button
           type="button"
           class="!rounded-full !px-4 !py-2 text-label-lg"
-          [class]="!roleFilter ? 'ui-btn-primary' : 'ui-btn-secondary border border-outline-variant'"
+          [class]="
+            !roleFilter
+              ? 'ui-btn-primary'
+              : 'ui-btn-secondary border border-outline-variant'
+          "
           (click)="setRoleFilter('')"
         >
           {{ 'admin.users.filterAll' | translate }}
@@ -155,37 +182,67 @@
     </section>
 
     @if (error()) {
-      <p class="text-on-error-container">{{ error() }}</p>
+      <ui-error-state [message]="error()" (retry)="loadUsers()" />
     }
 
     @if (loading()) {
-      <div class="flex justify-center py-16"><ui-loader /></div>
+      <div class="space-y-3" role="status" [attr.aria-busy]="true">
+        @for (i of [1, 2, 3, 4, 5]; track $index) {
+          <div class="ui-card p-4 flex items-center gap-4">
+            <ui-skeleton width="2.5rem" height="2.5rem" rounded="full" />
+            <div class="flex-1 space-y-2">
+              <ui-skeleton height="1rem" width="30%" />
+              <ui-skeleton height="0.875rem" width="50%" />
+            </div>
+            <ui-skeleton width="5rem" height="1.5rem" />
+          </div>
+        }
+      </div>
     } @else {
       <section class="ui-card overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full text-start border-collapse">
+          <table class="w-full min-w-[720px] text-start border-collapse">
             <thead>
-              <tr class="bg-surface-container-lowest border-b border-outline-variant">
-                <th scope="col" class="p-4 font-title-md text-title-md text-on-surface text-start">
+              <tr
+                class="bg-surface-container-lowest border-b border-outline-variant"
+              >
+                <th
+                  scope="col"
+                  class="p-4 font-title-md text-title-md text-on-surface text-start"
+                >
                   {{ 'admin.users.name' | translate }}
                 </th>
-                <th scope="col" class="p-4 font-title-md text-title-md text-on-surface text-start">
+                <th
+                  scope="col"
+                  class="p-4 font-title-md text-title-md text-on-surface text-start"
+                >
                   {{ 'admin.users.email' | translate }}
                 </th>
-                <th scope="col" class="p-4 font-title-md text-title-md text-on-surface text-start">
+                <th
+                  scope="col"
+                  class="p-4 font-title-md text-title-md text-on-surface text-start"
+                >
                   {{ 'admin.users.role' | translate }}
                 </th>
-                <th scope="col" class="p-4 font-title-md text-title-md text-on-surface text-start">
+                <th
+                  scope="col"
+                  class="p-4 font-title-md text-title-md text-on-surface text-start"
+                >
                   {{ 'admin.users.status' | translate }}
                 </th>
-                <th scope="col" class="p-4 font-title-md text-title-md text-on-surface text-start">
+                <th
+                  scope="col"
+                  class="p-4 font-title-md text-title-md text-on-surface text-start"
+                >
                   {{ 'common.actions' | translate }}
                 </th>
               </tr>
             </thead>
             <tbody class="divide-y divide-outline-variant">
               @for (user of users(); track user.id) {
-                <tr class="hover:bg-surface-container-low transition-colors group">
+                <tr
+                  class="hover:bg-surface-container-low transition-colors group"
+                >
                   <td class="p-4">
                     <div class="flex items-center gap-3">
                       <div
@@ -194,16 +251,22 @@
                         {{ initial(user) }}
                       </div>
                       <div>
-                        <p class="font-body-lg text-body-lg font-medium text-on-surface">
+                        <p
+                          class="font-body-lg text-body-lg font-medium text-on-surface"
+                        >
                           {{ displayName(user) }}
                         </p>
-                        <p class="font-label-sm text-label-sm text-on-surface-variant">
+                        <p
+                          class="font-label-sm text-label-sm text-on-surface-variant"
+                        >
                           ID: {{ user.id.slice(0, 8) }}ΓÇª
                         </p>
                       </div>
                     </div>
                   </td>
-                  <td class="p-4 font-body-md text-body-md text-on-surface-variant">
+                  <td
+                    class="p-4 font-body-md text-body-md text-on-surface-variant"
+                  >
                     {{ user.email }}
                   </td>
                   <td class="p-4">
@@ -232,7 +295,9 @@
                         <span class="text-xs text-error">Blocked</span>
                       }
                       @if (!user.isActive) {
-                        <span class="text-xs text-on-surface-variant">Inactive</span>
+                        <span class="text-xs text-on-surface-variant"
+                          >Inactive</span
+                        >
                       }
                     </div>
                   </td>
@@ -265,7 +330,9 @@
                           [disabled]="!!actionLoading()"
                           (click)="block(user)"
                         >
-                          <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+                          <span
+                            class="material-symbols-outlined text-[20px]"
+                            aria-hidden="true"
                             >block</span
                           >
                         </button>
@@ -292,6 +359,16 @@
                     </div>
                   </td>
                 </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="p-6">
+                    <ui-empty-state
+                      titleKey="admin.users.noUsers"
+                      bodyKey="admin.users.emptyBody"
+                      icon="group_off"
+                    />
+                  </td>
+                </tr>
               }
             </tbody>
           </table>
@@ -300,7 +377,9 @@
         <div
           class="p-4 border-t border-outline-variant bg-surface-container-lowest flex flex-col sm:flex-row items-center justify-between gap-3 font-body-md text-body-md text-on-surface-variant"
         >
-          <p>{{ totalCount() }} user(s) ┬╖ page {{ page }} / {{ totalPages() }}</p>
+          <p>
+            {{ totalCount() }} user(s) ┬╖ page {{ page }} / {{ totalPages() }}
+          </p>
           <div class="flex items-center gap-2">
             <button
               type="button"
@@ -309,7 +388,9 @@
               [attr.aria-label]="'common.previous' | translate"
               (click)="prevPage()"
             >
-              <span class="material-symbols-outlined icon-flip" aria-hidden="true"
+              <span
+                class="material-symbols-outlined icon-flip"
+                aria-hidden="true"
                 >chevron_left</span
               >
             </button>
@@ -321,7 +402,9 @@
               [attr.aria-label]="'common.next' | translate"
               (click)="nextPage()"
             >
-              <span class="material-symbols-outlined icon-flip" aria-hidden="true"
+              <span
+                class="material-symbols-outlined icon-flip"
+                aria-hidden="true"
                 >chevron_right</span
               >
             </button>

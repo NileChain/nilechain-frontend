@@ -8,7 +8,12 @@ import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-landing',
-  imports: [RouterLink, TranslatePipe, UiLanguageToggleComponent, UiThemeToggleComponent],
+  imports: [
+    RouterLink,
+    TranslatePipe,
+    UiLanguageToggleComponent,
+    UiThemeToggleComponent,
+  ],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
 })

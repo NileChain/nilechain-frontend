@@ -1,9 +1,14 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
   <header
-    class="h-16 flex justify-between items-center w-full px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40">
+    class="h-16 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
+  >
     <div class="flex items-center gap-4">
-      <button type="button" class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
-        [attr.aria-label]="'common.toggleMenu' | translate">
+      <button
+        type="button"
+        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
+        (click)="mobileNav.toggleMenu()"
+        [attr.aria-label]="'common.toggleMenu' | translate"
+      >
         <span class="material-symbols-outlined" aria-hidden="true">menu</span>
       </button>
       <h2 class="font-headline-md text-headline-md font-bold text-primary">
@@ -13,12 +18,18 @@
     <div class="flex items-center gap-2 sm:gap-4">
       <ui-language-toggle />
       <ui-theme-toggle />
-      <a routerLink="/farm-notifications"
+      <a
+        routerLink="/farm-notifications"
         class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant relative"
-        [attr.aria-label]="'common.notifications' | translate">
-        <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+        [attr.aria-label]="'common.notifications' | translate"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true"
+          >notifications</span
+        >
       </a>
-      <div class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant">
+      <div
+        class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant"
+      >
         <div class="text-end hidden sm:block">
           <p class="font-label-md text-label-md text-on-surface leading-tight">
             {{ currentUser()?.displayName || currentUser()?.email }}
@@ -27,37 +38,92 @@
             {{ 'nav.premiumFarmer' | translate }}
           </p>
         </div>
-        <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary">
-          <span class="font-bold">{{ (currentUser()?.displayName || currentUser()?.email || '?').charAt(0).toUpperCase() }}</span>
+        <div
+          class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary"
+        >
+          <span class="font-bold">{{
+            (currentUser()?.displayName || currentUser()?.email || '?')
+              .charAt(0)
+              .toUpperCase()
+          }}</span>
         </div>
       </div>
     </div>
   </header>
 
-  <div class="p-margin-desktop max-w-[1440px] mx-auto space-y-gutter">
+  <div
+    class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter"
+  >
     @if (loading()) {
-      <div class="flex justify-center py-16">
-        <ui-loader />
+      <div
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter"
+        role="status"
+        [attr.aria-busy]="true"
+      >
+        @for (i of [1, 2, 3, 4]; track $index) {
+          <div class="glass-card p-md space-y-4">
+            <div class="flex justify-between items-start">
+              <div class="space-y-2 flex-1">
+                <ui-skeleton height="0.75rem" width="70%" />
+                <ui-skeleton height="1.5rem" width="50%" />
+              </div>
+              <ui-skeleton width="2.5rem" height="2.5rem" rounded="lg" />
+            </div>
+            <ui-skeleton height="0.75rem" width="40%" />
+          </div>
+        }
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+        <div class="lg:col-span-2 glass-card p-md space-y-3">
+          <ui-skeleton height="1.25rem" width="40%" />
+          @for (i of [1, 2, 3]; track $index) {
+            <ui-skeleton height="3rem" />
+          }
+        </div>
+        <div class="glass-card p-md space-y-4">
+          <ui-skeleton height="1.25rem" width="60%" />
+          @for (i of [1, 2, 3]; track $index) {
+            <div class="space-y-2">
+              <div class="flex justify-between">
+                <ui-skeleton height="0.75rem" width="45%" />
+                <ui-skeleton height="0.75rem" width="15%" />
+              </div>
+              <ui-skeleton height="0.5rem" />
+            </div>
+          }
+        </div>
       </div>
     } @else if (error()) {
-      <div class="ui-card p-6 text-center space-y-4">
-        <p class="text-on-error-container">{{ error() }}</p>
-        <button type="button" class="ui-btn-primary" (click)="loadDashboard()">Retry</button>
-      </div>
+      <ui-error-state [message]="error()" (retry)="loadDashboard()" />
     } @else if (dashboard(); as data) {
-      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+      <section
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter"
+      >
         <div class="glass-card p-md flex flex-col justify-between h-full">
           <div class="flex justify-between items-start">
             <div>
-              <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">
+              <p
+                class="text-label-sm text-on-surface-variant uppercase tracking-wider"
+              >
                 {{ 'farm.dashboard.reliabilityScore' | translate }}
               </p>
               <h3 class="font-headline-md text-headline-md text-primary mt-1">
-                {{ data.riskScore != null ? (data.riskScore | number: '1.0-0') + '/100' : '—' }}
+                {{
+                  data.riskScore != null
+                    ? (data.riskScore | number: '1.0-0') + '/100'
+                    : '—'
+                }}
               </h3>
             </div>
-            <div class="w-10 h-10 rounded-full bg-success-green flex items-center justify-center text-on-primary shadow-sm">
-              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1" aria-hidden="true">verified</span>
+            <div
+              class="w-10 h-10 rounded-full bg-success-green flex items-center justify-center text-on-primary shadow-sm"
+            >
+              <span
+                class="material-symbols-outlined"
+                style="font-variation-settings: 'FILL' 1"
+                aria-hidden="true"
+                >verified</span
+              >
             </div>
           </div>
         </div>
@@ -65,13 +131,21 @@
         <div class="glass-card p-md flex flex-col justify-between h-full">
           <div class="flex justify-between items-start">
             <div>
-              <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">
+              <p
+                class="text-label-sm text-on-surface-variant uppercase tracking-wider"
+              >
                 {{ 'farm.dashboard.activeMatches' | translate }}
               </p>
-              <h3 class="font-headline-md text-headline-md text-primary mt-1">{{ data.activeMatchesCount }}</h3>
+              <h3 class="font-headline-md text-headline-md text-primary mt-1">
+                {{ data.activeMatchesCount }}
+              </h3>
             </div>
-            <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
-              <span class="material-symbols-outlined" aria-hidden="true">dynamic_feed</span>
+            <div
+              class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true"
+                >dynamic_feed</span
+              >
             </div>
           </div>
         </div>
@@ -79,13 +153,21 @@
         <div class="glass-card p-md flex flex-col justify-between h-full">
           <div class="flex justify-between items-start">
             <div>
-              <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">
+              <p
+                class="text-label-sm text-on-surface-variant uppercase tracking-wider"
+              >
                 {{ 'farm.dashboard.completedContracts' | translate }}
               </p>
-              <h3 class="font-headline-md text-headline-md text-primary mt-1">{{ data.completedContractsCount }}</h3>
+              <h3 class="font-headline-md text-headline-md text-primary mt-1">
+                {{ data.completedContractsCount }}
+              </h3>
             </div>
-            <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
-              <span class="material-symbols-outlined" aria-hidden="true">assignment_turned_in</span>
+            <div
+              class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true"
+                >assignment_turned_in</span
+              >
             </div>
           </div>
         </div>
@@ -93,20 +175,32 @@
         <div class="glass-card p-md flex flex-col justify-between h-full">
           <div class="flex justify-between items-start">
             <div>
-              <p class="text-label-sm text-on-surface-variant uppercase tracking-wider">
+              <p
+                class="text-label-sm text-on-surface-variant uppercase tracking-wider"
+              >
                 {{ 'farm.dashboard.qualityRating' | translate }}
               </p>
               <h3 class="font-headline-md text-headline-md text-primary mt-1">
                 {{ data.averageRating | number: '1.1-1' }}/5.0
               </h3>
             </div>
-            <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
-              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1" aria-hidden="true">star</span>
+            <div
+              class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary"
+            >
+              <span
+                class="material-symbols-outlined"
+                style="font-variation-settings: 'FILL' 1"
+                aria-hidden="true"
+                >star</span
+              >
             </div>
           </div>
           <div class="mt-4 flex items-center gap-2 text-label-sm">
             <span class="text-on-surface-variant">
-              {{ 'farm.dashboard.verifiedReviews' | translate: { count: data.ratingCount } }}
+              {{
+                'farm.dashboard.verifiedReviews'
+                  | translate: { count: data.ratingCount }
+              }}
             </span>
           </div>
         </div>
@@ -114,55 +208,104 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
         <section class="lg:col-span-2 glass-card overflow-hidden">
-          <div class="p-md border-b border-card-border flex justify-between items-center">
+          <div
+            class="p-md border-b border-card-border flex justify-between items-center"
+          >
             <h3 class="font-headline-sm text-headline-sm text-primary">
               {{ 'farm.dashboard.recentB2bMatches' | translate }}
             </h3>
-            <a routerLink="/farm-matches"
-              class="text-primary font-label-md text-label-md hover:underline flex items-center gap-1">
+            <a
+              routerLink="/farm-matches"
+              class="text-primary font-label-md text-label-md hover:underline flex items-center gap-1"
+            >
               {{ 'common.viewAll' | translate }}
-              <span class="material-symbols-outlined text-sm icon-flip" aria-hidden="true">arrow_forward</span>
+              <span
+                class="material-symbols-outlined text-sm icon-flip"
+                aria-hidden="true"
+                >arrow_forward</span
+              >
             </a>
           </div>
           <div class="overflow-x-auto">
             @if (data.recentMatches.length === 0) {
-              <p class="p-md text-on-surface-variant">No recent matches.</p>
+              <p class="p-md text-on-surface-variant flex items-center gap-2">
+                <span
+                  class="material-symbols-outlined text-[20px]"
+                  aria-hidden="true"
+                  >inbox</span
+                >
+                {{ 'farm.dashboard.noRecentMatches' | translate }}
+              </p>
             } @else {
-              <table class="w-full text-start">
-                <thead class="bg-surface-container-low text-label-sm uppercase tracking-wider text-on-surface-variant border-b border-card-border">
+              <table class="w-full min-w-[640px] text-start">
+                <thead
+                  class="bg-surface-container-low text-label-sm uppercase tracking-wider text-on-surface-variant border-b border-card-border"
+                >
                   <tr>
-                    <th class="px-md py-4 font-semibold">{{ 'farm.dashboard.factoryBuyer' | translate }}</th>
-                    <th class="px-md py-4 font-semibold">{{ 'farm.dashboard.cropType' | translate }}</th>
-                    <th class="px-md py-4 font-semibold">{{ 'farm.dashboard.quantity' | translate }}</th>
-                    <th class="px-md py-4 font-semibold">{{ 'farm.dashboard.matchScore' | translate }}</th>
-                    <th class="px-md py-4 font-semibold">{{ 'common.status' | translate }}</th>
-                    <th class="px-md py-4 font-semibold text-end">{{ 'common.actions' | translate }}</th>
+                    <th class="px-md py-4 font-semibold">
+                      {{ 'farm.dashboard.factoryBuyer' | translate }}
+                    </th>
+                    <th class="px-md py-4 font-semibold">
+                      {{ 'farm.dashboard.cropType' | translate }}
+                    </th>
+                    <th class="px-md py-4 font-semibold">
+                      {{ 'farm.dashboard.quantity' | translate }}
+                    </th>
+                    <th class="px-md py-4 font-semibold">
+                      {{ 'farm.dashboard.matchScore' | translate }}
+                    </th>
+                    <th class="px-md py-4 font-semibold">
+                      {{ 'common.status' | translate }}
+                    </th>
+                    <th class="px-md py-4 font-semibold text-end">
+                      {{ 'common.actions' | translate }}
+                    </th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-card-border">
                   @for (match of data.recentMatches; track match.matchId) {
-                    <tr class="hover:bg-surface-container-lowest transition-colors">
+                    <tr
+                      class="hover:bg-surface-container-lowest transition-colors"
+                    >
                       <td class="px-md py-4">
-                        <span class="font-label-md text-on-surface">{{ match.factoryName }}</span>
+                        <span class="font-label-md text-on-surface">{{
+                          match.factoryName
+                        }}</span>
                       </td>
-                      <td class="px-md py-4 text-on-surface-variant">{{ match.cropName }}</td>
-                      <td class="px-md py-4 text-on-surface-variant">{{ match.quantityTons }} MT</td>
+                      <td class="px-md py-4 text-on-surface-variant">
+                        {{ match.cropName }}
+                      </td>
+                      <td class="px-md py-4 text-on-surface-variant">
+                        {{ match.quantityTons }} MT
+                      </td>
                       <td class="px-md py-4">
                         <div class="flex items-center gap-2">
-                          <span class="w-2 h-2 rounded-full" [class]="scoreTone(match.matchScore)" aria-hidden="true"></span>
+                          <span
+                            class="w-2 h-2 rounded-full"
+                            [class]="scoreTone(match.matchScore)"
+                            aria-hidden="true"
+                          ></span>
                           <span class="font-medium text-on-surface">
-                            {{ match.matchScore != null ? (match.matchScore | number: '1.0-0') + '%' : '—' }}
+                            {{
+                              match.matchScore != null
+                                ? (match.matchScore | number: '1.0-0') + '%'
+                                : '—'
+                            }}
                           </span>
                         </div>
                       </td>
                       <td class="px-md py-4">
-                        <span class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase">
+                        <span
+                          class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase"
+                        >
                           {{ match.status }}
                         </span>
                       </td>
                       <td class="px-md py-4 text-end">
-                        <a routerLink="/farm-matches"
-                          class="inline-block bg-primary text-on-primary px-4 py-2 rounded-lg font-label-sm hover:opacity-90 transition-opacity">
+                        <a
+                          routerLink="/farm-matches"
+                          class="inline-block bg-primary text-on-primary px-4 py-2 rounded-lg font-label-sm hover:opacity-90 transition-opacity"
+                        >
                           {{ 'farm.dashboard.review' | translate }}
                         </a>
                       </td>
@@ -185,36 +328,64 @@
           </div>
           <div class="p-md space-y-6 flex-grow">
             @if (data.riskBreakdown.length === 0) {
-              <p class="text-on-surface-variant">No score breakdown available.</p>
+              <p class="text-on-surface-variant flex items-center gap-2">
+                <span
+                  class="material-symbols-outlined text-[20px]"
+                  aria-hidden="true"
+                  >monitor_heart</span
+                >
+                {{ 'farm.dashboard.noBreakdown' | translate }}
+              </p>
             } @else {
               @for (item of data.riskBreakdown; track item.label) {
                 <div>
                   <div class="flex justify-between items-center mb-2">
-                    <span class="font-label-md text-on-surface">{{ item.label }}</span>
-                    <span class="font-bold text-success-green">{{ item.percentage | number: '1.0-0' }}%</span>
+                    <span class="font-label-md text-on-surface">{{
+                      item.label
+                    }}</span>
+                    <span class="font-bold text-success-green"
+                      >{{ item.percentage | number: '1.0-0' }}%</span
+                    >
                   </div>
-                  <div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
-                    <div class="bg-success-green h-full" [style.width.%]="item.percentage"></div>
+                  <div
+                    class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden"
+                  >
+                    <div
+                      class="bg-success-green h-full"
+                      [style.width.%]="item.percentage"
+                    ></div>
                   </div>
                 </div>
               }
             }
 
             @for (tip of data.improvementTips; track tip.message) {
-              <div class="bg-primary-container/10 p-4 rounded-lg border border-primary/20 mt-4">
+              <div
+                class="bg-primary-container/10 p-4 rounded-lg border border-primary/20 mt-4"
+              >
                 <div class="flex items-start gap-3">
-                  <span class="material-symbols-outlined text-primary" aria-hidden="true">{{ tip.icon || 'lightbulb' }}</span>
+                  <span
+                    class="material-symbols-outlined text-primary"
+                    aria-hidden="true"
+                    >{{ tip.icon || 'lightbulb' }}</span
+                  >
                   <div>
                     <p class="font-label-md text-primary">{{ tip.category }}</p>
-                    <p class="text-label-sm text-on-surface-variant leading-normal">{{ tip.message }}</p>
+                    <p
+                      class="text-label-sm text-on-surface-variant leading-normal"
+                    >
+                      {{ tip.message }}
+                    </p>
                   </div>
                 </div>
               </div>
             }
           </div>
           <div class="p-md mt-auto">
-            <a routerLink="/farm-profile"
-              class="block text-center w-full border-2 border-primary text-primary py-3 rounded-lg font-label-md hover:bg-primary hover:text-on-primary transition-all">
+            <a
+              routerLink="/farm-profile"
+              class="block text-center w-full border-2 border-primary text-primary py-3 rounded-lg font-label-md hover:bg-primary hover:text-on-primary transition-all"
+            >
               {{ 'farm.dashboard.improveScore' | translate }}
             </a>
           </div>

@@ -6,9 +6,16 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
+import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
+import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
+import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { FarmService } from '../../../core/services/farm/farm.service';
-import { Conversation, Message } from '../../../core/models/farm/farm-message.model';
+import { MobileNavService } from '../../../core/services/mobile-nav.service';
+import {
+  Conversation,
+  Message,
+} from '../../../core/models/farm/farm-message.model';
 
 @Component({
   selector: 'app-farm-messages',
@@ -18,6 +25,9 @@ import { Conversation, Message } from '../../../core/models/farm/farm-message.mo
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
     UiLoaderComponent,
+    UiErrorStateComponent,
+    UiEmptyStateComponent,
+    UiSkeletonComponent,
     FormsModule,
     DatePipe,
   ],
@@ -27,11 +37,13 @@ export class FarmMessagesComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly farmService = inject(FarmService);
   readonly currentUser = this.authService.currentUser;
+  readonly mobileNav = inject(MobileNavService);
 
   readonly loading = signal(true);
   readonly messagesLoading = signal(false);
   readonly sending = signal(false);
   readonly error = signal<string | null>(null);
+  readonly threadError = signal<string | null>(null);
   readonly conversations = signal<Conversation[]>([]);
   readonly messages = signal<Message[]>([]);
   readonly selectedMatchId = signal<string | null>(null);
@@ -62,12 +74,13 @@ export class FarmMessagesComponent implements OnInit {
   selectConversation(matchId: string): void {
     this.selectedMatchId.set(matchId);
     this.messagesLoading.set(true);
+    this.threadError.set(null);
     this.farmService
       .getMessages(matchId)
       .pipe(finalize(() => this.messagesLoading.set(false)))
       .subscribe({
         next: (items) => this.messages.set(items),
-        error: () => this.error.set('Failed to load messages.'),
+        error: () => this.threadError.set('Failed to load messages.'),
       });
   }
 
@@ -88,6 +101,7 @@ export class FarmMessagesComponent implements OnInit {
     }
 
     this.sending.set(true);
+    this.threadError.set(null);
     this.farmService
       .sendMessage(matchId, content)
       .pipe(finalize(() => this.sending.set(false)))
@@ -97,7 +111,7 @@ export class FarmMessagesComponent implements OnInit {
           this.selectConversation(matchId);
           this.loadConversations();
         },
-        error: () => this.error.set('Failed to send message.'),
+        error: () => this.threadError.set('Failed to send message.'),
       });
   }
 }

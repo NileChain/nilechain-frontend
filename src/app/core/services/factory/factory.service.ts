@@ -25,6 +25,8 @@ export class FactoryService {
   }
 
   getRequestMatches(requestId: string): Observable<FactoryMatchItem[]> {
-    return this.http.get<FactoryMatchItem[]>(`${this.api}/requests/${requestId}/matches`);
+    return this.http.get<FactoryMatchItem[]>(
+      `${this.api}/requests/${requestId}/matches`
+    );
   }
 }

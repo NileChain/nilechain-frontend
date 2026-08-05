@@ -18,10 +18,18 @@ export class AgentService {
   private readonly api = `${environment.backendUrl}/agent`;
 
   run(requestId: string, payload: AgentRequest): Observable<AgentResponse> {
-    return this.http.post<AgentResponse>(`${this.api}/run/${requestId}`, payload);
+    return this.http.post<AgentResponse>(
+      `${this.api}/run/${requestId}`,
+      payload
+    );
   }
 
-  generateContract(payload: GenerateContractRequest): Observable<GenerateContractResponse> {
-    return this.http.post<GenerateContractResponse>(`${this.api}/generate-contract`, payload);
+  generateContract(
+    payload: GenerateContractRequest
+  ): Observable<GenerateContractResponse> {
+    return this.http.post<GenerateContractResponse>(
+      `${this.api}/generate-contract`,
+      payload
+    );
   }
 }

@@ -6,8 +6,10 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
+import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { AgentService } from '../../../core/services/agent/agent.service';
 import { FactoryService } from '../../../core/services/factory/factory.service';
+import { MobileNavService } from '../../../core/services/mobile-nav.service';
 import {
   AgentRequest,
   GenerateContractRequest,
@@ -23,6 +25,7 @@ import { readAgentSession } from '../../../core/utils/agent-session';
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
     UiLoaderComponent,
+    UiErrorStateComponent,
     FormsModule,
   ],
   templateUrl: './contract-signing.component.html',
@@ -31,6 +34,7 @@ export class ContractSigningComponent implements OnInit {
   private readonly agentService = inject(AgentService);
   private readonly factoryService = inject(FactoryService);
   private readonly route = inject(ActivatedRoute);
+  readonly mobileNav = inject(MobileNavService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -100,7 +104,9 @@ export class ContractSigningComponent implements OnInit {
 
     if (!this.selectedFarm) {
       if (!this.farmId || !this.farmName) {
-        this.error.set('Select a farm from agent results first (farmId / farmName required).');
+        this.error.set(
+          'Select a farm from agent results first (farmId / farmName required).'
+        );
         return;
       }
       this.selectedFarm = {

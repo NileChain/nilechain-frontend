@@ -6,7 +6,9 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
+import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { FactoryService } from '../../../core/services/factory/factory.service';
+import { MobileNavService } from '../../../core/services/mobile-nav.service';
 import { FactoryProfile } from '../../../core/models/factory/factory-profile.model';
 import { UpdateFactoryProfileRequest } from '../../../core/models/factory/factory-profile.model';
 
@@ -18,6 +20,7 @@ import { UpdateFactoryProfileRequest } from '../../../core/models/factory/factor
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
     UiLoaderComponent,
+    UiErrorStateComponent,
     ReactiveFormsModule,
     DecimalPipe,
   ],
@@ -26,6 +29,7 @@ import { UpdateFactoryProfileRequest } from '../../../core/models/factory/factor
 export class FactoryProfileComponent implements OnInit {
   private readonly factoryService = inject(FactoryService);
   private readonly fb = inject(FormBuilder);
+  readonly mobileNav = inject(MobileNavService);
 
   readonly loading = signal(true);
   readonly saving = signal(false);
