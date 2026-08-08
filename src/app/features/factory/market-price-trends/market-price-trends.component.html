@@ -1,0 +1,196 @@
+<section class="market-trends" [attr.dir]="isRtl() ? 'rtl' : 'ltr'">
+  <header class="market-head">
+    <div class="min-w-0">
+      <h3 class="fx-section-title market-title">
+        {{ 'factory.dashboard.marketPriceTrends' | translate }}
+      </h3>
+      <p class="fx-section-sub">
+        {{ 'factory.dashboard.marketPriceSubtitle' | translate }}
+      </p>
+    </div>
+
+    <div class="market-controls">
+      <label class="sr-only" for="market-range-select">{{
+        'factory.dashboard.dateRange' | translate
+      }}</label>
+      <select
+        id="market-range-select"
+        class="market-select"
+        [value]="range()"
+        (change)="setRange($any($event.target).value)"
+      >
+        <option value="3m">{{ 'factory.dashboard.last3Months' | translate }}</option>
+        <option value="6m">{{ 'factory.dashboard.last6Months' | translate }}</option>
+        <option value="ytd">{{ 'factory.dashboard.yearToDate' | translate }}</option>
+      </select>
+
+      <button
+        type="button"
+        class="market-icon-btn"
+        (click)="refresh()"
+        [attr.aria-label]="'common.refresh' | translate"
+      >
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+          >refresh</span
+        >
+      </button>
+
+      <button
+        type="button"
+        class="market-ghost-btn"
+        (click)="exportCsv()"
+        [disabled]="state() !== 'ready'"
+      >
+        <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
+          >download</span
+        >
+        <span class="hidden sm:inline">{{
+          'factory.dashboard.export' | translate
+        }}</span>
+      </button>
+    </div>
+  </header>
+
+  @if (state() === 'loading') {
+    <div class="space-y-3 px-4 pb-4" role="status" [attr.aria-busy]="true">
+      <div class="market-snapshot market-snapshot--loading">
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+          <ui-skeleton height="3.25rem" width="100%" />
+        }
+      </div>
+      <ui-skeleton height="14rem" width="100%" />
+    </div>
+  } @else if (state() === 'error') {
+    <div class="px-4 pb-4">
+      <ui-error-state [message]="errorMessage()" (retry)="retry()" />
+    </div>
+  } @else if (state() === 'empty') {
+    <div class="px-4 pb-4">
+      <ui-empty-state
+        icon="monitoring"
+        titleKey="factory.dashboard.marketEmptyTitle"
+        bodyKey="factory.dashboard.marketEmptyBody"
+      />
+    </div>
+  } @else {
+    <!-- Compact market snapshot -->
+    <div
+      class="market-snapshot"
+      role="list"
+      [attr.aria-label]="'factory.dashboard.marketPriceTrends' | translate"
+    >
+      @for (kpi of kpis(); track kpi.cropName) {
+        <article class="snap-item" role="listitem">
+          <p class="snap-item__name">{{ kpi.cropName }}</p>
+          <p class="snap-item__price ui-data">
+            EGP {{ kpi.currentPrice | number: '1.0-0' }}
+          </p>
+          <p
+            class="snap-item__change"
+            [class.kpi-up]="kpi.changePercent > 0"
+            [class.kpi-down]="kpi.changePercent < 0"
+            [class.kpi-flat]="kpi.changePercent === 0"
+            [attr.aria-label]="
+              kpi.cropName +
+              ': ' +
+              (kpi.changePercent > 0 ? '+' : '') +
+              kpi.changePercent +
+              '%'
+            "
+          >
+            @if (kpi.changePercent > 0) {
+              ↑ {{ kpi.changePercent | number: '1.1-1' }}%
+            } @else if (kpi.changePercent < 0) {
+              ↓ {{ abs(kpi.changePercent) | number: '1.1-1' }}%
+            } @else {
+              ○ 0.0%
+            }
+          </p>
+        </article>
+      }
+    </div>
+
+    <div #chartCard class="chart-card" [class.chart-card--fullscreen]="isFullscreen()">
+      <div class="chart-toolbar">
+        <div class="min-w-0">
+          <h4 class="chart-toolbar__title">
+            {{ 'factory.dashboard.marketChartTitle' | translate }}
+          </h4>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="sr-only" for="market-display-mode">{{
+            'factory.dashboard.displayMode' | translate
+          }}</label>
+          <select
+            id="market-display-mode"
+            class="market-select"
+            [value]="displayMode()"
+            (change)="setDisplayMode($any($event.target).value)"
+          >
+            <option value="average">
+              {{ 'factory.dashboard.modeAverage' | translate }}
+            </option>
+            <option value="weekly">
+              {{ 'factory.dashboard.modeWeekly' | translate }}
+            </option>
+            <option value="monthly">
+              {{ 'factory.dashboard.modeMonthly' | translate }}
+            </option>
+          </select>
+          <button
+            type="button"
+            class="market-icon-btn"
+            (click)="toggleFullscreen()"
+            [attr.aria-label]="'factory.dashboard.fullscreen' | translate"
+          >
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">{{
+              isFullscreen() ? 'fullscreen_exit' : 'fullscreen'
+            }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="chart-canvas-wrap">
+        <canvas
+          #mainChart
+          role="img"
+          [attr.aria-label]="'factory.dashboard.marketPriceTrends' | translate"
+        ></canvas>
+      </div>
+
+      @if (insights().length) {
+        <div class="insights">
+          <h5 class="insights__title">
+            {{ 'factory.dashboard.marketInsights' | translate }}
+          </h5>
+          <ul class="insights__list">
+            @for (insight of insights(); track $index) {
+              <li class="insight-item" [attr.data-tone]="insight.tone">
+                <span class="insight-mark" aria-hidden="true">
+                  @if (insight.tone === 'up') {
+                    ↑
+                  } @else if (insight.tone === 'down') {
+                    ↓
+                  } @else if (insight.tone === 'stable') {
+                    ○
+                  } @else {
+                    ◉
+                  }
+                </span>
+                <span class="insight-text">
+                  {{ insight.textKey | translate: insight.params ?? {} }}
+                </span>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      <p class="market-foot">
+        {{ 'factory.dashboard.marketDisclaimer' | translate }}
+        · {{ 'factory.dashboard.lastUpdated' | translate }}
+        {{ lastUpdated() | date: 'shortTime' }}
+      </p>
+    </div>
+  }
+</section>

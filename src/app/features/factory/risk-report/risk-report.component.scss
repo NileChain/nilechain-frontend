@@ -1,0 +1,325 @@
+/* Risk Report — Reasoning Spine instrument (reuse provenance tokens) */
+
+:host {
+  display: block;
+}
+
+.risk-instrument {
+  border-radius: 0.75rem;
+  border: 1px solid
+    color-mix(in srgb, var(--color-provenance) 22%, var(--color-outline-variant));
+  background: color-mix(
+    in srgb,
+    var(--color-provenance-container) 55%,
+    var(--color-surface-container-lowest)
+  );
+  padding: 1rem;
+}
+
+.risk-instrument__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+@media (min-width: 1024px) {
+  .risk-instrument__layout {
+    grid-template-columns: minmax(220px, 0.85fr) minmax(0, 1.35fr);
+    gap: 1.5rem;
+    align-items: center;
+  }
+}
+
+.risk-instrument__score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+}
+
+.risk-instrument__score-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-on-surface);
+}
+
+.risk-instrument__score-hint {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  color: var(--color-on-surface-variant);
+}
+
+.risk-instrument__gauge {
+  position: relative;
+  width: 10rem;
+  height: 10rem;
+  border-radius: 9999px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.risk-instrument__gauge-hole {
+  position: absolute;
+  inset: 12px;
+  border-radius: 9999px;
+  background: var(--color-surface-container-lowest);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Risk level badge — risk colors only (never provenance teal) */
+.risk-instrument__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.risk-instrument__badge[data-risk='low'] {
+  background: color-mix(in srgb, var(--color-success) 14%, #fff);
+  color: var(--color-success);
+  border-color: color-mix(in srgb, var(--color-success) 35%, transparent);
+}
+
+.risk-instrument__badge[data-risk='medium'] {
+  background: color-mix(in srgb, var(--color-warning) 14%, #fff);
+  color: var(--color-warning);
+  border-color: color-mix(in srgb, var(--color-warning) 40%, transparent);
+}
+
+.risk-instrument__badge[data-risk='high'] {
+  background: color-mix(in srgb, var(--color-danger) 12%, #fff);
+  color: var(--color-danger);
+  border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+}
+
+html.dark .risk-instrument__badge[data-risk='low'] {
+  background: color-mix(in srgb, var(--color-success) 18%, transparent);
+}
+html.dark .risk-instrument__badge[data-risk='medium'] {
+  background: color-mix(in srgb, var(--color-warning) 18%, transparent);
+}
+html.dark .risk-instrument__badge[data-risk='high'] {
+  background: color-mix(in srgb, var(--color-danger) 18%, transparent);
+}
+
+.risk-instrument__factors-wrap {
+  position: relative;
+  min-width: 0;
+}
+
+.risk-instrument__factors-title {
+  margin: 0 0 0.75rem;
+  padding-inline-start: 1.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-on-provenance-container);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.risk-instrument__factors {
+  position: relative;
+}
+
+.risk-instrument__factors > ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.risk-instrument__spine {
+  position: absolute;
+  inset-inline-start: 0.6875rem;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  width: 2px;
+  border-radius: 9999px;
+  background: var(--color-provenance);
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.risk-instrument__factor {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  z-index: 1;
+  padding-block: 0.35rem;
+}
+
+.risk-instrument__gutter {
+  position: relative;
+  width: 1.75rem;
+  flex-shrink: 0;
+}
+
+.risk-instrument__tick {
+  position: absolute;
+  inset-inline-start: calc(0.6875rem + 1px);
+  top: 1.1rem;
+  width: 0.55rem;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--color-provenance);
+  pointer-events: none;
+}
+
+.risk-instrument__anchor {
+  position: absolute;
+  inset-inline-start: calc(0.6875rem + 1px);
+  top: 1.1rem;
+  width: 0;
+  height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.risk-instrument__head {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--color-provenance);
+  border: 2px solid var(--color-surface-container-lowest);
+  box-shadow: 0 0 0 1px var(--color-provenance);
+  box-sizing: border-box;
+}
+
+.risk-instrument__factor-body {
+  flex: 1;
+  min-width: 0;
+  padding: 0.35rem 0.5rem 0.5rem;
+  border-radius: 0.5rem;
+  background: var(--color-surface-container-lowest);
+  border: 1px solid
+    color-mix(in srgb, var(--color-outline-variant) 80%, transparent);
+}
+
+.risk-instrument__factor-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-on-surface);
+}
+
+.risk-instrument__bar-track {
+  width: 100%;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--color-surface-container-high);
+  overflow: hidden;
+}
+
+.risk-instrument__bar-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  transform: scaleX(0);
+  transform-origin: inline-start center;
+  transition: transform 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .risk-instrument__bar-fill {
+    transition: none;
+  }
+}
+
+/* Second provenance well — AI narrative / RAG (distinct from factor instrument) */
+.risk-provenance-well {
+  border-radius: 0.75rem;
+  border: 1px solid
+    color-mix(in srgb, var(--color-provenance) 22%, var(--color-outline-variant));
+  background: color-mix(
+    in srgb,
+    var(--color-provenance-container) 55%,
+    var(--color-surface-container-lowest)
+  );
+  padding: 1.25rem 1.25rem 1.25rem 1rem;
+  position: relative;
+}
+
+.risk-provenance-well__spine {
+  position: absolute;
+  inset-inline-start: 0.75rem;
+  top: 1.25rem;
+  bottom: 1.25rem;
+  width: 2px;
+  border-radius: 9999px;
+  background: var(--color-provenance);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.risk-provenance-well__body {
+  padding-inline-start: 1.25rem;
+}
+
+.risk-provenance-well__title {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-on-provenance-container);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.risk-provenance-well__text {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--color-on-surface-variant);
+  white-space: pre-wrap;
+}
+
+.risk-provenance-well__sources {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.risk-provenance-well__source {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.5rem;
+  background: var(--color-surface-container-lowest);
+  border: 1px solid
+    color-mix(in srgb, var(--color-outline-variant) 70%, transparent);
+  font-size: 0.875rem;
+  color: var(--color-on-surface-variant);
+}
+
+.risk-provenance-well__source-icon {
+  color: var(--color-provenance);
+  flex-shrink: 0;
+}

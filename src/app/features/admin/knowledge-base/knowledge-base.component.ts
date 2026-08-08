@@ -1,50 +1,114 @@
-import { Component, inject } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
-import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
-import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
-import { UiPreviewBannerComponent } from '../../../shared/ui/preview-banner/preview-banner.component';
-import { MobileNavService } from '../../../core/services/mobile-nav.service';
+import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
+import { AdminService } from '../../../core/services/admin/admin.service';
+import { ToastService } from '../../../core/services/toast.service';
+import { TranslateService } from '../../../core/services/translate.service';
+
+interface KbDoc {
+  documentId?: string;
+  title: string;
+  meta: string;
+  category: string;
+  date: string;
+  status: string;
+}
 
 @Component({
   selector: 'app-knowledge-base',
   standalone: true,
   imports: [
     TranslatePipe,
-    UiLanguageToggleComponent,
-    UiThemeToggleComponent,
-    UiPreviewBannerComponent,
+    AppTopBarComponent,
+    FormsModule,
+    DatePipe,
   ],
   templateUrl: './knowledge-base.component.html',
 })
-export class KnowledgeBaseComponent {
-  readonly mobileNav = inject(MobileNavService);
-  readonly categories = [
-    { key: 'quality', icon: 'verified', count: 42 },
-    { key: 'contract', icon: 'contract', count: 18 },
-    { key: 'science', icon: 'science', count: 156 },
-  ] as const;
+export class KnowledgeBaseComponent implements OnInit {
+  private readonly adminService = inject(AdminService);
+  private readonly toast = inject(ToastService);
+  private readonly i18n = inject(TranslateService);
 
-  readonly documents = [
-    {
-      title: 'Wheat Export Quality Specs 2026',
-      meta: 'PDF · 2.4 MB',
-      category: 'quality',
-      date: '12 Oct 2025',
-      status: 'indexed',
-    },
-    {
-      title: 'Standard Distributor Agreement - EMEA',
-      meta: 'DOCX · 1.1 MB',
-      category: 'contract',
-      date: '10 Oct 2025',
-      status: 'indexed',
-    },
-    {
-      title: 'Soil Analysis & Crop Yield Predictions Q3',
-      meta: 'CSV · 14.5 MB',
-      category: 'science',
-      date: '08 Oct 2025',
-      status: 'processing',
-    },
-  ] as const;
+  readonly categories = [
+    { key: 'quality', icon: 'verified', count: 0 },
+    { key: 'contract', icon: 'contract', count: 0 },
+    { key: 'science', icon: 'science', count: 0 },
+  ];
+
+  readonly documents = signal<KbDoc[]>([]);
+  readonly loading = signal(false);
+  readonly uploading = signal(false);
+  selectedFiles: FileList | null = null;
+  uploadCategory = 'quality';
+  uploadTitle = '';
+
+  ngOnInit(): void {
+    this.loadDocuments();
+  }
+
+  loadDocuments(): void {
+    this.loading.set(true);
+    this.adminService
+      .getRagDocuments()
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (docs) => {
+          this.documents.set(
+            docs.map((d) => ({
+              documentId: d.documentId,
+              title: d.title,
+              meta: d.filePath?.split(/[\\/]/).pop() ?? 'file',
+              category: (d.category ?? 'quality').toLowerCase(),
+              date: d.uploadedAt,
+              status: d.status ?? 'indexed',
+            }))
+          );
+          this.refreshCategoryCounts();
+        },
+        error: () => {
+          // keep empty list on error
+        },
+      });
+  }
+
+  onFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.selectedFiles = input.files;
+  }
+
+  upload(): void {
+    const file = this.selectedFiles?.item(0);
+    if (!file) {
+      this.toast.error(this.i18n.instant('admin.knowledgeBase.uploadFormats'));
+      return;
+    }
+
+    this.uploading.set(true);
+    this.adminService
+      .uploadRagDocument(
+        file,
+        this.uploadCategory,
+        this.uploadTitle || file.name
+      )
+      .pipe(finalize(() => this.uploading.set(false)))
+      .subscribe({
+        next: () => {
+          this.toast.success('Document uploaded');
+          this.selectedFiles = null;
+          this.uploadTitle = '';
+          this.loadDocuments();
+        },
+        error: () => this.toast.error('Upload failed'),
+      });
+  }
+
+  private refreshCategoryCounts(): void {
+    for (const cat of this.categories) {
+      cat.count = this.documents().filter((d) => d.category === cat.key).length;
+    }
+  }
 }

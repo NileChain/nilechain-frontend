@@ -9,7 +9,7 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
   template: `
     <button
       type="button"
-      class="inline-flex h-10 w-10 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      class="ui-icon-btn inline-flex"
       [attr.aria-label]="
         theme.isDark()
           ? ('common.themeLight' | translate)

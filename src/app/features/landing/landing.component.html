@@ -1,92 +1,420 @@
-﻿<div class="ui-page">
+<div class="ui-page">
   <!-- Navbar -->
-  <nav
-    class="sticky top-0 z-50 bg-surface/95 backdrop-blur border-b border-outline-variant w-full h-16 flex justify-between items-center px-4 md:px-margin-desktop transition-all duration-300"
-    aria-label="Primary"
+  <header
+    class="lp-nav"
+    [class.lp-nav--scrolled]="navScrolled()"
+    [class.lp-nav--open]="mobileOpen()"
   >
-    <a [routerLink]="'/landing'" class="flex items-center gap-2">
-      <img
-        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPEIWYWtZnyIwQbN_iGXmWsV8pwt4C_0C-YEczE-9FPtMT4B0E7BoecK9TwkOO9Zzp5gN1Atmh1x9H9b_ZHzKAiaXQM7UKpJm4kGC95Y5zk6bvAjKZ-p5id-P2joyNy0QZplSbH8QetsSXawxym6RYPZunyTHfyEJwkHxv8IZkAzA8RSytLpZRSE6hGh6SsnSOl4UX2jrXhRUM0ZvFdNRmmThMBeY2DEuc0s6fqVimVB5Miu7XRqwX"
-        [attr.alt]="'app.name' | translate"
-        class="h-10 w-auto"
-      />
-      <span
-        class="font-headline-md text-headline-md font-bold text-primary hidden md:block"
-        >{{ 'app.name' | translate }}</span
-      >
-    </a>
-
-    <div
-      class="hidden md:flex gap-8 items-center font-label-md text-label-md text-on-surface-variant"
-    >
-      <a href="#how-it-works" class="hover:text-primary transition-colors">{{
-        'landing.solutions' | translate
-      }}</a>
-      <a href="#trusted" class="hover:text-primary transition-colors">{{
-        'landing.resources' | translate
-      }}</a>
-    </div>
-
-    <div class="flex items-center gap-1 sm:gap-2">
-      <ui-language-toggle />
-      <ui-theme-toggle />
-      @if (isAuthenticated()) {
-        <div
-          class="flex items-center gap-2 sm:gap-3 ms-2 ps-2 sm:ps-4 border-s border-outline-variant"
+    <nav class="lp-nav__inner" aria-label="Primary" (click)="$event.stopPropagation()">
+      <div class="lp-nav__start">
+        <a
+          [routerLink]="'/landing'"
+          class="lp-brand"
+          [attr.aria-label]="'app.name' | translate"
+          (click)="closeAll()"
         >
-          <div class="text-end hidden sm:block">
-            <p
-              class="font-label-md text-label-md text-on-surface leading-tight"
+          <ui-brand-mark [size]="36" [decorative]="true" />
+          <span class="lp-brand__name" aria-hidden="true">
+            <span class="lp-brand__name-nile">Nile</span><span class="lp-brand__name-chain">Chain</span>
+          </span>
+        </a>
+
+        <div class="lp-nav__links">
+          <div class="lp-dd">
+            <button
+              type="button"
+              class="lp-nav__link"
+              [attr.aria-expanded]="openMenu() === 'solutions'"
+              aria-haspopup="true"
+              (click)="toggleMenu('solutions', $event)"
             >
-              {{ currentUser()?.displayName || currentUser()?.email }}
-            </p>
+              <span class="material-symbols-outlined" aria-hidden="true"
+                >grid_view</span
+              >
+              {{ 'landing.solutions' | translate }}
+              <span
+                class="material-symbols-outlined lp-chev"
+                aria-hidden="true"
+                >expand_more</span
+              >
+            </button>
+            @if (openMenu() === 'solutions') {
+              <div class="lp-dd__panel" role="menu">
+                <a
+                  href="#how-it-works"
+                  class="lp-dd__item"
+                  role="menuitem"
+                  (click)="closeAll()"
+                  >{{ 'landing.howTitle' | translate }}</a
+                >
+                <a
+                  [routerLink]="'/register'"
+                  class="lp-dd__item"
+                  role="menuitem"
+                  (click)="closeAll()"
+                  >{{ 'landing.joinFarm' | translate }}</a
+                >
+                <a
+                  [routerLink]="'/register'"
+                  class="lp-dd__item"
+                  role="menuitem"
+                  (click)="closeAll()"
+                  >{{ 'landing.joinFactory' | translate }}</a
+                >
+              </div>
+            }
           </div>
-          <div
-            class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container text-sm font-bold"
-          >
-            {{
-              (currentUser()?.displayName || currentUser()?.email || '?')
-                .charAt(0)
-                .toUpperCase()
-            }}
+
+          <div class="lp-dd">
+            <button
+              type="button"
+              class="lp-nav__link"
+              [attr.aria-expanded]="openMenu() === 'resources'"
+              aria-haspopup="true"
+              (click)="toggleMenu('resources', $event)"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true"
+                >description</span
+              >
+              {{ 'landing.resources' | translate }}
+              <span
+                class="material-symbols-outlined lp-chev"
+                aria-hidden="true"
+                >expand_more</span
+              >
+            </button>
+            @if (openMenu() === 'resources') {
+              <div class="lp-dd__panel" role="menu">
+                <a
+                  href="#how-it-works"
+                  class="lp-dd__item"
+                  role="menuitem"
+                  (click)="closeAll()"
+                  >{{ 'landing.howTitle' | translate }}</a
+                >
+                <a
+                  href="#footer"
+                  class="lp-dd__item"
+                  role="menuitem"
+                  (click)="closeAll()"
+                  >{{ 'landing.privacy' | translate }}</a
+                >
+                <a
+                  href="#footer"
+                  class="lp-dd__item"
+                  role="menuitem"
+                  (click)="closeAll()"
+                  >{{ 'landing.contact' | translate }}</a
+                >
+              </div>
+            }
           </div>
         </div>
-        <button
-          type="button"
-          (click)="goToDashboard()"
-          class="ui-btn-primary !py-2 !px-4 text-sm"
-        >
-          <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
-            >dashboard</span
+      </div>
+
+      <div class="lp-nav__end">
+        <div class="lp-nav__tools">
+          <div class="lp-dd lp-dd--lang">
+            <button
+              type="button"
+              class="lp-tool-btn lp-tool-btn--lang"
+              [attr.aria-expanded]="openMenu() === 'lang'"
+              aria-haspopup="true"
+              [attr.aria-label]="'common.language' | translate"
+              (click)="toggleMenu('lang', $event)"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true"
+                >language</span
+              >
+              <span class="lp-tool-btn__label">{{ langCode() }}</span>
+              <span
+                class="material-symbols-outlined lp-chev lp-tool-btn__chev"
+                aria-hidden="true"
+                >expand_more</span
+              >
+            </button>
+            @if (openMenu() === 'lang') {
+              <div class="lp-dd__panel lp-dd__panel--end" role="menu">
+                <button
+                  type="button"
+                  class="lp-dd__item"
+                  role="menuitem"
+                  [class.lp-dd__item--active]="locale() === 'en'"
+                  (click)="setLocale('en')"
+                >
+                  {{ 'common.english' | translate }}
+                </button>
+                <button
+                  type="button"
+                  class="lp-dd__item"
+                  role="menuitem"
+                  [class.lp-dd__item--active]="locale() === 'ar'"
+                  (click)="setLocale('ar')"
+                >
+                  {{ 'common.arabic' | translate }}
+                </button>
+              </div>
+            }
+          </div>
+
+          <button
+            type="button"
+            class="lp-tool-btn"
+            (click)="toggleTheme()"
+            [attr.aria-label]="
+              theme.isDark()
+                ? ('common.themeLight' | translate)
+                : ('common.themeDark' | translate)
+            "
+            [attr.title]="
+              theme.isDark()
+                ? ('common.themeLight' | translate)
+                : ('common.themeDark' | translate)
+            "
           >
-          <span class="hidden sm:inline">{{
-            'nav.dashboard' | translate
-          }}</span>
-        </button>
-        <button type="button" (click)="logout()" class="ui-btn-ghost !px-3">
-          <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
-            >logout</span
+            <span class="material-symbols-outlined" aria-hidden="true">
+              {{ theme.isDark() ? 'light_mode' : 'dark_mode' }}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="lp-tool-btn lp-menu-btn"
+            (click)="toggleMobile()"
+            [attr.aria-expanded]="mobileOpen()"
+            [attr.aria-controls]="'landing-mobile-menu'"
+            [attr.aria-label]="'common.toggleMenu' | translate"
           >
-          <span class="hidden sm:inline">{{ 'nav.logout' | translate }}</span>
-        </button>
-      } @else {
-        <button
-          type="button"
-          [routerLink]="'/login'"
-          class="ui-btn-ghost hidden sm:inline-flex"
-        >
-          {{ 'landing.login' | translate }}
-        </button>
-        <button
-          type="button"
-          [routerLink]="'/register'"
-          class="ui-btn-primary !py-2 !px-5"
-        >
-          {{ 'landing.register' | translate }}
-        </button>
-      }
-    </div>
-  </nav>
+            <span class="material-symbols-outlined" aria-hidden="true">{{
+              mobileOpen() ? 'close' : 'menu'
+            }}</span>
+          </button>
+        </div>
+
+        <span class="lp-sep" aria-hidden="true"></span>
+
+        @if (isAuthenticated()) {
+          <div class="lp-nav__auth">
+            <span class="lp-nav__avatar" aria-hidden="true">
+              {{
+                (currentUser()?.displayName || currentUser()?.email || '?')
+                  .charAt(0)
+                  .toUpperCase()
+              }}
+            </span>
+            <button
+              type="button"
+              class="lp-btn lp-btn--text"
+              (click)="goToDashboard()"
+            >
+              {{ 'nav.dashboard' | translate }}
+            </button>
+            <button
+              type="button"
+              class="lp-btn lp-btn--primary"
+              (click)="logout()"
+            >
+              {{ 'nav.logout' | translate }}
+            </button>
+          </div>
+        } @else {
+          <div class="lp-nav__auth">
+            <a [routerLink]="'/login'" class="lp-btn lp-btn--text">{{
+              'landing.login' | translate
+            }}</a>
+            <a [routerLink]="'/register'" class="lp-btn lp-btn--primary">
+              {{ 'landing.register' | translate }}
+              <span
+                class="material-symbols-outlined icon-flip"
+                aria-hidden="true"
+                >arrow_forward</span
+              >
+            </a>
+          </div>
+        }
+      </div>
+    </nav>
+
+    @if (mobileOpen()) {
+      <div
+        id="landing-mobile-menu"
+        class="lp-mobile"
+        role="dialog"
+        aria-modal="true"
+        [attr.aria-label]="'common.toggleMenu' | translate"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="lp-mobile__head">
+          <p class="lp-mobile__title">{{ 'app.name' | translate }}</p>
+          <button
+            type="button"
+            class="lp-tool-btn"
+            (click)="closeAll()"
+            [attr.aria-label]="'common.close' | translate"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >close</span
+            >
+          </button>
+        </div>
+
+        <div class="lp-mobile__links">
+          <button
+            type="button"
+            class="lp-mobile__link"
+            [attr.aria-expanded]="openMenu() === 'solutions'"
+            (click)="toggleMenu('solutions', $event)"
+          >
+            <span class="lp-mobile__link-label">
+              <span class="material-symbols-outlined" aria-hidden="true"
+                >grid_view</span
+              >
+              {{ 'landing.solutions' | translate }}
+            </span>
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >chevron_right</span
+            >
+          </button>
+          @if (openMenu() === 'solutions') {
+            <div class="lp-mobile__sub">
+              <a href="#how-it-works" (click)="closeAll()">{{
+                'landing.howTitle' | translate
+              }}</a>
+              <a [routerLink]="'/register'" (click)="closeAll()">{{
+                'landing.joinFarm' | translate
+              }}</a>
+              <a [routerLink]="'/register'" (click)="closeAll()">{{
+                'landing.joinFactory' | translate
+              }}</a>
+            </div>
+          }
+
+          <button
+            type="button"
+            class="lp-mobile__link"
+            [attr.aria-expanded]="openMenu() === 'resources'"
+            (click)="toggleMenu('resources', $event)"
+          >
+            <span class="lp-mobile__link-label">
+              <span class="material-symbols-outlined" aria-hidden="true"
+                >description</span
+              >
+              {{ 'landing.resources' | translate }}
+            </span>
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >chevron_right</span
+            >
+          </button>
+          @if (openMenu() === 'resources') {
+            <div class="lp-mobile__sub">
+              <a href="#how-it-works" (click)="closeAll()">{{
+                'landing.howTitle' | translate
+              }}</a>
+              <a href="#footer" (click)="closeAll()">{{
+                'landing.privacy' | translate
+              }}</a>
+              <a href="#footer" (click)="closeAll()">{{
+                'landing.contact' | translate
+              }}</a>
+            </div>
+          }
+        </div>
+
+        <div class="lp-mobile__divider"></div>
+
+        <div class="lp-mobile__prefs">
+          <button
+            type="button"
+            class="lp-mobile__link"
+            [attr.aria-expanded]="openMenu() === 'lang'"
+            (click)="toggleMenu('lang', $event)"
+          >
+            <span class="lp-mobile__link-label">
+              <span class="material-symbols-outlined" aria-hidden="true"
+                >language</span
+              >
+              {{
+                locale() === 'ar'
+                  ? ('common.arabic' | translate)
+                  : ('common.english' | translate)
+              }}
+            </span>
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >chevron_right</span
+            >
+          </button>
+          @if (openMenu() === 'lang') {
+            <div class="lp-mobile__sub">
+              <button type="button" (click)="setLocale('en')">
+                {{ 'common.english' | translate }}
+              </button>
+              <button type="button" (click)="setLocale('ar')">
+                {{ 'common.arabic' | translate }}
+              </button>
+            </div>
+          }
+
+          <button type="button" class="lp-mobile__link" (click)="toggleTheme()">
+            <span class="lp-mobile__link-label">
+              <span class="material-symbols-outlined" aria-hidden="true">
+                {{ theme.isDark() ? 'light_mode' : 'dark_mode' }}
+              </span>
+              {{
+                theme.isDark()
+                  ? ('common.themeLight' | translate)
+                  : ('common.themeDark' | translate)
+              }}
+            </span>
+          </button>
+        </div>
+
+        <div class="lp-mobile__divider"></div>
+
+        @if (isAuthenticated()) {
+          <div class="lp-mobile__auth">
+            <p class="lp-mobile__user">
+              {{ currentUser()?.displayName || currentUser()?.email }}
+            </p>
+            <button
+              type="button"
+              class="lp-btn lp-btn--primary lp-btn--block"
+              (click)="goToDashboard(); closeAll()"
+            >
+              {{ 'nav.dashboard' | translate }}
+            </button>
+            <button
+              type="button"
+              class="lp-btn lp-btn--ghost lp-btn--block"
+              (click)="logout()"
+            >
+              {{ 'nav.logout' | translate }}
+            </button>
+          </div>
+        } @else {
+          <div class="lp-mobile__auth">
+            <a
+              [routerLink]="'/login'"
+              class="lp-btn lp-btn--text lp-btn--block"
+              (click)="closeAll()"
+              >{{ 'landing.login' | translate }}</a
+            >
+            <a
+              [routerLink]="'/register'"
+              class="lp-btn lp-btn--primary lp-btn--block"
+              (click)="closeAll()"
+            >
+              {{ 'landing.register' | translate }}
+              <span
+                class="material-symbols-outlined icon-flip"
+                aria-hidden="true"
+                >arrow_forward</span
+              >
+            </a>
+          </div>
+        }
+      </div>
+    }
+  </header>
 
   <!-- Hero -->
   <header
@@ -116,7 +444,7 @@
         <span
           class="material-symbols-outlined text-[18px] text-on-secondary-container"
           aria-hidden="true"
-          >verified</span
+          >eco</span
         >
         <span
           class="text-label-sm font-label-sm text-on-secondary-container tracking-wider"
@@ -164,7 +492,7 @@
 
     <div class="mt-16 w-full max-w-5xl px-4 hidden md:block" aria-hidden="true">
       <div
-        class="glass-card rounded-xl p-6 shadow-md flex items-center justify-between gap-8 translate-y-12 transition-transform duration-700 hover:translate-y-8"
+        class="ui-card rounded-xl p-6 shadow-md flex items-center justify-between gap-8 translate-y-12 transition-transform duration-700 hover:translate-y-8"
       >
         <div class="flex-1 space-y-3">
           <div class="h-2 w-24 bg-primary/20 rounded-full"></div>
@@ -191,44 +519,59 @@
     </div>
   </header>
 
-  <!-- Stats -->
+  <!-- Product value (no unverified metrics) -->
   <section
     class="bg-surface-container-lowest py-10 px-4 md:px-margin-desktop border-y border-outline-variant"
-    aria-label="Platform statistics"
+    [attr.aria-label]="'landing.valueSectionAria' | translate"
   >
     <div
-      class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-center text-center"
+      class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-start text-center"
     >
-      <div class="flex flex-col items-center animate-slide-up">
-        <h2 class="font-headline-lg text-headline-lg text-primary">500+</h2>
-        <p
-          class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest"
+      <div class="flex flex-col items-center gap-3 animate-slide-up px-2">
+        <span
+          class="material-symbols-outlined text-primary text-4xl"
+          aria-hidden="true"
+          >agriculture</span
         >
-          {{ 'landing.statsFarmsLabel' | translate }}
+        <p class="font-title-md text-title-md text-on-surface">
+          {{ 'landing.valueFarmsTitle' | translate }}
+        </p>
+        <p class="font-body-md text-body-md text-on-surface-variant max-w-xs">
+          {{ 'landing.valueFarmsBody' | translate }}
         </p>
       </div>
       <div
-        class="hidden md:block stat-divider mx-auto"
+        class="hidden md:block stat-divider mx-auto self-center"
         aria-hidden="true"
       ></div>
-      <div class="flex flex-col items-center animate-slide-up">
-        <h2 class="font-headline-lg text-headline-lg text-primary">120+</h2>
-        <p
-          class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest"
+      <div class="flex flex-col items-center gap-3 animate-slide-up px-2">
+        <span
+          class="material-symbols-outlined text-primary text-4xl"
+          aria-hidden="true"
+          >hub</span
         >
-          {{ 'landing.statsFactoriesLabel' | translate }}
+        <p class="font-title-md text-title-md text-on-surface">
+          {{ 'landing.valueMatchTitle' | translate }}
+        </p>
+        <p class="font-body-md text-body-md text-on-surface-variant max-w-xs">
+          {{ 'landing.valueMatchBody' | translate }}
         </p>
       </div>
       <div
-        class="hidden md:block stat-divider mx-auto"
+        class="hidden md:block stat-divider mx-auto self-center"
         aria-hidden="true"
       ></div>
-      <div class="flex flex-col items-center animate-slide-up">
-        <h2 class="font-headline-lg text-headline-lg text-primary">2,000+</h2>
-        <p
-          class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest"
+      <div class="flex flex-col items-center gap-3 animate-slide-up px-2">
+        <span
+          class="material-symbols-outlined text-primary text-4xl"
+          aria-hidden="true"
+          >description</span
         >
-          {{ 'landing.statsContractsLabel' | translate }}
+        <p class="font-title-md text-title-md text-on-surface">
+          {{ 'landing.valueContractsTitle' | translate }}
+        </p>
+        <p class="font-body-md text-body-md text-on-surface-variant max-w-xs">
+          {{ 'landing.valueContractsBody' | translate }}
         </p>
       </div>
     </div>
@@ -318,62 +661,18 @@
     </div>
   </section>
 
-  <!-- Trusted by -->
-  <section id="trusted" class="py-16 bg-surface-container-low overflow-hidden">
-    <div class="max-w-6xl mx-auto px-4">
-      <p
-        class="text-center font-label-md text-label-md text-outline uppercase tracking-[0.2em] mb-10"
-      >
-        {{ 'landing.trustedBy' | translate }}
-      </p>
-      <div
-        class="flex flex-wrap justify-center items-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all"
-        aria-hidden="true"
-      >
-        <div
-          class="h-12 w-32 bg-outline-variant rounded flex items-center justify-center text-on-surface-variant font-bold"
-        >
-          AGRO-CORP
-        </div>
-        <div
-          class="h-12 w-32 bg-outline-variant rounded flex items-center justify-center text-on-surface-variant font-bold"
-        >
-          EGYPT-FOODS
-        </div>
-        <div
-          class="h-12 w-32 bg-outline-variant rounded flex items-center justify-center text-on-surface-variant font-bold"
-        >
-          NILE-CAN
-        </div>
-        <div
-          class="h-12 w-32 bg-outline-variant rounded flex items-center justify-center text-on-surface-variant font-bold"
-        >
-          DELTA-MILLS
-        </div>
-        <div
-          class="h-12 w-32 bg-outline-variant rounded flex items-center justify-center text-on-surface-variant font-bold"
-        >
-          GLOBAL-SEED
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- Footer -->
   <footer
+    id="footer"
     class="bg-surface-container-highest py-16 px-4 md:px-margin-desktop border-t border-outline-variant"
   >
     <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
       <div>
         <div class="flex items-center gap-2 mb-4">
-          <img
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPEIWYWtZnyIwQbN_iGXmWsV8pwt4C_0C-YEczE-9FPtMT4B0E7BoecK9TwkOO9Zzp5gN1Atmh1x9H9b_ZHzKAiaXQM7UKpJm4kGC95Y5zk6bvAjKZ-p5id-P2joyNy0QZplSbH8QetsSXawxym6RYPZunyTHfyEJwkHxv8IZkAzA8RSytLpZRSE6hGh6SsnSOl4UX2jrXhRUM0ZvFdNRmmThMBeY2DEuc0s6fqVimVB5Miu7XRqwX"
-            [attr.alt]="'app.name' | translate"
-            class="h-8"
-          />
-          <span class="font-bold text-primary text-headline-sm">{{
-            'app.name' | translate
-          }}</span>
+          <ui-brand-mark [size]="40" [decorative]="true" />
+          <span class="lp-brand__name">
+            <span class="lp-brand__name-nile">Nile</span><span class="lp-brand__name-chain">Chain</span>
+          </span>
         </div>
         <p class="font-body-md text-body-md text-on-surface-variant">
           {{ 'landing.footerTagline' | translate }}

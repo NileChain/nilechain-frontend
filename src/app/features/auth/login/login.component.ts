@@ -6,6 +6,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { UiBrandMarkComponent } from '../../../shared/ui/brand-mark/brand-mark.component';
 
 @Component({
   selector: 'app-login',
@@ -14,6 +15,7 @@ import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-to
     TranslatePipe,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
+    UiBrandMarkComponent,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',

@@ -11,6 +11,22 @@ import {
   UpdateUserRequest,
 } from '../../models/admin/admin-user.model';
 
+export interface RagUploadResult {
+  documentId: string;
+  title: string;
+  category: string | null;
+  indexedInChroma: boolean;
+}
+
+export interface RagDocumentDto {
+  documentId: string;
+  title: string;
+  category: string | null;
+  filePath: string;
+  uploadedAt: string;
+  status: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -44,6 +60,26 @@ export class AdminService {
 
   updateUser(id: string, payload: UpdateUserRequest): Observable<AdminUser> {
     return this.http.put<AdminUser>(`${this.api}/users/${id}`, payload);
+  }
+
+  uploadRagDocument(
+    file: File,
+    category?: string,
+    title?: string
+  ): Observable<RagUploadResult> {
+    const form = new FormData();
+    form.append('file', file);
+    if (category) {
+      form.append('category', category);
+    }
+    if (title) {
+      form.append('title', title);
+    }
+    return this.http.post<RagUploadResult>(`${this.api}/rag/upload`, form);
+  }
+
+  getRagDocuments(): Observable<RagDocumentDto[]> {
+    return this.http.get<RagDocumentDto[]>(`${this.api}/rag/documents`);
   }
 
   verifyUser(id: string): Observable<void> {

@@ -1,78 +1,113 @@
-import { Component, inject } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
-import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
-import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
-import { UiPreviewBannerComponent } from '../../../shared/ui/preview-banner/preview-banner.component';
-import { MobileNavService } from '../../../core/services/mobile-nav.service';
+import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
+import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
+import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
+import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
+import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
+import { AuthService } from '../../../core/services/auth.service';
+import {
+  FactoryConversation,
+  FactoryMessage,
+  FactoryService,
+} from '../../../core/services/factory/factory.service';
 
 @Component({
   selector: 'app-factory-messages',
   standalone: true,
   imports: [
     TranslatePipe,
-    UiLanguageToggleComponent,
-    UiThemeToggleComponent,
-    UiPreviewBannerComponent,
+    UiLoaderComponent,
+    UiErrorStateComponent,
+    UiEmptyStateComponent,
+    UiSkeletonComponent,
+    AppTopBarComponent,
+    FormsModule,
+    DatePipe,
   ],
   templateUrl: './factory-messages.component.html',
 })
-export class FactoryMessagesComponent {
-  readonly mobileNav = inject(MobileNavService);
-  readonly conversations = [
-    {
-      id: 'c1',
-      name: 'Modern Valley Farms',
-      initial: 'M',
-      previewKey: 'messages.preview1',
-      timeKey: 'messages.now',
-      active: true,
-      online: true,
-      avatarUrl: null as string | null,
-    },
-    {
-      id: 'c2',
-      name: 'Nile Export Co.',
-      initial: null,
-      previewKey: 'messages.preview2',
-      timeKey: 'messages.timeMorning',
-      active: false,
-      online: false,
-      avatarUrl:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuAM5dU2rz0_IKwFiHkSl0ynP5A0BXQUehASz-Go580-eL7FXwwrIb62pwo7a9UXJTI5Q3IpVVFuibaQelPe4gCRZdq8M34RrER57stigAkyK8jiYHKQSGwmB-Nv56_SRnaQC9lbcAo_PRRER1w2g-9804klXd1HgorDjNfghX_rQ2mBEQ75FI3WxSLUSRsuWmznaShIJDOlUq7VIIeVyOF-CpGBykRhjt8tBEeBJxa6wwORJ1Y97LC4oUWx4MTzXoC616RypaDaEfw',
-    },
-    {
-      id: 'c3',
-      name: 'Delta Silos',
-      initial: 'D',
-      previewKey: 'messages.preview3',
-      timeKey: 'messages.yesterday',
-      active: false,
-      online: false,
-      avatarUrl: null as string | null,
-    },
-  ] as const;
+export class FactoryMessagesComponent implements OnInit {
+  private readonly authService = inject(AuthService);
+  private readonly factoryService = inject(FactoryService);
+  readonly currentUser = this.authService.currentUser;
 
-  readonly chatMessages = [
-    {
-      id: 'm1',
-      kind: 'incoming' as const,
-      bodyKey: 'messages.msg1',
-      time: '09:45',
-      attachment: false,
-    },
-    {
-      id: 'm2',
-      kind: 'incoming' as const,
-      bodyKey: 'messages.msg2',
-      time: '09:47',
-      attachment: true,
-    },
-    {
-      id: 'm3',
-      kind: 'outgoing' as const,
-      bodyKey: 'messages.msg3',
-      time: '09:55',
-      attachment: false,
-    },
-  ] as const;
+  readonly loading = signal(true);
+  readonly messagesLoading = signal(false);
+  readonly sending = signal(false);
+  readonly error = signal<string | null>(null);
+  readonly threadError = signal<string | null>(null);
+  readonly conversations = signal<FactoryConversation[]>([]);
+  readonly messages = signal<FactoryMessage[]>([]);
+  readonly selectedMatchId = signal<string | null>(null);
+
+  draft = '';
+
+  ngOnInit(): void {
+    this.loadConversations();
+  }
+
+  loadConversations(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.factoryService
+      .getConversations()
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (items) => {
+          this.conversations.set(items);
+          if (items.length > 0 && !this.selectedMatchId()) {
+            this.selectConversation(items[0].matchId);
+          }
+        },
+        error: () => this.error.set('Failed to load conversations.'),
+      });
+  }
+
+  selectConversation(matchId: string): void {
+    this.selectedMatchId.set(matchId);
+    this.messagesLoading.set(true);
+    this.threadError.set(null);
+    this.factoryService
+      .getMessages(matchId)
+      .pipe(finalize(() => this.messagesLoading.set(false)))
+      .subscribe({
+        next: (items) => this.messages.set(items),
+        error: () => this.threadError.set('Failed to load messages.'),
+      });
+  }
+
+  selectedConversation(): FactoryConversation | undefined {
+    const id = this.selectedMatchId();
+    return this.conversations().find((c) => c.matchId === id);
+  }
+
+  isOutgoing(message: FactoryMessage): boolean {
+    return message.senderId === this.currentUser()?.id;
+  }
+
+  send(): void {
+    const matchId = this.selectedMatchId();
+    const content = this.draft.trim();
+    if (!matchId || !content) {
+      return;
+    }
+
+    this.sending.set(true);
+    this.threadError.set(null);
+    this.factoryService
+      .sendMessage(matchId, content)
+      .pipe(finalize(() => this.sending.set(false)))
+      .subscribe({
+        next: () => {
+          this.draft = '';
+          this.selectConversation(matchId);
+          this.loadConversations();
+        },
+        error: () => this.threadError.set('Failed to send message.'),
+      });
+  }
 }

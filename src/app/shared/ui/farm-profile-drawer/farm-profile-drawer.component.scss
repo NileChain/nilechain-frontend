@@ -1,0 +1,153 @@
+.farm-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+}
+
+.farm-drawer__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: rgb(0 0 0 / 0.4);
+  cursor: pointer;
+}
+
+.farm-drawer__panel {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: min(100%, 28rem);
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border-inline-start: 1px solid var(--color-outline-variant);
+  box-shadow: var(--shadow-md);
+}
+
+.farm-drawer__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid var(--color-outline-variant);
+  background: var(--color-surface-container-lowest);
+  flex-shrink: 0;
+}
+
+.farm-drawer__eyebrow {
+  margin: 0 0 0.2rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-on-surface-variant);
+}
+
+.farm-drawer__title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-on-surface);
+  line-height: 1.3;
+}
+
+.farm-drawer__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 1.1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.farm-drawer__section-label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-on-surface-variant);
+}
+
+.farm-drawer__map {
+  height: 11rem;
+  width: 100%;
+  background: var(--color-surface-container-low);
+}
+
+/* Provenance well for AI-computed blocks (risk / rationale) — teal spine only */
+.farm-drawer__risk,
+.farm-drawer__ai {
+  position: relative;
+  border-radius: 0.75rem;
+  border: 1px solid
+    color-mix(in srgb, var(--color-provenance) 22%, var(--color-outline-variant));
+  background: color-mix(
+    in srgb,
+    var(--color-provenance-container) 45%,
+    var(--color-surface-container-lowest)
+  );
+  padding: 0.9rem 0.9rem 0.9rem 0.75rem;
+}
+
+.farm-drawer__risk-spine {
+  position: absolute;
+  inset-inline-start: 0.65rem;
+  top: 0.85rem;
+  bottom: 0.85rem;
+  width: 2px;
+  border-radius: 9999px;
+  background: var(--color-provenance);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.farm-drawer__risk-body {
+  padding-inline-start: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.farm-drawer__risk .farm-drawer__section-label,
+.farm-drawer__ai .farm-drawer__section-label {
+  color: var(--color-on-provenance-container);
+}
+
+@keyframes farm-drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes farm-drawer-in-rtl {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-end {
+  animation: farm-drawer-in 220ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+[dir='rtl'] .animate-slide-in-end {
+  animation-name: farm-drawer-in-rtl;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-in-end {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,230 @@
+@if (open) {
+  <div class="farm-drawer" role="dialog" aria-modal="true" [attr.aria-label]="'factory.matches.viewFarmProfile' | translate">
+    <button
+      type="button"
+      class="farm-drawer__backdrop"
+      (click)="close()"
+      [attr.aria-label]="'common.close' | translate"
+    ></button>
+
+    <aside #drawerPanel class="farm-drawer__panel animate-slide-in-end">
+      <header class="farm-drawer__header">
+        <div class="min-w-0">
+          <p class="farm-drawer__eyebrow">
+            {{ 'factory.matches.farmProfile' | translate }}
+          </p>
+          @if (profile(); as p) {
+            <h2 class="farm-drawer__title">
+              <span class="truncate">{{ p.name }}</span>
+              @if (p.isVerified) {
+                <span
+                  class="material-symbols-outlined text-primary text-[22px] fill shrink-0"
+                  [attr.title]="'common.verified' | translate"
+                  aria-hidden="true"
+                  >verified</span
+                >
+              }
+            </h2>
+          } @else {
+            <h2 class="farm-drawer__title">
+              {{ 'factory.matches.farmProfile' | translate }}
+            </h2>
+          }
+        </div>
+        <button
+          #drawerClose
+          type="button"
+          class="ui-icon-btn"
+          (click)="close()"
+          [attr.aria-label]="'common.close' | translate"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </header>
+
+      <div class="farm-drawer__body">
+        @if (loading()) {
+          <div class="space-y-4" role="status" [attr.aria-busy]="true">
+            <ui-skeleton height="2rem" width="60%" />
+            <ui-skeleton height="2.5rem" width="40%" />
+            <ui-skeleton height="10rem" width="100%" />
+            <ui-skeleton height="1.25rem" width="50%" />
+            <div class="flex flex-wrap gap-2">
+              <ui-skeleton height="1.75rem" width="5rem" />
+              <ui-skeleton height="1.75rem" width="5rem" />
+              <ui-skeleton height="1.75rem" width="5rem" />
+            </div>
+            <ui-skeleton height="6rem" width="100%" />
+          </div>
+        } @else if (error()) {
+          <ui-error-state
+            [message]="error()"
+            (retry)="retry()"
+          />
+        } @else if (profile(); as p) {
+          <!-- Risk instrument (AI-computed → thin provenance spine) -->
+          <section class="farm-drawer__risk" aria-labelledby="farm-risk-heading">
+            <div class="farm-drawer__risk-spine" aria-hidden="true"></div>
+            <div class="farm-drawer__risk-body">
+              <h3 id="farm-risk-heading" class="farm-drawer__section-label">
+                {{ 'factory.matches.riskScoreLabel' | translate }}
+              </h3>
+              <div class="flex flex-wrap items-center gap-3">
+                <ui-risk-score-badge [score]="p.riskScore" />
+                @if (p.riskLevel) {
+                  <span class="text-sm text-on-surface-variant">{{
+                    p.riskLevel
+                  }}</span>
+                }
+              </div>
+            </div>
+          </section>
+
+          <!-- Map -->
+          <section class="ui-card overflow-hidden">
+            <div
+              #drawerMapHost
+              class="farm-drawer__map"
+              role="img"
+              [attr.aria-label]="'factory.matches.mapPlaceholder' | translate"
+            ></div>
+            <div class="px-3 py-2 text-sm text-on-surface-variant border-t border-outline-variant">
+              <span class="material-symbols-outlined text-[16px] align-middle me-1" aria-hidden="true"
+                >location_on</span
+              >
+              {{ p.governorate || p.location || ('factory.matches.location' | translate) }}
+            </div>
+          </section>
+
+          <!-- Size + owner -->
+          <dl class="grid grid-cols-2 gap-3">
+            <div class="ui-card p-3">
+              <dt class="text-xs text-on-surface-variant uppercase tracking-wide">
+                {{ 'factory.matches.sizeFeddans' | translate }}
+              </dt>
+              <dd class="ui-data-sm mt-1">
+                {{
+                  p.sizeInFeddans != null
+                    ? (p.sizeInFeddans | number: '1.0-1')
+                    : '—'
+                }}
+              </dd>
+            </div>
+            <div class="ui-card p-3">
+              <dt class="text-xs text-on-surface-variant uppercase tracking-wide">
+                {{ 'factory.matches.owner' | translate }}
+              </dt>
+              <dd class="font-semibold text-on-surface mt-1 truncate">
+                {{ p.ownerDisplayName }}
+              </dd>
+            </div>
+          </dl>
+
+          <!-- Crops -->
+          <section>
+            <h3 class="farm-drawer__section-label mb-2">
+              {{ 'factory.matches.crops' | translate }}
+            </h3>
+            @if (p.cropTypes.length) {
+              <div class="flex flex-wrap gap-2">
+                @for (crop of p.cropTypes; track crop) {
+                  <span
+                    class="inline-flex items-center rounded-lg bg-primary-container text-on-primary-container px-2.5 py-1 text-sm font-medium"
+                    >{{ crop }}</span
+                  >
+                }
+              </div>
+            } @else {
+              <p class="text-sm text-on-surface-variant">
+                {{ 'factory.matches.noCrops' | translate }}
+              </p>
+            }
+          </section>
+
+          <!-- Documents metadata -->
+          <section>
+            <h3 class="farm-drawer__section-label mb-2">
+              {{ 'factory.matches.documents' | translate }}
+            </h3>
+            @if (p.documents.length) {
+              <ul class="space-y-2">
+                @for (doc of p.documents; track doc.documentId) {
+                  <li
+                    class="flex items-center gap-3 rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2"
+                  >
+                    <span
+                      class="material-symbols-outlined text-on-surface-variant"
+                      aria-hidden="true"
+                      >{{ documentIcon(doc.fileType) }}</span
+                    >
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm font-medium text-on-surface truncate">
+                        {{ doc.fileName }}
+                      </p>
+                      <p class="text-xs text-on-surface-variant">
+                        {{ doc.fileType || '—' }} ·
+                        {{ doc.uploadedAt | date: 'mediumDate' }}
+                      </p>
+                    </div>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <ui-empty-state
+                icon="folder_off"
+                titleKey="factory.matches.noDocuments"
+                bodyKey="factory.matches.noDocumentsBody"
+              />
+            }
+          </section>
+
+          <!-- Ratings -->
+          <section class="ui-card p-4">
+            <h3 class="farm-drawer__section-label mb-2">
+              {{ 'factory.matches.rating' | translate }}
+            </h3>
+            @if (p.rating.ratingCount > 0) {
+              <div class="flex items-baseline gap-2">
+                <span class="ui-data">{{
+                  p.rating.averageRating | number: '1.1-1'
+                }}</span>
+                <span class="text-on-surface-variant text-sm">
+                  / 5 ·
+                  {{
+                    'factory.matches.reviewCount'
+                      | translate: { count: p.rating.ratingCount }
+                  }}
+                </span>
+              </div>
+            } @else {
+              <p class="text-sm text-on-surface-variant">
+                {{ 'factory.matches.noReviews' | translate }}
+              </p>
+            }
+          </section>
+
+          <!-- AI match rationale -->
+          @if (matchRationale) {
+            <section class="farm-drawer__ai" aria-labelledby="match-why-heading">
+              <div class="farm-drawer__risk-spine" aria-hidden="true"></div>
+              <div class="farm-drawer__risk-body">
+                <h3
+                  id="match-why-heading"
+                  class="farm-drawer__section-label flex items-center gap-2"
+                >
+                  <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+                    >psychology</span
+                  >
+                  {{ 'factory.matches.whyMatched' | translate }}
+                </h3>
+                <p class="text-sm text-on-surface-variant whitespace-pre-wrap leading-relaxed">
+                  {{ matchRationale }}
+                </p>
+              </div>
+            </section>
+          }
+        }
+      </div>
+    </aside>
+  </div>
+}

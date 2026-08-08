@@ -100,6 +100,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'contracts/:contractId',
+        loadComponent: () =>
+          import(
+            './features/farm/farm-contract-details/farm-contract-details.component'
+          ).then((m) => m.FarmContractDetailsComponent),
+      },
+      {
         path: 'messages',
         loadComponent: () =>
           import('./features/farm/farm-messages/farm-messages.component').then(

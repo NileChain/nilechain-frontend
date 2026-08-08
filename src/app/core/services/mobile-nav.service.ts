@@ -19,5 +19,6 @@ export class MobileNavService {
   private setOpen(next: boolean): void {
     this.open.set(next);
     document.body.classList.toggle('overflow-hidden', next);
+    document.documentElement.classList.toggle('overflow-hidden', next);
   }
 }

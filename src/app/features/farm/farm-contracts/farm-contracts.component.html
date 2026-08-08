@@ -1,46 +1,9 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
-  <header
-    class="h-16 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
-  >
-    <div class="flex items-center gap-4">
-      <button
-        type="button"
-        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
-        (click)="mobileNav.toggleMenu()"
-        [attr.aria-label]="'common.toggleMenu' | translate"
-      >
-        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-      </button>
-      <h1 class="font-headline-md text-headline-md font-bold text-primary">
-        {{ 'farm.contracts.title' | translate }}
-      </h1>
-    </div>
-    <div class="flex items-center gap-2 sm:gap-4">
-      <ui-language-toggle />
-      <ui-theme-toggle />
-      <div
-        class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant"
-      >
-        <div class="text-end hidden sm:block">
-          <p class="font-label-md text-label-md text-on-surface leading-tight">
-            {{ currentUser()?.displayName || currentUser()?.email }}
-          </p>
-          <p class="text-label-sm text-label-sm text-on-surface-variant">
-            {{ 'nav.premiumFarmer' | translate }}
-          </p>
-        </div>
-        <div
-          class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary"
-        >
-          <span class="font-bold">{{
-            (currentUser()?.displayName || currentUser()?.email || '?')
-              .charAt(0)
-              .toUpperCase()
-          }}</span>
-        </div>
-      </div>
-    </div>
-  </header>
+  <app-top-bar
+    titleKey="farm.contracts.title"
+    portal="farm"
+    notificationsLink="/farm/notifications"
+  />
 
   <div
     class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
@@ -49,9 +12,6 @@
       class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4"
     >
       <div>
-        <h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">
-          {{ 'farm.contracts.title' | translate }}
-        </h2>
         <p class="font-body-lg text-body-lg text-on-surface-variant">
           {{ 'farm.contracts.subtitle' | translate }}
         </p>
@@ -88,9 +48,7 @@
           } @else {
             <table class="w-full min-w-[760px] text-start">
               <caption class="sr-only">
-                {{
-                  'farm.contracts.title' | translate
-                }}
+                {{ 'farm.contracts.title' | translate }}
               </caption>
               <thead
                 class="bg-surface-container-low border-b border-outline-variant"
@@ -135,7 +93,10 @@
               </thead>
               <tbody class="divide-y divide-outline-variant">
                 @for (row of contracts(); track row.contractId) {
-                  <tr class="hover:bg-surface-container-low transition-colors">
+                  <tr
+                    class="hover:bg-surface-container-low transition-colors cursor-pointer"
+                    (click)="openContract(row)"
+                  >
                     <td
                       class="px-6 py-4 font-body-md text-body-md text-on-surface font-medium"
                     >
@@ -172,19 +133,24 @@
                         >
                           {{ row.status }}
                         </span>
-                      } @else {
+                      } @else if (isPending(row.status)) {
                         <span
                           class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-orange/15 text-warning-orange border border-warning-orange/30"
                         >
                           {{ row.status }}
                         </span>
+                      } @else {
+                        <span
+                          class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-container-high text-on-surface-variant border border-outline-variant"
+                        >
+                          {{ row.status }}
+                        </span>
                       }
                     </td>
-                    <td class="px-6 py-4">
-                      <button
-                        type="button"
-                        class="text-primary hover:opacity-80 font-label-lg text-label-lg font-bold flex items-center gap-1"
-                        (click)="selectContract(row)"
+                    <td class="px-6 py-4" (click)="$event.stopPropagation()">
+                      <a
+                        class="text-primary hover:opacity-80 font-label-lg text-label-lg font-bold inline-flex items-center gap-1"
+                        [routerLink]="['/farm/contracts', row.contractId]"
                       >
                         {{ 'farm.contracts.viewContract' | translate }}
                         <span
@@ -192,7 +158,7 @@
                           aria-hidden="true"
                           >visibility</span
                         >
-                      </button>
+                      </a>
                     </td>
                   </tr>
                 }
@@ -204,79 +170,11 @@
           class="px-6 py-4 border-t border-outline-variant flex flex-col sm:flex-row items-center justify-between gap-3"
         >
           <span class="font-body-md text-body-md text-on-surface-variant">
-            {{ contracts().length }} contract(s)
+            {{ contracts().length }}
+            {{ 'farm.contracts.countLabel' | translate }}
           </span>
         </div>
       </section>
-
-      @if (selected(); as contract) {
-        <section
-          class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant overflow-hidden"
-          [attr.aria-label]="'farm.contracts.signTitle' | translate"
-        >
-          <div
-            class="px-6 py-4 border-b border-outline-variant flex justify-between items-center gap-4 bg-surface"
-          >
-            <div>
-              <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
-                {{ 'farm.contracts.previewTitle' | translate }}
-                {{ contract.contractId.slice(0, 8) }}…
-              </h2>
-              <p
-                class="font-label-sm text-label-sm text-on-surface-variant mt-1"
-              >
-                {{ contract.factoryName }}
-              </p>
-            </div>
-          </div>
-
-          <div
-            class="p-6 overflow-y-auto font-body-md text-body-md text-on-surface leading-relaxed bg-surface"
-          >
-            <article
-              class="bg-surface-container-lowest p-6 md:p-8 border border-outline-variant shadow-sm rounded-lg"
-            >
-              <h3
-                class="text-center font-title-lg text-title-lg font-bold mb-6"
-              >
-                {{ 'farm.contracts.docTitle' | translate }}
-              </h3>
-              <ul
-                class="list-disc list-inside mb-6 space-y-2 ps-4 text-on-surface-variant"
-              >
-                <li>
-                  <strong
-                    >{{ 'farm.contracts.partyBuyer' | translate }}:</strong
-                  >
-                  {{ contract.factoryName }}
-                  @if (contract.factoryLocation) {
-                    — {{ contract.factoryLocation }}
-                  }
-                </li>
-                <li>
-                  <strong>Crop:</strong> {{ contract.cropName }} ({{
-                    contract.quantityTons
-                  }}
-                  ton)
-                </li>
-                <li><strong>Status:</strong> {{ contract.status }}</li>
-                @if (contract.deliveryDate) {
-                  <li>
-                    <strong>Delivery:</strong>
-                    {{ contract.deliveryDate | date: 'mediumDate' }}
-                  </li>
-                }
-                @if (contract.signedAt) {
-                  <li>
-                    <strong>Signed:</strong>
-                    {{ contract.signedAt | date: 'medium' }}
-                  </li>
-                }
-              </ul>
-            </article>
-          </div>
-        </section>
-      }
     }
   </div>
 </main>

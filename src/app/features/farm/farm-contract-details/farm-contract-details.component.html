@@ -1,0 +1,208 @@
+<main class="md:ms-[280px] min-h-screen legal-workspace">
+  <app-top-bar
+    titleKey="farm.contracts.detailsTitle"
+    subtitleKey="farm.contracts.detailsSubtitle"
+    portal="farm"
+    notificationsLink="/farm/notifications"
+  >
+    <a
+      [routerLink]="fromMatches() ? '/farm/matches' : '/farm/contracts'"
+      class="ui-btn-ghost !py-2 !px-3"
+    >
+      <span class="material-symbols-outlined text-[18px] icon-flip" aria-hidden="true"
+        >arrow_back</span
+      >
+      {{
+        (fromMatches()
+          ? 'farm.matches.title'
+          : 'farm.contracts.backToList'
+        ) | translate
+      }}
+    </a>
+
+    @if (contract(); as headerContract) {
+      <span
+        class="lw-status-pill"
+        [attr.data-tone]="statusTone(headerContract.status)"
+      >
+        {{ statusLabelKey(headerContract.status) | translate }}
+      </span>
+      <button
+        type="button"
+        class="ui-icon-btn"
+        (click)="downloadPdf()"
+        [disabled]="acting()"
+        [attr.aria-label]="'contractDoc.downloadPdf' | translate"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">download</span>
+      </button>
+      <button
+        type="button"
+        class="ui-icon-btn hidden sm:inline-flex"
+        (click)="print()"
+        [attr.aria-label]="'contractDoc.print' | translate"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">print</span>
+      </button>
+      <button
+        type="button"
+        class="ui-icon-btn hidden sm:inline-flex"
+        (click)="share()"
+        [attr.aria-label]="'contractDoc.share' | translate"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">share</span>
+      </button>
+    }
+  </app-top-bar>
+
+  <div class="lw-shell">
+    @if (loading()) {
+      <div class="lw-loader ui-card">
+        <ui-loader [label]="'contractDoc.loadingDocument' | translate" />
+      </div>
+    } @else if (error()) {
+      <div class="lw-loader">
+        <ui-error-state [message]="error()" (retry)="load()" />
+      </div>
+    } @else if (contract(); as c) {
+      @if (canDecide()) {
+        <div class="lw-progress print:hidden">
+          <app-contract-reading-progress [percent]="readPercent()" />
+        </div>
+      }
+
+      <!-- Compact overview -->
+      <section class="lw-overview" aria-labelledby="lw-overview-title">
+        <header class="lw-overview__head">
+          <div class="min-w-0">
+            <p class="lw-overview__eyebrow">
+              {{ 'contractDoc.aiSummary' | translate }}
+            </p>
+            <h2 id="lw-overview-title" class="lw-overview__title">
+              {{ c.factoryName }}
+              <span class="lw-overview__sep" aria-hidden="true">·</span>
+              {{ c.farmName }}
+            </h2>
+            <p class="lw-overview__meta">
+              {{ 'contractDoc.contractNumber' | translate }}
+              <span class="ui-data-sm">{{ shortId(c.contractId) }}</span>
+              <span class="lw-overview__sep" aria-hidden="true">·</span>
+              <span
+                class="lw-status-pill lw-status-pill--sm"
+                [attr.data-tone]="statusTone(c.status)"
+              >
+                {{ statusLabelKey(c.status) | translate }}
+              </span>
+            </p>
+          </div>
+          <div class="lw-overview__scores">
+            <div class="lw-metric">
+              <span class="material-symbols-outlined" aria-hidden="true"
+                >auto_awesome</span
+              >
+              <div>
+                <p class="lw-metric__label">
+                  {{ 'farm.matches.aiScore' | translate }}
+                </p>
+                <p class="lw-metric__value ui-data-sm">
+                  {{
+                    c.matchScore != null
+                      ? (c.matchScore | number: '1.0-0') + '%'
+                      : '—'
+                  }}
+                </p>
+              </div>
+            </div>
+            <div class="lw-metric">
+              <span class="material-symbols-outlined" aria-hidden="true"
+                >health_and_safety</span
+              >
+              <div>
+                <p class="lw-metric__label">
+                  {{ 'farm.matches.safetyScore' | translate }}
+                </p>
+                <p class="lw-metric__value ui-data-sm">
+                  {{
+                    c.riskScore != null ? (c.riskScore | number: '1.0-0') : '—'
+                  }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <app-contract-summary [bullets]="summary()" />
+      </section>
+
+      <!-- 3-column workspace -->
+      <div class="lw-workspace">
+        <aside class="lw-toc print:hidden">
+          <app-contract-toc
+            [items]="toc()"
+            [activeId]="activeSectionId()"
+            [collapsible]="true"
+            (navigate)="scrollToSection($event)"
+          />
+        </aside>
+
+        <div class="lw-document">
+          @if (documentReady()) {
+            <app-contract-document
+              [contract]="c"
+              [showSignedBanner]="isSigned()"
+              [showWatermark]="isSigned()"
+              [documentDir]="documentDir()"
+            />
+          } @else {
+            <div class="lw-paper-skeleton" aria-hidden="true"></div>
+          }
+
+          @if (!c.generatedText?.trim()) {
+            <div class="mt-4 print:hidden">
+              <ui-empty-state
+                icon="description"
+                titleKey="contractDoc.emptyBodyTitle"
+                bodyKey="contractDoc.emptyBodyHint"
+              >
+                <button
+                  type="button"
+                  class="ui-btn-secondary mt-2"
+                  (click)="load()"
+                >
+                  {{ 'common.refresh' | translate }}
+                </button>
+              </ui-empty-state>
+            </div>
+          }
+
+          <div class="lw-actions print:hidden">
+            <app-contract-action-bar
+              [canDecide]="canDecide()"
+              [acceptEnabled]="acceptEnabled()"
+              [busy]="acting()"
+              [floating]="false"
+              [sticky]="true"
+              acceptLabelKey="contractDoc.acceptContract"
+              rejectLabelKey="contractDoc.rejectContract"
+              [reviewHintKey]="
+                canDecide() && !hasReviewedEnough()
+                  ? 'farm.contracts.reviewBeforeAccept'
+                  : ''
+              "
+              (approve)="approve()"
+              (reject)="reject()"
+              (download)="downloadPdf()"
+              (print)="print()"
+              (share)="share()"
+            />
+          </div>
+        </div>
+
+        <aside class="lw-rail print:hidden">
+          <app-contract-timeline [steps]="timeline()" />
+          <app-contract-attachments [items]="attachments()" />
+        </aside>
+      </div>
+    }
+  </div>
+</main>

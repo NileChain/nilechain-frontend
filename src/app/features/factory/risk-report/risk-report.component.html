@@ -1,254 +1,397 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
+  <app-top-bar
+    titleKey="factory.riskReport.title"
+    portal="factory"
+    notificationsLink="/factory/notifications"
+  />
+
   <div
     class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
   >
-    <ui-preview-banner />
-    <!-- Header -->
-    <header class="flex justify-between items-center gap-4 flex-wrap">
-      <div class="flex items-center gap-2">
+    <section class="space-y-1">
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        @if (mode() === 'picker') {
+          {{ 'factory.riskReport.pickerSubtitle' | translate }}
+        } @else {
+          {{ 'factory.riskReport.subtitle' | translate }}
+          <span class="text-on-surface">{{ farmName() }}</span>
+        }
+      </p>
+    </section>
+
+    @if (mode() === 'picker') {
+      @if (picking()) {
+        <div class="ui-card p-8 flex justify-center">
+          <ui-loader />
+        </div>
+      } @else if (error()) {
+        <ui-error-state [message]="error()" (retry)="loadCandidates()" />
+      } @else if (candidates().length === 0) {
+        <ui-empty-state
+          icon="agriculture"
+          titleKey="factory.riskReport.noCandidatesTitle"
+          bodyKey="factory.riskReport.noCandidatesBody"
+        />
+        <div class="flex flex-wrap gap-3">
+          <a routerLink="/factory/matches" class="ui-btn-primary inline-flex">
+            {{ 'factory.riskReport.goToMatches' | translate }}
+          </a>
+          <a
+            routerLink="/factory/supply-request"
+            class="ui-btn-secondary inline-flex"
+          >
+            {{ 'factory.riskReport.newRequest' | translate }}
+          </a>
+        </div>
+      } @else {
+        <section class="ui-card p-6 space-y-4">
+          <div class="flex items-start justify-between gap-4 flex-wrap">
+            <div>
+              <h2 class="font-title-md text-title-md text-on-surface">
+                {{ 'factory.riskReport.selectFarmTitle' | translate }}
+              </h2>
+              <p class="mt-1 font-body-md text-body-md text-on-surface-variant">
+                {{ 'factory.riskReport.selectFarmHint' | translate }}
+              </p>
+            </div>
+            <span
+              class="inline-flex items-center rounded-full bg-surface-container-high px-3 py-1 text-label-sm text-on-surface-variant"
+            >
+              {{ candidates().length }}
+              {{ 'factory.riskReport.farmsLabel' | translate }}
+            </span>
+          </div>
+
+          <ul class="divide-y divide-outline-variant">
+            @for (farm of candidates(); track farm.farmId) {
+              <li>
+                <button
+                  type="button"
+                  class="w-full flex items-center justify-between gap-4 py-4 text-start hover:bg-surface-container-low/80 transition-colors rounded-lg px-2 -mx-2"
+                  (click)="selectCandidate(farm)"
+                >
+                  <div class="min-w-0 flex items-center gap-3">
+                    <span
+                      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-container text-on-primary-container"
+                    >
+                      <span
+                        class="material-symbols-outlined text-[22px]"
+                        aria-hidden="true"
+                        >agriculture</span
+                      >
+                    </span>
+                    <div class="min-w-0">
+                      <p class="font-title-md text-title-md text-on-surface truncate">
+                        {{ farm.farmName }}
+                      </p>
+                      <p class="text-label-sm text-on-surface-variant">
+                        @if (farm.farmGovernorate) {
+                          {{ farm.farmGovernorate }} ·
+                        }
+                        {{ farm.farmId.slice(0, 8) }}…
+                      </p>
+                    </div>
+                  </div>
+                  <div class="shrink-0 flex items-center gap-3">
+                    @if (farm.matchScore != null) {
+                      <span
+                        class="rounded-full bg-secondary-container text-on-secondary-container px-3 py-1 ui-data-sm"
+                      >
+                        {{ farm.matchScore | number: '1.0-0' }}%
+                      </span>
+                    }
+                    <span
+                      class="material-symbols-outlined text-on-surface-variant"
+                      aria-hidden="true"
+                      >chevron_right</span
+                    >
+                  </div>
+                </button>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    } @else if (loading()) {
+      <div class="ui-card p-8 flex justify-center">
+        <ui-loader />
+      </div>
+    } @else if (error()) {
+      <ui-error-state
+        [message]="error()"
+        (retry)="farmId() && loadReport(farmId()!)"
+      />
+      <button type="button" class="ui-btn-ghost mt-2" (click)="clearFarmSelection()">
+        {{ 'factory.riskReport.changeFarm' | translate }}
+      </button>
+    } @else if (report(); as r) {
+      <div class="flex flex-wrap gap-2 border-b border-outline-variant pb-4">
         <button
           type="button"
-          class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant shrink-0"
-          (click)="mobileNav.toggleMenu()"
-          [attr.aria-label]="'common.toggleMenu' | translate"
+          class="ui-btn-ghost min-h-[44px] !px-3 inline-flex items-center"
+          (click)="clearFarmSelection()"
         >
-          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+            >arrow_back</span
+          >
+          {{ 'factory.riskReport.changeFarm' | translate }}
         </button>
-        <div>
-          <h1 class="font-headline-lg text-headline-lg text-on-surface">
-            {{ 'factory.riskReport.title' | translate }}
-          </h1>
-          <p class="font-body-md text-body-md text-on-surface-variant">
-            {{ 'factory.riskReport.subtitle' | translate }}
-            <span class="text-on-surface">Green Valley Farm</span>
-          </p>
-        </div>
-      </div>
-      <div class="flex items-center gap-2 sm:gap-4">
-        <ui-language-toggle />
-        <ui-theme-toggle />
-      </div>
-    </header>
-
-    <!-- Meta badges -->
-    <div class="flex flex-wrap gap-2 border-b border-outline-variant pb-4">
-      <span
-        class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm"
-      >
-        <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
-          >smart_toy</span
+        <span
+          class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm"
         >
-        {{ 'factory.riskReport.aiGenerated' | translate }}
-      </span>
-      <span
-        class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm"
-      >
-        <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
-          >calendar_today</span
-        >
-        11 Nov 2024
-      </span>
-      <span
-        class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm"
-      >
-        <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
-          >menu_book</span
-        >
-        RAG Knowledge Base v3
-      </span>
-    </div>
-
-    <!-- Trust score + factors -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
-      <!-- Trust score gauge -->
-      <section
-        class="ui-card p-6 flex flex-col items-center justify-center text-center animate-slide-up"
-        aria-labelledby="trust-score-heading"
-      >
-        <h2
-          id="trust-score-heading"
-          class="font-title-lg text-title-lg text-primary mb-2"
-        >
-          {{ 'factory.riskReport.trustScore' | translate }}
-        </h2>
-        <p class="font-body-md text-body-md text-on-surface-variant mb-6">
-          {{ 'factory.riskReport.dataPointsBasis' | translate }}
-        </p>
-        <div
-          class="relative w-40 h-40 rounded-full mb-4 flex items-center justify-center"
-          role="progressbar"
-          aria-valuemin="0"
-          aria-valuemax="100"
-          aria-valuenow="85"
-          [attr.aria-label]="'factory.riskReport.trustScore' | translate"
-          style="
-            background: conic-gradient(
-              var(--color-primary) 0% 85%,
-              var(--color-surface-container-high) 85% 100%
-            );
-          "
-        >
-          <div
-            class="absolute inset-[12px] rounded-full bg-surface-container-lowest flex items-center justify-center"
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
+            >smart_toy</span
           >
-            <span
-              class="font-headline-lg text-headline-lg text-primary font-bold"
-              >85</span
-            >
-          </div>
-        </div>
-        <div
-          class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-container text-on-primary-container font-title-md text-title-md"
-        >
+          {{ 'factory.riskReport.aiGenerated' | translate }}
+        </span>
+        @if (requestId()) {
           <span
-            class="material-symbols-outlined text-[20px] fill"
-            aria-hidden="true"
-            >check_circle</span
+            class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm"
           >
-          {{ 'factory.riskReport.lowRisk' | translate }}
-        </div>
-      </section>
+            {{ 'factory.progress.requestLabel' | translate }}:
+            {{ requestId()!.slice(0, 8) }}…
+          </span>
+        }
+        @if (farmId()) {
+          <span
+            class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm"
+          >
+            {{ 'contractSign.farmId' | translate }}: {{ farmId()!.slice(0, 8) }}…
+          </span>
+        }
+      </div>
 
-      <!-- Factors + narrative -->
-      <div class="col-span-1 lg:col-span-2 flex flex-col gap-gutter">
-        <section class="ui-card p-6" aria-labelledby="factors-heading">
-          <h3
-            id="factors-heading"
-            class="font-title-md text-title-md text-primary mb-4 flex items-center gap-2"
-          >
-            <span class="material-symbols-outlined" aria-hidden="true"
-              >analytics</span
-            >
-            {{ 'factory.riskReport.factorBreakdown' | translate }}
-          </h3>
-          <div class="space-y-4">
-            @for (factor of factors; track factor.key) {
-              <div>
-                <div
-                  class="flex justify-between font-label-lg text-label-lg text-on-surface mb-1"
-                >
-                  <span>{{ factor.key | translate }}</span>
-                  <span>{{ factor.value }}%</span>
-                </div>
-                <div
-                  class="w-full bg-surface-container-high rounded-full h-2"
-                  role="progressbar"
-                  [attr.aria-valuenow]="factor.value"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  [attr.aria-label]="factor.key | translate"
-                >
-                  <div
-                    class="h-2 rounded-full transition-all"
-                    [class.bg-primary-container]="
-                      factor.barClass === 'bg-primary-container'
-                    "
-                    [class.bg-secondary-container]="
-                      factor.barClass === 'bg-secondary-container'
-                    "
-                    [class.bg-success-green]="
-                      factor.barClass === 'bg-success-green'
-                    "
-                    [style.width.%]="factor.value"
-                  ></div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter pb-8">
+        <!-- Score + factors as one provenance instrument -->
+        <section
+          class="col-span-1 lg:col-span-2 risk-instrument"
+          aria-labelledby="trust-score-heading"
+        >
+          <div class="risk-instrument__layout">
+            <div class="risk-instrument__score">
+              <h2
+                id="trust-score-heading"
+                class="risk-instrument__score-title"
+              >
+                {{ 'factory.riskReport.trustScore' | translate }}
+              </h2>
+              <p class="risk-instrument__score-hint">
+                {{ 'factory.riskReport.liveFactors' | translate }}
+              </p>
+              <div
+                class="risk-instrument__gauge"
+                role="progressbar"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                [attr.aria-valuenow]="overallScore()"
+                [attr.aria-label]="'factory.riskReport.trustScore' | translate"
+                [style.background]="
+                  'conic-gradient(' +
+                  riskColor() +
+                  ' 0% ' +
+                  overallScore() +
+                  '%, var(--color-surface-container-high) ' +
+                  overallScore() +
+                  '% 100%)'
+                "
+              >
+                <div class="risk-instrument__gauge-hole">
+                  <span class="ui-data-lg" [style.color]="riskColor()">{{
+                    overallScore()
+                  }}</span>
                 </div>
               </div>
-            }
+              <div
+                class="risk-instrument__badge"
+                [attr.data-risk]="riskLevel()"
+                role="status"
+              >
+                <span
+                  class="material-symbols-outlined text-[20px] fill"
+                  aria-hidden="true"
+                  >{{
+                    riskLevel() === 'low'
+                      ? 'check_circle'
+                      : riskLevel() === 'medium'
+                        ? 'warning'
+                        : 'error'
+                  }}</span
+                >
+                {{ riskLevelKey() | translate }}
+              </div>
+              @if (r.riskLevel) {
+                <p class="mt-2 text-sm text-on-surface-variant">
+                  {{ r.riskLevel }}
+                </p>
+              }
+            </div>
+
+            <div class="risk-instrument__factors-wrap">
+              <h3
+                id="factors-heading"
+                class="risk-instrument__factors-title"
+              >
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+                  >analytics</span
+                >
+                {{ 'factory.riskReport.factorBreakdown' | translate }}
+              </h3>
+              <div class="risk-instrument__factors">
+                <div class="risk-instrument__spine" aria-hidden="true"></div>
+                <ol aria-labelledby="factors-heading">
+                  @for (factor of factors(); track factor.key; let i = $index) {
+                    <li class="risk-instrument__factor">
+                      <div class="risk-instrument__gutter" aria-hidden="true">
+                        <span class="risk-instrument__tick"></span>
+                        <span class="risk-instrument__anchor">
+                          <span class="risk-instrument__head"></span>
+                        </span>
+                      </div>
+                      <div class="risk-instrument__factor-body">
+                        <div class="risk-instrument__factor-meta">
+                          <span>{{ factor.key | translate }}</span>
+                          <span class="ui-data-sm"
+                            >{{ factor.value | number: '1.0-1' }}/{{
+                              factor.max
+                            }}
+                            ({{ factorPercent(factor) | number: '1.0-0' }}%)</span
+                          >
+                        </div>
+                        <div
+                          class="risk-instrument__bar-track"
+                          role="progressbar"
+                          [attr.aria-valuenow]="factorPercent(factor)"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                          [attr.aria-label]="factor.key | translate"
+                        >
+                          <div
+                            class="risk-instrument__bar-fill"
+                            [class.bg-primary]="factor.barClass === 'bg-primary'"
+                            [class.bg-secondary-container]="
+                              factor.barClass === 'bg-secondary-container'
+                            "
+                            [class.bg-success-green]="
+                              factor.barClass === 'bg-success-green'
+                            "
+                            [style.transform]="
+                              'scaleX(' + factorPercent(factor) / 100 + ')'
+                            "
+                            [style.transitionDelay]="
+                              (i < 6 ? i * 40 : 0) + 'ms'
+                            "
+                          ></div>
+                        </div>
+                      </div>
+                    </li>
+                  }
+                </ol>
+              </div>
+            </div>
           </div>
         </section>
 
         <section
-          class="rounded-xl p-6 bg-surface-container-low border border-outline-variant"
-          aria-labelledby="narrative-heading"
+          class="ui-card p-6 flex flex-col justify-between"
+          aria-labelledby="rec-heading"
         >
-          <h3
-            id="narrative-heading"
-            class="font-title-md text-title-md text-primary mb-3 flex items-center gap-2"
-          >
-            <span
-              class="material-symbols-outlined text-primary"
-              aria-hidden="true"
+          <div>
+            <h3
+              id="rec-heading"
+              class="font-title-md text-title-md text-primary mb-2 flex items-center gap-2"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true"
+                >recommend</span
+              >
+              {{ 'factory.riskReport.recommendation' | translate }}
+            </h3>
+            <p class="font-body-md text-body-md text-on-surface-variant mb-6">
+              {{
+                r.recommendation ||
+                  ('factory.riskReport.recommendationFallback' | translate)
+              }}
+            </p>
+          </div>
+          <div class="flex flex-col gap-3">
+            <button
+              type="button"
+              class="ui-btn-primary w-full"
+              (click)="selectFarm()"
+            >
+              <span
+                class="material-symbols-outlined text-[20px]"
+                aria-hidden="true"
+                >check</span
+              >
+              {{ 'factory.riskReport.selectFarm' | translate }}
+            </button>
+            <button
+              type="button"
+              class="ui-btn-secondary w-full"
+              (click)="downloadReport()"
+            >
+              <span
+                class="material-symbols-outlined text-[20px]"
+                aria-hidden="true"
+                >download</span
+              >
+              {{ 'factory.riskReport.downloadReport' | translate }}
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Second provenance well: AI narrative + RAG sources -->
+      <section
+        class="risk-provenance-well mb-8"
+        aria-labelledby="narrative-heading"
+      >
+        <div class="risk-provenance-well__spine" aria-hidden="true"></div>
+        <div class="risk-provenance-well__body">
+          <h3 id="narrative-heading" class="risk-provenance-well__title">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
               >psychology</span
             >
             {{ 'factory.riskReport.narrative' | translate }}
           </h3>
-          <p
-            class="font-body-md text-body-md text-on-surface-variant leading-relaxed"
-          >
-            {{ 'factory.riskReport.narrativeBody' | translate }}
+          <p class="risk-provenance-well__text">
+            {{
+              r.aiAnalysis ||
+                r.recommendation ||
+                ('factory.riskReport.narrativeFallback' | translate)
+            }}
           </p>
-        </section>
-      </div>
-    </div>
 
-    <!-- Sources + recommendation -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter pb-8">
-      <section
-        class="col-span-1 lg:col-span-2 ui-card p-6"
-        aria-labelledby="sources-heading"
-      >
-        <h3
-          id="sources-heading"
-          class="font-title-md text-title-md text-primary mb-4 flex items-center gap-2"
-        >
-          <span class="material-symbols-outlined" aria-hidden="true"
-            >source</span
-          >
-          {{ 'factory.riskReport.sources' | translate }}
-        </h3>
-        <ul class="space-y-3 font-body-md text-body-md text-on-surface-variant">
-          @for (source of sources; track source.key) {
-            <li
-              class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-container-low transition-colors"
-            >
-              <span
-                class="material-symbols-outlined text-[20px] text-primary"
-                aria-hidden="true"
-                >{{ source.icon }}</span
-              >
-              {{ source.key | translate }}
-            </li>
-          }
-        </ul>
-      </section>
-
-      <section
-        class="ui-card p-6 flex flex-col justify-between"
-        aria-labelledby="rec-heading"
-      >
-        <div>
           <h3
-            id="rec-heading"
-            class="font-title-md text-title-md text-primary mb-2 flex items-center gap-2"
+            id="sources-heading"
+            class="risk-provenance-well__title"
+            style="margin-top: 1.25rem"
           >
-            <span class="material-symbols-outlined" aria-hidden="true"
-              >recommend</span
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+              >source</span
             >
-            {{ 'factory.riskReport.recommendation' | translate }}
+            {{ 'factory.riskReport.sources' | translate }}
           </h3>
-          <p class="font-body-md text-body-md text-on-surface-variant mb-6">
-            {{ 'factory.riskReport.recommendationBody' | translate }}
-          </p>
-        </div>
-        <div class="flex flex-col gap-3">
-          <button type="button" class="ui-btn-primary w-full">
-            <span
-              class="material-symbols-outlined text-[20px]"
-              aria-hidden="true"
-              >check</span
-            >
-            {{ 'factory.riskReport.selectFarm' | translate }}
-          </button>
-          <button type="button" class="ui-btn-secondary w-full">
-            <span
-              class="material-symbols-outlined text-[20px]"
-              aria-hidden="true"
-              >download</span
-            >
-            {{ 'factory.riskReport.downloadPdf' | translate }}
-          </button>
+          @if (r.ragSourcesUsed.length) {
+            <ul class="risk-provenance-well__sources">
+              @for (source of r.ragSourcesUsed; track source) {
+                <li class="risk-provenance-well__source">
+                  <span
+                    class="material-symbols-outlined text-[18px] risk-provenance-well__source-icon"
+                    aria-hidden="true"
+                    >description</span
+                  >
+                  {{ source }}
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="risk-provenance-well__text">
+              {{ 'factory.riskReport.noSources' | translate }}
+            </p>
+          }
         </div>
       </section>
-    </div>
+    }
   </div>
 </main>

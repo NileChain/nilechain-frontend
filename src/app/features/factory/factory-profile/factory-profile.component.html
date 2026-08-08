@@ -1,43 +1,30 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
-  <div
-    class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
+  <app-top-bar
+    titleKey="factory.profile.title"
+    subtitleKey="factory.profile.subtitle"
+    portal="factory"
+    notificationsLink="/factory/notifications"
   >
-    <header class="flex justify-between items-center gap-4 flex-wrap">
-      <div class="flex items-center gap-2 flex-1 min-w-[200px]">
-        <button
-          type="button"
-          class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant shrink-0"
-          (click)="mobileNav.toggleMenu()"
-          [attr.aria-label]="'common.toggleMenu' | translate"
+    <button
+      type="button"
+      class="ui-btn-primary shrink-0"
+      [disabled]="saving() || loading()"
+      (click)="save()"
+    >
+      @if (saving()) {
+        <ui-loader size="sm" />
+      } @else {
+        <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+          >save</span
         >
-          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-        </button>
-        <div class="flex-1 min-w-0">
-          <h1 class="font-headline-lg text-headline-lg text-on-surface">
-            {{ 'factory.profile.title' | translate }}
-          </h1>
-          <p class="font-body-lg text-body-lg text-on-surface-variant mt-2">
-            {{ 'factory.profile.subtitle' | translate }}
-          </p>
-        </div>
-      </div>
-      <div class="flex items-center gap-2 sm:gap-4">
-        <ui-language-toggle />
-        <ui-theme-toggle />
-        <button
-          type="button"
-          class="ui-btn-primary shrink-0"
-          [disabled]="saving() || loading()"
-          (click)="save()"
-        >
-          <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
-            >save</span
-          >
-          {{ 'factory.profile.saveChanges' | translate }}
-        </button>
-      </div>
-    </header>
+      }
+      {{ 'factory.profile.saveChanges' | translate }}
+    </button>
+  </app-top-bar>
 
+  <div
+    class="fp-page p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto animate-fade-in"
+  >
     @if (loading()) {
       <div
         class="flex justify-center py-16"
@@ -50,163 +37,358 @@
       <ui-error-state [message]="error()" (retry)="loadProfile()" />
     } @else if (profile(); as data) {
       @if (error()) {
-        <p class="text-on-error-container">{{ error() }}</p>
+        <p class="fp-alert fp-alert--error" role="alert">{{ error() }}</p>
       }
       @if (saveSuccess()) {
-        <p class="text-primary">Profile saved.</p>
+        <p class="fp-alert fp-alert--success" role="status">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+            >check_circle</span
+          >
+          {{ 'factory.profile.saved' | translate }}
+        </p>
       }
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-        <div class="lg:col-span-4 flex flex-col gap-gutter">
-          <div class="ui-card p-6 relative overflow-hidden">
-            <div class="flex items-center gap-4">
-              <div
-                class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shrink-0"
-              >
-                <span
-                  class="material-symbols-outlined text-on-primary-container text-2xl fill"
-                  aria-hidden="true"
-                  >{{ data.isVerified ? 'verified' : 'pending' }}</span
-                >
+      <div class="fp-layout">
+        <!-- Left rail: trust + completion -->
+        <aside class="fp-rail">
+          <section
+            class="fp-trust"
+            [attr.data-verified]="data.isVerified ? 'true' : 'false'"
+            aria-labelledby="fp-trust-title"
+          >
+            <div class="fp-trust__hero">
+              <div class="fp-trust__icon" aria-hidden="true">
+                <span class="material-symbols-outlined fill">{{
+                  data.isVerified ? 'verified' : 'pending'
+                }}</span>
               </div>
-              <div>
-                <h2 class="font-title-lg text-title-lg text-primary font-bold">
+              <div class="min-w-0">
+                <div class="fp-trust__title-row">
+                  <h2 id="fp-trust-title" class="fp-trust__title">
+                    {{
+                      data.isVerified
+                        ? ('factory.profile.verifiedFactory' | translate)
+                        : ('factory.profile.pendingVerification' | translate)
+                    }}
+                  </h2>
+                  @if (data.isVerified) {
+                    <span class="fp-badge">
+                      <span
+                        class="material-symbols-outlined text-[14px] fill"
+                        aria-hidden="true"
+                        >verified</span
+                      >
+                      {{ 'common.verified' | translate }}
+                    </span>
+                  }
+                </div>
+                <p class="fp-trust__hint">
                   {{
                     data.isVerified
-                      ? ('factory.profile.verifiedFactory' | translate)
-                      : 'Pending verification'
+                      ? ('factory.profile.verifiedByNile' | translate)
+                      : ('factory.profile.pendingHint' | translate)
                   }}
-                </h2>
-                <p class="font-body-md text-body-md text-on-surface-variant">
-                  Rating {{ data.averageRating | number: '1.1-1' }} ({{
-                    data.ratingCount
-                  }})
                 </p>
               </div>
             </div>
-          </div>
 
-          <div class="ui-card p-6 flex flex-col items-center">
-            <h2
-              class="font-title-md text-title-md text-on-surface mb-4 self-start w-full"
-            >
-              {{ 'factory.profile.completion' | translate }}
-            </h2>
-            <div
-              class="relative w-32 h-32 mb-4 rounded-full"
-              role="progressbar"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              [attr.aria-valuenow]="data.completionPercent"
-              [attr.aria-label]="'factory.profile.completion' | translate"
-              [style.background]="
-                'conic-gradient(var(--color-primary) 0% ' +
-                data.completionPercent +
-                '%, var(--color-surface-container-highest) ' +
-                data.completionPercent +
-                '% 100%)'
-              "
-            >
+            <div class="fp-trust__rating">
               <div
-                class="absolute inset-[10px] rounded-full bg-surface-container-lowest flex flex-col items-center justify-center"
+                class="fp-stars"
+                [attr.aria-label]="
+                  ('factory.profile.ratingAria'
+                    | translate
+                      : {
+                          rating: (data.averageRating | number: '1.1-1') || '0',
+                          count: data.ratingCount,
+                        })
+                "
+              >
+                @for (slot of starSlots(data.averageRating); track $index) {
+                  <span
+                    class="material-symbols-outlined fp-stars__icon"
+                    [class.fill]="slot !== 'empty'"
+                    [class.fp-stars__icon--half]="slot === 'half'"
+                    aria-hidden="true"
+                    >star</span
+                  >
+                }
+              </div>
+              <p class="fp-trust__score">
+                <span class="ui-data-sm">{{
+                  data.averageRating | number: '1.1-1'
+                }}</span>
+                <span class="fp-trust__reviews">
+                  {{
+                    'factory.profile.reviewCount'
+                      | translate: { count: data.ratingCount }
+                  }}
+                </span>
+              </p>
+            </div>
+
+            <dl class="fp-trust__metrics">
+              <div class="fp-metric">
+                <dt>{{ 'factory.profile.metricRating' | translate }}</dt>
+                <dd>{{ data.averageRating | number: '1.1-1' }}/5</dd>
+              </div>
+              <div class="fp-metric">
+                <dt>{{ 'factory.profile.metricReviews' | translate }}</dt>
+                <dd>{{ data.ratingCount }}</dd>
+              </div>
+              <div class="fp-metric">
+                <dt>{{ 'factory.profile.metricCompletion' | translate }}</dt>
+                <dd>{{ data.completionPercent }}%</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section
+            class="fp-completion ui-card"
+            aria-labelledby="fp-completion-title"
+          >
+            <div class="fp-completion__head">
+              <h2 id="fp-completion-title" class="fp-section-title">
+                {{ 'factory.profile.completion' | translate }}
+              </h2>
+              <p class="fp-section-sub">
+                @if (data.completionPercent >= 100) {
+                  {{ 'factory.profile.profileComplete' | translate }}
+                } @else {
+                  {{ 'factory.profile.completionHint' | translate }}
+                }
+              </p>
+            </div>
+
+            <div class="fp-completion__body">
+              <div
+                class="fp-ring"
+                role="progressbar"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                [attr.aria-valuenow]="data.completionPercent"
+                [attr.aria-label]="'factory.profile.completion' | translate"
+                [style.background]="
+                  'conic-gradient(var(--color-primary) 0% ' +
+                  data.completionPercent +
+                  '%, var(--color-surface-container-high) ' +
+                  data.completionPercent +
+                  '% 100%)'
+                "
+              >
+                <div class="fp-ring__hole">
+                  <span class="fp-ring__value">{{ data.completionPercent }}%</span>
+                </div>
+              </div>
+
+              @if (data.completionPercent < 100) {
+                <a
+                  class="ui-btn-secondary w-full justify-center"
+                  routerLink="/factory/supply-request"
+                >
+                  <span
+                    class="material-symbols-outlined text-[18px]"
+                    aria-hidden="true"
+                    >add_business</span
+                  >
+                  {{ 'factory.profile.ctaSupplyRequest' | translate }}
+                </a>
+              }
+            </div>
+          </section>
+        </aside>
+
+        <!-- Main column -->
+        <div class="fp-main" [formGroup]="form">
+          <section class="fp-section ui-card" aria-labelledby="fp-basic-title">
+            <header class="fp-section__header">
+              <div>
+                <h2 id="fp-basic-title" class="fp-section-title">
+                  {{ 'factory.profile.basicInfo' | translate }}
+                </h2>
+                <p class="fp-section-sub">
+                  {{ 'factory.profile.basicInfoHint' | translate }}
+                </p>
+              </div>
+              <button
+                type="button"
+                class="ui-btn-ghost shrink-0"
+                (click)="focusBasicInfo()"
               >
                 <span
-                  class="font-headline-lg text-headline-lg font-bold text-primary"
-                  >{{ data.completionPercent }}%</span
+                  class="material-symbols-outlined text-[18px]"
+                  aria-hidden="true"
+                  >edit</span
                 >
+                {{ 'common.edit' | translate }}
+              </button>
+            </header>
+
+            <div class="fp-info-grid">
+              <label class="fp-field" for="factory-name">
+                <span class="fp-field__icon" aria-hidden="true">
+                  <span class="material-symbols-outlined">precision_manufacturing</span>
+                </span>
+                <span class="fp-field__meta">
+                  <span class="fp-field__label">{{
+                    'factory.profile.factoryName' | translate
+                  }}</span>
+                  <input
+                    #nameInput
+                    id="factory-name"
+                    type="text"
+                    class="ui-input fp-field__input"
+                    formControlName="name"
+                  />
+                </span>
+              </label>
+
+              <label class="fp-field" for="factory-industry">
+                <span class="fp-field__icon" aria-hidden="true">
+                  <span class="material-symbols-outlined">category</span>
+                </span>
+                <span class="fp-field__meta">
+                  <span class="fp-field__label">{{
+                    'factory.profile.industryType' | translate
+                  }}</span>
+                  <input
+                    id="factory-industry"
+                    type="text"
+                    class="ui-input fp-field__input"
+                    formControlName="industryType"
+                  />
+                </span>
+              </label>
+
+              <div class="fp-field fp-field--readonly">
+                <span class="fp-field__icon" aria-hidden="true">
+                  <span class="material-symbols-outlined">map</span>
+                </span>
+                <span class="fp-field__meta">
+                  <span class="fp-field__label">{{
+                    'factory.profile.governorate' | translate
+                  }}</span>
+                  <span class="fp-field__value">{{
+                    form.controls.governorate.value || '—'
+                  }}</span>
+                </span>
+              </div>
+
+              <div class="fp-field fp-field--readonly">
+                <span class="fp-field__icon" aria-hidden="true">
+                  <span class="material-symbols-outlined">pin_drop</span>
+                </span>
+                <span class="fp-field__meta">
+                  <span class="fp-field__label">{{
+                    'factory.profile.address' | translate
+                  }}</span>
+                  <span class="fp-field__value">{{
+                    form.controls.location.value || '—'
+                  }}</span>
+                </span>
               </div>
             </div>
-            <p
-              class="font-body-md text-body-md text-center text-on-surface-variant"
-            >
-              {{ 'factory.profile.completionHint' | translate }}
-            </p>
-          </div>
-        </div>
 
-        <div class="lg:col-span-8 flex flex-col gap-gutter">
-          <section class="ui-card p-6" [formGroup]="form">
-            <h2
-              class="font-title-lg text-title-lg text-on-surface mb-6 flex items-center gap-2"
-            >
-              <span
-                class="material-symbols-outlined text-primary"
-                aria-hidden="true"
-                >info</span
-              >
-              {{ 'factory.profile.basicInfo' | translate }}
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="fp-map-block">
+              <h3 class="fp-section-title fp-section-title--sm">
+                {{ 'locationPicker.label' | translate }}
+              </h3>
+              <app-location-picker
+                [initialLocation]="mapInitial()"
+                (locationChange)="onLocationPicked($event)"
+              />
+              @if (
+                form.controls.governorate.invalid &&
+                form.controls.governorate.touched
+              ) {
+                <p class="fp-field-error">
+                  {{ 'locationPicker.required' | translate }}
+                </p>
+              }
+            </div>
+          </section>
+
+          <!-- Contact & overview — only real fields from API -->
+          <section
+            class="fp-contact ui-card"
+            aria-labelledby="fp-contact-title"
+          >
+            <header class="fp-section__header">
               <div>
-                <label
-                  class="block font-label-lg text-label-lg text-on-surface-variant mb-2"
-                  for="factory-name"
-                >
-                  {{ 'factory.profile.factoryName' | translate }}
-                </label>
-                <input
-                  id="factory-name"
-                  type="text"
-                  class="ui-input"
-                  formControlName="name"
-                />
+                <h2 id="fp-contact-title" class="fp-section-title">
+                  {{ 'factory.profile.contactOverview' | translate }}
+                </h2>
+                <p class="fp-section-sub">
+                  {{ 'factory.profile.contactOverviewHint' | translate }}
+                </p>
               </div>
-              <div>
-                <label
-                  class="block font-label-lg text-label-lg text-on-surface-variant mb-2"
-                  for="factory-gov"
-                >
-                  {{ 'factory.profile.governorate' | translate }}
-                </label>
-                <input
-                  id="factory-gov"
-                  type="text"
-                  class="ui-input"
-                  formControlName="governorate"
-                />
+            </header>
+
+            <div class="fp-contact__grid">
+              <div class="fp-contact__item">
+                <span class="fp-contact__icon" aria-hidden="true">
+                  <span class="material-symbols-outlined">call</span>
+                </span>
+                <div class="min-w-0">
+                  <p class="fp-contact__label">
+                    {{ 'factory.profile.phone' | translate }}
+                  </p>
+                  <p class="fp-contact__value">
+                    {{ data.phone || ('factory.profile.notProvided' | translate) }}
+                  </p>
+                </div>
               </div>
-              <div class="md:col-span-2">
-                <label
-                  class="block font-label-lg text-label-lg text-on-surface-variant mb-2"
-                  for="factory-address"
-                >
-                  {{ 'factory.profile.address' | translate }}
-                </label>
-                <input
-                  id="factory-address"
-                  type="text"
-                  class="ui-input"
-                  formControlName="location"
-                />
+
+              <div class="fp-contact__item">
+                <span class="fp-contact__icon" aria-hidden="true">
+                  <span class="material-symbols-outlined">location_on</span>
+                </span>
+                <div class="min-w-0">
+                  <p class="fp-contact__label">
+                    {{ 'factory.profile.address' | translate }}
+                  </p>
+                  <p class="fp-contact__value">
+                    {{
+                      form.controls.location.value ||
+                        form.controls.governorate.value ||
+                        ('factory.profile.notProvided' | translate)
+                    }}
+                  </p>
+                </div>
               </div>
-              <div class="md:col-span-2">
-                <label
-                  class="block font-label-lg text-label-lg text-on-surface-variant mb-2"
-                  for="factory-industry"
-                >
-                  Industry type
-                </label>
-                <input
-                  id="factory-industry"
-                  type="text"
-                  class="ui-input"
-                  formControlName="industryType"
-                />
+
+              <div class="fp-contact__item">
+                <span class="fp-contact__icon" aria-hidden="true">
+                  <span class="material-symbols-outlined">public</span>
+                </span>
+                <div class="min-w-0">
+                  <p class="fp-contact__label">
+                    {{ 'factory.profile.governorate' | translate }}
+                  </p>
+                  <p class="fp-contact__value">
+                    {{
+                      form.controls.governorate.value ||
+                        ('factory.profile.notProvided' | translate)
+                    }}
+                  </p>
+                </div>
               </div>
-              <div>
-                <label
-                  class="block font-label-lg text-label-lg text-on-surface-variant mb-2"
-                  for="factory-phone"
-                >
-                  Phone
-                </label>
-                <input
-                  id="factory-phone"
-                  type="text"
-                  class="ui-input"
-                  [value]="data.phone || ''"
-                  readonly
-                />
+
+              <div class="fp-contact__item">
+                <span class="fp-contact__icon" aria-hidden="true">
+                  <span class="material-symbols-outlined">category</span>
+                </span>
+                <div class="min-w-0">
+                  <p class="fp-contact__label">
+                    {{ 'factory.profile.industryType' | translate }}
+                  </p>
+                  <p class="fp-contact__value">
+                    {{
+                      form.controls.industryType.value ||
+                        ('factory.profile.notProvided' | translate)
+                    }}
+                  </p>
+                </div>
               </div>
             </div>
           </section>

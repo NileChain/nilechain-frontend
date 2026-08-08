@@ -8,6 +8,7 @@ import { RegisterRequest } from '../../../core/models/user.model';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { UiBrandMarkComponent } from '../../../shared/ui/brand-mark/brand-mark.component';
 
 /** Matches ASP.NET Identity default password rules (+ RequiredLength = 8). */
 const PASSWORD_RULES = {
@@ -26,6 +27,7 @@ const PASSWORD_RULES = {
     TranslatePipe,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
+    UiBrandMarkComponent,
   ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',

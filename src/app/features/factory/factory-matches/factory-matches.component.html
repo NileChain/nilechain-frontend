@@ -1,57 +1,39 @@
 <main class="md:ms-[280px] min-h-screen bg-surface flex flex-col">
-  <header
-    class="sticky top-0 z-30 bg-surface border-b border-outline-variant px-margin-mobile md:px-margin-desktop py-3"
+  <app-top-bar
+    titleKey="factory.matches.title"
+    portal="factory"
+    notificationsLink="/factory/notifications"
   >
-    <div
-      class="max-w-[1440px] mx-auto flex justify-between items-center gap-4 flex-wrap"
+    @if (requestId()) {
+      <span
+        class="hidden sm:inline-flex bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-lg text-sm shrink-0"
+      >
+        {{ 'factory.progress.requestLabel' | translate }}
+        {{ requestId()!.slice(0, 8) }}…
+      </span>
+    }
+    <a
+      class="ui-btn-secondary !py-2 !px-4"
+      routerLink="/factory/agent-progress"
+      [queryParams]="requestId() ? { requestId: requestId() } : {}"
     >
-      <div class="flex items-center gap-3 flex-wrap min-w-0">
-        <button
-          type="button"
-          class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant shrink-0"
-          (click)="mobileNav.toggleMenu()"
-          [attr.aria-label]="'common.toggleMenu' | translate"
-        >
-          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-        </button>
-        <h1
-          class="font-title-lg text-title-lg font-bold text-on-surface truncate"
-        >
-          {{ 'factory.matches.title' | translate }}
-        </h1>
-        @if (requestId()) {
-          <span
-            class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-lg text-sm shrink-0"
-          >
-            Request {{ requestId()!.slice(0, 8) }}…
-          </span>
-        }
-      </div>
-      <div class="flex items-center gap-2 sm:gap-4">
-        <ui-language-toggle />
-        <ui-theme-toggle />
-        <a
-          class="ui-btn-secondary !py-2 !px-4"
-          routerLink="/agent-progress"
-          [queryParams]="requestId() ? { requestId: requestId() } : {}"
-        >
-          Run Agent
-        </a>
-      </div>
-    </div>
-  </header>
+      {{ 'factory.matches.runAgent' | translate }}
+    </a>
+  </app-top-bar>
 
   @if (!requestId()) {
-    <div class="p-margin-desktop max-w-3xl mx-auto text-center space-y-4 py-16">
-      <p class="font-body-lg text-on-surface-variant">
-        Provide a supply request id to load matches.
-      </p>
-      <p class="font-label-md text-on-surface-variant">
-        Open
-        <code class="bg-surface-container px-2 py-1 rounded"
-          >/factory-matches?requestId=&#123;guid&#125;</code
-        >
-      </p>
+    <div
+      class="p-margin-mobile md:p-margin-desktop max-w-3xl mx-auto py-16"
+    >
+      <ui-empty-state
+        icon="agriculture"
+        titleKey="factory.matches.needRequestId"
+        bodyKey="factory.matches.needRequestIdHint"
+      >
+        <a class="ui-btn-primary mt-2" routerLink="/factory/supply-request">
+          {{ 'factory.matches.startSupplyRequest' | translate }}
+        </a>
+      </ui-empty-state>
     </div>
   } @else if (loading()) {
     <div
@@ -108,9 +90,12 @@
             @for (farm of matches(); track farm.matchId) {
               <button
                 type="button"
-                class="w-full text-start ui-card p-4 hover:shadow-md transition-shadow relative overflow-hidden"
-                [class.ring-2]="selected()?.matchId === farm.matchId"
-                [class.ring-primary]="selected()?.matchId === farm.matchId"
+                class="w-full text-start ui-card ui-card-interactive p-4 relative overflow-hidden"
+                [class.ui-card-selected]="selected()?.matchId === farm.matchId"
+                [class.animate-fade-in]="$index < 6"
+                [style.animation-delay]="
+                  $index < 6 ? $index * 40 + 'ms' : null
+                "
                 (click)="select(farm)"
               >
                 <div class="flex justify-between items-start mb-3 gap-3">
@@ -138,33 +123,57 @@
                       {{ farm.farmGovernorate || farm.farmLocation || '—' }}
                     </p>
                   </div>
-                  <div
-                    class="bg-primary-container text-on-primary-container px-3 py-1 rounded-lg font-title-md text-title-md flex items-center gap-1 shrink-0"
-                  >
+                  <div class="flex flex-col items-end gap-2 shrink-0">
                     <span
-                      class="material-symbols-outlined text-sm"
-                      aria-hidden="true"
-                      >auto_awesome</span
+                      class="px-3 py-1 rounded-lg font-label-md text-label-md text-white"
+                      [class.bg-success-green]="riskLevel(farm.riskScore) === 'low'"
+                      [class.bg-warning-orange]="
+                        riskLevel(farm.riskScore) === 'medium'
+                      "
+                      [class.bg-danger-red]="riskLevel(farm.riskScore) === 'high'"
                     >
-                    {{
-                      farm.matchScore != null
-                        ? (farm.matchScore | number: '1.0-0') + '%'
-                        : '—'
-                    }}
+                      {{ riskLevelKey(farm.riskScore) | translate }}
+                    </span>
+                    <div
+                      class="bg-primary-container text-on-primary-container px-3 py-1 rounded-lg ui-data-sm flex items-center gap-1"
+                    >
+                      <span
+                        class="material-symbols-outlined text-sm"
+                        aria-hidden="true"
+                        >auto_awesome</span
+                      >
+                      {{
+                        farm.matchScore != null
+                          ? (farm.matchScore | number: '1.0-0') + '%'
+                          : '—'
+                      }}
+                    </div>
                   </div>
                 </div>
                 <div
-                  class="flex justify-between text-sm text-on-surface-variant"
+                  class="flex justify-between text-sm text-on-surface-variant items-center gap-2"
                 >
-                  <span
-                    >Risk:
+                  <span class="ui-data-sm"
+                    >{{ 'factory.matches.riskScore' | translate }}
                     {{
                       farm.riskScore != null
                         ? (farm.riskScore | number: '1.0-0')
                         : '—'
                     }}</span
                   >
-                  <span>{{ farm.status }}</span>
+                  <span class="truncate">{{ farm.status }}</span>
+                </div>
+                <div class="mt-3" (click)="$event.stopPropagation()">
+                  <button
+                    type="button"
+                    class="ui-btn-ghost min-h-[44px] !px-3 text-sm inline-flex items-center gap-1"
+                    (click)="openFarmProfile(farm, $event)"
+                  >
+                    <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
+                      >person_search</span
+                    >
+                    {{ 'factory.matches.viewFarmProfile' | translate }}
+                  </button>
                 </div>
               </button>
             }
@@ -174,22 +183,29 @@
 
       <section class="flex-1 p-6 overflow-y-auto">
         @if (selected(); as farm) {
-          <div class="space-y-4">
+          <div class="space-y-6">
             <h2 class="font-headline-md text-headline-md text-on-surface">
               {{ farm.farmName }}
             </h2>
+
             <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <dt class="text-on-surface-variant text-sm">Location</dt>
+                <dt class="text-on-surface-variant text-sm">
+                  {{ 'factory.matches.location' | translate }}
+                </dt>
                 <dd>{{ farm.farmLocation || '—' }}</dd>
               </div>
               <div>
-                <dt class="text-on-surface-variant text-sm">Governorate</dt>
+                <dt class="text-on-surface-variant text-sm">
+                  {{ 'factory.matches.governorate' | translate }}
+                </dt>
                 <dd>{{ farm.farmGovernorate || '—' }}</dd>
               </div>
               <div>
-                <dt class="text-on-surface-variant text-sm">Match score</dt>
-                <dd>
+                <dt class="text-on-surface-variant text-sm">
+                  {{ 'factory.matches.matchScore' | translate }}
+                </dt>
+                <dd class="ui-data-sm">
                   {{
                     farm.matchScore != null
                       ? (farm.matchScore | number: '1.0-0')
@@ -198,41 +214,169 @@
                 </dd>
               </div>
               <div>
-                <dt class="text-on-surface-variant text-sm">Risk score</dt>
-                <dd>
+                <dt class="text-on-surface-variant text-sm">
+                  {{ 'factory.matches.riskScoreLabel' | translate }}
+                </dt>
+                <dd class="ui-data-sm">
                   {{
                     farm.riskScore != null
                       ? (farm.riskScore | number: '1.0-0')
                       : '—'
                   }}
-                  ({{ riskLevel(farm.riskScore) }})
+                  ({{ riskLevelKey(farm.riskScore) | translate }})
                 </dd>
               </div>
               <div>
-                <dt class="text-on-surface-variant text-sm">Rating</dt>
+                <dt class="text-on-surface-variant text-sm">
+                  {{ 'factory.matches.rating' | translate }}
+                </dt>
                 <dd>{{ farm.farmAverageRating | number: '1.1-1' }}</dd>
               </div>
               <div>
-                <dt class="text-on-surface-variant text-sm">Created</dt>
+                <dt class="text-on-surface-variant text-sm">
+                  {{ 'factory.matches.created' | translate }}
+                </dt>
                 <dd>{{ farm.createdAt | date: 'medium' }}</dd>
               </div>
             </dl>
-            <a
-              class="ui-btn-primary inline-flex"
-              routerLink="/contract-signing"
-              [queryParams]="{
-                requestId: requestId(),
-                farmId: farm.farmId,
-                farmName: farm.farmName,
-              }"
+
+            <div
+              class="rounded-xl border border-outline-variant bg-surface-container-low p-4 space-y-2"
             >
-              Generate contract
-            </a>
+              <h3
+                class="font-title-md text-title-md text-on-surface flex items-center gap-2"
+              >
+                <span class="material-symbols-outlined text-primary" aria-hidden="true"
+                  >psychology</span
+                >
+                {{ 'factory.matches.whyMatched' | translate }}
+              </h3>
+              <p class="font-body-md text-body-md text-on-surface-variant whitespace-pre-wrap">
+                {{ whyMatched(farm) }}
+              </p>
+            </div>
+
+            <div class="ui-card p-4 flex items-center gap-4">
+              <div
+                class="relative w-20 h-20 rounded-full shrink-0 flex items-center justify-center"
+                role="progressbar"
+                [attr.aria-valuenow]="riskGaugePercent(farm.riskScore)"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                [style.background]="
+                  'conic-gradient(' +
+                  riskColor(farm.riskScore) +
+                  ' 0% ' +
+                  riskGaugePercent(farm.riskScore) +
+                  '%, var(--color-surface-container-high) ' +
+                  riskGaugePercent(farm.riskScore) +
+                  '% 100%)'
+                "
+              >
+                <div
+                  class="absolute inset-[10px] rounded-full bg-surface-container-lowest flex items-center justify-center"
+                >
+                  <span
+                    class="ui-data"
+                    [style.color]="riskColor(farm.riskScore)"
+                    >{{
+                      farm.riskScore != null
+                        ? (farm.riskScore | number: '1.0-0')
+                        : '—'
+                    }}</span
+                  >
+                </div>
+              </div>
+              <div>
+                <p class="font-title-md text-title-md text-on-surface">
+                  {{ 'factory.matches.riskScoreLabel' | translate }}
+                </p>
+                <p
+                  class="text-sm font-medium"
+                  [style.color]="riskColor(farm.riskScore)"
+                >
+                  {{ riskLevelKey(farm.riskScore) | translate }}
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="rounded-xl border border-outline-variant overflow-hidden"
+            >
+              <div
+                #mapHost
+                class="h-64 w-full bg-surface-container-low"
+                role="img"
+                [attr.aria-label]="'factory.matches.mapPlaceholder' | translate"
+              ></div>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+              <button
+                type="button"
+                class="ui-btn-secondary inline-flex"
+                (click)="openFarmProfile(farm)"
+              >
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+                  >agriculture</span
+                >
+                {{ 'factory.matches.viewFarmProfile' | translate }}
+              </button>
+              <a
+                class="ui-btn-secondary inline-flex"
+                routerLink="/factory/risk-report"
+                [queryParams]="{
+                  requestId: requestId(),
+                  farmId: farm.farmId,
+                  farmName: farm.farmName,
+                }"
+              >
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+                  >assessment</span
+                >
+                {{ 'factory.matches.viewRiskReport' | translate }}
+              </a>
+              <a
+                class="ui-btn-primary inline-flex"
+                routerLink="/factory/contract-signing"
+                [queryParams]="{
+                  requestId: requestId(),
+                  farmId: farm.farmId,
+                  farmName: farm.farmName,
+                  matchId: farm.matchId,
+                }"
+              >
+                {{ 'factory.matches.generateContract' | translate }}
+              </a>
+              <a
+                class="ui-btn-ghost inline-flex"
+                routerLink="/factory/messages"
+                [queryParams]="{ farmId: farm.farmId }"
+              >
+                {{ 'factory.matches.message' | translate }}
+              </a>
+              <button
+                type="button"
+                class="ui-btn-ghost text-error"
+                (click)="excludeMatch(farm)"
+              >
+                {{ 'factory.matches.exclude' | translate }}
+              </button>
+            </div>
           </div>
         } @else {
-          <p class="text-on-surface-variant">Select a match to view details.</p>
+          <p class="text-on-surface-variant">
+            {{ 'factory.matches.selectMatch' | translate }}
+          </p>
         }
       </section>
     </div>
   }
+
+  <app-farm-profile-drawer
+    [open]="profileOpen()"
+    [farmId]="profileFarmId()"
+    [matchRationale]="profileRationale()"
+    (closed)="closeFarmProfile()"
+  />
 </main>

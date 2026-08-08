@@ -9,7 +9,7 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
   template: `
     <button
       type="button"
-      class="inline-flex h-10 min-w-10 items-center justify-center gap-1 rounded-full px-3 font-label-md text-label-md text-on-surface-variant transition-colors hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      class="ui-icon-btn inline-flex items-center justify-center gap-1 px-3 font-label-md text-label-md"
       [attr.aria-label]="'common.language' | translate"
       (click)="onToggle()"
     >

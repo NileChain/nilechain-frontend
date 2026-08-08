@@ -90,8 +90,36 @@ export class FarmService {
     } satisfies RespondToMatchRequest);
   }
 
+  getOrCreateContractForMatch(matchId: string): Observable<FarmContract> {
+    return this.http.get<FarmContract>(`${this.api}/matches/${matchId}/contract`);
+  }
+
   getContracts(): Observable<FarmContract[]> {
     return this.http.get<FarmContract[]>(`${this.api}/contracts`);
+  }
+
+  getContract(contractId: string): Observable<FarmContract> {
+    return this.http.get<FarmContract>(`${this.api}/contracts/${contractId}`);
+  }
+
+  approveContract(contractId: string): Observable<FarmContract> {
+    return this.http.put<FarmContract>(
+      `${this.api}/contracts/${contractId}/approve`,
+      {}
+    );
+  }
+
+  rejectContract(contractId: string): Observable<FarmContract> {
+    return this.http.put<FarmContract>(
+      `${this.api}/contracts/${contractId}/reject`,
+      {}
+    );
+  }
+
+  downloadContractPdf(contractId: string): Observable<Blob> {
+    return this.http.get(`${this.api}/contracts/${contractId}/pdf`, {
+      responseType: 'blob',
+    });
   }
 
   getConversations(): Observable<Conversation[]> {

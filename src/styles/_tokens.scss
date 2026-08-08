@@ -1,17 +1,18 @@
 /* NileChain design tokens — Agro-Technical Precision (Stitch / Figma) */
 
 :root {
-  /* Brand & surfaces (light) */
-  --color-primary: #00450d;
-  --color-primary-container: #1b5e20;
+  /* Brand & surfaces (light) — demo brand sheet: Primary #1B5E20, Primary Container #E8F5E9 */
+  --color-primary: #1b5e20;
+  --color-primary-container: #e8f5e9;
   --color-on-primary: #ffffff;
-  --color-on-primary-container: #90d689;
+  /* On light mint container: dark green (not the old light #90d689 meant for a dark container) */
+  --color-on-primary-container: #1b5e20;
   --color-primary-fixed: #acf4a4;
   --color-primary-fixed-dim: #91d78a;
   --color-on-primary-fixed: #002203;
   --color-on-primary-fixed-variant: #0c5216;
   --color-inverse-primary: #91d78a;
-  --color-surface-tint: #2a6b2c;
+  --color-surface-tint: #1b5e20;
 
   --color-secondary: #1b6d24;
   --color-secondary-container: #a0f499;
@@ -59,6 +60,12 @@
   --color-warning: #e65100;
   --color-danger: #c62828;
   --color-card-border: #c8e6c9;
+
+  /* AI provenance (Reasoning Spine) — not for CTAs / nav / success */
+  --color-provenance: #0a5c63;
+  --color-provenance-container: #d7eded;
+  --color-on-provenance: #ffffff;
+  --color-on-provenance-container: #0a5c63;
 
   --shadow-sm: 0 2px 4px rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 12px rgb(0 0 0 / 0.1);
@@ -135,6 +142,12 @@ html.dark {
   --color-warning: #ffb74d;
   --color-danger: #ff8a80;
   --color-card-border: #41493e;
+
+  /* AI provenance — luminous teal on charcoal ops console */
+  --color-provenance: #5eb3b8;
+  --color-provenance-container: #0e3034;
+  --color-on-provenance: #0e3034;
+  --color-on-provenance-container: #5eb3b8;
 
   --shadow-sm: 0 2px 4px rgb(0 0 0 / 0.35);
   --shadow-md: 0 4px 12px rgb(0 0 0 / 0.45);

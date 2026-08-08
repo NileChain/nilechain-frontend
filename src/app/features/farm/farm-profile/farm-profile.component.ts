@@ -1,20 +1,20 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
-import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
-import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
+import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
+import { LocationPickerComponent } from '../../../shared/components/location-picker/location-picker.component';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { FarmService } from '../../../core/services/farm/farm.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { MobileNavService } from '../../../core/services/mobile-nav.service';
+import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import {
   CropType,
   FarmProfile,
 } from '../../../core/models/farm/farm-profile.model';
 import { UpdateFarmProfileRequest } from '../../../core/models/farm/update-farm-profile-request.model';
+import { PickedLocation } from '../../../shared/geo/egypt-governorates';
 
 @Component({
   selector: 'app-farm-profile',
@@ -22,21 +22,18 @@ import { UpdateFarmProfileRequest } from '../../../core/models/farm/update-farm-
   imports: [
     ReactiveFormsModule,
     TranslatePipe,
-    UiLanguageToggleComponent,
-    UiThemeToggleComponent,
+    AppTopBarComponent,
     UiLoaderComponent,
     UiErrorStateComponent,
-    RouterLink,
+    LocationPickerComponent,
   ],
   templateUrl: './farm-profile.component.html',
 })
 export class FarmProfileComponent implements OnInit {
   private readonly farmService = inject(FarmService);
   private readonly authService = inject(AuthService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly fb = inject(FormBuilder);
-
-  readonly currentUser = this.authService.currentUser;
-  readonly mobileNav = inject(MobileNavService);
 
   private readonly SOIL_TYPE_MAP: Record<string, number> = {
     Clay: 0,
@@ -49,11 +46,18 @@ export class FarmProfileComponent implements OnInit {
   };
 
   readonly profile = signal<FarmProfile | null>(null);
+  readonly mapInitial = signal<{
+    latitude?: number | null;
+    longitude?: number | null;
+    governorate?: string | null;
+  } | null>(null);
 
   readonly form = this.fb.nonNullable.group({
     name: this.fb.nonNullable.control('', Validators.required),
-    location: this.fb.nonNullable.control('', Validators.required),
+    location: this.fb.nonNullable.control(''),
     governorate: this.fb.nonNullable.control('', Validators.required),
+    latitude: this.fb.control<number | null>(null),
+    longitude: this.fb.control<number | null>(null),
     sizeInFeddans: this.fb.nonNullable.control(0, Validators.required),
     soilType: this.fb.nonNullable.control(''),
   });
@@ -93,8 +97,15 @@ export class FarmProfileComponent implements OnInit {
             name: response.name,
             location: response.location ?? '',
             governorate: response.governorate ?? '',
+            latitude: response.latitude ?? null,
+            longitude: response.longitude ?? null,
             sizeInFeddans: response.sizeInFeddans ?? 0,
             soilType: response.soilType ?? '',
+          });
+          this.mapInitial.set({
+            latitude: response.latitude,
+            longitude: response.longitude,
+            governorate: response.governorate,
           });
         },
         error: (err) => {
@@ -102,6 +113,18 @@ export class FarmProfileComponent implements OnInit {
           this.error.set('Failed to load profile.');
         },
       });
+  }
+
+  onLocationPicked(loc: PickedLocation): void {
+    this.form.patchValue({
+      latitude: loc.latitude,
+      longitude: loc.longitude,
+      governorate: loc.governorate,
+      location:
+        this.form.controls.location.value?.trim() ||
+        `${loc.governorateAr} (${loc.governorate})`,
+    });
+    this.form.controls.governorate.markAsDirty();
   }
 
   loadCropTypes(): void {
@@ -116,6 +139,10 @@ export class FarmProfileComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
+    if (!this.form.controls.governorate.value) {
+      this.error.set('Pick a location on the map before saving.');
+      return;
+    }
 
     this.saving.set(true);
     this.error.set(null);
@@ -123,7 +150,12 @@ export class FarmProfileComponent implements OnInit {
 
     const raw = this.form.getRawValue();
     const payload: UpdateFarmProfileRequest = {
-      ...raw,
+      name: raw.name,
+      location: raw.location || raw.governorate,
+      governorate: raw.governorate,
+      latitude: raw.latitude,
+      longitude: raw.longitude,
+      sizeInFeddans: raw.sizeInFeddans,
       soilType: raw.soilType
         ? (this.SOIL_TYPE_MAP[raw.soilType] ?? null)
         : null,
@@ -169,8 +201,14 @@ export class FarmProfileComponent implements OnInit {
       });
   }
 
-  deleteCrop(cropTypeId: string): void {
-    if (!confirm('Are you sure you want to remove this crop?')) return;
+  async deleteCrop(cropTypeId: string): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      titleKey: 'common.confirmTitle',
+      bodyKey: 'common.confirmBody',
+      confirmKey: 'common.remove',
+      danger: true,
+    });
+    if (!confirmed) return;
     this.deletingCropId.set(cropTypeId);
     this.mutationError.set(null);
     this.farmService
@@ -203,8 +241,14 @@ export class FarmProfileComponent implements OnInit {
       });
   }
 
-  deleteDocument(documentId: string): void {
-    if (!confirm('Are you sure you want to delete this document?')) return;
+  async deleteDocument(documentId: string): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      titleKey: 'common.confirmTitle',
+      bodyKey: 'common.confirmBody',
+      confirmKey: 'common.delete',
+      danger: true,
+    });
+    if (!confirmed) return;
     this.deletingDocumentId.set(documentId);
     this.mutationError.set(null);
     this.farmService

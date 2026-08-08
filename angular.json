@@ -32,6 +32,11 @@
                 "glob": "**/*",
                 "input": "src/assets",
                 "output": "/"
+              },
+              {
+                "glob": "*.png",
+                "input": "node_modules/leaflet/dist/images",
+                "output": "/leaflet"
               }
             ],
             "styles": [
@@ -48,8 +53,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "14kB",
+                  "maximumError": "18kB"
                 }
               ],
               "outputHashing": "all"

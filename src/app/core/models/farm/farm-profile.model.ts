@@ -3,6 +3,8 @@ export interface FarmProfile {
   name: string;
   location: string | null;
   governorate: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   sizeInFeddans: number | null;
   soilType: string | null;
   phone: string | null;

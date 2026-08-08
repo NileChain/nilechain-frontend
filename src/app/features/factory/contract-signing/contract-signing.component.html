@@ -1,38 +1,22 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
-  <header
-    class="h-16 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
-  >
-    <div class="flex items-center gap-2">
-      <button
-        type="button"
-        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant shrink-0"
-        (click)="mobileNav.toggleMenu()"
-        [attr.aria-label]="'common.toggleMenu' | translate"
-      >
-        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-      </button>
-      <h1 class="font-headline-md text-headline-md font-bold text-primary">
-        {{ 'contractSign.title' | translate }}
-      </h1>
-    </div>
-    <div class="flex items-center gap-2 sm:gap-4">
-      <ui-language-toggle />
-      <ui-theme-toggle />
-    </div>
-  </header>
+  <app-top-bar
+    titleKey="contractSign.title"
+    portal="factory"
+    notificationsLink="/factory/notifications"
+  />
 
   <div
     class="p-margin-mobile md:p-margin-desktop max-w-4xl mx-auto space-y-gutter animate-fade-in"
   >
     <section class="ui-card p-6 space-y-4">
       <p class="font-body-md text-on-surface-variant">
-        Generate an AI contract draft for the selected farm match.
+        {{ 'contractSign.subtitle' | translate }}
       </p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block font-label-md mb-1" for="factory-name-contract"
-            >Factory name</label
-          >
+          <label class="block font-label-md mb-1" for="factory-name-contract">{{
+            'contractSign.factoryName' | translate
+          }}</label>
           <input
             id="factory-name-contract"
             class="ui-input"
@@ -41,15 +25,21 @@
           />
         </div>
         <div>
-          <label class="block font-label-md mb-1">Farm</label>
+          <label class="block font-label-md mb-1">{{
+            'contractSign.farm' | translate
+          }}</label>
           <input class="ui-input" [value]="farmName || '—'" readonly />
         </div>
         <div>
-          <label class="block font-label-md mb-1">Request id</label>
+          <label class="block font-label-md mb-1">{{
+            'contractSign.requestId' | translate
+          }}</label>
           <input class="ui-input" [value]="requestId || '—'" readonly />
         </div>
         <div>
-          <label class="block font-label-md mb-1">Farm id</label>
+          <label class="block font-label-md mb-1">{{
+            'contractSign.farmId' | translate
+          }}</label>
           <input class="ui-input" [value]="farmId || '—'" readonly />
         </div>
       </div>
@@ -59,9 +49,49 @@
         [disabled]="loading()"
         (click)="generate()"
       >
-        {{ loading() ? 'Generating…' : 'Generate contract' }}
+        {{
+          loading()
+            ? ('contractSign.generating' | translate)
+            : ('contractSign.generate' | translate)
+        }}
       </button>
     </section>
+
+    <!-- Status stepper -->
+    <nav
+      class="ui-card p-4"
+      [attr.aria-label]="'contractSign.timeline' | translate"
+    >
+      <ol class="flex flex-col sm:flex-row gap-3 sm:gap-0 sm:justify-between">
+        @for (step of statusSteps; track step.id; let i = $index) {
+          <li class="flex items-center gap-2 flex-1">
+            <span
+              class="w-8 h-8 rounded-full flex items-center justify-center font-label-md shrink-0"
+              [class.bg-primary-container]="stepIndex(status()) >= i"
+              [class.text-on-primary-container]="stepIndex(status()) >= i"
+              [class.bg-surface-container-high]="stepIndex(status()) < i"
+              [class.text-on-surface-variant]="stepIndex(status()) < i"
+            >
+              @if (stepIndex(status()) > i) {
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+                  >check</span
+                >
+              } @else {
+                {{ i + 1 }}
+              }
+            </span>
+            <span
+              class="font-label-md"
+              [class.text-primary]="status() === step.id"
+              [class.text-on-surface]="stepIndex(status()) > i"
+              [class.text-on-surface-variant]="stepIndex(status()) < i"
+            >
+              {{ step.labelKey | translate }}
+            </span>
+          </li>
+        }
+      </ol>
+    </nav>
 
     @if (loading()) {
       <div class="flex justify-center py-8"><ui-loader /></div>
@@ -72,11 +102,68 @@
     }
 
     @if (contractText(); as text) {
-      <section class="ui-card p-6">
-        <h2 class="font-title-lg text-on-surface mb-4">Contract draft</h2>
-        <pre
-          class="whitespace-pre-wrap font-body-md text-body-md text-on-surface leading-relaxed bg-surface-container-low p-4 rounded-lg border border-outline-variant overflow-x-auto"
-          >{{ text }}</pre>
+      <section class="space-y-4">
+        @if (keyTerms().length) {
+          <div class="flex flex-wrap gap-2">
+            <span class="font-label-md text-on-surface-variant self-center">{{
+              'contractSign.keyTerms' | translate
+            }}:</span>
+            @for (term of keyTerms(); track term) {
+              <span
+                class="px-3 py-1 rounded-lg bg-surface-container-high text-on-surface font-label-sm text-label-sm"
+              >
+                {{ term }}
+              </span>
+            }
+          </div>
+        }
+
+        <article class="ui-card p-6 space-y-4">
+          <header class="flex justify-between items-center gap-3 flex-wrap">
+            <h2 class="font-title-lg text-on-surface">
+              {{ 'contractSign.document' | translate }}
+            </h2>
+            <span
+              class="px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-label-sm"
+            >
+              {{
+                status() === 'approved'
+                  ? ('contractSign.statusApproved' | translate)
+                  : status() === 'ready'
+                    ? ('contractSign.statusReady' | translate)
+                    : ('contractSign.statusDraft' | translate)
+              }}
+            </span>
+          </header>
+          <div
+            class="prose-contract bg-surface-container-low p-5 rounded-xl border border-outline-variant max-h-[28rem] overflow-y-auto"
+          >
+            <pre
+              class="whitespace-pre-wrap font-body-md text-body-md text-on-surface leading-relaxed m-0 font-sans"
+              >{{ text }}</pre
+            >
+          </div>
+          <div class="flex flex-wrap gap-3 pt-2">
+            <button
+              type="button"
+              class="ui-btn-primary"
+              [disabled]="status() === 'approved'"
+              (click)="approve()"
+            >
+              {{ 'contractSign.approve' | translate }}
+            </button>
+            <button type="button" class="ui-btn-secondary" (click)="download()">
+              {{ 'contractSign.download' | translate }}
+            </button>
+            <button
+              type="button"
+              class="ui-btn-ghost"
+              (click)="requestChanges()"
+            >
+              {{ 'contractSign.requestChanges' | translate }}
+            </button>
+          </div>
+        </article>
       </section>
     }
   </div>

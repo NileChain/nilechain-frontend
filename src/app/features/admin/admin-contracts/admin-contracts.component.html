@@ -1,80 +1,23 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
-  <header
-    class="h-16 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
-  >
-    <div class="flex items-center gap-4">
-      <button
-        type="button"
-        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
-        (click)="mobileNav.toggleMenu()"
-        [attr.aria-label]="'common.toggleMenu' | translate"
+  <app-top-bar titleKey="admin.contracts.title" portal="admin">
+    <button
+      type="button"
+      class="ui-btn-primary inline-flex items-center gap-2 shrink-0 !py-2 !px-4"
+    >
+      <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+        >add</span
       >
-        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-      </button>
-      <h2 class="font-headline-md text-headline-md font-bold text-primary">
-        {{ 'admin.contracts.title' | translate }}
-      </h2>
-    </div>
-    <div class="flex items-center gap-2 sm:gap-4">
-      <ui-language-toggle />
-      <ui-theme-toggle />
-      <button
-        type="button"
-        class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant relative"
-        [attr.aria-label]="'common.notifications' | translate"
-      >
-        <span class="material-symbols-outlined" aria-hidden="true"
-          >notifications</span
-        >
-        <span
-          class="absolute top-2 end-2 w-2 h-2 bg-error rounded-full"
-          aria-hidden="true"
-        ></span>
-      </button>
-      <div
-        class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant"
-      >
-        <div class="text-end hidden sm:block">
-          <p class="font-label-md text-label-md text-on-surface leading-tight">
-            Admin
-          </p>
-          <p class="text-label-sm text-label-sm text-on-surface-variant">
-            {{ 'nav.adminRole' | translate }}
-          </p>
-        </div>
-        <div
-          class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container"
-        >
-          <span class="font-bold">AD</span>
-        </div>
-      </div>
-    </div>
-  </header>
+      {{ 'admin.contracts.newContract' | translate }}
+    </button>
+  </app-top-bar>
 
   <div
     class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
   >
-    <ui-preview-banner />
-    <section
-      class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4"
-    >
-      <div class="space-y-1">
-        <h1 class="font-headline-lg text-headline-lg font-bold text-on-surface">
-          {{ 'admin.contracts.title' | translate }}
-        </h1>
-        <p class="font-body-lg text-body-lg text-on-surface-variant">
-          {{ 'admin.contracts.subtitle' | translate }}
-        </p>
-      </div>
-      <button
-        type="button"
-        class="ui-btn-primary inline-flex items-center gap-2 shrink-0"
-      >
-        <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
-          >add</span
-        >
-        {{ 'admin.contracts.newContract' | translate }}
-      </button>
+    <section class="space-y-1">
+      <p class="font-body-lg text-body-lg text-on-surface-variant">
+        {{ 'admin.contracts.subtitle' | translate }}
+      </p>
     </section>
 
     <!-- Filters -->

@@ -1,23 +1,24 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
-import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
-import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
+import { UiStatCardComponent } from '../../../shared/ui/stat-card/stat-card.component';
 import { UiPreviewBannerComponent } from '../../../shared/ui/preview-banner/preview-banner.component';
-import { MobileNavService } from '../../../core/services/mobile-nav.service';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
   imports: [
     TranslatePipe,
-    UiLanguageToggleComponent,
-    UiThemeToggleComponent,
+    RouterLink,
+    AppTopBarComponent,
+    UiStatCardComponent,
     UiPreviewBannerComponent,
   ],
   templateUrl: './admin-dashboard.component.html',
 })
 export class AdminDashboardComponent {
-  readonly mobileNav = inject(MobileNavService);
+  /** Illustrative sample only — not backed by an admin analytics API. */
   readonly monthlyBars = [
     { label: 'Jan', height: '72%' },
     { label: 'Feb', height: '66%' },
@@ -28,6 +29,7 @@ export class AdminDashboardComponent {
     { label: 'Jul', height: '100%' },
   ] as const;
 
+  /** Illustrative sample only — not backed by an admin analytics API. */
   readonly crops = [
     {
       name: 'Hard Wheat',

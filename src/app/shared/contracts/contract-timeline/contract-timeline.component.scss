@@ -1,0 +1,117 @@
+.timeline-card {
+  border-radius: 0.75rem;
+  border: 1px solid
+    color-mix(in srgb, var(--color-outline-variant, #c4c8c0) 75%, transparent);
+  background: var(--color-surface-container-lowest, #fff);
+  box-shadow: none;
+  padding: 0.9rem 0.95rem;
+}
+
+.timeline-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 0.85rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-on-surface, #1a1c19);
+}
+
+.timeline-card__title .material-symbols-outlined {
+  font-size: 1.1rem;
+  color: var(--color-on-surface-variant, #5f6b64);
+}
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.timeline__item {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  gap: 0.75rem;
+  position: relative;
+  padding-bottom: 1.1rem;
+  animation: stepIn 0.4s ease both;
+}
+
+.timeline__item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 1.05rem;
+  top: 2.2rem;
+  bottom: 0;
+  width: 2px;
+  background: color-mix(in srgb, var(--color-outline-variant, #c4c8c0) 80%, transparent);
+}
+
+.timeline__icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-container-high, #e8ebe4);
+  color: var(--color-on-surface-variant, #5f6b64);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.timeline__item[data-state='done'] .timeline__icon {
+  background: color-mix(in srgb, var(--color-success, #1b5e20) 18%, transparent);
+  color: var(--color-success, #1b5e20);
+}
+
+.timeline__item[data-state='current'] .timeline__icon {
+  background: color-mix(in srgb, var(--color-primary, #1b5e20) 18%, transparent);
+  color: var(--color-primary, #1b5e20);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary, #1b5e20) 14%, transparent);
+}
+
+.timeline__item[data-state='rejected'] .timeline__icon {
+  background: color-mix(in srgb, var(--color-danger, #c62828) 16%, transparent);
+  color: var(--color-danger, #c62828);
+}
+
+.timeline__label {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.timeline__time {
+  margin: 0.15rem 0 0;
+  font-size: 0.78rem;
+  color: var(--color-on-surface-variant, #5f6b64);
+}
+
+.timeline__dot {
+  margin-inline: 0.25rem;
+}
+
+.timeline__icon .material-symbols-outlined {
+  font-size: 18px;
+}
+
+@keyframes stepIn {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}

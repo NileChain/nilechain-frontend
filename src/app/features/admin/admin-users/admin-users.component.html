@@ -1,104 +1,106 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
-  <header
-    class="h-16 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
-  >
-    <div class="flex items-center gap-4">
-      <button
-        type="button"
-        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
-        (click)="mobileNav.toggleMenu()"
-        [attr.aria-label]="'common.toggleMenu' | translate"
+  <app-top-bar titleKey="admin.users.title" portal="admin">
+    <button
+      type="button"
+      class="ui-btn-primary inline-flex items-center gap-2 shrink-0 !py-2 !px-4"
+      (click)="showCreate.set(!showCreate())"
+    >
+      <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+        >add</span
       >
-        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-      </button>
-      <h2 class="font-headline-md text-headline-md font-bold text-primary">
-        {{ 'admin.users.title' | translate }}
-      </h2>
-    </div>
-    <div class="flex items-center gap-2 sm:gap-4">
-      <ui-language-toggle />
-      <ui-theme-toggle />
-      <div
-        class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant"
-      >
-        <div class="text-end hidden sm:block">
-          <p class="font-label-md text-label-md text-on-surface leading-tight">
-            {{ currentUser()?.email || 'Admin' }}
-          </p>
-          <p class="text-label-sm text-label-sm text-on-surface-variant">
-            {{ 'nav.adminRole' | translate }}
-          </p>
-        </div>
-        <div
-          class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container"
-        >
-          <span class="font-bold">AD</span>
-        </div>
-      </div>
-    </div>
-  </header>
+      {{ 'admin.users.addUser' | translate }}
+    </button>
+  </app-top-bar>
 
   <div
     class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
   >
-    <section
-      class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4"
-    >
-      <div class="space-y-1">
-        <h1 class="font-headline-lg text-headline-lg font-bold text-on-surface">
-          {{ 'admin.users.title' | translate }}
-        </h1>
-        <p class="font-body-lg text-body-lg text-on-surface-variant">
-          {{ 'admin.users.subtitle' | translate }}
-        </p>
-      </div>
-      <button
-        type="button"
-        class="ui-btn-primary inline-flex items-center gap-2 shrink-0"
-        (click)="showCreate.set(!showCreate())"
-      >
-        <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
-          >add</span
-        >
-        {{ 'admin.users.addUser' | translate }}
-      </button>
+    <section class="space-y-1">
+      <p class="font-body-lg text-body-lg text-on-surface-variant">
+        {{ 'admin.users.subtitle' | translate }}
+      </p>
     </section>
 
     @if (showCreate()) {
       <section class="ui-card p-6 space-y-4">
-        <h2 class="font-title-lg">Create user</h2>
+        <h2 class="font-title-lg">{{ 'admin.users.addUser' | translate }}</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            class="ui-input"
-            placeholder="Email"
-            [(ngModel)]="createEmail"
-            name="createEmail"
-          />
-          <input
-            class="ui-input"
-            placeholder="Name"
-            [(ngModel)]="createName"
-            name="createName"
-          />
-          <input
-            class="ui-input"
-            type="password"
-            placeholder="Password"
-            [(ngModel)]="createPassword"
-            name="createPassword"
-          />
-          <input
-            class="ui-input"
-            type="password"
-            placeholder="Confirm password"
-            [(ngModel)]="createConfirm"
-            name="createConfirm"
-          />
-          <select class="ui-input" [(ngModel)]="createRole" name="createRole">
-            <option value="Farm">Farm</option>
-            <option value="Factory">Factory</option>
-            <option value="Admin">Admin</option>
-          </select>
+          <div class="space-y-1">
+            <label class="block font-label-md text-label-md" for="create-email">{{
+              'admin.users.email' | translate
+            }}</label>
+            <input
+              id="create-email"
+              class="ui-input"
+              type="email"
+              [attr.placeholder]="'admin.users.email' | translate"
+              [(ngModel)]="createEmail"
+              name="createEmail"
+            />
+          </div>
+          <div class="space-y-1">
+            <label class="block font-label-md text-label-md" for="create-name">{{
+              'admin.users.name' | translate
+            }}</label>
+            <input
+              id="create-name"
+              class="ui-input"
+              [attr.placeholder]="'admin.users.name' | translate"
+              [(ngModel)]="createName"
+              name="createName"
+            />
+          </div>
+          <div class="space-y-1">
+            <label
+              class="block font-label-md text-label-md"
+              for="create-password"
+              >{{ 'common.password' | translate }}</label
+            >
+            <input
+              id="create-password"
+              class="ui-input"
+              type="password"
+              [attr.placeholder]="'common.password' | translate"
+              [(ngModel)]="createPassword"
+              name="createPassword"
+            />
+          </div>
+          <div class="space-y-1">
+            <label
+              class="block font-label-md text-label-md"
+              for="create-confirm"
+              >{{ 'common.confirmPassword' | translate }}</label
+            >
+            <input
+              id="create-confirm"
+              class="ui-input"
+              type="password"
+              [attr.placeholder]="'common.confirmPassword' | translate"
+              [(ngModel)]="createConfirm"
+              name="createConfirm"
+            />
+          </div>
+          <div class="space-y-1">
+            <label class="block font-label-md text-label-md" for="create-role">{{
+              'admin.users.role' | translate
+            }}</label>
+            <select
+              id="create-role"
+              class="ui-input"
+              [(ngModel)]="createRole"
+              name="createRole"
+            >
+              <option value="Farm">
+                {{ 'admin.users.roleFarm' | translate }}
+              </option>
+              <option value="Factory">
+                {{ 'admin.users.roleFactory' | translate }}
+              </option>
+              <option value="Admin">
+                {{ 'admin.users.roleAdmin' | translate }}
+              </option>
+            </select>
+          </div>
         </div>
         <button
           type="button"
@@ -106,7 +108,7 @@
           [disabled]="actionLoading() === 'create'"
           (click)="createUser()"
         >
-          Create
+          {{ 'admin.users.addUser' | translate }}
         </button>
       </section>
     }
@@ -127,7 +129,7 @@
         />
       </div>
       <button type="button" class="ui-btn-secondary" (click)="searchUsers()">
-        Search
+        {{ 'common.search' | translate }}
       </button>
       <div class="flex flex-wrap gap-2">
         <button
@@ -259,7 +261,7 @@
                         <p
                           class="font-label-sm text-label-sm text-on-surface-variant"
                         >
-                          ID: {{ user.id.slice(0, 8) }}ΓÇª
+                          ID: {{ user.id.slice(0, 8) }}…
                         </p>
                       </div>
                     </div>
@@ -320,7 +322,7 @@
                           [disabled]="!!actionLoading()"
                           (click)="unblock(user)"
                         >
-                          Unblock
+                          {{ 'admin.users.unblock' | translate }}
                         </button>
                       } @else {
                         <button
@@ -344,7 +346,7 @@
                           [disabled]="!!actionLoading()"
                           (click)="deactivate(user)"
                         >
-                          Deactivate
+                          {{ 'admin.users.deactivate' | translate }}
                         </button>
                       } @else {
                         <button
@@ -353,7 +355,7 @@
                           [disabled]="!!actionLoading()"
                           (click)="reactivate(user)"
                         >
-                          Reactivate
+                          {{ 'admin.users.activate' | translate }}
                         </button>
                       }
                     </div>
@@ -378,7 +380,7 @@
           class="p-4 border-t border-outline-variant bg-surface-container-lowest flex flex-col sm:flex-row items-center justify-between gap-3 font-body-md text-body-md text-on-surface-variant"
         >
           <p>
-            {{ totalCount() }} user(s) ┬╖ page {{ page }} / {{ totalPages() }}
+            {{ totalCount() }} user(s) · page {{ page }} / {{ totalPages() }}
           </p>
           <div class="flex items-center gap-2">
             <button

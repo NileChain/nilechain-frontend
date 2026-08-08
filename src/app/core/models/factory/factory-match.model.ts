@@ -4,6 +4,8 @@ export interface FactoryMatchItem {
   farmName: string;
   farmLocation: string | null;
   farmGovernorate: string | null;
+  farmLatitude?: number | null;
+  farmLongitude?: number | null;
   farmIsVerified: boolean;
   farmAverageRating: number;
   matchScore: number | null;

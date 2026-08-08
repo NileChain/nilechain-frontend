@@ -1,0 +1,102 @@
+<header
+  class="app-topbar px-margin-mobile md:px-margin-desktop"
+  [class.app-topbar--scrolled]="scrolled()"
+>
+  <div class="app-topbar__start">
+    <button
+      type="button"
+      class="ui-icon-btn md:hidden shrink-0"
+      (click)="mobileNav.toggleMenu()"
+      [attr.aria-expanded]="mobileNav.open()"
+      [attr.aria-label]="'common.toggleMenu' | translate"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+    </button>
+
+    <div class="app-topbar__titles">
+      <h2 class="app-topbar__title truncate">
+        {{ titleKey | translate }}
+      </h2>
+      @if (subtitleKey) {
+        <p class="app-topbar__subtitle truncate hidden sm:block">
+          {{ subtitleKey | translate }}
+        </p>
+      }
+    </div>
+  </div>
+
+  <div class="app-topbar__end">
+    <div class="app-topbar__actions">
+      <ng-content />
+    </div>
+
+    <div
+      class="app-topbar__utils"
+      role="group"
+      [attr.aria-label]="'common.actions' | translate"
+    >
+      @if (showSearch) {
+        <button
+          type="button"
+          class="ui-icon-btn"
+          (click)="onSearch()"
+          [attr.aria-label]="'common.search' | translate"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true"
+            >search</span
+          >
+        </button>
+      }
+
+      <ui-language-toggle />
+      <ui-theme-toggle />
+
+      @if (notificationsLink) {
+        <a
+          [routerLink]="notificationsLink"
+          class="ui-icon-btn relative"
+          [attr.aria-label]="'common.notifications' | translate"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true"
+            >notifications</span
+          >
+          @if (notificationCenter.unreadCount() > 0) {
+            <span class="app-topbar__badge" aria-hidden="true">{{
+              unreadBadgeLabel
+            }}</span>
+          }
+        </a>
+      } @else {
+        <button
+          type="button"
+          class="ui-icon-btn relative"
+          (click)="notificationCenter.openDrawer()"
+          [attr.aria-label]="'common.notifications' | translate"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true"
+            >notifications</span
+          >
+          @if (notificationCenter.unreadCount() > 0) {
+            <span class="app-topbar__badge" aria-hidden="true">{{
+              unreadBadgeLabel
+            }}</span>
+          }
+        </button>
+      }
+    </div>
+
+    @if (showUser) {
+      <div class="app-topbar__account" [attr.aria-label]="accountAriaLabel">
+        <div class="app-topbar__account-meta hidden sm:block">
+          <p class="app-topbar__account-name">
+            {{ currentUser()?.displayName || currentUser()?.email || '' }}
+          </p>
+          <p class="app-topbar__account-role">
+            {{ roleLabelKey | translate }}
+          </p>
+        </div>
+        <ui-avatar [initials]="userInitials" [size]="36" />
+      </div>
+    }
+  </div>
+</header>

@@ -1,29 +1,47 @@
-import { AfterViewInit, Component, OnDestroy, inject } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  HostListener,
+  OnDestroy,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
-import { UiLanguageToggleComponent } from '../../shared/ui/language-toggle/language-toggle.component';
-import { UiThemeToggleComponent } from '../../shared/ui/theme-toggle/theme-toggle.component';
 import { AuthService } from '../../core/services/auth.service';
+import { LocaleService } from '../../core/services/locale.service';
+import { ThemeService } from '../../core/services/theme.service';
+import { AppLocale } from '../../core/models/ui.models';
+import { UiBrandMarkComponent } from '../../shared/ui/brand-mark/brand-mark.component';
+
+type NavMenu = 'solutions' | 'resources' | 'lang' | null;
 
 @Component({
   selector: 'app-landing',
-  imports: [
-    RouterLink,
-    TranslatePipe,
-    UiLanguageToggleComponent,
-    UiThemeToggleComponent,
-  ],
+  imports: [RouterLink, TranslatePipe, UiBrandMarkComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
 })
 export class LandingComponent implements AfterViewInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly localeService = inject(LocaleService);
+  readonly theme = inject(ThemeService);
+
   readonly isAuthenticated = this.authService.isAuthenticated;
   readonly currentUser = this.authService.currentUser;
-
   readonly roles = this.authService.roles;
+
+  readonly mobileOpen = signal(false);
+  readonly navScrolled = signal(false);
+  readonly openMenu = signal<NavMenu>(null);
+
+  readonly locale = this.localeService.locale;
+  readonly langCode = computed(() =>
+    this.locale() === 'ar' ? 'ع' : 'EN'
+  );
 
   goToDashboard(): void {
     const roles = this.roles().map((r) => r.toLowerCase());
@@ -40,25 +58,61 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   }
 
   logout(): void {
+    this.closeAll();
     this.authService.logout().subscribe({
       next: () => void this.router.navigate(['/login']),
       error: () => void this.router.navigate(['/login']),
     });
   }
 
-  private readonly onScroll = (): void => {
-    const nav = document.querySelector('nav');
-    if (!nav) {
+  toggleMobile(): void {
+    this.openMenu.set(null);
+    this.mobileOpen.update((v) => !v);
+  }
+
+  closeAll(): void {
+    this.mobileOpen.set(false);
+    this.openMenu.set(null);
+  }
+
+  /** Keep drawer closed if viewport crosses into desktop nav. */
+  @HostListener('window:resize')
+  onResize(): void {
+    if (typeof window !== 'undefined' && window.innerWidth >= 768 && this.mobileOpen()) {
+      this.mobileOpen.set(false);
+    }
+  }
+
+  toggleMenu(menu: Exclude<NavMenu, null>, event?: Event): void {
+    event?.stopPropagation();
+    this.openMenu.update((cur) => (cur === menu ? null : menu));
+  }
+
+  setLocale(locale: AppLocale): void {
+    void this.localeService.setLocale(locale);
+    this.openMenu.set(null);
+  }
+
+  toggleTheme(): void {
+    this.theme.toggle();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.openMenu()) {
+      this.openMenu.set(null);
       return;
     }
+    this.closeAll();
+  }
 
-    if (window.scrollY > 20) {
-      nav.classList.add('shadow-md', 'h-14');
-      nav.classList.remove('h-16');
-    } else {
-      nav.classList.remove('shadow-md', 'h-14');
-      nav.classList.add('h-16');
-    }
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.closeAll();
+  }
+
+  private readonly onScroll = (): void => {
+    this.navScrolled.set(window.scrollY > 12);
   };
 
   private observer?: IntersectionObserver;
@@ -68,7 +122,8 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    window.addEventListener('scroll', this.onScroll);
+    window.addEventListener('scroll', this.onScroll, { passive: true });
+    this.onScroll();
 
     this.observer = new IntersectionObserver(
       (entries) => {

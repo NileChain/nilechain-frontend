@@ -1,84 +1,144 @@
 <ng-template #navBody>
-  <div class="px-2 py-4 mb-6">
-    <div class="flex items-center gap-3">
-      <span
-        class="material-symbols-outlined text-primary text-4xl"
-        style="font-variation-settings: 'FILL' 1"
-        >agriculture</span
-      >
-      <div>
-        <h1
-          class="font-headline-sm text-headline-sm font-bold text-primary leading-tight"
-        >
-          NileChain B2B
-        </h1>
-        <p
-          class="text-label-sm font-label-sm text-on-surface-variant opacity-70"
-        >
-          Enterprise Portal
+  <div class="app-sidebar__inner">
+    <div class="app-sidebar__brand">
+      <div class="app-sidebar__brand-mark" aria-hidden="true">
+        <ui-brand-mark [size]="28" [decorative]="true" />
+      </div>
+      <div class="min-w-0">
+        <p class="app-sidebar__brand-title">NileChain B2B</p>
+        <p class="app-sidebar__brand-sub">
+          {{ 'nav.farmPortal' | translate }}
         </p>
       </div>
     </div>
-  </div>
 
-  <nav
-    class="flex-grow space-y-1"
-    [attr.aria-label]="'nav.dashboard' | translate"
-  >
-    @for (item of items; track item.key) {
-      <a
-        [routerLink]="item.link"
-        [class]="
-          active() === item.key
-            ? 'sidebar-active flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-100 active:scale-95'
-            : 'text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150'
-        "
-        [attr.aria-current]="active() === item.key ? 'page' : null"
+    <div class="app-sidebar__scroll">
+      <p class="app-sidebar__section-label">
+        {{ 'nav.mainSection' | translate }}
+      </p>
+      <nav
+        class="app-sidebar__nav"
+        [attr.aria-label]="'nav.mainSection' | translate"
       >
-        <span class="material-symbols-outlined" aria-hidden="true">{{
-          item.icon
-        }}</span>
-        {{ item.labelKey | translate }}
-      </a>
-    }
-  </nav>
-  <div class="pt-4 border-t border-outline-variant space-y-1">
-    <button
-      type="button"
-      (click)="logout()"
-      class="w-full text-start text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150"
-    >
-      <span class="material-symbols-outlined" aria-hidden="true">logout</span>
-      {{ 'nav.logout' | translate }}
-    </button>
+        @for (item of items; track item.key) {
+          <a
+            [routerLink]="item.link"
+            class="app-sidebar__link"
+            [class.app-sidebar__link--active]="active() === item.key"
+            [attr.aria-current]="active() === item.key ? 'page' : null"
+          >
+            <span
+              class="material-symbols-outlined"
+              aria-hidden="true"
+              [attr.data-fill]="active() === item.key ? '1' : null"
+              >{{ item.icon }}</span
+            >
+            <span class="truncate">{{ item.labelKey | translate }}</span>
+          </a>
+        }
+      </nav>
+
+      @if (personalization.recentItems().length > 0) {
+        <div class="app-sidebar__recent">
+          <p class="app-sidebar__section-label">
+            {{ 'common.recentItems' | translate }}
+          </p>
+          <nav
+            class="app-sidebar__nav"
+            [attr.aria-label]="'common.recentItems' | translate"
+          >
+            @for (
+              item of personalization.recentItems().slice(0, 4);
+              track item.id
+            ) {
+              <a
+                [routerLink]="item.route"
+                class="app-sidebar__link app-sidebar__link--recent"
+              >
+                <span
+                  class="material-symbols-outlined"
+                  aria-hidden="true"
+                  >{{ item.icon }}</span
+                >
+                <span class="truncate">{{ item.label | translate }}</span>
+              </a>
+            }
+          </nav>
+        </div>
+      }
+
+      @if (personalization.favorites().length > 0) {
+        <div class="app-sidebar__recent">
+          <p class="app-sidebar__section-label">
+            {{ 'common.favorites' | translate }}
+          </p>
+          <nav
+            class="app-sidebar__nav"
+            [attr.aria-label]="'common.favorites' | translate"
+          >
+            @for (
+              item of personalization.favorites().slice(0, 4);
+              track item.id
+            ) {
+              <a
+                [routerLink]="item.route"
+                class="app-sidebar__link app-sidebar__link--recent"
+              >
+                <span
+                  class="material-symbols-outlined"
+                  aria-hidden="true"
+                  >{{ item.icon }}</span
+                >
+                <span class="truncate">{{ item.label | translate }}</span>
+              </a>
+            }
+          </nav>
+        </div>
+      }
+    </div>
+
+    <div class="app-sidebar__footer">
+      <button
+        type="button"
+        class="app-sidebar__logout"
+        (click)="logout()"
+      >
+        <span class="material-symbols-outlined icon-flip" aria-hidden="true"
+          >logout</span
+        >
+        {{ 'nav.logout' | translate }}
+      </button>
+    </div>
   </div>
 </ng-template>
 
 <aside
-  class="fixed start-0 top-0 h-full w-[280px] bg-surface-container-low border-e border-outline-variant flex flex-col p-4 space-y-2 z-50 hidden md:flex"
+  class="app-sidebar fixed start-0 top-0 hidden md:flex"
+  aria-label="Farm navigation"
 >
   <ng-container *ngTemplateOutlet="navBody" />
 </aside>
 
 @if (mobileNav.open()) {
-  <div
-    class="fixed inset-0 z-[60] md:hidden"
-    [attr.aria-label]="'common.toggleMenu' | translate"
-  >
+  <div class="app-sidebar-overlay md:hidden" role="presentation">
     <div
-      class="absolute inset-0 bg-black/50 animate-fade-in"
+      class="app-sidebar-overlay__backdrop animate-backdrop-in"
       (click)="mobileNav.closeMenu()"
       [attr.aria-hidden]="true"
     ></div>
     <aside
-      class="absolute start-0 top-0 h-full w-[280px] bg-surface-container-low border-e border-outline-variant flex flex-col p-4 space-y-2"
+      #drawerPanel
+      tabindex="-1"
+      class="app-sidebar app-sidebar--drawer animate-slide-in-start outline-none"
       role="dialog"
       aria-modal="true"
+      [attr.aria-label]="'common.toggleMenu' | translate"
     >
-      <div class="flex justify-end">
+      <div class="app-sidebar__drawer-close px-3 pt-2">
         <button
+          #drawerClose
           type="button"
-          class="p-2 hover:bg-surface-container-high rounded-full text-on-surface-variant"
+          class="ui-icon-btn"
           (click)="mobileNav.closeMenu()"
           [attr.aria-label]="'common.close' | translate"
         >

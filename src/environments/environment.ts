@@ -1,7 +1,8 @@
 export const environment = {
   production: false,
   apiUrl: 'http://localhost:4200',
-  backendUrl: 'https://localhost:7018/api',
+  // Use HTTP profile (dotnet run --launch-profile http). HTTPS :7018 is only up with the https profile.
+  backendUrl: 'http://localhost:5190/api',
   aiServiceUrl: 'http://localhost:8000',
   apiKey: '',
   apiKeyHeader: 'X-Api-Key',

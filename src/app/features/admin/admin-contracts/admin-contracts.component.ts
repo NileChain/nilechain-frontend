@@ -1,23 +1,14 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
-import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
-import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
-import { UiPreviewBannerComponent } from '../../../shared/ui/preview-banner/preview-banner.component';
-import { MobileNavService } from '../../../core/services/mobile-nav.service';
+import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 
 @Component({
   selector: 'app-admin-contracts',
   standalone: true,
-  imports: [
-    TranslatePipe,
-    UiLanguageToggleComponent,
-    UiThemeToggleComponent,
-    UiPreviewBannerComponent,
-  ],
+  imports: [TranslatePipe, AppTopBarComponent],
   templateUrl: './admin-contracts.component.html',
 })
 export class AdminContractsComponent {
-  readonly mobileNav = inject(MobileNavService);
   readonly contracts = [
     {
       id: 'CTR-2026-084',

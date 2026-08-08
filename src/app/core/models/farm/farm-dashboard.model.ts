@@ -7,6 +7,12 @@ export interface FarmDashboard {
   riskBreakdown: RiskBreakdownItem[];
   recentMatches: RecentMatchItem[];
   improvementTips: ImprovementTip[];
+  reliabilityTrend: ReliabilityTrendPoint[];
+}
+
+export interface ReliabilityTrendPoint {
+  value: number;
+  label: string;
 }
 
 export interface RiskBreakdownItem {

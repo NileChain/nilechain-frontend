@@ -1,50 +1,35 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
+  <app-top-bar
+    titleKey="factory.supplyRequest.title"
+    subtitleKey="factory.supplyRequest.subtitle"
+    portal="factory"
+    notificationsLink="/factory/notifications"
+  >
+    <span
+      class="hidden sm:inline-flex items-center gap-2 bg-primary-container/10 px-4 py-2 rounded-lg"
+    >
+      <span
+        class="material-symbols-outlined text-primary text-xl fill"
+        aria-hidden="true"
+        >auto_awesome</span
+      >
+      <span class="font-title-md text-title-md text-primary">{{
+        'factory.supplyRequest.aiPowered' | translate
+      }}</span>
+    </span>
+  </app-top-bar>
+
   <div
     class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
   >
-    <ui-preview-banner />
-    <!-- Topbar -->
-    <header class="flex justify-between items-center gap-4 flex-wrap">
-      <div class="flex items-center gap-2">
-        <button
-          type="button"
-          class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant shrink-0"
-          (click)="mobileNav.toggleMenu()"
-          [attr.aria-label]="'common.toggleMenu' | translate"
-        >
-          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-        </button>
-        <div>
-          <h1 class="font-headline-lg text-headline-lg text-on-surface">
-            {{ 'factory.supplyRequest.title' | translate }}
-          </h1>
-          <p class="font-body-lg text-body-lg text-on-surface-variant mt-1">
-            {{ 'factory.supplyRequest.subtitle' | translate }}
-          </p>
-        </div>
-      </div>
-      <div class="flex items-center gap-2 sm:gap-4">
-        <span
-          class="hidden sm:inline-flex items-center gap-2 bg-primary-container/10 px-4 py-2 rounded-lg"
-        >
-          <span
-            class="material-symbols-outlined text-primary text-xl fill"
-            aria-hidden="true"
-            >auto_awesome</span
-          >
-          <span class="font-title-md text-title-md text-primary">{{
-            'factory.supplyRequest.aiPowered' | translate
-          }}</span>
-        </span>
-        <ui-language-toggle />
-        <ui-theme-toggle />
-      </div>
-    </header>
 
-    <!-- Presentational form -->
-    <form class="ui-card p-6 md:p-8 space-y-8 animate-slide-up" novalidate>
+    <form
+      class="ui-card p-6 md:p-8 space-y-8 animate-slide-up"
+      [formGroup]="form"
+      (ngSubmit)="onSubmit()"
+      novalidate
+    >
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Crop -->
         <div class="space-y-2">
           <label
             class="block font-title-md text-title-md text-on-surface"
@@ -57,10 +42,10 @@
           <div class="relative">
             <select
               id="crop_type"
-              name="crop_type"
+              formControlName="crop"
               class="ui-input appearance-none pe-10"
             >
-              <option disabled selected value="">
+              <option disabled value="">
                 {{ 'factory.supplyRequest.selectCrop' | translate }}
               </option>
               @for (crop of crops; track crop.value) {
@@ -77,7 +62,6 @@
           </div>
         </div>
 
-        <!-- Quantity -->
         <div class="space-y-2">
           <label
             class="block font-title-md text-title-md text-on-surface"
@@ -89,7 +73,7 @@
           </label>
           <input
             id="quantity"
-            name="quantity"
+            formControlName="quantity"
             type="number"
             min="1"
             class="ui-input"
@@ -99,7 +83,6 @@
           />
         </div>
 
-        <!-- Target price -->
         <div class="space-y-2">
           <label
             class="block font-title-md text-title-md text-on-surface"
@@ -111,7 +94,7 @@
           </label>
           <input
             id="target_price"
-            name="target_price"
+            formControlName="price"
             type="number"
             min="0"
             class="ui-input"
@@ -121,7 +104,6 @@
           />
         </div>
 
-        <!-- Delivery date -->
         <div class="space-y-2">
           <label
             class="block font-title-md text-title-md text-on-surface"
@@ -133,14 +115,13 @@
           </label>
           <input
             id="delivery_date"
-            name="delivery_date"
+            formControlName="deliveryDate"
             type="date"
             class="ui-input"
           />
         </div>
       </div>
 
-      <!-- Quality -->
       <div class="space-y-2">
         <label
           class="block font-title-md text-title-md text-on-surface"
@@ -153,7 +134,7 @@
         </label>
         <textarea
           id="quality_specs"
-          name="quality_specs"
+          formControlName="quality"
           rows="4"
           class="ui-input resize-y"
           [attr.placeholder]="
@@ -162,7 +143,6 @@
         ></textarea>
       </div>
 
-      <!-- Governorates -->
       <fieldset class="space-y-3">
         <legend class="font-title-md text-title-md text-on-surface">
           {{ 'factory.supplyRequest.governorates' | translate }}
@@ -172,37 +152,52 @@
         </p>
         <div class="flex flex-wrap gap-2">
           @for (gov of governorates; track gov.value) {
-            <label class="cursor-pointer">
-              <input
-                class="peer sr-only"
-                name="governorate"
-                type="checkbox"
-                [value]="gov.value"
-              />
-              <span
-                class="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface-variant font-title-md text-title-md peer-checked:bg-primary-container peer-checked:text-on-primary-container peer-checked:border-primary-container transition-colors select-none"
-              >
-                {{ gov.labelKey | translate }}
-              </span>
-            </label>
+            <button
+              type="button"
+              class="inline-flex items-center justify-center px-4 py-2 rounded-lg border font-title-md text-title-md transition-colors select-none"
+              [class.border-outline-variant]="!isGovSelected(gov.value)"
+              [class.bg-surface-container-lowest]="!isGovSelected(gov.value)"
+              [class.text-on-surface-variant]="!isGovSelected(gov.value)"
+              [class.bg-primary-container]="isGovSelected(gov.value)"
+              [class.text-on-primary-container]="isGovSelected(gov.value)"
+              [class.border-primary-container]="isGovSelected(gov.value)"
+              (click)="toggleGovernorate(gov.value)"
+            >
+              {{ gov.labelKey | translate }}
+            </button>
           }
         </div>
       </fieldset>
 
       <hr class="border-outline-variant" />
 
-      <!-- Actions -->
       <div
         class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-4"
       >
-        <button type="button" class="ui-btn-ghost w-full sm:w-auto">
+        <a
+          routerLink="/factory/dashboard"
+          class="ui-btn-ghost w-full sm:w-auto text-center"
+        >
           {{ 'factory.supplyRequest.cancel' | translate }}
-        </button>
-        <button type="button" class="ui-btn-primary w-full sm:w-auto">
-          <span class="material-symbols-outlined fill" aria-hidden="true"
-            >manage_search</span
-          >
-          {{ 'factory.supplyRequest.submit' | translate }}
+        </a>
+        <button
+          type="submit"
+          class="ui-btn-primary w-full sm:w-auto"
+          [disabled]="submitting()"
+        >
+          @if (submitting()) {
+            <span
+              class="material-symbols-outlined animate-spin text-[20px]"
+              aria-hidden="true"
+              >progress_activity</span
+            >
+            {{ 'factory.supplyRequest.submitting' | translate }}
+          } @else {
+            <span class="material-symbols-outlined fill" aria-hidden="true"
+              >manage_search</span
+            >
+            {{ 'factory.supplyRequest.submit' | translate }}
+          }
         </button>
       </div>
     </form>

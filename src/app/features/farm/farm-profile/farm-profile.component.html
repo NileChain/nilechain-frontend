@@ -1,82 +1,9 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
-  <header
-    class="h-16 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
-  >
-    <div class="flex items-center gap-4">
-      <button
-        type="button"
-        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
-        (click)="mobileNav.toggleMenu()"
-        [attr.aria-label]="'common.toggleMenu' | translate"
-      >
-        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-      </button>
-      <h1 class="font-headline-md text-headline-md font-bold text-primary">
-        {{ 'farm.profile.title' | translate }}
-      </h1>
-    </div>
-    <div class="flex items-center gap-2 sm:gap-4">
-      <ui-language-toggle />
-      <ui-theme-toggle />
-      <a
-        routerLink="/farm-notifications"
-        class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant relative"
-        [attr.aria-label]="'common.notifications' | translate"
-      >
-        <span class="material-symbols-outlined" aria-hidden="true"
-          >notifications</span
-        >
-        <span
-          class="absolute top-2 end-2 w-2 h-2 bg-error rounded-full"
-          aria-hidden="true"
-        ></span>
-      </a>
-      <div
-        class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant"
-      >
-        <div class="text-end hidden sm:block">
-          <p class="font-label-md text-label-md text-on-surface leading-tight">
-            {{ currentUser()?.displayName || currentUser()?.email }}
-          </p>
-          <p
-            class="text-label-sm text-label-sm text-on-surface-variant inline-flex items-center gap-1"
-          >
-            @if (profile()?.isVerified) {
-              <span
-                class="material-symbols-outlined text-xs text-success-green"
-                aria-hidden="true"
-                >verified</span
-              >
-              <span>{{ 'common.verified' | translate }}</span>
-            } @else {
-              <span>{{ 'common.pending' | translate }}</span>
-            }
-          </p>
-        </div>
-        <div
-          class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary"
-        >
-          <span class="font-bold"
-            >{{
-              (currentUser()?.displayName || currentUser()?.email || '?')
-                .charAt(0)
-                .toUpperCase()
-            }}{{
-              (currentUser()?.displayName || currentUser()?.email || '').split(
-                ' '
-              ).length > 1
-                ? (currentUser()?.displayName || currentUser()?.email || '')
-                    .split(' ')
-                    .pop()!
-                    .charAt(0)
-                    .toUpperCase()
-                : ''
-            }}</span
-          >
-        </div>
-      </div>
-    </div>
-  </header>
+  <app-top-bar
+    titleKey="farm.profile.title"
+    portal="farm"
+    notificationsLink="/farm/notifications"
+  />
 
   @if (loading()) {
     <div
@@ -101,10 +28,7 @@
           class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4"
         >
           <div>
-            <h2 class="font-headline-lg text-headline-lg text-on-surface">
-              {{ 'farm.profile.title' | translate }}
-            </h2>
-            <p class="font-body-lg text-body-lg text-on-surface-variant mt-2">
+            <p class="font-body-lg text-body-lg text-on-surface-variant">
               {{ 'farm.profile.subtitle' | translate }}
             </p>
           </div>
@@ -161,7 +85,7 @@
           <div class="lg:col-span-4 flex flex-col gap-gutter">
             @if (p.isVerified) {
               <article
-                class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant relative overflow-hidden"
+                class="ui-card p-6 relative overflow-hidden"
               >
                 <div
                   class="absolute -end-12 -top-12 w-32 h-32 bg-primary-container opacity-10 rounded-full"
@@ -194,7 +118,7 @@
             }
 
             <article
-              class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col items-center justify-center"
+              class="ui-card p-6 flex flex-col items-center justify-center"
             >
               <h3
                 class="font-title-md text-title-md text-on-surface mb-4 self-start w-full"
@@ -251,7 +175,7 @@
             </article>
 
             <article
-              class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant"
+              class="ui-card p-6"
             >
               <h3
                 class="font-title-lg text-title-lg text-on-surface mb-4 flex items-center gap-2"
@@ -291,7 +215,7 @@
 
           <div class="lg:col-span-8 flex flex-col gap-gutter">
             <article
-              class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant"
+              class="ui-card p-6"
             >
               <h3
                 class="font-title-lg text-title-lg text-on-surface mb-6 flex items-center gap-2"
@@ -318,67 +242,19 @@
                     formControlName="name"
                   />
                 </div>
-                <div>
-                  <label
-                    class="block font-label-lg text-label-lg text-on-surface-variant mb-2"
-                    for="farm-location"
-                  >
-                    {{ 'farm.profile.location' | translate }}
-                  </label>
-                  <div class="relative">
-                    <span
-                      class="material-symbols-outlined absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
-                      aria-hidden="true"
-                      >location_on</span
-                    >
-                    <input
-                      id="farm-location"
-                      class="ui-input w-full pe-10"
-                      type="text"
-                      formControlName="location"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label
-                    class="block font-label-lg text-label-lg text-on-surface-variant mb-2"
-                    for="farm-governorate"
-                  >
-                    {{ 'farm.profile.governorate' | translate }}
-                  </label>
-                  <select
-                    id="farm-governorate"
-                    class="ui-input w-full appearance-none"
-                    formControlName="governorate"
-                  >
-                    <option value="Alexandria">Alexandria</option>
-                    <option value="Aswan">Aswan</option>
-                    <option value="Asyut">Asyut</option>
-                    <option value="Beheira">Beheira</option>
-                    <option value="Beni Suef">Beni Suef</option>
-                    <option value="Cairo">Cairo</option>
-                    <option value="Dakahlia">Dakahlia</option>
-                    <option value="Damietta">Damietta</option>
-                    <option value="Faiyum">Faiyum</option>
-                    <option value="Gharbia">Gharbia</option>
-                    <option value="Giza">Giza</option>
-                    <option value="Ismailia">Ismailia</option>
-                    <option value="Kafr El Sheikh">Kafr El Sheikh</option>
-                    <option value="Luxor">Luxor</option>
-                    <option value="Matrouh">Matrouh</option>
-                    <option value="Minya">Minya</option>
-                    <option value="Monufia">Monufia</option>
-                    <option value="New Valley">New Valley</option>
-                    <option value="North Sinai">North Sinai</option>
-                    <option value="Port Said">Port Said</option>
-                    <option value="Qalyubia">Qalyubia</option>
-                    <option value="Qena">Qena</option>
-                    <option value="Red Sea">Red Sea</option>
-                    <option value="Sharqia">Sharqia</option>
-                    <option value="Sohag">Sohag</option>
-                    <option value="South Sinai">South Sinai</option>
-                    <option value="Suez">Suez</option>
-                  </select>
+                <div class="md:col-span-2">
+                  <app-location-picker
+                    [initialLocation]="mapInitial()"
+                    (locationChange)="onLocationPicked($event)"
+                  />
+                  @if (
+                    form.controls.governorate.invalid &&
+                    form.controls.governorate.touched
+                  ) {
+                    <p class="mt-2 text-sm text-error">
+                      {{ 'locationPicker.required' | translate }}
+                    </p>
+                  }
                 </div>
                 <div>
                   <label
@@ -441,7 +317,7 @@
             </article>
 
             <article
-              class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant"
+              class="ui-card p-6"
             >
               <div
                 class="flex justify-between items-center mb-6 gap-4 flex-wrap"
@@ -503,7 +379,7 @@
                         type="button"
                         (click)="deleteCrop(crop.cropTypeId)"
                         [disabled]="deletingCropId() === crop.cropTypeId"
-                        class="text-on-primary-container hover:text-error transition-colors ml-1"
+                        class="text-on-primary-container hover:text-error transition-colors ms-1"
                         [attr.aria-label]="'common.remove' | translate"
                       >
                         @if (deletingCropId() === crop.cropTypeId) {
@@ -529,7 +405,7 @@
             </article>
 
             <article
-              class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant"
+              class="ui-card p-6"
             >
               <h3
                 class="font-title-lg text-title-lg text-on-surface mb-6 flex items-center gap-2"

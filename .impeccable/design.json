@@ -1,0 +1,712 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-08T17:08:00.213Z",
+  "title": "Design System: NileChain",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Nile Forest Green",
+        "canonical": "#1b5e20",
+        "tonalRamp": [
+          "#0a2e0d",
+          "#0f3f12",
+          "#144f17",
+          "#1b5e20",
+          "#3d7a40",
+          "#6fa072",
+          "#a8cba9",
+          "#e8f5e9"
+        ]
+      },
+      "primary-container": {
+        "role": "primary",
+        "displayName": "Mint Container",
+        "canonical": "#e8f5e9",
+        "tonalRamp": [
+          "#0c5216",
+          "#1b5e20",
+          "#3d8a42",
+          "#6fb874",
+          "#91d78a",
+          "#acf4a4",
+          "#d4f5d2",
+          "#e8f5e9"
+        ]
+      },
+      "secondary": {
+        "role": "secondary",
+        "displayName": "Field Secondary",
+        "canonical": "#1b6d24",
+        "tonalRamp": [
+          "#002204",
+          "#005312",
+          "#0a5f18",
+          "#1b6d24",
+          "#3d8f44",
+          "#87d982",
+          "#a0f499",
+          "#e8fce6"
+        ]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Warm Paper",
+        "canonical": "#fbf9f8",
+        "tonalRamp": [
+          "#121312",
+          "#1b1c1c",
+          "#303030",
+          "#717a6d",
+          "#c0c9bb",
+          "#e3e2e2",
+          "#f5f3f3",
+          "#fbf9f8"
+        ]
+      },
+      "surface-container-lowest": {
+        "role": "neutral",
+        "displayName": "Paper Lowest",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#0d0e0d",
+          "#1e1f1e",
+          "#282928",
+          "#e3e2e2",
+          "#e9e8e7",
+          "#efeded",
+          "#f5f3f3",
+          "#ffffff"
+        ]
+      },
+      "on-surface": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#1b1c1c",
+        "tonalRamp": [
+          "#1b1c1c",
+          "#303030",
+          "#41493e",
+          "#717a6d",
+          "#8a9386",
+          "#c0c9bb",
+          "#e3e2e2",
+          "#f2f0f0"
+        ]
+      },
+      "outline-variant": {
+        "role": "neutral",
+        "displayName": "Outline Variant",
+        "canonical": "#c0c9bb",
+        "tonalRamp": [
+          "#41493e",
+          "#5a6356",
+          "#717a6d",
+          "#8a9386",
+          "#a4ad9f",
+          "#c0c9bb",
+          "#d7ddd2",
+          "#eef1ea"
+        ]
+      },
+      "error": {
+        "role": "primary",
+        "displayName": "Error",
+        "canonical": "#ba1a1a",
+        "tonalRamp": [
+          "#690005",
+          "#93000a",
+          "#ba1a1a",
+          "#de3730",
+          "#ff5449",
+          "#ff8a80",
+          "#ffdad6",
+          "#fffbff"
+        ]
+      },
+      "warning": {
+        "role": "secondary",
+        "displayName": "Warning Amber",
+        "canonical": "#e65100",
+        "tonalRamp": [
+          "#5c2200",
+          "#8a3400",
+          "#b84300",
+          "#e65100",
+          "#ff6d00",
+          "#ffb74d",
+          "#ffe0b2",
+          "#fff8f0"
+        ]
+      },
+      "provenance": {
+        "role": "tertiary",
+        "displayName": "Provenance Teal",
+        "canonical": "#0a5c63",
+        "tonalRamp": [
+          "#0e3034",
+          "#0a5c63",
+          "#1a7a82",
+          "#2e969e",
+          "#5eb3b8",
+          "#8fc9cd",
+          "#d7eded",
+          "#eef7f7"
+        ]
+      },
+      "provenance-container": {
+        "role": "tertiary",
+        "displayName": "Provenance Well",
+        "canonical": "#d7eded",
+        "tonalRamp": [
+          "#0e3034",
+          "#0a5c63",
+          "#1a7a82",
+          "#5eb3b8",
+          "#8fc9cd",
+          "#b8dde0",
+          "#d7eded",
+          "#eef7f7"
+        ]
+      },
+      "contract-paper": {
+        "role": "neutral",
+        "displayName": "Contract Paper",
+        "canonical": "#fffefb",
+        "tonalRamp": [
+          "#1c1f1b",
+          "#2a2e29",
+          "#5f6b64",
+          "#8a9386",
+          "#c0c9bb",
+          "#e8ebe4",
+          "#fffefb",
+          "#ffffff"
+        ]
+      },
+      "contract-paper-muted": {
+        "role": "neutral",
+        "displayName": "Contract Paper Muted",
+        "canonical": "#5f6b64",
+        "tonalRamp": [
+          "#1a1c19",
+          "#2f3632",
+          "#41493e",
+          "#5f6b64",
+          "#7a857d",
+          "#9aa39c",
+          "#c5cbc6",
+          "#e8ebe4"
+        ]
+      },
+      "contract-paper-ink": {
+        "role": "neutral",
+        "displayName": "Contract Paper Ink",
+        "canonical": "#1a1c19",
+        "tonalRamp": [
+          "#1a1c19",
+          "#2a2e29",
+          "#41493e",
+          "#5f6b64",
+          "#8a9386",
+          "#c0c9bb",
+          "#e8ebe4",
+          "#fffefb"
+        ]
+      },
+      "contract-paper-dark": {
+        "role": "neutral",
+        "displayName": "Contract Paper Dark",
+        "canonical": "#1c1f1b",
+        "tonalRamp": [
+          "#0d0e0d",
+          "#1c1f1b",
+          "#2a2e29",
+          "#41493e",
+          "#5f6b64",
+          "#8a9386",
+          "#c0c9bb",
+          "#e8ebe4"
+        ]
+      },
+      "chart-up-dark": {
+        "role": "secondary",
+        "displayName": "Chart Up Dark",
+        "canonical": "#81c784",
+        "tonalRamp": [
+          "#1b5e20",
+          "#2e7d32",
+          "#43a047",
+          "#66bb6a",
+          "#81c784",
+          "#a5d6a7",
+          "#c8e6c9",
+          "#e8f5e9"
+        ]
+      },
+      "chart-down-dark": {
+        "role": "primary",
+        "displayName": "Chart Down Dark",
+        "canonical": "#ef9a9a",
+        "tonalRamp": [
+          "#b71c1c",
+          "#c62828",
+          "#e57373",
+          "#ef9a9a",
+          "#ffcdd2",
+          "#ffebee",
+          "#fff5f5",
+          "#ffffff"
+        ]
+      },
+      "mix-black": {
+        "role": "neutral",
+        "displayName": "Mix Black",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "#000000",
+          "#1b1c1c",
+          "#303030",
+          "#717a6d",
+          "#c0c9bb",
+          "#e3e2e2",
+          "#f5f3f3",
+          "#ffffff"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display LG",
+        "purpose": "Landing hero scale only (text-display-lg)."
+      },
+      "headline-lg": {
+        "displayName": "Headline LG",
+        "purpose": "Desktop page and major section titles (text-headline-lg)."
+      },
+      "headline-lg-mobile": {
+        "displayName": "Headline LG Mobile",
+        "purpose": "Mobile compression of headline-lg (text-headline-lg-mobile)."
+      },
+      "headline-md": {
+        "displayName": "Headline MD",
+        "purpose": "Mid-level portal headings (text-headline-md)."
+      },
+      "headline-sm": {
+        "displayName": "Headline SM",
+        "purpose": "Smaller section leaders (text-headline-sm)."
+      },
+      "title-lg": {
+        "displayName": "Title LG",
+        "purpose": "Card and dialog titles (text-title-lg)."
+      },
+      "title-md": {
+        "displayName": "Title MD",
+        "purpose": "Compact panel titles (text-title-md)."
+      },
+      "body-lg": {
+        "displayName": "Body LG",
+        "purpose": "Emphasized reading and larger form copy (text-body-lg)."
+      },
+      "body-md": {
+        "displayName": "Body MD",
+        "purpose": "Default forms, descriptions, messages (text-body-md)."
+      },
+      "label-md": {
+        "displayName": "Label MD",
+        "purpose": "Buttons and primary controls (text-label-md)."
+      },
+      "label-lg": {
+        "displayName": "Label LG",
+        "purpose": "Dense tracked meta (text-label-lg)."
+      },
+      "label-sm": {
+        "displayName": "Label SM",
+        "purpose": "Compact secondary labels (text-label-sm)."
+      },
+      "data": {
+        "displayName": "Data",
+        "purpose": "Decision figures: match %, reliability, EGP, tons (tabular-nums)."
+      },
+      "data-lg": {
+        "displayName": "Data LG",
+        "purpose": "Trust-score / hero metrics (.ui-data-lg)."
+      },
+      "data-sm": {
+        "displayName": "Data SM",
+        "purpose": "Compact tabular figures (.ui-data-sm)."
+      },
+      "body-sm": {
+        "displayName": "Body SM",
+        "purpose": "Secondary supporting copy in overlays (text-body-sm)."
+      },
+      "icon": {
+        "displayName": "Material Symbols",
+        "purpose": "Shipping icon font (Material Symbols Outlined)."
+      },
+      "contract-serif": {
+        "displayName": "Contract Serif",
+        "purpose": "Georgia stack for contract-paper reading only."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "IDs and codes (factory dashboard .fx-mono)."
+      }
+    },
+    "radiusMeta": {
+      "sm": {
+        "displayName": "Radius SM",
+        "purpose": "Tight corners / default rounded.",
+        "value": "0.25rem"
+      },
+      "md": {
+        "displayName": "Radius MD",
+        "purpose": "Compact controls and nav rows.",
+        "value": "0.5rem"
+      },
+      "lg": {
+        "displayName": "Radius LG",
+        "purpose": "Buttons and inputs (Tailwind rounded-lg = 1rem in this project).",
+        "value": "1rem"
+      },
+      "xl": {
+        "displayName": "Radius XL",
+        "purpose": "Cards and large panels.",
+        "value": "1.5rem"
+      },
+      "full": {
+        "displayName": "Radius Full",
+        "purpose": "Icon buttons, badges, pills.",
+        "value": "9999px"
+      },
+      "shell-dense": {
+        "displayName": "Shell Dense",
+        "purpose": "Tight interactive chips in dense chrome.",
+        "value": "0.4rem"
+      },
+      "shell-chip": {
+        "displayName": "Shell Chip",
+        "purpose": "Compact wells / small controls.",
+        "value": "0.45rem"
+      },
+      "shell-mark": {
+        "displayName": "Shell Mark",
+        "purpose": "Brand mark wells in sidebar chrome.",
+        "value": "0.55rem"
+      },
+      "shell-control": {
+        "displayName": "Shell Control",
+        "purpose": "Mid-density shell controls.",
+        "value": "0.65rem"
+      },
+      "shell-panel": {
+        "displayName": "Shell Panel",
+        "purpose": "Elevated sub-panels and contract side chrome.",
+        "value": "0.75rem"
+      },
+      "shell-lift": {
+        "displayName": "Shell Lift",
+        "purpose": "Softer lifted action surfaces.",
+        "value": "0.85rem"
+      },
+      "hairline": {
+        "displayName": "Hairline",
+        "purpose": "Rare admin ticks.",
+        "value": "2px"
+      },
+      "micro": {
+        "displayName": "Micro",
+        "purpose": "Chart geometry.",
+        "value": "0.08rem"
+      },
+      "tight": {
+        "displayName": "Tight",
+        "purpose": "Dense dashboard corners.",
+        "value": "0.3rem"
+      },
+      "compact": {
+        "displayName": "Compact",
+        "purpose": "Compact dashboard corners.",
+        "value": "0.35rem"
+      },
+      "soft": {
+        "displayName": "Soft",
+        "purpose": "Soft dashboard corners.",
+        "value": "0.6rem"
+      }
+    },
+    "shellTypeBand": [
+      {
+        "name": "micro-badge",
+        "value": "0.5625rem–0.6875rem",
+        "purpose": "Badges, brand subtitles, micro meta in app chrome."
+      },
+      {
+        "name": "dense-meta",
+        "value": "0.8125rem",
+        "purpose": "Dense nav / list meta in shells."
+      },
+      {
+        "name": "brand-title",
+        "value": "0.9375rem",
+        "purpose": "Sidebar brand title."
+      },
+      {
+        "name": "topbar-title",
+        "value": "1.05rem",
+        "purpose": "Sticky top-bar page title (~650 weight)."
+      },
+      {
+        "name": "chrome-icon",
+        "value": "1.125rem–1.25rem",
+        "purpose": "Material Symbol sizes in shell chrome."
+      }
+    ],
+    "exceptions": [
+      {
+        "name": "contract-paper-lane",
+        "scope": "src/app/shared/contracts/*",
+        "summary": "Signed-document metaphor with warm paper fills, muted #5f6b64 meta ink, paper-specific radii, and multi-layer document shadows. Do not normalize into Operate tokens."
+      },
+      {
+        "name": "shell-density",
+        "scope": "src/styles.scss (.app-sidebar*, .app-topbar*)",
+        "summary": "Literal rem type and intermediate radii for Operate chrome density; documented as shell-* radius steps and shellTypeBand."
+      },
+      {
+        "name": "material-symbols",
+        "scope": "src/styles.scss icon font import",
+        "summary": "Material Symbols Outlined is the shipping icon system; not listed as a text face in typography fontFamily."
+      },
+      {
+        "name": "contract-serif",
+        "scope": "shared/contracts/contract-document",
+        "summary": "Georgia serif for paper reading; not Operate UI."
+      },
+      {
+        "name": "mono-ids",
+        "scope": "factory-dashboard .fx-mono",
+        "summary": "Monospace stack for IDs/codes only."
+      },
+      {
+        "name": "chart-kpi-dark",
+        "scope": "market-price-trends",
+        "summary": "Dark-mode KPI up/down hex accents #81c784 / #ef9a9a."
+      },
+      {
+        "name": "micro-radii",
+        "scope": "farm/factory dashboards, admin-users",
+        "summary": "Hairline/micro/tight/compact/soft radii already shipping."
+      }
+    ],
+    "shadows": [
+      {
+        "name": "shadow-sm",
+        "value": "0 2px 4px rgb(0 0 0 / 0.05)",
+        "purpose": "Default card rest lift and scrolled top-bar hint."
+      },
+      {
+        "name": "shadow-md",
+        "value": "0 4px 12px rgb(0 0 0 / 0.1)",
+        "purpose": "Hover lift, mobile drawer, elevated overlays."
+      },
+      {
+        "name": "shadow-login",
+        "value": "0 18px 45px rgb(0 0 0 / 0.08)",
+        "purpose": "Auth focal card only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "duration-default",
+        "value": "150ms",
+        "purpose": "Default color/background transitions on controls and nav."
+      },
+      {
+        "name": "ease-emphasized",
+        "value": "cubic-bezier(0.2, 0, 0, 1)",
+        "purpose": "Enter animations (fade-in, slide-up)."
+      },
+      {
+        "name": "fade-in",
+        "value": "220ms cubic-bezier(0.2, 0, 0, 1)",
+        "purpose": "Panel and content enter."
+      },
+      {
+        "name": "slide-up",
+        "value": "260ms cubic-bezier(0.2, 0, 0, 1)",
+        "purpose": "Drawer and stacked content enter."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Default CTA: mint container fill with forest text—not solid primary.",
+      "html": "<button type=\"button\" class=\"ds-btn-primary\">Save changes</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; border-radius: var(--radius-lg, 1rem); background: var(--color-primary-container, #e8f5e9); color: var(--color-on-primary-container, #1b5e20); padding: 0.75rem 1.5rem; font-family: Work Sans, sans-serif; font-size: 14px; font-weight: 600; line-height: 20px; cursor: pointer; transition: opacity 150ms ease, transform 150ms ease; } .ds-btn-primary:hover { opacity: 0.9; } .ds-btn-primary:active { transform: scale(0.98); } .ds-btn-primary:focus-visible { outline: 2px solid var(--color-primary, #1b5e20); outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Outlined primary action for secondary emphasis.",
+      "html": "<button type=\"button\" class=\"ds-btn-secondary\">Cancel</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: var(--radius-lg, 1rem); border: 2px solid var(--color-primary, #1b5e20); background: transparent; color: var(--color-primary, #1b5e20); padding: 0.75rem 1.5rem; font-family: Work Sans, sans-serif; font-size: 14px; font-weight: 600; line-height: 20px; cursor: pointer; transition: background-color 150ms ease, transform 150ms ease; } .ds-btn-secondary:hover { background: var(--color-surface-container-low, #f5f3f3); } .ds-btn-secondary:active { transform: scale(0.98); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--color-primary, #1b5e20); outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Tertiary text action in primary color.",
+      "html": "<button type=\"button\" class=\"ds-btn-ghost\">View all</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; border-radius: var(--radius-lg, 1rem); background: transparent; color: var(--color-primary, #1b5e20); padding: 0.5rem 1rem; font-family: Work Sans, sans-serif; font-size: 14px; font-weight: 600; line-height: 20px; cursor: pointer; transition: background-color 150ms ease; } .ds-btn-ghost:hover { background: var(--color-surface-container-low, #f5f3f3); } .ds-btn-ghost:focus-visible { outline: 2px solid var(--color-primary, #1b5e20); outline-offset: 2px; }"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Destructive confirmation action.",
+      "html": "<button type=\"button\" class=\"ds-btn-danger\">Delete</button>",
+      "css": ".ds-btn-danger { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; border-radius: var(--radius-lg, 1rem); background: var(--color-error, #ba1a1a); color: var(--color-on-error, #ffffff); padding: 0.75rem 1.5rem; font-family: Work Sans, sans-serif; font-size: 14px; font-weight: 600; line-height: 20px; cursor: pointer; transition: opacity 150ms ease, transform 150ms ease; } .ds-btn-danger:hover { opacity: 0.9; } .ds-btn-danger:active { transform: scale(0.98); } .ds-btn-danger:focus-visible { outline: 2px solid var(--color-primary, #1b5e20); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Default form field with primary focus glow.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field__label\">Email</span><input class=\"ds-input\" type=\"email\" placeholder=\"name@company.com\" /></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 0.35rem; font-family: Work Sans, sans-serif; } .ds-field__label { font-size: 14px; font-weight: 600; color: var(--color-on-surface, #1b1c1c); } .ds-input { width: 100%; box-sizing: border-box; border-radius: var(--radius-lg, 1rem); border: 1px solid var(--color-outline-variant, #c0c9bb); background: var(--color-surface, #fbf9f8); color: var(--color-on-surface, #1b1c1c); padding: 0.75rem 1rem; font-size: 14px; line-height: 1.5; transition: border-color 150ms ease, box-shadow 150ms ease; } .ds-input::placeholder { color: var(--color-outline, #717a6d); } .ds-input:focus { outline: none; border-color: var(--color-primary, #1b5e20); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #1b5e20) 20%, transparent); }"
+    },
+    {
+      "name": "Surface Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Default paper panel for dashboard and portal content.",
+      "html": "<article class=\"ds-card\"><h3 class=\"ds-card__title\">Reliability score</h3><p class=\"ds-card__body\">Keep farm profile documents current to improve match confidence.</p></article>",
+      "css": ".ds-card { border-radius: var(--radius-xl, 1.5rem); background: var(--color-surface-container-lowest, #ffffff); border: 1px solid var(--color-outline-variant, #c0c9bb); box-shadow: var(--shadow-sm, 0 2px 4px rgb(0 0 0 / 0.05)); padding: 1rem; font-family: Work Sans, sans-serif; color: var(--color-on-surface, #1b1c1c); } .ds-card__title { margin: 0 0 0.35rem; font-size: 22px; font-weight: 500; line-height: 28px; } .ds-card__body { margin: 0; font-size: 14px; line-height: 1.5; color: var(--color-on-surface-variant, #41493e); }"
+    },
+    {
+      "name": "Sidebar Nav Link",
+      "kind": "nav",
+      "refersTo": "button-ghost",
+      "description": "Portal sidebar item with active start-rail treatment.",
+      "html": "<nav class=\"ds-sidebar\" aria-label=\"Farm\"><a class=\"ds-nav-link\" href=\"#\">Dashboard</a><a class=\"ds-nav-link ds-nav-link--active\" href=\"#\" aria-current=\"page\">Matches</a></nav>",
+      "css": ".ds-sidebar { display: flex; flex-direction: column; gap: 0.15rem; width: 280px; padding: 0.75rem; background: var(--color-surface-container-low, #f5f3f3); font-family: Work Sans, sans-serif; } .ds-nav-link { position: relative; display: flex; align-items: center; gap: 0.7rem; padding: 0.5rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; color: var(--color-on-surface-variant, #41493e); text-decoration: none; transition: background-color 150ms ease, color 150ms ease; } .ds-nav-link:hover { background: var(--color-surface-container-high, #e9e8e7); color: var(--color-on-surface, #1b1c1c); } .ds-nav-link--active { background: color-mix(in srgb, var(--color-primary-container, #e8f5e9) 70%, transparent); color: var(--color-primary, #1b5e20); font-weight: 600; } .ds-nav-link--active::before { content: \"\"; position: absolute; inset-inline-start: 0; top: 20%; bottom: 20%; width: 3px; border-radius: 9999px; background: var(--color-primary, #1b5e20); } .ds-nav-link:focus-visible { outline: 2px solid var(--color-primary, #1b5e20); outline-offset: 1px; }"
+    },
+    {
+      "name": "Provenance Well",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "AI reasoning spine — teal lane only; never reuse for CTAs.",
+      "html": "<aside class=\"ds-provenance\"><div class=\"ds-provenance__spine\" aria-hidden=\"true\"></div><div class=\"ds-provenance__body\"><p class=\"ds-provenance__label\">AI reasoning</p><p class=\"ds-provenance__text\">Match confidence reflects crop fit, delivery window, and reliability score.</p></div></aside>",
+      "css": ".ds-provenance { display: flex; gap: 0; border-radius: var(--radius-xl, 1.5rem); border: 1px solid color-mix(in srgb, var(--color-provenance, #0a5c63) 22%, var(--color-outline-variant, #c0c9bb)); background: color-mix(in srgb, var(--color-provenance-container, #d7eded) 55%, var(--color-surface-container-lowest, #ffffff)); overflow: hidden; font-family: Work Sans, sans-serif; } .ds-provenance__spine { width: 4px; flex-shrink: 0; background: var(--color-provenance, #0a5c63); } .ds-provenance__body { padding: 1rem 1.1rem; } .ds-provenance__label { margin: 0 0 0.35rem; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-on-provenance-container, #0a5c63); } .ds-provenance__text { margin: 0; font-size: 14px; line-height: 1.5; color: var(--color-on-surface, #1b1c1c); }"
+    },
+    {
+      "name": "Data Figure",
+      "kind": "custom",
+      "refersTo": "data",
+      "description": "Tabular decision number for scores and currency.",
+      "html": "<div class=\"ds-data-block\"><span class=\"ds-data\">87%</span><span class=\"ds-data-label\">Match confidence</span></div>",
+      "css": ".ds-data-block { display: flex; flex-direction: column; gap: 0.25rem; font-family: Work Sans, IBM Plex Sans Arabic, sans-serif; } .ds-data { font-variant-numeric: tabular-nums lining-nums; font-weight: 700; font-size: 1.75rem; line-height: 1.1; letter-spacing: -0.02em; color: var(--color-on-surface, #1b1c1c); } .ds-data-label { font-size: 12px; font-weight: 500; color: var(--color-on-surface-variant, #41493e); }"
+    },
+    {
+      "name": "Contract Paper",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "Exception lane: signed-document sheet — warm paper, muted meta ink, not ops surface language.",
+      "html": "<article class=\"ds-paper\"><p class=\"ds-paper__meta\">Contract ID · SC-1042</p><h1 class=\"ds-paper__title\">Supply Agreement</h1><p class=\"ds-paper__body\">Parties agree to the crop volume, quality grade, and delivery window stated herein.</p></article>",
+      "css": ".ds-paper { max-width: 36rem; margin: 0 auto; border-radius: 0.25rem 0.25rem 1rem 1rem; background: #fffefb; color: #1a1c19; box-shadow: 0 1px 2px rgb(16 24 40 / 5%), 0 18px 48px rgb(16 24 40 / 9%), 0 0 0 1px rgb(16 24 40 / 5%); padding: 1.75rem 1.5rem; font-family: Work Sans, sans-serif; } .ds-paper__meta { margin: 0 0 0.75rem; font-size: 0.8125rem; color: #5f6b64; } .ds-paper__title { margin: 0 0 0.75rem; font-size: 1.55rem; font-weight: 700; line-height: 1.25; } .ds-paper__body { margin: 0; font-size: 1.02rem; line-height: 1.85; max-width: 68ch; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Agro-Technical Precision",
+    "overview": "NileChain’s visual system is a calibrated agri ops console: verdant trust signals on warm paper, bilingual enterprise clarity, and teal reserved strictly for AI provenance. It serves farm-first B2B work—profiles, matches, reliability, and contracts—without drifting into rustic farmhouse nostalgia or neon crypto dashboards.\n\nDensity is scan-first Operate UI across Farm, Factory, and Admin shells (fixed 280px sidebar, sticky frosted top bar), with a quieter marketing landing that reuses the same palette and type. Light mode is the default paper world; dark mode flips to a charcoal ops console while keeping the same roles and spacing.\n\nConfirmed visual rejections: purple SaaS gradients, glassmorphism as a product language (legacy `.glass-card` is deprecated), playful consumer agri kitsch, and using provenance teal for CTAs, nav, or success states.",
+    "keyCharacteristics": [
+      "Nile Forest Green as the rare, decisive brand accent on Warm Paper neutrals",
+      "Work Sans (Latin) + IBM Plex Sans Arabic (Arabic) with tabular Data figures for scores and money",
+      "Tonal surface steps first; soft shadows only for lift and sticky chrome",
+      "Logical CSS / RTL-safe shells; Material Symbols for iconography",
+      "Provenance Teal as the Reasoning Spine for AI explanation UI only",
+      "Contract signing uses a separate contract-paper visual lane (document metaphor), not the default ops surface language"
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "Nile Forest Green (and its container) owns brand action. Provenance Teal never substitutes for it.",
+        "section": "colors"
+      },
+      {
+        "name": "The Provenance Lane Rule",
+        "body": "Teal appears only on AI reasoning / risk-instrument surfaces. If a control is a normal CTA, it is green—not teal.",
+        "section": "colors"
+      },
+      {
+        "name": "The Contract Paper Lane Rule",
+        "body": "Contract document UI may use paper-warm fills, muted #5f6b64 meta ink, and paper-specific radii. Do not restyle Operate dashboards to match paper, and do not “fix” paper hexes into forest/ops neutrals.",
+        "section": "colors"
+      },
+      {
+        "name": "The Data Figures Rule",
+        "body": "Scores, money, and tonnage use .ui-data* (tabular nums). Do not style decision numbers as ordinary body weight.",
+        "section": "typography"
+      },
+      {
+        "name": "The Documented Ramp Rule",
+        "body": "Prefer named Tailwind type steps for feature UI. Shell density rem sizes and contract-paper type are allowed exceptions where they already ship; do not invent parallel ramps for ordinary screens.",
+        "section": "typography"
+      },
+      {
+        "name": "The Logical Shell Rule",
+        "body": "New chrome uses logical inset/border properties so EN LTR and AR RTL stay mirrored without one-off physical margins.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "At rest, prefer border + surface step. Introduce shadow-md as a state (hover, drawer, focus elevation), not as default decoration on every panel.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Soft Instrument Rule",
+        "body": "Cards are xl-rounded paper panels; buttons are lg-rounded (1rem)—not stadium pills except icon-only utilities and badges.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do drive Operate color through CSS variables (--color-*) so light/dark stay coherent.",
+      "Do use primary-container for primary CTAs and reserve solid primary for accents, rails, and focus.",
+      "Do render match/reliability/EGP/tons with .ui-data* tabular figures.",
+      "Do keep Provenance Teal on AI/risk reasoning chrome only.",
+      "Do build shells with logical properties for RTL Arabic.",
+      "Do prefer the documented Tailwind type and radius tokens; treat shell intermediates and contract-paper values as named exceptions when matching existing chrome."
+    ],
+    "donts": [
+      "Don't use provenance teal for buttons, sidebar active states, or success badges.",
+      "Don't revive .glass-card / .glass-panel as the product surface language.",
+      "Don't invent purple gradients, neon glows, or rustic farmhouse textures.",
+      "Don't hardcode light-only hex in feature SCSS when an Operate token exists.",
+      "Don't normalize contract-paper colors/radii into the ops token set just to silence detectors—document the lane instead.",
+      "Don't fabricate partner logos or “#1 network” proof as visual system requirements—those are unverified marketing claims, not design tokens."
+    ]
+  }
+}

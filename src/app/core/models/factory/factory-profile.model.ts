@@ -3,6 +3,8 @@ export interface FactoryProfile {
   name: string;
   location: string | null;
   governorate: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   industryType: string | null;
   phone: string | null;
   isVerified: boolean;
@@ -15,5 +17,7 @@ export interface UpdateFactoryProfileRequest {
   name: string;
   location?: string | null;
   governorate?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   industryType?: string | null;
 }

@@ -1,21 +1,40 @@
-import { Component, HostListener, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { NgTemplateOutlet } from '@angular/common';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { AuthService } from '../../../core/services/auth.service';
 import { MobileNavService } from '../../../core/services/mobile-nav.service';
+import { PersonalizationService } from '../../../core/services/personalization.service';
 import { filter } from 'rxjs';
+import {
+  captureFocus,
+  restoreFocus,
+  trapTabKey,
+} from '../../a11y/focus-trap';
+import { UiBrandMarkComponent } from '../../ui/brand-mark/brand-mark.component';
 
 @Component({
   selector: 'app-sidebar-farm',
   standalone: true,
-  imports: [RouterLink, TranslatePipe, NgTemplateOutlet],
+  imports: [RouterLink, TranslatePipe, NgTemplateOutlet, UiBrandMarkComponent],
   templateUrl: './sidebar-farm.component.html',
 })
 export class SidebarFarmComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   readonly mobileNav = inject(MobileNavService);
+  readonly personalization = inject(PersonalizationService);
+
+  readonly drawerPanel = viewChild<ElementRef<HTMLElement>>('drawerPanel');
+  readonly drawerClose = viewChild<ElementRef<HTMLButtonElement>>('drawerClose');
 
   readonly items: Array<{
     key: string;
@@ -63,18 +82,60 @@ export class SidebarFarmComponent {
 
   readonly active = signal(this.resolveActive(this.router.url));
 
+  private previousFocus: HTMLElement | null = null;
+  private wasOpen = false;
+
   constructor() {
+    effect(() => {
+      const isOpen = this.mobileNav.open();
+      if (isOpen && !this.wasOpen) {
+        this.previousFocus = captureFocus();
+        queueMicrotask(() => {
+          this.drawerClose()?.nativeElement.focus();
+        });
+      } else if (!isOpen && this.wasOpen) {
+        restoreFocus(this.previousFocus);
+        this.previousFocus = null;
+      }
+      this.wasOpen = isOpen;
+    });
+
     this.router.events
       .pipe(filter((e) => e instanceof NavigationEnd))
       .subscribe((e) => {
-        this.active.set(this.resolveActive((e as NavigationEnd).url));
+        const url =
+          (e as NavigationEnd).urlAfterRedirects || (e as NavigationEnd).url;
+        this.active.set(this.resolveActive(url));
         this.mobileNav.closeMenu();
+        const match = this.items.find((item) => url.startsWith(item.link));
+        if (match) {
+          this.personalization.trackRecent({
+            id: `farm-${match.key}`,
+            label: match.labelKey,
+            route: match.link,
+            icon: match.icon,
+          });
+        }
       });
   }
 
   @HostListener('window:keydown.escape')
   closeOnEscape(): void {
-    this.mobileNav.closeMenu();
+    if (this.mobileNav.open()) {
+      this.mobileNav.closeMenu();
+    }
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onKeydown(event: KeyboardEvent): void {
+    if (!this.mobileNav.open()) {
+      return;
+    }
+    const panelEl = this.drawerPanel()?.nativeElement;
+    if (!panelEl) {
+      return;
+    }
+    trapTabKey(event, panelEl);
   }
 
   toggleMenu(): void {

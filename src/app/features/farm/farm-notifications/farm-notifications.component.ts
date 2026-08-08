@@ -2,14 +2,11 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
-import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
-import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
-import { AuthService } from '../../../core/services/auth.service';
+import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 import { FarmService } from '../../../core/services/farm/farm.service';
-import { MobileNavService } from '../../../core/services/mobile-nav.service';
 import { FarmNotification } from '../../../core/models/farm/farm-notification.model';
 
 @Component({
@@ -17,20 +14,16 @@ import { FarmNotification } from '../../../core/models/farm/farm-notification.mo
   standalone: true,
   imports: [
     TranslatePipe,
-    UiLanguageToggleComponent,
-    UiThemeToggleComponent,
     UiErrorStateComponent,
     UiEmptyStateComponent,
     UiSkeletonComponent,
+    AppTopBarComponent,
     DatePipe,
   ],
   templateUrl: './farm-notifications.component.html',
 })
 export class FarmNotificationsComponent implements OnInit {
-  private readonly authService = inject(AuthService);
   private readonly farmService = inject(FarmService);
-  readonly currentUser = this.authService.currentUser;
-  readonly mobileNav = inject(MobileNavService);
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
@@ -97,9 +90,23 @@ export class FarmNotificationsComponent implements OnInit {
       case 'message':
         return 'chat';
       case 'risk':
+      case 'weatherrisk':
         return 'thermostat';
+      case 'priceshift':
+        return 'trending_up';
       default:
         return 'notifications';
+    }
+  }
+
+  toneClass(type: string | null): string {
+    switch ((type ?? '').toLowerCase()) {
+      case 'weatherrisk':
+        return 'bg-error-container text-on-error-container';
+      case 'priceshift':
+        return 'bg-tertiary-container text-on-tertiary-container';
+      default:
+        return 'bg-surface-container-high text-primary';
     }
   }
 }

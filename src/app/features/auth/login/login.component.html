@@ -2,12 +2,12 @@
   <header
     class="bg-surface border-b border-outline-variant flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-16 fixed top-0 z-50"
   >
-    <a [routerLink]="'/landing'" class="flex items-center gap-2">
-      <img
-        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPEIWYWtZnyIwQbN_iGXmWsV8pwt4C_0C-YEczE-9FPtMT4B0E7BoecK9TwkOO9Zzp5gN1Atmh1x9H9b_ZHzKAiaXQM7UKpJm4kGC95Y5zk6bvAjKZ-p5id-P2joyNy0QZplSbH8QetsSXawxym6RYPZunyTHfyEJwkHxv8IZkAzA8RSytLpZRSE6hGh6SsnSOl4UX2jrXhRUM0ZvFdNRmmThMBeY2DEuc0s6fqVimVB5Miu7XRqwX"
-        class="h-8 w-auto"
-        [attr.alt]="'app.name' | translate"
-      />
+    <a
+      [routerLink]="'/landing'"
+      class="flex items-center gap-2"
+      [attr.aria-label]="'app.name' | translate"
+    >
+      <ui-brand-mark [size]="32" [decorative]="true" />
       <span class="font-headline-sm text-headline-sm font-bold text-primary">{{
         'app.name' | translate
       }}</span>
@@ -32,11 +32,7 @@
         class="p-8 text-center border-b border-outline-variant bg-surface-bright"
       >
         <div class="mb-4 flex justify-center">
-          <img
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPEIWYWtZnyIwQbN_iGXmWsV8pwt4C_0C-YEczE-9FPtMT4B0E7BoecK9TwkOO9Zzp5gN1Atmh1x9H9b_ZHzKAiaXQM7UKpJm4kGC95Y5zk6bvAjKZ-p5id-P2joyNy0QZplSbH8QetsSXawxym6RYPZunyTHfyEJwkHxv8IZkAzA8RSytLpZRSE6hGh6SsnSOl4UX2jrXhRUM0ZvFdNRmmThMBeY2DEuc0s6fqVimVB5Miu7XRqwX"
-            class="h-12 w-auto"
-            [attr.alt]="'app.name' | translate"
-          />
+          <ui-brand-mark [size]="48" />
         </div>
         <h1 class="font-headline-md text-headline-md text-on-surface font-bold">
           {{ 'login.title' | translate }}

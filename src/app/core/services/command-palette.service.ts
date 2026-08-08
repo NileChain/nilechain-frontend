@@ -1,0 +1,182 @@
+import { Injectable, signal } from '@angular/core';
+
+export interface CommandPaletteItem {
+  id: string;
+  labelKey: string;
+  icon: string;
+  link: string;
+  roles: string[];
+  keywords?: string[];
+}
+
+@Injectable({ providedIn: 'root' })
+export class CommandPaletteService {
+  readonly open = signal(false);
+  readonly query = signal('');
+
+  readonly items: CommandPaletteItem[] = [
+    // Farm
+    {
+      id: 'farm-dashboard',
+      labelKey: 'nav.dashboard',
+      icon: 'dashboard',
+      link: '/farm/dashboard',
+      roles: ['Farm', 'Admin'],
+      keywords: ['farm', 'home'],
+    },
+    {
+      id: 'farm-profile',
+      labelKey: 'nav.profile',
+      icon: 'person',
+      link: '/farm/profile',
+      roles: ['Farm', 'Admin'],
+      keywords: ['farm', 'profile'],
+    },
+    {
+      id: 'farm-matches',
+      labelKey: 'nav.matches',
+      icon: 'handshake',
+      link: '/farm/matches',
+      roles: ['Farm', 'Admin'],
+    },
+    {
+      id: 'farm-contracts',
+      labelKey: 'nav.contracts',
+      icon: 'description',
+      link: '/farm/contracts',
+      roles: ['Farm', 'Admin'],
+    },
+    {
+      id: 'farm-messages',
+      labelKey: 'nav.messages',
+      icon: 'forum',
+      link: '/farm/messages',
+      roles: ['Farm', 'Admin'],
+    },
+    {
+      id: 'farm-notifications',
+      labelKey: 'nav.notifications',
+      icon: 'notifications',
+      link: '/farm/notifications',
+      roles: ['Farm', 'Admin'],
+    },
+    // Factory
+    {
+      id: 'factory-dashboard',
+      labelKey: 'nav.dashboard',
+      icon: 'dashboard',
+      link: '/factory/dashboard',
+      roles: ['Factory', 'Admin'],
+      keywords: ['factory', 'home'],
+    },
+    {
+      id: 'factory-profile',
+      labelKey: 'nav.profile',
+      icon: 'factory',
+      link: '/factory/profile',
+      roles: ['Factory', 'Admin'],
+    },
+    {
+      id: 'factory-supply',
+      labelKey: 'nav.supplyRequest',
+      icon: 'add_box',
+      link: '/factory/supply-request',
+      roles: ['Factory', 'Admin'],
+    },
+    {
+      id: 'factory-matches',
+      labelKey: 'nav.matches',
+      icon: 'handshake',
+      link: '/factory/matches',
+      roles: ['Factory', 'Admin'],
+    },
+    {
+      id: 'factory-agent',
+      labelKey: 'nav.agentProgress',
+      icon: 'smart_toy',
+      link: '/factory/agent-progress',
+      roles: ['Factory', 'Admin'],
+    },
+    {
+      id: 'factory-risk',
+      labelKey: 'nav.riskReport',
+      icon: 'health_and_safety',
+      link: '/factory/risk-report',
+      roles: ['Factory', 'Admin'],
+    },
+    {
+      id: 'factory-contracts',
+      labelKey: 'nav.contracts',
+      icon: 'description',
+      link: '/factory/contract-signing',
+      roles: ['Factory', 'Admin'],
+    },
+    {
+      id: 'factory-messages',
+      labelKey: 'nav.messages',
+      icon: 'forum',
+      link: '/factory/messages',
+      roles: ['Factory', 'Admin'],
+    },
+    {
+      id: 'factory-notifications',
+      labelKey: 'nav.notifications',
+      icon: 'notifications',
+      link: '/factory/notifications',
+      roles: ['Factory', 'Admin'],
+    },
+    // Admin
+    {
+      id: 'admin-dashboard',
+      labelKey: 'nav.dashboard',
+      icon: 'monitoring',
+      link: '/admin/dashboard',
+      roles: ['Admin'],
+    },
+    {
+      id: 'admin-users',
+      labelKey: 'nav.users',
+      icon: 'group',
+      link: '/admin/users',
+      roles: ['Admin'],
+    },
+    {
+      id: 'admin-contracts',
+      labelKey: 'nav.contracts',
+      icon: 'description',
+      link: '/admin/contracts',
+      roles: ['Admin'],
+    },
+    {
+      id: 'admin-kb',
+      labelKey: 'nav.knowledgeBase',
+      icon: 'auto_stories',
+      link: '/admin/knowledge-base',
+      roles: ['Admin'],
+    },
+  ];
+
+  openPalette(): void {
+    this.query.set('');
+    this.open.set(true);
+    document.body.classList.add('overflow-hidden');
+  }
+
+  closePalette(): void {
+    this.open.set(false);
+    this.query.set('');
+    document.body.classList.remove('overflow-hidden');
+  }
+
+  toggle(): void {
+    if (this.open()) {
+      this.closePalette();
+    } else {
+      this.openPalette();
+    }
+  }
+
+  setQuery(value: string): void {
+    this.query.set(value);
+  }
+}

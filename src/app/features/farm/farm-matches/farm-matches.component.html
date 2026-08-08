@@ -1,46 +1,9 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
-  <header
-    class="h-16 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop bg-surface border-b border-outline-variant sticky top-0 z-40"
-  >
-    <div class="flex items-center gap-4">
-      <button
-        type="button"
-        class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant"
-        (click)="mobileNav.toggleMenu()"
-        [attr.aria-label]="'common.toggleMenu' | translate"
-      >
-        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-      </button>
-      <h1 class="font-headline-md text-headline-md font-bold text-primary">
-        {{ 'farm.matches.title' | translate }}
-      </h1>
-    </div>
-    <div class="flex items-center gap-2 sm:gap-4">
-      <ui-language-toggle />
-      <ui-theme-toggle />
-      <div
-        class="flex items-center gap-3 ms-2 ps-4 border-s border-outline-variant"
-      >
-        <div class="text-end hidden sm:block">
-          <p class="font-label-md text-label-md text-on-surface leading-tight">
-            {{ currentUser()?.displayName || currentUser()?.email }}
-          </p>
-          <p class="text-label-sm text-label-sm text-on-surface-variant">
-            {{ 'nav.premiumFarmer' | translate }}
-          </p>
-        </div>
-        <div
-          class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary"
-        >
-          <span class="font-bold">{{
-            (currentUser()?.displayName || currentUser()?.email || '?')
-              .charAt(0)
-              .toUpperCase()
-          }}</span>
-        </div>
-      </div>
-    </div>
-  </header>
+  <app-top-bar
+    titleKey="farm.matches.title"
+    portal="farm"
+    notificationsLink="/farm/notifications"
+  />
 
   <div
     class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
@@ -61,7 +24,7 @@
 
     <!-- Filters Bar -->
     <section
-      class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant flex flex-wrap gap-4 items-center justify-between"
+      class="ui-card p-4 flex flex-wrap gap-4 items-center justify-between"
       [attr.aria-label]="'farm.matches.filters' | translate"
     >
       <div
@@ -125,7 +88,7 @@
       >
         @for (i of [1, 2, 3, 4]; track $index) {
           <div
-            class="bg-surface-container-lowest rounded-xl p-6 space-y-4 border border-outline-variant"
+            class="ui-card p-6 space-y-4"
           >
             <div class="flex justify-between items-start gap-4">
               <div class="flex-1 space-y-2">
@@ -157,7 +120,11 @@
       >
         @for (match of matches(); track match.matchId) {
           <article
-            class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col gap-6 transition-all hover:shadow-md"
+            class="ui-card ui-card-interactive p-6 flex flex-col gap-6"
+            [class.animate-fade-in]="$index < 6"
+            [style.animation-delay]="
+              $index < 6 ? $index * 40 + 'ms' : null
+            "
           >
             <div class="flex justify-between items-start gap-4">
               <div class="min-w-0">
@@ -189,7 +156,7 @@
                     aria-hidden="true"
                     >auto_awesome</span
                   >
-                  <span class="font-label-lg text-label-lg font-bold"
+                  <span class="ui-data-sm font-bold"
                     >{{ 'farm.matches.aiScore' | translate }}
                     {{
                       match.matchScore != null
@@ -211,7 +178,7 @@
                     aria-hidden="true"
                     >security</span
                   >
-                  <span class="font-label-lg text-label-lg"
+                  <span class="ui-data-sm"
                     >{{ 'farm.matches.safetyScore' | translate }}
                     {{
                       match.riskScore != null
@@ -246,7 +213,7 @@
                   'farm.matches.quantity' | translate
                 }}</span>
                 <div
-                  class="flex items-center gap-2 text-on-surface font-title-md text-title-md"
+                  class="flex items-center gap-2 text-on-surface ui-data-sm"
                 >
                   <span
                     class="material-symbols-outlined text-primary"
@@ -261,7 +228,7 @@
                   'farm.matches.price' | translate
                 }}</span>
                 <div
-                  class="flex items-center gap-2 text-on-surface font-title-md text-title-md"
+                  class="flex items-center gap-2 text-on-surface ui-data-sm"
                 >
                   <span
                     class="material-symbols-outlined text-primary"
@@ -301,24 +268,44 @@
                 <button
                   type="button"
                   class="flex-1 ui-btn-primary font-title-md text-title-md py-3 flex items-center justify-center gap-2"
-                  [disabled]="respondingId() === match.matchId"
-                  (click)="respond(match.matchId, 'accept')"
+                  [disabled]="
+                    openingId() === match.matchId ||
+                    respondingId() === match.matchId
+                  "
+                  (click)="viewContract(match)"
                 >
                   <span class="material-symbols-outlined" aria-hidden="true"
-                    >check_circle</span
+                    >description</span
                   >
-                  {{ 'farm.matches.acceptOffer' | translate }}
+                  {{ 'farm.matches.viewContract' | translate }}
                 </button>
                 <button
                   type="button"
                   class="flex-1 ui-btn-secondary font-title-md text-title-md py-3 flex items-center justify-center gap-2"
-                  [disabled]="respondingId() === match.matchId"
-                  (click)="respond(match.matchId, 'reject')"
+                  [disabled]="
+                    openingId() === match.matchId ||
+                    respondingId() === match.matchId
+                  "
+                  (click)="rejectOffer(match)"
                 >
                   <span class="material-symbols-outlined" aria-hidden="true"
                     >cancel</span
                   >
                   {{ 'farm.matches.declineOffer' | translate }}
+                </button>
+              </div>
+            } @else if (match.contractId || match.status === 'Accepted') {
+              <div class="mt-auto pt-2">
+                <button
+                  type="button"
+                  class="w-full ui-btn-secondary font-title-md text-title-md py-3 flex items-center justify-center gap-2"
+                  [disabled]="openingId() === match.matchId"
+                  (click)="viewContract(match)"
+                >
+                  <span class="material-symbols-outlined" aria-hidden="true"
+                    >visibility</span
+                  >
+                  {{ 'farm.matches.viewContract' | translate }}
                 </button>
               </div>
             }

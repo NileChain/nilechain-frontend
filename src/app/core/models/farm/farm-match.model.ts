@@ -13,8 +13,9 @@ export interface FarmMatchItem {
   riskScore: number | null;
   status: string;
   createdAt: string;
+  contractId?: string | null;
 }
 
 export interface RespondToMatchRequest {
-  action: 'accept' | 'reject';
+  action: 'reject';
 }

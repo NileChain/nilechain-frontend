@@ -5,7 +5,7 @@ import { Component, Input } from '@angular/core';
   standalone: true,
   template: `
     <article
-      class="glass-card rounded-lg p-md flex flex-col justify-between h-full transition-colors hover:border-primary"
+      class="ui-card p-md flex flex-col justify-between h-full transition-colors hover:border-primary"
     >
       <div class="flex justify-between items-start gap-3">
         <div class="min-w-0">
@@ -15,13 +15,14 @@ import { Component, Input } from '@angular/core';
             {{ label }}
           </p>
           <h3
-            class="font-headline-md text-headline-md text-primary mt-1 truncate"
+            class="text-primary mt-1 tracking-tight truncate"
+            [class]="dataFace ? 'ui-data' : 'font-headline-md text-headline-md'"
           >
             {{ value }}
           </h3>
         </div>
         <div
-          class="w-10 h-10 shrink-0 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container shadow-sm"
+          class="w-10 h-10 shrink-0 rounded-full bg-primary-container flex items-center justify-center text-primary shadow-sm"
         >
           <span class="material-symbols-outlined" aria-hidden="true">{{
             icon
@@ -40,4 +41,6 @@ export class UiStatCardComponent {
   @Input({ required: true }) value!: string;
   @Input() icon = 'analytics';
   @Input() hint = '';
+  /** Use Data type role for decision figures (scores, EGP) — not generic counts. */
+  @Input() dataFace = false;
 }

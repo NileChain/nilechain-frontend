@@ -1,15 +1,13 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
-import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
-import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
-import { AuthService } from '../../../core/services/auth.service';
+import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 import { FarmService } from '../../../core/services/farm/farm.service';
-import { MobileNavService } from '../../../core/services/mobile-nav.service';
 import { FarmContract } from '../../../core/models/farm/farm-contract.model';
 
 @Component({
@@ -17,8 +15,8 @@ import { FarmContract } from '../../../core/models/farm/farm-contract.model';
   standalone: true,
   imports: [
     TranslatePipe,
-    UiLanguageToggleComponent,
-    UiThemeToggleComponent,
+    RouterLink,
+    AppTopBarComponent,
     UiErrorStateComponent,
     UiEmptyStateComponent,
     UiSkeletonComponent,
@@ -28,15 +26,12 @@ import { FarmContract } from '../../../core/models/farm/farm-contract.model';
   templateUrl: './farm-contracts.component.html',
 })
 export class FarmContractsComponent implements OnInit {
-  private readonly authService = inject(AuthService);
   private readonly farmService = inject(FarmService);
-  readonly currentUser = this.authService.currentUser;
-  readonly mobileNav = inject(MobileNavService);
+  private readonly router = inject(Router);
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly contracts = signal<FarmContract[]>([]);
-  readonly selected = signal<FarmContract | null>(null);
 
   ngOnInit(): void {
     this.loadContracts();
@@ -49,18 +44,13 @@ export class FarmContractsComponent implements OnInit {
       .getContracts()
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: (items) => {
-          this.contracts.set(items);
-          if (items.length > 0 && !this.selected()) {
-            this.selected.set(items[0]);
-          }
-        },
+        next: (items) => this.contracts.set(items),
         error: () => this.error.set('Failed to load contracts.'),
       });
   }
 
-  selectContract(contract: FarmContract): void {
-    this.selected.set(contract);
+  openContract(contract: FarmContract): void {
+    void this.router.navigate(['/farm/contracts', contract.contractId]);
   }
 
   contractValue(contract: FarmContract): number | null {
@@ -74,5 +64,10 @@ export class FarmContractsComponent implements OnInit {
     return (
       status.toLowerCase() === 'signed' || status.toLowerCase() === 'active'
     );
+  }
+
+  isPending(status: string): boolean {
+    const s = status.toLowerCase();
+    return s === 'pendingsignature' || s === 'draft';
   }
 }

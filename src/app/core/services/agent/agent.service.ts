@@ -9,13 +9,63 @@ import {
   GenerateContractRequest,
   GenerateContractResponse,
 } from '../../models/agent/agent.model';
+import {
+  readAgentSession,
+  saveAgentSession,
+} from '../../utils/agent-session';
 
+export interface CachedAgentRun {
+  requestId: string;
+  request: AgentRequest;
+  response: AgentResponse;
+}
+
+/**
+ * Singleton agent API + in-memory run cache (survives route navigation).
+ * Cache is keyed by supply requestId so Agent Progress can restore results
+ * without re-POSTing /agent/run on every visit.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class AgentService {
   private readonly http = inject(HttpClient);
   private readonly api = `${environment.backendUrl}/agent`;
+  private readonly runCache = new Map<string, CachedAgentRun>();
+
+  constructor() {
+    // Warm cache from sessionStorage so a tab refresh still skips re-run.
+    const session = readAgentSession();
+    if (session?.requestId && session.response) {
+      this.runCache.set(session.requestId, {
+        requestId: session.requestId,
+        request: session.agentRequest,
+        response: session.response,
+      });
+    }
+  }
+
+  getCachedRun(requestId: string): CachedAgentRun | null {
+    return this.runCache.get(requestId) ?? null;
+  }
+
+  setCachedRun(
+    requestId: string,
+    request: AgentRequest,
+    response: AgentResponse
+  ): void {
+    const entry: CachedAgentRun = { requestId, request, response };
+    this.runCache.set(requestId, entry);
+    saveAgentSession({
+      requestId,
+      agentRequest: request,
+      response,
+    });
+  }
+
+  clearCachedRun(requestId: string): void {
+    this.runCache.delete(requestId);
+  }
 
   run(requestId: string, payload: AgentRequest): Observable<AgentResponse> {
     return this.http.post<AgentResponse>(

@@ -1,420 +1,609 @@
-﻿<!-- Application shell: sidebar + scrollable column (content + footer in document flow) -->
-<div class="md:ms-[280px] min-h-screen flex flex-col bg-surface">
-  <!-- Main Canvas -->
-  <main class="flex-1 p-margin-mobile md:p-margin-desktop">
-    <ui-preview-banner class="mb-xl block" />
-    <!-- Header -->
-    <header class="flex justify-between items-center mb-xl gap-4 flex-wrap">
-      <div class="flex items-center gap-2">
-        <button
-          type="button"
-          class="md:hidden p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant shrink-0"
-          (click)="mobileNav.toggleMenu()"
-          [attr.aria-label]="'common.toggleMenu' | translate"
-        >
-          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-        </button>
-        <div>
-          <h2 class="font-headline-lg text-headline-lg text-on-surface">
-            {{ 'factory.dashboard.title' | translate }}
-          </h2>
-          <p class="font-body-md text-body-md text-on-surface-variant">
-            {{ 'factory.dashboard.overviewSubtitle' | translate }}
-          </p>
-        </div>
-      </div>
-      <div class="flex items-center gap-2 sm:gap-4">
-        <ui-language-toggle />
-        <ui-theme-toggle />
-        <button
-          type="button"
-          class="bg-primary-container text-on-primary-container px-lg py-sm rounded-lg font-label-md flex items-center gap-2 hover:opacity-90 transition-opacity"
-        >
-          <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
-            >add</span
-          >
-          {{ 'factory.dashboard.newRequest' | translate }}
-        </button>
-      </div>
-    </header>
+<div class="md:ms-[280px] min-h-screen flex flex-col fx-page" (click)="closeMenu()">
+  <app-top-bar
+    titleKey="factory.dashboard.title"
+    subtitleKey="factory.dashboard.overviewSubtitle"
+    portal="factory"
+    notificationsLink="/factory/notifications"
+  >
+    <a
+      routerLink="/factory/supply-request"
+      class="ui-btn-primary !py-2 !px-4"
+    >
+      <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+        >add</span
+      >
+      {{ 'factory.dashboard.newRequest' | translate }}
+    </a>
+  </app-top-bar>
 
-    <!-- KPI Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-xl">
-      <div class="glass-card rounded-lg p-md flex flex-col justify-between">
-        <div>
-          <p
-            class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider"
-          >
-            {{ 'factory.dashboard.openRequests' | translate }}
-          </p>
-          <h3 class="font-headline-md text-headline-md text-primary mt-1">
-            12
-          </h3>
-        </div>
-        <div class="mt-4 flex items-center text-primary font-label-sm">
-          <span
-            class="material-symbols-outlined text-[16px] me-1 icon-flip"
-            aria-hidden="true"
-            >trending_up</span
-          >
-          <span>{{
-            'factory.dashboard.fromLastWeek' | translate: { count: 2 }
-          }}</span>
-        </div>
-      </div>
-      <div class="glass-card rounded-lg p-md flex flex-col justify-between">
-        <div>
-          <p
-            class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider"
-          >
-            {{ 'factory.dashboard.matchesFound' | translate }}
-          </p>
-          <h3 class="font-headline-md text-headline-md text-primary mt-1">
-            48
-          </h3>
-        </div>
-        <div class="mt-4 flex items-center text-primary font-label-sm">
-          <span
-            class="material-symbols-outlined text-[16px] me-1"
-            aria-hidden="true"
-            >check_circle</span
-          >
-          <span>{{
-            'factory.dashboard.matchRate' | translate: { percent: '85%' }
-          }}</span>
-        </div>
-      </div>
-      <div class="glass-card rounded-lg p-md flex flex-col justify-between">
-        <div>
-          <p
-            class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider"
-          >
-            {{ 'factory.dashboard.contracts' | translate }}
-          </p>
-          <h3 class="font-headline-md text-headline-md text-primary mt-1">
-            24
-          </h3>
-        </div>
-        <div
-          class="mt-4 flex items-center text-on-surface-variant font-label-sm"
-        >
-          <span
-            class="material-symbols-outlined text-[16px] me-1"
-            aria-hidden="true"
-            >calendar_today</span
-          >
-          <span>{{
-            'factory.dashboard.nextDelivery' | translate: { date: 'Oct 12' }
-          }}</span>
-        </div>
-      </div>
-      <div class="glass-card rounded-lg p-md flex flex-col justify-between">
-        <div>
-          <p
-            class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider"
-          >
-            {{ 'factory.dashboard.totalProcurement' | translate }}
-          </p>
-          <h3 class="font-headline-md text-headline-md text-primary mt-1">
-            EGP 1.2M
-          </h3>
-        </div>
-        <div class="mt-4 flex items-center text-primary font-label-sm">
-          <span
-            class="material-symbols-outlined text-[16px] me-1"
-            aria-hidden="true"
-            >payments</span
-          >
-          <span>{{
-            'factory.dashboard.fiscalYear' | translate: { year: 2024 }
-          }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Charts & Analysis Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter mb-xl">
-      <!-- Market Price Trends (Line Chart) -->
-      <div class="lg:col-span-2 glass-card rounded-lg p-lg">
-        <div class="flex justify-between items-center mb-lg gap-4 flex-wrap">
-          <h4 class="font-headline-sm text-headline-sm text-on-surface">
-            {{ 'factory.dashboard.marketPriceTrends' | translate }}
-          </h4>
-          <label class="sr-only" for="market-range">{{
-            'factory.dashboard.marketPriceTrends' | translate
-          }}</label>
-          <select
-            id="market-range"
-            class="bg-surface-container-low border border-outline-variant rounded-lg font-label-sm text-on-surface-variant px-3 py-1 outline-none"
-          >
-            <option>{{ 'factory.dashboard.last6Months' | translate }}</option>
-            <option>{{ 'factory.dashboard.yearToDate' | translate }}</option>
-          </select>
-        </div>
-        <div class="h-[300px] w-full relative">
-          <canvas id="marketChart"></canvas>
-        </div>
-      </div>
-
-      <!-- Supply Risk Score -->
-      <div class="glass-card rounded-lg overflow-hidden flex flex-col">
-        <div
-          class="p-lg border-b border-outline-variant bg-surface-container-lowest"
-        >
-          <h4 class="font-headline-sm text-headline-sm text-on-surface">
-            {{ 'factory.dashboard.supplyHealth' | translate }}
-          </h4>
-        </div>
-        <div
-          class="p-lg flex-1 flex flex-col justify-center items-center text-center"
-        >
-          <div
-            class="w-32 h-32 rounded-full border-8 border-secondary-container flex items-center justify-center mb-md"
-          >
-            <span class="font-headline-lg text-headline-lg text-primary"
-              >88</span
-            >
+  <main class="fx-shell flex-1">
+    @if (loading()) {
+      <div class="fx-kpi-strip" role="status" [attr.aria-busy]="true">
+        @for (i of [1, 2, 3, 4]; track $index) {
+          <div class="fx-kpi">
+            <ui-skeleton height="0.7rem" width="55%" />
+            <ui-skeleton height="1.6rem" width="40%" class="mt-2" />
+            <ui-skeleton height="0.7rem" width="70%" class="mt-3" />
           </div>
-          <span
-            class="bg-secondary-container text-on-secondary-container font-label-sm px-4 py-1 rounded-full uppercase"
-            >{{ 'factory.dashboard.optimal' | translate }}</span
-          >
-          <p
-            class="font-body-md text-body-md text-on-surface-variant mt-md px-4"
-          >
-            {{ 'factory.dashboard.supplyHealthBody' | translate }}
-          </p>
-        </div>
-        <div
-          class="p-lg bg-surface-container-low border-t border-outline-variant"
-        >
-          <button
-            type="button"
-            class="w-full py-2 bg-secondary text-on-secondary rounded-lg font-label-md hover:opacity-90 transition-opacity"
-          >
-            {{ 'factory.dashboard.viewDetailedAudit' | translate }}
-          </button>
-        </div>
+        }
       </div>
-    </div>
-
-    <!-- Recent Requests Table -->
-    <div class="glass-card rounded-lg overflow-hidden mb-xl">
-      <div
-        class="p-lg border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest"
+      <div class="fx-panel p-4 space-y-3">
+        <ui-skeleton height="1.1rem" width="40%" />
+        <ui-skeleton height="12rem" width="100%" />
+      </div>
+    } @else if (error()) {
+      <ui-error-state [message]="error()" (retry)="loadDashboard()" />
+    } @else {
+      <!-- KPIs -->
+      <section
+        class="fx-kpi-strip"
+        [attr.aria-label]="'factory.dashboard.kpiAria' | translate"
       >
-        <h4 class="font-headline-sm text-headline-sm text-on-surface">
-          {{ 'factory.dashboard.recentProcurementRequests' | translate }}
-        </h4>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-start font-body-md">
-          <thead
-            class="bg-surface-container text-on-surface-variant border-b border-outline-variant"
-          >
-            <tr>
-              <th class="px-lg py-md font-label-md">
-                {{ 'factory.dashboard.requestId' | translate }}
-              </th>
-              <th class="px-lg py-md font-label-md">
-                {{ 'factory.dashboard.commodity' | translate }}
-              </th>
-              <th class="px-lg py-md font-label-md">
-                {{ 'factory.dashboard.quantityTons' | translate }}
-              </th>
-              <th class="px-lg py-md font-label-md">
-                {{ 'factory.dashboard.budgetEgp' | translate }}
-              </th>
-              <th class="px-lg py-md font-label-md">
-                {{ 'common.status' | translate }}
-              </th>
-              <th class="px-lg py-md font-label-md">
-                {{ 'factory.dashboard.date' | translate }}
-              </th>
-              <th class="px-lg py-md font-label-md">
-                {{ 'common.actions' | translate }}
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-outline-variant text-on-surface">
-            <tr class="hover:bg-surface-container-low transition-colors">
-              <td class="px-lg py-md">#REQ-4022</td>
-              <td class="px-lg py-md font-bold">Premium Wheat</td>
-              <td class="px-lg py-md">500</td>
-              <td class="px-lg py-md">1.2M</td>
-              <td class="px-lg py-md">
-                <span
-                  class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-label-sm"
-                  >{{ 'common.active' | translate }}</span
-                >
-              </td>
-              <td class="px-lg py-md">Oct 02, 2024</td>
-              <td class="px-lg py-md">
-                <button
-                  type="button"
-                  class="text-primary material-symbols-outlined"
-                  [attr.aria-label]="'common.actions' | translate"
-                >
-                  more_horiz
-                </button>
-              </td>
-            </tr>
-            <tr class="hover:bg-surface-container-low transition-colors">
-              <td class="px-lg py-md">#REQ-4019</td>
-              <td class="px-lg py-md font-bold">Sugar Beet</td>
-              <td class="px-lg py-md">250</td>
-              <td class="px-lg py-md">450K</td>
-              <td class="px-lg py-md">
-                <span
-                  class="bg-primary-container text-on-primary px-3 py-1 rounded-full text-label-sm"
-                  >{{ 'factory.dashboard.statusMatched' | translate }}</span
-                >
-              </td>
-              <td class="px-lg py-md">Sep 28, 2024</td>
-              <td class="px-lg py-md">
-                <button
-                  type="button"
-                  class="text-primary material-symbols-outlined"
-                  [attr.aria-label]="'common.actions' | translate"
-                >
-                  more_horiz
-                </button>
-              </td>
-            </tr>
-            <tr class="hover:bg-surface-container-low transition-colors">
-              <td class="px-lg py-md">#REQ-3988</td>
-              <td class="px-lg py-md font-bold">Idaho Potato</td>
-              <td class="px-lg py-md">100</td>
-              <td class="px-lg py-md">180K</td>
-              <td class="px-lg py-md">
-                <span
-                  class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-label-sm"
-                  >{{ 'factory.dashboard.statusDraft' | translate }}</span
-                >
-              </td>
-              <td class="px-lg py-md">Sep 25, 2024</td>
-              <td class="px-lg py-md">
-                <button
-                  type="button"
-                  class="text-primary material-symbols-outlined"
-                  [attr.aria-label]="'common.actions' | translate"
-                >
-                  more_horiz
-                </button>
-              </td>
-            </tr>
-            <tr class="hover:bg-surface-container-low transition-colors">
-              <td class="px-lg py-md">#REQ-3942</td>
-              <td class="px-lg py-md font-bold">Milling Wheat</td>
-              <td class="px-lg py-md">1200</td>
-              <td class="px-lg py-md">2.8M</td>
-              <td class="px-lg py-md">
-                <span
-                  class="bg-error-container text-on-error-container px-3 py-1 rounded-full text-label-sm"
-                  >{{
-                    'factory.dashboard.statusPendingApproval' | translate
-                  }}</span
-                >
-              </td>
-              <td class="px-lg py-md">Sep 20, 2024</td>
-              <td class="px-lg py-md">
-                <button
-                  type="button"
-                  class="text-primary material-symbols-outlined"
-                  [attr.aria-label]="'common.actions' | translate"
-                >
-                  more_horiz
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Bottom Banner -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
-      <div
-        class="relative rounded-lg overflow-hidden h-48 group cursor-pointer"
-      >
-        <div
-          class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-          [attr.aria-label]="
-            'factory.dashboard.supplyChainInsights' | translate
-          "
-          role="img"
-          style="
-            background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCYgTYtp34jtYPGHYPPqfYrqnGLEHbZqvBxnrYdXZDu3KP_ckiTVd1oJG5TwHvWlx3D4jj2fr4mEge5t-8A2_6jm98Umo-fbbj0mj75KXumNDTbDOX0QllWKGcyjrJteJ_c-cx-0Ulq8F0jfRZ8BTIVHC_PYS0cDo0yNV9fdH-Em-IWCAQm2WmKgFda1FAoYCP7syP5e2gI8W5BdZczCugwbvrzkO1C32DvK0KSO7rpDhEhjANZfiVy');
-          "
-        ></div>
-        <div
-          class="absolute inset-0 bg-gradient-to-r from-primary/80 to-transparent p-lg flex flex-col justify-end text-on-primary"
-        >
-          <h5 class="font-headline-sm text-headline-sm">
-            {{ 'factory.dashboard.supplyChainInsights' | translate }}
-          </h5>
-          <p class="font-body-md text-body-md opacity-90">
-            {{ 'factory.dashboard.marketReport' | translate }}
-          </p>
-        </div>
-      </div>
-      <div
-        class="glass-card rounded-lg p-lg flex items-center justify-between gap-4"
-      >
-        <div class="flex items-center gap-4">
-          <div
-            class="w-16 h-16 rounded-full bg-secondary-container flex items-center justify-center shrink-0"
-          >
-            <span
-              class="material-symbols-outlined text-primary text-3xl"
-              aria-hidden="true"
-              >support_agent</span
-            >
-          </div>
-          <div>
-            <h5 class="font-headline-sm text-headline-sm text-on-surface">
-              {{ 'factory.dashboard.dedicatedManager' | translate }}
-            </h5>
-            <p class="font-body-md text-body-md text-on-surface-variant">
-              {{ 'factory.dashboard.dedicatedManagerBody' | translate }}
+        <article class="fx-kpi fx-kpi--lead">
+          <div class="fx-kpi__top">
+            <p class="fx-kpi__label">
+              {{ 'factory.dashboard.openRequests' | translate }}
             </p>
+            <span class="fx-kpi__icon" aria-hidden="true">
+              <span class="material-symbols-outlined">assignment</span>
+            </span>
+          </div>
+          <p class="fx-kpi__value">{{ openRequestCount() }}</p>
+          @if (openRequestCount() > 0) {
+            <p class="fx-kpi__hint">
+              {{ 'factory.dashboard.openRequestsHint' | translate }}
+            </p>
+          }
+        </article>
+
+        <article class="fx-kpi">
+          <div class="fx-kpi__top">
+            <p class="fx-kpi__label">
+              {{ 'factory.dashboard.matchesFound' | translate }}
+            </p>
+            <span class="fx-kpi__icon" aria-hidden="true">
+              <span class="material-symbols-outlined">handshake</span>
+            </span>
+          </div>
+          <p class="fx-kpi__value">{{ matchesCount() }}</p>
+          @if (matchesCount() > 0) {
+            <p class="fx-kpi__hint">
+              {{
+                'factory.dashboard.matchesFoundHint'
+                  | translate: { count: matchesCount() }
+              }}
+            </p>
+          }
+        </article>
+
+        <article class="fx-kpi">
+          <div class="fx-kpi__top">
+            <p class="fx-kpi__label">
+              {{ 'factory.dashboard.contracts' | translate }}
+            </p>
+            <span class="fx-kpi__icon" aria-hidden="true">
+              <span class="material-symbols-outlined">description</span>
+            </span>
+          </div>
+          <p class="fx-kpi__value">{{ activeContractsCount() }}</p>
+          @if (activeContractsCount() > 0) {
+            <p class="fx-kpi__hint">
+              {{ 'factory.dashboard.activeContractsHint' | translate }}
+            </p>
+          }
+        </article>
+
+        <article class="fx-kpi">
+          <div class="fx-kpi__top">
+            <p class="fx-kpi__label">
+              {{ 'factory.dashboard.totalProcurement' | translate }}
+            </p>
+            <span class="fx-kpi__icon" aria-hidden="true">
+              <span class="material-symbols-outlined">payments</span>
+            </span>
+          </div>
+          <p class="fx-kpi__value ui-data">
+            {{ formatProcurement(totalProcurement()) }}
+          </p>
+          @if (totalProcurement() != null) {
+            <p class="fx-kpi__hint">
+              {{ 'factory.dashboard.totalProcurementHint' | translate }}
+            </p>
+          }
+        </article>
+      </section>
+
+      <!-- Needs attention -->
+      <section
+        class="fx-section fx-attention"
+        [attr.aria-label]="'factory.dashboard.needsAttention' | translate"
+      >
+        <header class="fx-section-head">
+          <h2 class="fx-section-title">
+            {{ 'factory.dashboard.needsAttention' | translate }}
+          </h2>
+        </header>
+
+        @if (attentionItems().length === 0) {
+          <div class="fx-empty fx-empty--compact">
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >check_circle</span
+            >
+            <div>
+              <p class="fx-empty__title">
+                {{ 'factory.dashboard.allCaughtUp' | translate }}
+              </p>
+              <p class="fx-empty__body">
+                {{ 'factory.dashboard.allCaughtUpHint' | translate }}
+              </p>
+            </div>
+          </div>
+        } @else {
+          <ul class="fx-attention__list">
+            @for (item of attentionItems(); track item.id) {
+              <li class="fx-attention__item" [attr.data-tone]="item.tone">
+                <span class="fx-attention__icon" aria-hidden="true">
+                  <span class="material-symbols-outlined">{{ item.icon }}</span>
+                </span>
+                <div class="min-w-0 flex-1">
+                  <p class="fx-attention__title">
+                    {{ item.titleKey | translate: item.titleParams }}
+                  </p>
+                  <p class="fx-attention__status">
+                    {{ item.statusKey | translate }}
+                  </p>
+                </div>
+                <a [routerLink]="item.link" class="fx-link-cta">
+                  {{ item.ctaKey | translate }}
+                  <span
+                    class="material-symbols-outlined text-[16px] icon-flip"
+                    aria-hidden="true"
+                    >arrow_forward</span
+                  >
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <!-- Market -->
+      <app-market-price-trends class="block" />
+
+      <!-- Lower procurement workspace -->
+      <div class="fx-workspace">
+        <!-- Recent procurement requests (primary) -->
+        <section class="fx-section fx-requests">
+          <header class="fx-section-head fx-section-head--row">
+            <h2 class="fx-section-title">
+              {{ 'factory.dashboard.recentProcurementRequests' | translate }}
+            </h2>
+            <a routerLink="/factory/matches" class="fx-link-cta">
+              {{ 'factory.dashboard.viewAll' | translate }}
+              <span
+                class="material-symbols-outlined text-[16px] icon-flip"
+                aria-hidden="true"
+                >arrow_forward</span
+              >
+            </a>
+          </header>
+
+          @if (procurementRows().length === 0) {
+            <div class="fx-empty">
+              <span class="material-symbols-outlined" aria-hidden="true"
+                >assignment_add</span
+              >
+              <div>
+                <p class="fx-empty__title">
+                  {{ 'factory.dashboard.noRequestsTitle' | translate }}
+                </p>
+                <p class="fx-empty__body">
+                  {{ 'factory.dashboard.noRequestsBody' | translate }}
+                </p>
+                <a
+                  routerLink="/factory/supply-request"
+                  class="ui-btn-primary mt-3 inline-flex !py-2 !px-4"
+                >
+                  <span
+                    class="material-symbols-outlined text-[18px]"
+                    aria-hidden="true"
+                    >add</span
+                  >
+                  {{ 'factory.dashboard.quickActionSupply' | translate }}
+                </a>
+              </div>
+            </div>
+          } @else {
+            <div class="fx-table-wrap hidden md:block">
+              <table class="fx-table">
+                <thead>
+                  <tr>
+                    <th scope="col">
+                      {{ 'factory.dashboard.requestId' | translate }}
+                    </th>
+                    <th scope="col">
+                      {{ 'factory.dashboard.commodity' | translate }}
+                    </th>
+                    <th scope="col" class="fx-num">
+                      {{ 'factory.dashboard.quantityTons' | translate }}
+                    </th>
+                    <th scope="col" class="fx-num">
+                      {{ 'factory.dashboard.budgetEgp' | translate }}
+                    </th>
+                    <th scope="col">{{ 'common.status' | translate }}</th>
+                    <th scope="col">{{ 'factory.dashboard.date' | translate }}</th>
+                    <th scope="col" class="fx-table__actions">
+                      <span class="sr-only">{{
+                        'common.actions' | translate
+                      }}</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of procurementRows(); track row.id) {
+                    <tr
+                      class="fx-table__row"
+                      [routerLink]="row.link"
+                      tabindex="0"
+                    >
+                      <td>
+                        <span class="fx-mono">{{
+                          shortId(row.requestId)
+                        }}</span>
+                        @if (row.matchCount) {
+                          <span class="fx-sub">
+                            {{
+                              'factory.dashboard.matchCountHint'
+                                | translate: { count: row.matchCount }
+                            }}
+                          </span>
+                        }
+                      </td>
+                      <td>
+                        <span class="fx-strong">{{
+                          row.commodity || '—'
+                        }}</span>
+                      </td>
+                      <td class="fx-num">
+                        {{
+                          row.quantityTons != null
+                            ? (row.quantityTons | number: '1.0-0')
+                            : '—'
+                        }}
+                      </td>
+                      <td class="fx-num ui-data">
+                        {{
+                          row.budgetEgp != null
+                            ? (row.budgetEgp | number: '1.0-0')
+                            : '—'
+                        }}
+                      </td>
+                      <td>
+                        <span
+                          class="fx-badge"
+                          [attr.data-tone]="statusTone(row.status)"
+                        >
+                          {{ statusKey(row.status) | translate }}
+                        </span>
+                      </td>
+                      <td class="fx-muted">
+                        {{
+                          row.date ? (row.date | date: 'mediumDate') : '—'
+                        }}
+                      </td>
+                      <td
+                        class="fx-table__actions"
+                        (click)="$event.stopPropagation()"
+                      >
+                        <div class="fx-menu">
+                          <button
+                            type="button"
+                            class="fx-icon-btn"
+                            (click)="toggleMenu(row.id, $event)"
+                            [attr.aria-expanded]="menuOpenId() === row.id"
+                            [attr.aria-label]="'common.actions' | translate"
+                          >
+                            <span
+                              class="material-symbols-outlined"
+                              aria-hidden="true"
+                              >more_horiz</span
+                            >
+                          </button>
+                          @if (menuOpenId() === row.id) {
+                            <div class="fx-menu__panel" role="menu">
+                              <a
+                                [routerLink]="row.link"
+                                class="fx-menu__item"
+                                role="menuitem"
+                                >{{ 'common.view' | translate }}</a
+                              >
+                              <a
+                                routerLink="/factory/agent-progress"
+                                [queryParams]="{ requestId: row.requestId }"
+                                class="fx-menu__item"
+                                role="menuitem"
+                                >{{
+                                  'factory.dashboard.quickActionAgent'
+                                    | translate
+                                }}</a
+                              >
+                            </div>
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <ul class="fx-req-list md:hidden">
+              @for (row of procurementRows(); track row.id) {
+                <li>
+                  <a [routerLink]="row.link" class="fx-req-item">
+                    <div class="fx-req-item__main">
+                      <span class="fx-mono">{{ shortId(row.requestId) }}</span>
+                      <span class="fx-strong">{{
+                        row.commodity || '—'
+                      }}</span>
+                    </div>
+                    <div class="fx-req-item__meta">
+                      @if (row.quantityTons != null) {
+                        <span
+                          >{{ row.quantityTons | number: '1.0-0' }}
+                          {{ 'factory.dashboard.tonsShort' | translate }}</span
+                        >
+                      }
+                      @if (row.budgetEgp != null) {
+                        <span class="ui-data"
+                          >EGP {{ row.budgetEgp | number: '1.0-0' }}</span
+                        >
+                      }
+                      <span
+                        class="fx-badge"
+                        [attr.data-tone]="statusTone(row.status)"
+                      >
+                        {{ statusKey(row.status) | translate }}
+                      </span>
+                    </div>
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+        <!-- Closing workspace: supply / help / actions / activity -->
+        <div class="fx-closing">
+          <div class="fx-closing__pair">
+            <section
+              class="fx-surface fx-supply"
+              [attr.aria-label]="'factory.dashboard.supplyHealth' | translate"
+            >
+              <p class="fx-kicker">
+                {{ 'factory.dashboard.supplyHealth' | translate }}
+              </p>
+
+              @if (supplyHealthScore(); as score) {
+                <p
+                  class="fx-supply__score ui-data"
+                  [attr.data-tone]="
+                    score >= 75 ? 'good' : score >= 50 ? 'mid' : 'low'
+                  "
+                >
+                  {{
+                    'factory.dashboard.supplyHealthScore'
+                      | translate: { score: score }
+                  }}
+                </p>
+                <p
+                  class="fx-supply__status"
+                  [attr.data-tone]="
+                    score >= 75 ? 'good' : score >= 50 ? 'mid' : 'low'
+                  "
+                >
+                  {{ supplyHealthLabel(score) }}
+                </p>
+                <div
+                  class="fx-supply__bar"
+                  role="meter"
+                  [attr.aria-valuenow]="score"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  [attr.aria-label]="
+                    'factory.dashboard.supplyHealth' | translate
+                  "
+                >
+                  <span
+                    class="fx-supply__bar-fill"
+                    [style.transform]="'scaleX(' + score / 100 + ')'"
+                    [attr.data-tone]="
+                      score >= 75 ? 'good' : score >= 50 ? 'mid' : 'low'
+                    "
+                  ></span>
+                </div>
+                <p class="fx-supply__hint">
+                  {{ supplyHealthBody(score) }}
+                </p>
+              } @else {
+                <p class="fx-supply__score ui-data" data-tone="none">—</p>
+                <p class="fx-supply__status" data-tone="none">
+                  {{ supplyHealthLabel(null) }}
+                </p>
+                <p class="fx-supply__hint">
+                  {{ supplyHealthBody(null) }}
+                </p>
+              }
+
+              <a routerLink="/factory/risk-report" class="fx-link-cta">
+                {{ 'factory.dashboard.viewDetailedAudit' | translate }}
+                <span
+                  class="material-symbols-outlined text-[16px] icon-flip"
+                  aria-hidden="true"
+                  >arrow_forward</span
+                >
+              </a>
+            </section>
+
+            <section
+              class="fx-surface fx-help"
+              [attr.aria-label]="'factory.dashboard.needHelp' | translate"
+            >
+              <div class="fx-help__top">
+                <span class="fx-help__icon" aria-hidden="true">
+                  <span class="material-symbols-outlined">support_agent</span>
+                </span>
+                <div class="min-w-0">
+                  <h2 class="fx-surface__title">
+                    {{ 'factory.dashboard.needHelp' | translate }}
+                  </h2>
+                  <p class="fx-help__body">
+                    {{ 'factory.dashboard.needHelpBody' | translate }}
+                  </p>
+                </div>
+              </div>
+              <a routerLink="/factory/messages" class="fx-help__cta">
+                {{ 'factory.dashboard.contactManager' | translate }}
+              </a>
+            </section>
+          </div>
+
+          <div class="fx-closing__ops">
+            <section
+              class="fx-surface fx-actions"
+              [attr.aria-label]="'common.quickActions' | translate"
+            >
+              <h2 class="fx-surface__title">
+                {{ 'common.quickActions' | translate }}
+              </h2>
+              <nav class="fx-action-list">
+                <a
+                  routerLink="/factory/supply-request"
+                  class="fx-action-row fx-action-row--primary"
+                >
+                  <span class="fx-action-row__icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">add</span>
+                  </span>
+                  <span class="fx-action-row__text">
+                    <span class="fx-action-row__label">{{
+                      'factory.dashboard.quickActionSupply' | translate
+                    }}</span>
+                    <span class="fx-action-row__desc">{{
+                      'factory.dashboard.quickActionSupplyHint' | translate
+                    }}</span>
+                  </span>
+                  <span
+                    class="material-symbols-outlined fx-action-row__chev icon-flip"
+                    aria-hidden="true"
+                    >arrow_forward</span
+                  >
+                </a>
+                <a routerLink="/factory/agent-progress" class="fx-action-row">
+                  <span class="fx-action-row__icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">smart_toy</span>
+                  </span>
+                  <span class="fx-action-row__text">
+                    <span class="fx-action-row__label">{{
+                      'factory.dashboard.quickActionAgent' | translate
+                    }}</span>
+                    <span class="fx-action-row__desc">{{
+                      'factory.dashboard.quickActionAgentHint' | translate
+                    }}</span>
+                  </span>
+                  <span
+                    class="material-symbols-outlined fx-action-row__chev icon-flip"
+                    aria-hidden="true"
+                    >arrow_forward</span
+                  >
+                </a>
+                <a routerLink="/factory/messages" class="fx-action-row">
+                  <span class="fx-action-row__icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">chat</span>
+                  </span>
+                  <span class="fx-action-row__text">
+                    <span class="fx-action-row__label">{{
+                      'factory.dashboard.quickActionMessages' | translate
+                    }}</span>
+                    <span class="fx-action-row__desc">{{
+                      'factory.dashboard.quickActionMessagesHint' | translate
+                    }}</span>
+                  </span>
+                  <span
+                    class="material-symbols-outlined fx-action-row__chev icon-flip"
+                    aria-hidden="true"
+                    >arrow_forward</span
+                  >
+                </a>
+              </nav>
+            </section>
+
+            <section
+              class="fx-surface fx-activity"
+              [attr.aria-label]="'factory.dashboard.activityTitle' | translate"
+            >
+              <header class="fx-surface__head">
+                <h2 class="fx-surface__title">
+                  {{ 'factory.dashboard.activityTitle' | translate }}
+                </h2>
+                <a routerLink="/factory/notifications" class="fx-link-cta">
+                  {{ 'factory.dashboard.viewAll' | translate }}
+                  <span
+                    class="material-symbols-outlined text-[16px] icon-flip"
+                    aria-hidden="true"
+                    >arrow_forward</span
+                  >
+                </a>
+              </header>
+
+              @if (activityItems().length === 0) {
+                <p class="fx-empty__body">
+                  {{ 'factory.dashboard.noActivity' | translate }}
+                </p>
+              } @else {
+                <ul class="fx-timeline">
+                  @for (item of activityItems(); track item.id) {
+                    <li>
+                      <a [routerLink]="item.link" class="fx-timeline__item">
+                        <span
+                          class="fx-timeline__mark"
+                          [attr.data-tone]="item.tone || 'neutral'"
+                          aria-hidden="true"
+                        >
+                          <span class="material-symbols-outlined">{{
+                            item.icon
+                          }}</span>
+                        </span>
+                        <div class="min-w-0 flex-1">
+                          <p class="fx-timeline__title">{{ item.title }}</p>
+                          <p class="fx-timeline__time">{{ item.meta }}</p>
+                        </div>
+                      </a>
+                    </li>
+                  }
+                </ul>
+              }
+            </section>
           </div>
         </div>
-        <button
-          type="button"
-          class="bg-primary text-on-primary p-sm rounded-full material-symbols-outlined hover:bg-primary-container transition-colors shrink-0"
-          [attr.aria-label]="'common.messages' | translate"
-        >
-          chat
-        </button>
       </div>
-    </div>
+    }
   </main>
 
-  <!-- Footer (in document flow — not fixed to viewport) -->
-  <footer
-    class="mt-auto bg-surface-container-highest border-t border-outline-variant"
-  >
-    <div
-      class="flex flex-col md:flex-row justify-between items-center px-margin-desktop py-4 w-full gap-4"
-    >
-      <span class="font-label-sm text-label-sm text-on-surface-variant">{{
-        'landing.footerRights' | translate
-      }}</span>
-      <div class="flex gap-lg">
-        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
-          'landing.privacy' | translate
-        }}</span>
-        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
-          'landing.terms' | translate
-        }}</span>
-        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
-          'landing.compliance' | translate
-        }}</span>
-        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
-          'landing.contact' | translate
-        }}</span>
-      </div>
+  <footer class="fx-footer">
+    <div class="fx-footer__inner">
+      <span>{{ 'landing.footerRights' | translate }}</span>
+      <nav
+        class="fx-footer__links"
+        [attr.aria-label]="'landing.footerCompany' | translate"
+      >
+        <span>{{ 'landing.privacy' | translate }}</span>
+        <span aria-hidden="true">·</span>
+        <span>{{ 'landing.terms' | translate }}</span>
+        <span aria-hidden="true">·</span>
+        <span>{{ 'landing.compliance' | translate }}</span>
+        <span aria-hidden="true">·</span>
+        <span>{{ 'landing.contact' | translate }}</span>
+      </nav>
     </div>
   </footer>
 </div>

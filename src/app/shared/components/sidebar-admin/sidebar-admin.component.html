@@ -1,83 +1,86 @@
 <ng-template #navBody>
-  <div class="flex items-center gap-3 px-2 mb-8 mt-4">
-    <div
-      class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-on-primary"
-    >
-      <span
-        class="material-symbols-outlined"
-        style="font-variation-settings: 'FILL' 1"
-        aria-hidden="true"
-        >eco</span
-      >
+  <div class="app-sidebar__inner">
+    <div class="app-sidebar__brand">
+      <div class="app-sidebar__brand-mark" aria-hidden="true">
+        <ui-brand-mark [size]="28" [decorative]="true" />
+      </div>
+      <div class="min-w-0">
+        <p class="app-sidebar__brand-title">NileChain B2B</p>
+        <p class="app-sidebar__brand-sub">
+          {{ 'nav.adminPortal' | translate }}
+        </p>
+      </div>
     </div>
-    <div>
-      <h1 class="font-headline-sm text-headline-sm font-bold text-primary">
-        NileChain B2B
-      </h1>
-      <p class="font-label-sm text-label-sm text-on-surface-variant opacity-70">
-        Enterprise Portal
+
+    <div class="app-sidebar__scroll">
+      <p class="app-sidebar__section-label">
+        {{ 'nav.mainSection' | translate }}
       </p>
-    </div>
-  </div>
-
-  <nav class="flex-1 space-y-1" aria-label="Admin navigation">
-    @for (item of items; track item.key) {
-      <a
-        [routerLink]="item.link"
-        [class]="
-          active() === item.key
-            ? 'sidebar-active flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-100 active:scale-95'
-            : 'text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150'
-        "
-        [attr.aria-current]="active() === item.key ? 'page' : null"
+      <nav
+        class="app-sidebar__nav"
+        [attr.aria-label]="'nav.adminConsole' | translate"
       >
-        <span class="material-symbols-outlined" aria-hidden="true">{{
-          item.icon
-        }}</span>
-        <span class="font-label-md text-label-md">{{
-          item.labelKey | translate
-        }}</span>
-      </a>
-    }
-  </nav>
+        @for (item of items; track item.key) {
+          <a
+            [routerLink]="item.link"
+            class="app-sidebar__link"
+            [class.app-sidebar__link--active]="active() === item.key"
+            [attr.aria-current]="active() === item.key ? 'page' : null"
+          >
+            <span
+              class="material-symbols-outlined"
+              aria-hidden="true"
+              [attr.data-fill]="active() === item.key ? '1' : null"
+              >{{ item.icon }}</span
+            >
+            <span class="truncate">{{ item.labelKey | translate }}</span>
+          </a>
+        }
+      </nav>
+    </div>
 
-  <div class="pt-4 border-t border-outline-variant space-y-1">
-    <button
-      type="button"
-      (click)="logout()"
-      class="w-full text-start text-on-surface-variant hover:bg-surface-container-high flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md transition-all duration-150"
-    >
-      <span class="material-symbols-outlined" aria-hidden="true">logout</span>
-      {{ 'nav.logout' | translate }}
-    </button>
+    <div class="app-sidebar__footer">
+      <button
+        type="button"
+        class="app-sidebar__logout"
+        (click)="logout()"
+      >
+        <span class="material-symbols-outlined icon-flip" aria-hidden="true"
+          >logout</span
+        >
+        {{ 'nav.logout' | translate }}
+      </button>
+    </div>
   </div>
 </ng-template>
 
 <aside
-  class="fixed start-0 top-0 h-full w-[280px] bg-surface-container-low border-e border-outline-variant flex-col p-4 space-y-2 z-50 hidden md:flex"
+  class="app-sidebar fixed start-0 top-0 hidden md:flex"
+  aria-label="Admin navigation"
 >
   <ng-container *ngTemplateOutlet="navBody" />
 </aside>
 
 @if (mobileNav.open()) {
-  <div
-    class="fixed inset-0 z-[60] md:hidden"
-    [attr.aria-label]="'common.toggleMenu' | translate"
-  >
+  <div class="app-sidebar-overlay md:hidden" role="presentation">
     <div
-      class="absolute inset-0 bg-black/50 animate-fade-in"
+      class="app-sidebar-overlay__backdrop animate-backdrop-in"
       (click)="mobileNav.closeMenu()"
       [attr.aria-hidden]="true"
     ></div>
     <aside
-      class="absolute start-0 top-0 h-full w-[280px] bg-surface-container-low border-e border-outline-variant flex-col p-4 space-y-2"
+      #drawerPanel
+      tabindex="-1"
+      class="app-sidebar app-sidebar--drawer animate-slide-in-start outline-none"
       role="dialog"
       aria-modal="true"
+      [attr.aria-label]="'common.toggleMenu' | translate"
     >
-      <div class="flex justify-end">
+      <div class="app-sidebar__drawer-close px-3 pt-2">
         <button
+          #drawerClose
           type="button"
-          class="p-2 hover:bg-surface-container-high rounded-full text-on-surface-variant"
+          class="ui-icon-btn"
           (click)="mobileNav.closeMenu()"
           [attr.aria-label]="'common.close' | translate"
         >

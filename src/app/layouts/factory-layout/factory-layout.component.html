@@ -1,2 +1,11 @@
 <app-sidebar-factory></app-sidebar-factory>
 <router-outlet></router-outlet>
+<a
+  routerLink="/factory/supply-request"
+  class="fixed bottom-6 end-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-on-primary shadow-md hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:hidden"
+  [attr.aria-label]="'factory.dashboard.newRequest' | translate"
+>
+  <span class="material-symbols-outlined text-[24px]" aria-hidden="true"
+    >add</span
+  >
+</a>

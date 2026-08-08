@@ -56,9 +56,16 @@ module.exports = {
         'warning-orange': 'var(--color-warning)',
         'danger-red': 'var(--color-danger)',
         'card-border': 'var(--color-card-border)',
+        provenance: 'var(--color-provenance)',
+        'provenance-container': 'var(--color-provenance-container)',
+        'on-provenance': 'var(--color-on-provenance)',
+        'on-provenance-container': 'var(--color-on-provenance-container)',
       },
       fontFamily: {
         sans: ['Work Sans', 'sans-serif'],
+        arabic: ['IBM Plex Sans Arabic', 'Work Sans', 'sans-serif'],
+        data: ['Work Sans', 'IBM Plex Sans Arabic', 'sans-serif'],
+        'body-sm': ['Work Sans', 'sans-serif'],
         'body-md': ['Work Sans', 'sans-serif'],
         'body-lg': ['Work Sans', 'sans-serif'],
         'headline-lg': ['Work Sans', 'sans-serif'],
@@ -73,6 +80,7 @@ module.exports = {
         'display-lg': ['Work Sans', 'sans-serif'],
       },
       fontSize: {
+        'body-sm': ['12px', { lineHeight: '1.5', fontWeight: '400' }],
         'body-md': ['14px', { lineHeight: '1.5', fontWeight: '400' }],
         'body-lg': ['16px', { lineHeight: '1.5', fontWeight: '400' }],
         'headline-lg-mobile': [
@@ -105,6 +113,31 @@ module.exports = {
           {
             lineHeight: '64px',
             letterSpacing: '-0.25px',
+            fontWeight: '600',
+          },
+        ],
+        /* Decision figures (SENIOR_DESIGN_SYSTEM Data / Data-sm) */
+        data: [
+          '28px',
+          {
+            lineHeight: '1.1',
+            letterSpacing: '-0.02em',
+            fontWeight: '700',
+          },
+        ],
+        'data-lg': [
+          '36px',
+          {
+            lineHeight: '1.1',
+            letterSpacing: '-0.02em',
+            fontWeight: '700',
+          },
+        ],
+        'data-sm': [
+          '14px',
+          {
+            lineHeight: '1.2',
+            letterSpacing: '-0.01em',
             fontWeight: '600',
           },
         ],
