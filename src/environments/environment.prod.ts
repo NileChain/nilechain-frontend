@@ -1,7 +1,9 @@
 export const environment = {
   production: true,
   apiUrl: '',
-  backendUrl: '/api',
+  // Production ASP.NET API (Heroku). Paths below are appended by services
+  // (e.g. /auth/login → …/api/auth/login). Trailing slash omitted on purpose.
+  backendUrl: 'https://nilechain-api-ee4cc7889a58.herokuapp.com/api',
   aiServiceUrl: '/ai',
   apiKey: '',
   apiKeyHeader: 'X-Api-Key',
