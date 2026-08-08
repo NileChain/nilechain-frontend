@@ -14,13 +14,24 @@
     </button>
 
     <div class="app-topbar__titles">
-      <h2 class="app-topbar__title truncate">
-        {{ titleKey | translate }}
-      </h2>
-      @if (subtitleKey) {
-        <p class="app-topbar__subtitle truncate hidden sm:block">
-          {{ subtitleKey | translate }}
-        </p>
+      @if (useGreeting) {
+        <h2 class="app-topbar__title app-topbar__title--greeting truncate">
+          {{ greetingKey | translate: { name: greetingName } }}
+        </h2>
+        @if (subtitleKey) {
+          <p class="app-topbar__subtitle truncate hidden sm:block">
+            {{ subtitleKey | translate }}
+          </p>
+        }
+      } @else {
+        <h2 class="app-topbar__title truncate">
+          {{ titleKey | translate }}
+        </h2>
+        @if (subtitleKey) {
+          <p class="app-topbar__subtitle truncate hidden sm:block">
+            {{ subtitleKey | translate }}
+          </p>
+        }
       }
     </div>
   </div>

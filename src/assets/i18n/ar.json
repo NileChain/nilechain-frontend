@@ -277,6 +277,9 @@
     "dashboard": {
       "title": "لوحة التحكم",
       "subtitle": "أداء مزرعتك والمطابقات والنشاط الأخير.",
+      "greetingMorning": "صباح الخير، {{name}}!",
+      "greetingAfternoon": "طاب يومك، {{name}}!",
+      "greetingEvening": "مساء الخير، {{name}}!",
       "riskScore": "درجة المخاطر",
       "reliabilityScore": "مؤشر الموثوقية",
       "reliabilityStrong": "وضع قوي",

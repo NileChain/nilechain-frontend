@@ -12,6 +12,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { AuthService } from '../../../core/services/auth.service';
 import { MobileNavService } from '../../../core/services/mobile-nav.service';
+import { NotificationCenterService } from '../../../core/services/notification-center.service';
 import { PersonalizationService } from '../../../core/services/personalization.service';
 import { filter } from 'rxjs';
 import {
@@ -32,6 +33,7 @@ export class SidebarFarmComponent {
   private readonly router = inject(Router);
   readonly mobileNav = inject(MobileNavService);
   readonly personalization = inject(PersonalizationService);
+  readonly notificationCenter = inject(NotificationCenterService);
 
   readonly drawerPanel = viewChild<ElementRef<HTMLElement>>('drawerPanel');
   readonly drawerClose = viewChild<ElementRef<HTMLButtonElement>>('drawerClose');

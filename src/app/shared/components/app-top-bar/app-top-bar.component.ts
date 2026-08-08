@@ -40,12 +40,15 @@ export class AppTopBarComponent {
   readonly currentUser = this.authService.currentUser;
   readonly scrolled = signal(false);
 
-  @Input({ required: true }) titleKey!: string;
+  /** Optional when useGreeting is true — greeting replaces the static title. */
+  @Input() titleKey = '';
   @Input() subtitleKey = '';
   @Input() notificationsLink = '';
   @Input() showSearch = true;
   @Input() showUser = true;
   @Input() portal: AppTopBarPortal = 'farm';
+  /** Time-based greeting + dynamic first name from AuthService. */
+  @Input() useGreeting = false;
 
   @Output() searchClick = new EventEmitter<void>();
 
@@ -85,6 +88,29 @@ export class AppTopBarComponent {
   get unreadBadgeLabel(): string {
     const n = this.notificationCenter.unreadCount();
     return n > 9 ? '9+' : String(n);
+  }
+
+  get greetingKey(): string {
+    const hour = new Date().getHours();
+    if (hour < 12) {
+      return 'farm.dashboard.greetingMorning';
+    }
+    if (hour < 17) {
+      return 'farm.dashboard.greetingAfternoon';
+    }
+    return 'farm.dashboard.greetingEvening';
+  }
+
+  get greetingName(): string {
+    const user = this.currentUser();
+    const source = (user?.displayName || user?.email || '').trim();
+    if (!source) {
+      return '—';
+    }
+    if (source.includes('@')) {
+      return source.split('@')[0] || source;
+    }
+    return source.split(/\s+/)[0] || source;
   }
 
   onSearch(): void {

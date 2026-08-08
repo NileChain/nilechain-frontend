@@ -33,7 +33,19 @@
               [attr.data-fill]="active() === item.key ? '1' : null"
               >{{ item.icon }}</span
             >
-            <span class="truncate">{{ item.labelKey | translate }}</span>
+            <span class="truncate app-sidebar__link-label">{{
+              item.labelKey | translate
+            }}</span>
+            @if (
+              item.key === 'notifications' &&
+              notificationCenter.unreadCount() > 0
+            ) {
+              <span class="app-sidebar__nav-badge" aria-hidden="true">{{
+                notificationCenter.unreadCount() > 9
+                  ? '9+'
+                  : notificationCenter.unreadCount()
+              }}</span>
+            }
           </a>
         }
       </nav>

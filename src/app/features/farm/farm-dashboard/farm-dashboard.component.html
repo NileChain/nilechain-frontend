@@ -1,6 +1,13 @@
+<!--
+  THESIS: One coherent farm ops board — scan KPIs, act on attention, read B2B matches — not a stack of equal cards.
+  OWN-WORLD: NileChain green on surface tokens; dense SaaS panels; thin borders; restrained primary accents.
+  STORY: Farm operator sees standing, open work, reliability trend, then reviews factory matches.
+  FIRST VIEWPORT: Greeting header · KPI row · attention · trend · matches + score panel · activity.
+  FORM: Operate / premium B2B agritech; FINISH: build + lint + theme/RTL checks.
+-->
 <main class="md:ms-[280px] min-h-screen fd-page">
   <app-top-bar
-    titleKey="farm.dashboard.title"
+    [useGreeting]="true"
     subtitleKey="farm.dashboard.subtitle"
     portal="farm"
     notificationsLink="/farm/notifications"
@@ -10,7 +17,7 @@
     @if (loading()) {
       <div class="fd-kpi-grid" role="status" [attr.aria-busy]="true">
         @for (i of [1, 2, 3, 4]; track $index) {
-          <div class="fd-card fd-kpi">
+          <div class="fd-panel fd-kpi">
             <ui-skeleton height="0.7rem" width="55%" />
             <ui-skeleton height="1.6rem" width="40%" class="mt-2" />
             <ui-skeleton height="0.7rem" width="70%" class="mt-3" />
@@ -18,13 +25,13 @@
         }
       </div>
       <div class="fd-main-grid">
-        <div class="fd-card p-4 space-y-3">
+        <div class="fd-panel fd-panel--pad space-y-3">
           <ui-skeleton height="1.1rem" width="40%" />
           @for (i of [1, 2, 3]; track $index) {
             <ui-skeleton height="2.75rem" />
           }
         </div>
-        <div class="fd-card p-4 space-y-3">
+        <div class="fd-panel fd-panel--pad space-y-3">
           <ui-skeleton height="1.1rem" width="50%" />
           @for (i of [1, 2, 3]; track $index) {
             <ui-skeleton height="0.5rem" />
@@ -36,7 +43,7 @@
     } @else if (dashboard(); as data) {
       <!-- KPIs -->
       <section class="fd-kpi-grid" aria-label="Farm KPIs">
-        <article class="fd-card fd-kpi fd-kpi--primary">
+        <article class="fd-panel fd-kpi fd-kpi--primary">
           <div class="fd-kpi__top">
             <p class="fd-kpi__label">
               {{ 'farm.dashboard.reliabilityScore' | translate }}
@@ -55,7 +62,7 @@
           <p class="fd-kpi__hint">{{ reliabilityHint(data.riskScore) }}</p>
         </article>
 
-        <article class="fd-card fd-kpi">
+        <article class="fd-panel fd-kpi">
           <div class="fd-kpi__top">
             <p class="fd-kpi__label">
               {{ 'farm.dashboard.activeMatches' | translate }}
@@ -68,7 +75,7 @@
           <p class="fd-kpi__hint">{{ activeMatchesHint(data) }}</p>
         </article>
 
-        <article class="fd-card fd-kpi">
+        <article class="fd-panel fd-kpi">
           <div class="fd-kpi__top">
             <p class="fd-kpi__label">
               {{ 'farm.dashboard.completedContracts' | translate }}
@@ -83,7 +90,7 @@
           </p>
         </article>
 
-        <article class="fd-card fd-kpi">
+        <article class="fd-panel fd-kpi">
           <div class="fd-kpi__top">
             <p class="fd-kpi__label">
               {{ 'farm.dashboard.qualityRating' | translate }}
@@ -106,13 +113,16 @@
 
       <!-- Needs attention -->
       <section
-        class="fd-card fd-attention"
+        class="fd-panel fd-attention"
         [attr.aria-label]="'farm.dashboard.needsAttention' | translate"
       >
-        <header class="fd-section-head">
+        <header class="fd-section-head fd-section-head--inline">
           <h2 class="fd-section-title">
             {{ 'farm.dashboard.needsAttention' | translate }}
           </h2>
+          @if (attentionItems().length > 0) {
+            <span class="fd-count-pill">{{ attentionItems().length }}</span>
+          }
         </header>
 
         @if (attentionItems().length === 0) {
@@ -144,13 +154,8 @@
                     {{ item.statusKey | translate }}
                   </p>
                 </div>
-                <a [routerLink]="item.link" class="fd-link-cta">
+                <a [routerLink]="item.link" class="fd-btn-primary fd-btn-primary--sm">
                   {{ item.ctaKey | translate }}
-                  <span
-                    class="material-symbols-outlined text-[16px] icon-flip"
-                    aria-hidden="true"
-                    >arrow_forward</span
-                  >
                 </a>
               </li>
             }
@@ -158,8 +163,8 @@
         }
       </section>
 
-      <!-- Reliability trend (compact when empty) -->
-      <section class="fd-card fd-trend-card">
+      <!-- Reliability trend -->
+      <section class="fd-panel fd-trend-card">
         <div class="fd-section-head fd-section-head--row">
           <div class="min-w-0">
             <h2 class="fd-section-title">
@@ -215,46 +220,23 @@
           </div>
         } @else {
           <div
-            class="fd-trend"
+            class="fd-trend-chart"
             role="img"
             [attr.aria-label]="'farm.dashboard.reliabilityTrend' | translate"
           >
-            @for (point of data.reliabilityTrend; track $index) {
-              <div class="fd-trend__col">
-                <div
-                  class="fd-trend__bar"
-                  [style.transform]="
-                    'scaleY(' + barHeight(point.value) / 100 + ')'
-                  "
-                  [attr.title]="
-                    (point.label || '') +
-                    ': ' +
-                    (point.value | number: '1.0-0') +
-                    '/100'
-                  "
-                ></div>
-              </div>
-            }
-          </div>
-          <div class="fd-trend__labels" aria-hidden="true">
-            <span>{{ data.reliabilityTrend[0]?.label }}</span>
-            @if (data.reliabilityTrend.length > 1) {
-              <span>{{
-                data.reliabilityTrend[data.reliabilityTrend.length - 1]?.label
-              }}</span>
-            }
+            <canvas #trendChart></canvas>
           </div>
         }
       </section>
 
       <!-- Matches + Score -->
       <div class="fd-main-grid">
-        <section class="fd-card fd-matches">
+        <section class="fd-panel fd-matches">
           <header class="fd-section-head fd-section-head--row fd-matches__head">
             <h2 class="fd-section-title">
               {{ 'farm.dashboard.recentB2bMatches' | translate }}
             </h2>
-            <a routerLink="/farm/matches" class="fd-link-cta">
+            <a routerLink="/farm/matches" class="fd-text-link">
               {{ 'common.viewAll' | translate }}
               <span
                 class="material-symbols-outlined text-[16px] icon-flip"
@@ -265,7 +247,7 @@
           </header>
 
           @if (data.recentMatches.length === 0) {
-            <div class="fd-empty">
+            <div class="fd-empty fd-empty--pad">
               <span class="material-symbols-outlined" aria-hidden="true"
                 >inbox</span
               >
@@ -279,101 +261,78 @@
               </div>
             </div>
           } @else {
-            <!-- Desktop table -->
-            <div class="fd-table-wrap">
-              <table class="fd-table">
-                <thead>
-                  <tr>
-                    <th>{{ 'farm.dashboard.factoryBuyer' | translate }}</th>
-                    <th>{{ 'farm.dashboard.cropType' | translate }}</th>
-                    <th>{{ 'farm.dashboard.quantity' | translate }}</th>
-                    <th>{{ 'farm.dashboard.matchScore' | translate }}</th>
-                    <th>{{ 'common.status' | translate }}</th>
-                    <th class="text-end">{{ 'common.actions' | translate }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (match of data.recentMatches; track match.matchId) {
-                    <tr>
-                      <td>
-                        <span class="fd-table__primary">{{
-                          match.factoryName
-                        }}</span>
-                      </td>
-                      <td>
-                        <span class="fd-table__secondary">{{
-                          match.cropName
-                        }}</span>
-                      </td>
-                      <td>
-                        <span class="ui-data-sm"
-                          >{{ match.quantityTons }} MT</span
-                        >
-                      </td>
-                      <td>
-                        <span
-                          class="fd-score"
-                          [attr.data-tone]="scoreTone(match.matchScore)"
-                        >
-                          <span class="fd-score__dot" aria-hidden="true"></span>
-                          <span class="ui-data-sm">
-                            {{
-                              match.matchScore != null
-                                ? (match.matchScore | number: '1.0-0') + '%'
-                                : '—'
-                            }}
-                          </span>
-                          <span class="fd-score__label">{{
-                            'farm.dashboard.matchLabel' | translate
-                          }}</span>
-                        </span>
-                      </td>
-                      <td>
-                        <span
-                          class="fd-badge"
-                          [attr.data-tone]="statusTone(match.status)"
-                        >
-                          {{ statusKey(match.status) | translate }}
-                        </span>
-                      </td>
-                      <td class="text-end">
-                        <a
-                          routerLink="/farm/matches"
-                          class="fd-btn-review"
-                        >
-                          {{ 'farm.dashboard.review' | translate }}
-                        </a>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
+            <div class="fd-match-board" role="table">
+              <div class="fd-match-board__head" role="row">
+                <div role="columnheader">
+                  {{ 'farm.dashboard.factoryBuyer' | translate }}
+                </div>
+                <div role="columnheader">
+                  {{ 'farm.dashboard.cropType' | translate }}
+                </div>
+                <div role="columnheader">
+                  {{ 'farm.dashboard.quantity' | translate }}
+                </div>
+                <div role="columnheader">
+                  {{ 'farm.dashboard.matchScore' | translate }}
+                </div>
+                <div role="columnheader">
+                  {{ 'common.status' | translate }}
+                </div>
+                <div role="columnheader" class="fd-match-board__action-h">
+                  {{ 'common.actions' | translate }}
+                </div>
+              </div>
 
-            <!-- Mobile cards -->
-            <ul class="fd-match-cards">
               @for (match of data.recentMatches; track match.matchId) {
-                <li class="fd-match-card">
-                  <div class="fd-match-card__row">
-                    <div class="min-w-0">
-                      <p class="fd-table__primary">{{ match.factoryName }}</p>
-                      <p class="fd-table__secondary">
-                        {{ match.cropName }} · {{ match.quantityTons }} MT
-                      </p>
-                    </div>
-                    <span
-                      class="fd-badge"
-                      [attr.data-tone]="statusTone(match.status)"
-                    >
-                      {{ statusKey(match.status) | translate }}
-                    </span>
+                <div class="fd-match-board__row" role="row">
+                  <div
+                    role="cell"
+                    [attr.data-label]="'farm.dashboard.factoryBuyer' | translate"
+                  >
+                    <span class="fd-match-board__primary">{{
+                      match.factoryName
+                    }}</span>
                   </div>
-                  <div class="fd-match-card__row">
-                    <span
+                  <div
+                    role="cell"
+                    [attr.data-label]="'farm.dashboard.cropType' | translate"
+                  >
+                    <span class="fd-match-board__secondary">{{
+                      match.cropName
+                    }}</span>
+                  </div>
+                  <div
+                    role="cell"
+                    [attr.data-label]="'farm.dashboard.quantity' | translate"
+                  >
+                    <span class="ui-data-sm"
+                      >{{ match.quantityTons }} MT</span
+                    >
+                  </div>
+                  <div
+                    role="cell"
+                    [attr.data-label]="'farm.dashboard.matchScore' | translate"
+                  >
+                    <div
                       class="fd-score"
                       [attr.data-tone]="scoreTone(match.matchScore)"
                     >
-                      <span class="fd-score__dot" aria-hidden="true"></span>
+                      <div
+                        class="fd-score__bar"
+                        role="presentation"
+                        aria-hidden="true"
+                      >
+                        <span
+                          class="fd-score__fill"
+                          [style.transform]="
+                            'scaleX(' +
+                            (match.matchScore != null
+                              ? match.matchScore / 100
+                              : 0) +
+                            ')'
+                          "
+                        ></span>
+                      </div>
                       <span class="ui-data-sm">
                         {{
                           match.matchScore != null
@@ -381,18 +340,35 @@
                             : '—'
                         }}
                       </span>
+                    </div>
+                  </div>
+                  <div
+                    role="cell"
+                    [attr.data-label]="'common.status' | translate"
+                  >
+                    <span
+                      class="fd-badge"
+                      [attr.data-tone]="statusTone(match.status)"
+                    >
+                      {{ statusKey(match.status) | translate }}
                     </span>
-                    <a routerLink="/farm/matches" class="fd-btn-review">
+                  </div>
+                  <div
+                    role="cell"
+                    class="fd-match-board__action"
+                    [attr.data-label]="'common.actions' | translate"
+                  >
+                    <a routerLink="/farm/matches" class="fd-btn-primary fd-btn-primary--sm">
                       {{ 'farm.dashboard.review' | translate }}
                     </a>
                   </div>
-                </li>
+                </div>
               }
-            </ul>
+            </div>
           }
         </section>
 
-        <section class="fd-card fd-score-panel">
+        <section class="fd-panel fd-score-panel">
           <header class="fd-score-panel__hero">
             <div>
               <p class="fd-kpi__label">
@@ -450,15 +426,20 @@
                   {{ 'farm.dashboard.suggestions' | translate }}
                 </p>
                 @for (tip of topTips(); track tip.category) {
-                  <div class="fd-tip">
+                  <a [routerLink]="tipLink(tip)" class="fd-tip">
                     <span class="material-symbols-outlined" aria-hidden="true">{{
                       tip.icon || 'lightbulb'
                     }}</span>
-                    <div class="min-w-0">
+                    <div class="min-w-0 flex-1">
                       <p class="fd-tip__cat">{{ tip.category }}</p>
                       <p class="fd-tip__msg">{{ tipShort(tip) }}</p>
                     </div>
-                  </div>
+                    <span
+                      class="material-symbols-outlined fd-tip__chevron icon-flip"
+                      aria-hidden="true"
+                      >chevron_right</span
+                    >
+                  </a>
                 }
               </div>
             }
@@ -477,9 +458,9 @@
         </section>
       </div>
 
-      <!-- Activity from real matches -->
-      <section class="fd-card fd-activity">
-        <header class="fd-section-head">
+      <!-- Activity -->
+      <section class="fd-panel fd-activity">
+        <header class="fd-section-head fd-section-head--row">
           <h2 class="fd-section-title">
             {{ 'common.activityFeed' | translate }}
           </h2>
@@ -502,7 +483,8 @@
         } @else {
           <ul class="fd-activity__list">
             @for (item of activityItems(); track item.id) {
-              <li class="fd-activity__item">
+              <li class="fd-activity__item" [attr.data-tone]="item.tone">
+                <span class="fd-activity__rail" aria-hidden="true"></span>
                 <span class="fd-activity__icon" aria-hidden="true">
                   <span class="material-symbols-outlined">{{ item.icon }}</span>
                 </span>
@@ -510,7 +492,7 @@
                   <p class="fd-activity__title">{{ item.title }}</p>
                   <p class="fd-activity__meta">{{ item.meta }}</p>
                 </div>
-                <a [routerLink]="item.link" class="fd-link-cta fd-link-cta--quiet">
+                <a [routerLink]="item.link" class="fd-text-link fd-text-link--quiet">
                   {{ 'farm.dashboard.review' | translate }}
                 </a>
               </li>

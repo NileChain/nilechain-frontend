@@ -277,6 +277,9 @@
     "dashboard": {
       "title": "Dashboard",
       "subtitle": "Your farm performance, matches, and recent activity.",
+      "greetingMorning": "Good morning, {{name}}!",
+      "greetingAfternoon": "Good afternoon, {{name}}!",
+      "greetingEvening": "Good evening, {{name}}!",
       "riskScore": "Risk score",
       "reliabilityScore": "Reliability Score",
       "reliabilityStrong": "Strong standing",
