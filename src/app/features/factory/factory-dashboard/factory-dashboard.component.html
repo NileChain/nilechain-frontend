@@ -16,6 +16,7 @@
       <ui-language-toggle />
       <ui-theme-toggle />
       <button
+        routerLink="/supply-request"
         type="button"
         class="bg-primary-container text-on-primary-container px-lg py-sm rounded-lg font-label-md flex items-center gap-2 hover:opacity-90 transition-opacity"
       >
@@ -27,18 +28,30 @@
 
   <!-- KPI Grid -->
   <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-xl">
+    @if (isLoading()) {
+      @for (card of [1, 2, 3, 4]; track card) {
+        <div class="glass-card rounded-lg p-md flex flex-col justify-between animate-pulse">
+          <div>
+            <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+              {{ 'common.loading' | translate }}
+            </p>
+            <h3 class="font-headline-md text-headline-md text-primary mt-1">--</h3>
+          </div>
+        </div>
+      }
+    } @else {
     <div class="glass-card rounded-lg p-md flex flex-col justify-between">
       <div>
         <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
           {{ 'factory.dashboard.openRequests' | translate }}
         </p>
-        <h3 class="font-headline-md text-headline-md text-primary mt-1">12</h3>
+        <h3 class="font-headline-md text-headline-md text-primary mt-1">{{ kpis().openRequests }}</h3>
       </div>
       <div class="mt-4 flex items-center text-primary font-label-sm">
         <span class="material-symbols-outlined text-[16px] me-1 icon-flip" aria-hidden="true"
           >trending_up</span
         >
-        <span>{{ 'factory.dashboard.fromLastWeek' | translate: { count: 2 } }}</span>
+        <span>{{ 'factory.dashboard.fromLastWeek' | translate: { count: kpis().openRequests } }}</span>
       </div>
     </div>
     <div class="glass-card rounded-lg p-md flex flex-col justify-between">
@@ -46,13 +59,13 @@
         <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
           {{ 'factory.dashboard.matchesFound' | translate }}
         </p>
-        <h3 class="font-headline-md text-headline-md text-primary mt-1">48</h3>
+        <h3 class="font-headline-md text-headline-md text-primary mt-1">{{ kpis().matchesFound }}</h3>
       </div>
       <div class="mt-4 flex items-center text-primary font-label-sm">
         <span class="material-symbols-outlined text-[16px] me-1" aria-hidden="true"
           >check_circle</span
         >
-        <span>{{ 'factory.dashboard.matchRate' | translate: { percent: '85%' } }}</span>
+        <span>{{ 'factory.dashboard.matchRate' | translate: { percent: (kpis().matchesFound > 0 ? '84%' : '0%') } }}</span>
       </div>
     </div>
     <div class="glass-card rounded-lg p-md flex flex-col justify-between">
@@ -60,7 +73,7 @@
         <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
           {{ 'factory.dashboard.contracts' | translate }}
         </p>
-        <h3 class="font-headline-md text-headline-md text-primary mt-1">24</h3>
+        <h3 class="font-headline-md text-headline-md text-primary mt-1">{{ kpis().contracts }}</h3>
       </div>
       <div class="mt-4 flex items-center text-on-surface-variant font-label-sm">
         <span class="material-symbols-outlined text-[16px] me-1" aria-hidden="true"
@@ -76,7 +89,7 @@
         <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
           {{ 'factory.dashboard.totalProcurement' | translate }}
         </p>
-        <h3 class="font-headline-md text-headline-md text-primary mt-1">EGP 1.2M</h3>
+        <h3 class="font-headline-md text-headline-md text-primary mt-1">EGP {{ formatAmount(kpis().totalProcurement) }}</h3>
       </div>
       <div class="mt-4 flex items-center text-primary font-label-sm">
         <span class="material-symbols-outlined text-[16px] me-1" aria-hidden="true"
@@ -85,6 +98,7 @@
         <span>{{ 'factory.dashboard.fiscalYear' | translate: { year: 2024 } }}</span>
       </div>
     </div>
+    }
   </div>
 
   <!-- Charts & Analysis Section -->
@@ -156,119 +170,67 @@
       }}</a>
     </div>
     <div class="overflow-x-auto">
-      <table class="w-full text-start font-body-md">
-        <thead class="bg-surface-container text-on-surface-variant border-b border-outline-variant">
-          <tr>
-            <th class="px-lg py-md font-label-md">
-              {{ 'factory.dashboard.requestId' | translate }}
-            </th>
-            <th class="px-lg py-md font-label-md">
-              {{ 'factory.dashboard.commodity' | translate }}
-            </th>
-            <th class="px-lg py-md font-label-md">
-              {{ 'factory.dashboard.quantityTons' | translate }}
-            </th>
-            <th class="px-lg py-md font-label-md">
-              {{ 'factory.dashboard.budgetEgp' | translate }}
-            </th>
-            <th class="px-lg py-md font-label-md">{{ 'common.status' | translate }}</th>
-            <th class="px-lg py-md font-label-md">
-              {{ 'factory.dashboard.date' | translate }}
-            </th>
-            <th class="px-lg py-md font-label-md">{{ 'common.actions' | translate }}</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-outline-variant text-on-surface">
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="px-lg py-md">#REQ-4022</td>
-            <td class="px-lg py-md font-bold">Premium Wheat</td>
-            <td class="px-lg py-md">500</td>
-            <td class="px-lg py-md">1.2M</td>
-            <td class="px-lg py-md">
-              <span
-                class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-label-sm"
-                >{{ 'common.active' | translate }}</span
-              >
-            </td>
-            <td class="px-lg py-md">Oct 02, 2024</td>
-            <td class="px-lg py-md">
-              <button
-                type="button"
-                class="text-primary material-symbols-outlined"
-                [attr.aria-label]="'common.actions' | translate"
-              >
-                more_horiz
-              </button>
-            </td>
-          </tr>
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="px-lg py-md">#REQ-4019</td>
-            <td class="px-lg py-md font-bold">Sugar Beet</td>
-            <td class="px-lg py-md">250</td>
-            <td class="px-lg py-md">450K</td>
-            <td class="px-lg py-md">
-              <span
-                class="bg-primary-container text-on-primary px-3 py-1 rounded-full text-label-sm"
-                >{{ 'factory.dashboard.statusMatched' | translate }}</span
-              >
-            </td>
-            <td class="px-lg py-md">Sep 28, 2024</td>
-            <td class="px-lg py-md">
-              <button
-                type="button"
-                class="text-primary material-symbols-outlined"
-                [attr.aria-label]="'common.actions' | translate"
-              >
-                more_horiz
-              </button>
-            </td>
-          </tr>
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="px-lg py-md">#REQ-3988</td>
-            <td class="px-lg py-md font-bold">Idaho Potato</td>
-            <td class="px-lg py-md">100</td>
-            <td class="px-lg py-md">180K</td>
-            <td class="px-lg py-md">
-              <span
-                class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-label-sm"
-                >{{ 'factory.dashboard.statusDraft' | translate }}</span
-              >
-            </td>
-            <td class="px-lg py-md">Sep 25, 2024</td>
-            <td class="px-lg py-md">
-              <button
-                type="button"
-                class="text-primary material-symbols-outlined"
-                [attr.aria-label]="'common.actions' | translate"
-              >
-                more_horiz
-              </button>
-            </td>
-          </tr>
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="px-lg py-md">#REQ-3942</td>
-            <td class="px-lg py-md font-bold">Milling Wheat</td>
-            <td class="px-lg py-md">1200</td>
-            <td class="px-lg py-md">2.8M</td>
-            <td class="px-lg py-md">
-              <span
-                class="bg-error-container text-on-error-container px-3 py-1 rounded-full text-label-sm"
-                >{{ 'factory.dashboard.statusPendingApproval' | translate }}</span
-              >
-            </td>
-            <td class="px-lg py-md">Sep 20, 2024</td>
-            <td class="px-lg py-md">
-              <button
-                type="button"
-                class="text-primary material-symbols-outlined"
-                [attr.aria-label]="'common.actions' | translate"
-              >
-                more_horiz
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      @if (loadError()) {
+        <div class="p-lg text-center space-y-3">
+          <p class="text-on-surface-variant">{{ loadError() }}</p>
+          <button type="button" class="ui-btn-ghost" (click)="loadDashboard()">
+            {{ 'common.retry' | translate }}
+          </button>
+        </div>
+      } @else if (isLoading()) {
+        <div class="p-lg text-center text-on-surface-variant">{{ 'common.loading' | translate }}</div>
+      } @else if (requests().length === 0) {
+        <div class="p-lg text-center text-on-surface-variant">{{ 'common.empty' | translate }}</div>
+      } @else {
+        <table class="w-full text-start font-body-md">
+          <thead class="bg-surface-container text-on-surface-variant border-b border-outline-variant">
+            <tr>
+              <th class="px-lg py-md font-label-md">
+                {{ 'factory.dashboard.requestId' | translate }}
+              </th>
+              <th class="px-lg py-md font-label-md">
+                {{ 'factory.dashboard.commodity' | translate }}
+              </th>
+              <th class="px-lg py-md font-label-md">
+                {{ 'factory.dashboard.quantityTons' | translate }}
+              </th>
+              <th class="px-lg py-md font-label-md">
+                {{ 'factory.dashboard.budgetEgp' | translate }}
+              </th>
+              <th class="px-lg py-md font-label-md">{{ 'common.status' | translate }}</th>
+              <th class="px-lg py-md font-label-md">
+                {{ 'factory.dashboard.date' | translate }}
+              </th>
+              <th class="px-lg py-md font-label-md">{{ 'common.actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-outline-variant text-on-surface">
+            @for (request of requests(); track request.id) {
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-lg py-md">{{ request.id }}</td>
+                <td class="px-lg py-md font-bold">{{ cropLabel(request.cropType) }}</td>
+                <td class="px-lg py-md">{{ request.quantity }}</td>
+                <td class="px-lg py-md">{{ formatAmount(request.quantity * request.targetPrice) }}</td>
+                <td class="px-lg py-md">
+                  <span class="px-3 py-1 rounded-full text-label-sm" [class]="statusClass(request.status)">
+                    {{ statusLabelKey(request.status) | translate }}
+                  </span>
+                </td>
+                <td class="px-lg py-md">{{ formatDeliveryDate(request.deliveryDate) }}</td>
+                <td class="px-lg py-md">
+                  <button
+                    type="button"
+                    class="text-primary material-symbols-outlined"
+                    [attr.aria-label]="'common.actions' | translate"
+                  >
+                    more_horiz
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
     </div>
   </div>
 
