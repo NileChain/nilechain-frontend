@@ -1,15 +1,5 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
-  <app-top-bar titleKey="admin.contracts.title" portal="admin">
-    <button
-      type="button"
-      class="ui-btn-primary inline-flex items-center gap-2 shrink-0 !py-2 !px-4"
-    >
-      <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
-        >add</span
-      >
-      {{ 'admin.contracts.newContract' | translate }}
-    </button>
-  </app-top-bar>
+  <app-top-bar titleKey="admin.contracts.title" portal="admin" />
 
   <div
     class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
@@ -20,7 +10,6 @@
       </p>
     </section>
 
-    <!-- Filters -->
     <section class="ui-card p-6">
       <div class="flex items-center justify-between mb-4 gap-3">
         <h2
@@ -34,254 +23,257 @@
         <button
           type="button"
           class="ui-btn-ghost text-primary font-label-lg text-label-lg"
+          (click)="resetFilters()"
         >
           {{ 'admin.contracts.resetFilters' | translate }}
         </button>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <div>
-          <label
-            class="block font-label-lg text-label-lg text-on-surface-variant mb-1"
-            for="filter-farm"
-            >{{ 'admin.contracts.farm' | translate }}</label
-          >
-          <select id="filter-farm" class="ui-input w-full">
-            <option>{{ 'admin.contracts.allFarms' | translate }}</option>
-            <option>Eastern Nile Farms</option>
-            <option>Delta Cooperative</option>
-          </select>
-        </div>
-        <div>
-          <label
-            class="block font-label-lg text-label-lg text-on-surface-variant mb-1"
-            for="filter-factory"
-            >{{ 'admin.contracts.factory' | translate }}</label
-          >
-          <select id="filter-factory" class="ui-input w-full">
-            <option>{{ 'admin.contracts.allFactories' | translate }}</option>
-            <option>Modern Food Factories</option>
-            <option>National Export Co.</option>
-          </select>
-        </div>
-        <div>
-          <label
-            class="block font-label-lg text-label-lg text-on-surface-variant mb-1"
-            for="filter-crop"
-            >{{ 'admin.contracts.crop' | translate }}</label
-          >
-          <select id="filter-crop" class="ui-input w-full">
-            <option>{{ 'admin.contracts.allCrops' | translate }}</option>
-            <option>Wheat</option>
-            <option>Processing Tomato</option>
-            <option>Long Staple Cotton</option>
-          </select>
-        </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div>
           <label
             class="block font-label-lg text-label-lg text-on-surface-variant mb-1"
             for="filter-status"
             >{{ 'common.status' | translate }}</label
           >
-          <select id="filter-status" class="ui-input w-full">
-            <option>{{ 'admin.contracts.allStatuses' | translate }}</option>
-            <option>{{ 'admin.contracts.statusSigned' | translate }}</option>
-            <option>{{ 'admin.contracts.statusReview' | translate }}</option>
-            <option>{{ 'admin.contracts.statusRejected' | translate }}</option>
+          <select
+            id="filter-status"
+            class="ui-input w-full"
+            [(ngModel)]="statusFilter"
+            (ngModelChange)="applyFilters()"
+          >
+            @for (opt of statusOptions; track opt.value) {
+              <option [value]="opt.value">
+                {{ opt.labelKey | translate }}
+              </option>
+            }
           </select>
         </div>
-      </div>
-      <div class="relative max-w-md">
-        <label class="sr-only" for="admin-contracts-search">{{
-          'common.search' | translate
-        }}</label>
-        <span
-          class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
-          aria-hidden="true"
-          >search</span
-        >
-        <input
-          id="admin-contracts-search"
-          type="search"
-          class="ui-input w-full ps-10"
-          [attr.placeholder]="'admin.contracts.searchPlaceholder' | translate"
-        />
-      </div>
-    </section>
-
-    <!-- Contracts table -->
-    <section class="ui-card overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-start border-collapse">
-          <thead>
-            <tr
-              class="bg-surface-container-low border-b border-outline-variant"
+        <div>
+          <label class="sr-only" for="admin-contracts-search">{{
+            'common.search' | translate
+          }}</label>
+          <div class="relative">
+            <span
+              class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
+              aria-hidden="true"
+              >search</span
             >
-              <th
-                scope="col"
-                class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start"
-              >
-                {{ 'admin.contracts.contractId' | translate }}
-              </th>
-              <th
-                scope="col"
-                class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start"
-              >
-                {{ 'admin.contracts.farm' | translate }}
-              </th>
-              <th
-                scope="col"
-                class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start"
-              >
-                {{ 'admin.contracts.factory' | translate }}
-              </th>
-              <th
-                scope="col"
-                class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start"
-              >
-                {{ 'admin.contracts.crop' | translate }}
-              </th>
-              <th
-                scope="col"
-                class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start"
-              >
-                {{ 'admin.contracts.value' | translate }}
-              </th>
-              <th
-                scope="col"
-                class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start"
-              >
-                {{ 'admin.contracts.riskIndex' | translate }}
-              </th>
-              <th
-                scope="col"
-                class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start"
-              >
-                {{ 'common.status' | translate }}
-              </th>
-              <th
-                scope="col"
-                class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start"
-              >
-                {{ 'common.actions' | translate }}
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-outline-variant">
-            @for (c of contracts; track c.id) {
-              <tr class="hover:bg-surface-container-lowest transition-colors">
-                <td
-                  class="py-4 px-6 font-body-md text-body-md text-on-surface font-medium"
-                >
-                  {{ c.id }}
-                </td>
-                <td class="py-4 px-6 font-body-md text-body-md text-on-surface">
-                  {{ c.farm }}
-                </td>
-                <td class="py-4 px-6 font-body-md text-body-md text-on-surface">
-                  {{ c.factory }}
-                </td>
-                <td
-                  class="py-4 px-6 font-body-md text-body-md text-on-surface-variant"
-                >
-                  {{ c.crop }}
-                </td>
-                <td class="py-4 px-6 font-body-md text-body-md text-on-surface">
-                  {{ c.value }}
-                </td>
-                <td class="py-4 px-6">
-                  @if (c.risk === 'low') {
-                    <div class="flex items-center gap-1">
-                      <span
-                        class="h-2 w-2 rounded-full bg-success-green"
-                        aria-hidden="true"
-                      ></span>
-                      <span
-                        class="font-label-sm text-label-sm text-success-green"
-                        >{{ 'common.low' | translate }} ({{
-                          c.riskScore
-                        }})</span
-                      >
-                    </div>
-                  }
-                  @if (c.risk === 'medium') {
-                    <div class="flex items-center gap-1">
-                      <span
-                        class="h-2 w-2 rounded-full bg-warning-orange"
-                        aria-hidden="true"
-                      ></span>
-                      <span
-                        class="font-label-sm text-label-sm text-warning-orange"
-                        >{{ 'common.medium' | translate }} ({{
-                          c.riskScore
-                        }})</span
-                      >
-                    </div>
-                  }
-                  @if (c.risk === 'high') {
-                    <div class="flex items-center gap-1">
-                      <span
-                        class="h-2 w-2 rounded-full bg-danger-red"
-                        aria-hidden="true"
-                      ></span>
-                      <span class="font-label-sm text-label-sm text-danger-red"
-                        >{{ 'common.high' | translate }} ({{
-                          c.riskScore
-                        }})</span
-                      >
-                    </div>
-                  }
-                </td>
-                <td class="py-4 px-6">
-                  @if (c.status === 'signed') {
-                    <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-secondary-container text-on-secondary-container"
-                      >{{ 'admin.contracts.statusSigned' | translate }}</span
-                    >
-                  }
-                  @if (c.status === 'review') {
-                    <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container-high text-on-surface"
-                      >{{ 'admin.contracts.statusReview' | translate }}</span
-                    >
-                  }
-                  @if (c.status === 'rejected') {
-                    <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-error-container text-on-error-container"
-                      >{{ 'admin.contracts.statusRejected' | translate }}</span
-                    >
-                  }
-                </td>
-                <td class="py-4 px-6 text-on-surface-variant">
-                  <button
-                    type="button"
-                    class="hover:text-primary transition-colors"
-                    [attr.aria-label]="'common.actions' | translate"
-                  >
-                    <span class="material-symbols-outlined" aria-hidden="true"
-                      >more_vert</span
-                    >
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-      <div
-        class="bg-surface-container-low p-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-outline-variant"
-      >
-        <span class="font-body-md text-body-md text-on-surface-variant">{{
-          'admin.contracts.showingResults' | translate
-        }}</span>
-        <div class="flex gap-2">
-          <button type="button" class="ui-btn-secondary !px-3 !py-1" disabled>
-            {{ 'common.previous' | translate }}
-          </button>
-          <button type="button" class="ui-btn-secondary !px-3 !py-1">
-            {{ 'common.next' | translate }}
-          </button>
+            <input
+              id="admin-contracts-search"
+              type="search"
+              class="ui-input w-full ps-10"
+              [(ngModel)]="search"
+              (keyup.enter)="applyFilters()"
+              [attr.placeholder]="
+                'admin.contracts.searchPlaceholder' | translate
+              "
+            />
+          </div>
         </div>
       </div>
+      <button type="button" class="ui-btn-secondary" (click)="applyFilters()">
+        {{ 'common.search' | translate }}
+      </button>
+    </section>
+
+    <section class="ui-card overflow-hidden">
+      @if (loading()) {
+        <div class="flex justify-center py-12">
+          <ui-loader [label]="'common.loading' | translate" />
+        </div>
+      } @else if (error()) {
+        <div class="p-8 text-center space-y-3">
+          <p class="font-body-md text-body-md text-error">{{ error() }}</p>
+          <button type="button" class="ui-btn-primary" (click)="load()">
+            {{ 'common.retry' | translate }}
+          </button>
+        </div>
+      } @else if (contracts().length === 0) {
+        <div class="p-6">
+          <ui-empty-state
+            titleKey="admin.contracts.emptyTitle"
+            bodyKey="admin.contracts.emptyBody"
+            icon="description"
+            [compact]="true"
+          />
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-start border-collapse">
+            <thead>
+              <tr
+                class="bg-surface-container-low border-b border-outline-variant"
+              >
+                <th
+                  scope="col"
+                  class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start"
+                >
+                  {{ 'admin.contracts.contractId' | translate }}
+                </th>
+                <th
+                  scope="col"
+                  class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start"
+                >
+                  {{ 'admin.contracts.farm' | translate }}
+                </th>
+                <th
+                  scope="col"
+                  class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start"
+                >
+                  {{ 'admin.contracts.factory' | translate }}
+                </th>
+                <th
+                  scope="col"
+                  class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start"
+                >
+                  {{ 'admin.contracts.crop' | translate }}
+                </th>
+                <th
+                  scope="col"
+                  class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start"
+                >
+                  {{ 'admin.contracts.value' | translate }}
+                </th>
+                <th
+                  scope="col"
+                  class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start"
+                >
+                  {{ 'admin.contracts.riskIndex' | translate }}
+                </th>
+                <th
+                  scope="col"
+                  class="py-4 px-6 font-label-lg text-label-lg text-on-surface-variant text-start"
+                >
+                  {{ 'common.status' | translate }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant">
+              @for (c of contracts(); track c.contractId) {
+                <tr class="hover:bg-surface-container-lowest transition-colors">
+                  <td
+                    class="py-4 px-6 font-body-md text-body-md text-on-surface font-medium"
+                  >
+                    {{ c.shortId }}
+                  </td>
+                  <td class="py-4 px-6 font-body-md text-body-md text-on-surface">
+                    {{ c.farmName }}
+                  </td>
+                  <td class="py-4 px-6 font-body-md text-body-md text-on-surface">
+                    {{ c.factoryName }}
+                  </td>
+                  <td
+                    class="py-4 px-6 font-body-md text-body-md text-on-surface-variant"
+                  >
+                    {{ c.cropName }}
+                  </td>
+                  <td class="py-4 px-6 font-body-md text-body-md text-on-surface">
+                    {{ formatValue(c.valueEgp) }}
+                  </td>
+                  <td class="py-4 px-6">
+                    @if (c.riskBand === 'low') {
+                      <div class="flex items-center gap-1">
+                        <span
+                          class="h-2 w-2 rounded-full bg-success-green"
+                          aria-hidden="true"
+                        ></span>
+                        <span
+                          class="font-label-sm text-label-sm text-success-green"
+                          >{{ 'common.low' | translate }}
+                          @if (c.farmRiskScore != null) {
+                            ({{ c.farmRiskScore }})
+                          }
+                        </span>
+                      </div>
+                    } @else if (c.riskBand === 'high') {
+                      <div class="flex items-center gap-1">
+                        <span
+                          class="h-2 w-2 rounded-full bg-danger-red"
+                          aria-hidden="true"
+                        ></span>
+                        <span
+                          class="font-label-sm text-label-sm text-danger-red"
+                          >{{ 'common.high' | translate }}
+                          @if (c.farmRiskScore != null) {
+                            ({{ c.farmRiskScore }})
+                          }
+                        </span>
+                      </div>
+                    } @else {
+                      <div class="flex items-center gap-1">
+                        <span
+                          class="h-2 w-2 rounded-full bg-warning-orange"
+                          aria-hidden="true"
+                        ></span>
+                        <span
+                          class="font-label-sm text-label-sm text-warning-orange"
+                          >{{ 'common.medium' | translate }}
+                          @if (c.farmRiskScore != null) {
+                            ({{ c.farmRiskScore }})
+                          }
+                        </span>
+                      </div>
+                    }
+                  </td>
+                  <td class="py-4 px-6">
+                    @if (c.status === 'signed') {
+                      <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-secondary-container text-on-secondary-container"
+                        >{{ 'admin.contracts.statusSigned' | translate }}</span
+                      >
+                    } @else if (c.status === 'rejected') {
+                      <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-error-container text-on-error-container"
+                        >{{
+                          'admin.contracts.statusRejected' | translate
+                        }}</span
+                      >
+                    } @else {
+                      <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container-high text-on-surface"
+                        >{{ 'admin.contracts.statusReview' | translate }}</span
+                      >
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div
+          class="bg-surface-container-low p-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-outline-variant"
+        >
+          <span class="font-body-md text-body-md text-on-surface-variant">
+            {{
+              'admin.contracts.showingLive'
+                | translate
+                  : {
+                      shown: contracts().length,
+                      total: totalCount(),
+                      page: page(),
+                    }
+            }}
+          </span>
+          <div class="flex gap-2">
+            <button
+              type="button"
+              class="ui-btn-secondary !px-3 !py-1"
+              [disabled]="page() <= 1"
+              (click)="prevPage()"
+            >
+              {{ 'common.previous' | translate }}
+            </button>
+            <button
+              type="button"
+              class="ui-btn-secondary !px-3 !py-1"
+              [disabled]="page() * pageSize >= totalCount()"
+              (click)="nextPage()"
+            >
+              {{ 'common.next' | translate }}
+            </button>
+          </div>
+        </div>
+      }
     </section>
   </div>
 </main>

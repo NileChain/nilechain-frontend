@@ -24,6 +24,12 @@ import { TranslateService } from '../../../core/services/translate.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { FactoryMatchItem } from '../../../core/models/factory/factory-match.model';
 import { readAgentSession } from '../../../core/utils/agent-session';
+import {
+  ListSortMode,
+  normalizeListSort,
+  relativeTimeParts,
+} from '../../../shared/list/list-ordering.util';
+import { FormsModule } from '@angular/forms';
 
 import {
   EGYPT_MAP_CENTER,
@@ -64,6 +70,7 @@ configureLeafletDefaultIcon();
     RouterLink,
     DatePipe,
     DecimalPipe,
+    FormsModule,
   ],
   templateUrl: './factory-matches.component.html',
 })
@@ -86,9 +93,12 @@ export class FactoryMatchesComponent
   readonly profileOpen = signal(false);
   readonly profileFarmId = signal<string | null>(null);
   readonly profileRationale = signal<string | null>(null);
+  readonly sortMode = signal<ListSortMode>('newest');
+  readonly excludingId = signal<string | null>(null);
 
   private map?: L.Map;
-  private marker?: L.Marker;
+  private markerLayer?: L.LayerGroup;
+  private markersByFarmId = new Map<string, L.Marker>();
   private mapNeedsInit = false;
   private sizeFixTimer?: ReturnType<typeof setTimeout>;
   private mapInitAttempts = 0;
@@ -124,7 +134,8 @@ export class FactoryMatchesComponent
     if (this.map && this.map.getContainer() !== host) {
       this.map.remove();
       this.map = undefined;
-      this.marker = undefined;
+      this.markerLayer = undefined;
+      this.markersByFarmId.clear();
     }
     this.mapNeedsInit = false;
     this.mapInitAttempts += 1;
@@ -143,7 +154,7 @@ export class FactoryMatchesComponent
     this.error.set(null);
     this.destroyMap();
     this.factoryService
-      .getRequestMatches(requestId)
+      .getRequestMatches(requestId, this.sortMode())
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (items) => {
@@ -159,6 +170,20 @@ export class FactoryMatchesComponent
         error: () =>
           this.error.set(this.i18n.instant('factory.matches.loadFailed')),
       });
+  }
+
+  onSortChange(value: string): void {
+    this.sortMode.set(normalizeListSort(value));
+    const id = this.requestId();
+    if (id) {
+      this.loadMatches(id);
+    }
+  }
+
+  relativeLabel(iso: string | null | undefined): string | null {
+    const parts = relativeTimeParts(iso);
+    if (!parts) return null;
+    return this.i18n.instant(parts.key, parts.params);
   }
 
   select(match: FactoryMatchItem): void {
@@ -237,6 +262,9 @@ export class FactoryMatchesComponent
   }
 
   async excludeMatch(match: FactoryMatchItem): Promise<void> {
+    if (this.excludingId()) {
+      return;
+    }
     const confirmed = await this.confirmDialog.confirm({
       titleKey: 'factory.matches.excludeTitle',
       bodyKey: 'factory.matches.excludeBody',
@@ -247,19 +275,29 @@ export class FactoryMatchesComponent
     if (!confirmed) {
       return;
     }
-    this.matches.update((list) =>
-      list.filter((m) => m.matchId !== match.matchId)
-    );
-    if (this.selected()?.matchId === match.matchId) {
-      this.selected.set(this.matches()[0] ?? null);
-      if (this.selected()) {
-        this.scheduleMapInit();
-      } else {
-        this.destroyMap();
-        this.mapNeedsInit = false;
-      }
-    }
-    this.toast.info(this.i18n.instant('factory.matches.excludedToast'));
+    this.excludingId.set(match.matchId);
+    this.factoryService
+      .excludeMatch(match.matchId)
+      .pipe(finalize(() => this.excludingId.set(null)))
+      .subscribe({
+        next: () => {
+          this.matches.update((list) =>
+            list.filter((m) => m.matchId !== match.matchId)
+          );
+          if (this.selected()?.matchId === match.matchId) {
+            this.selected.set(this.matches()[0] ?? null);
+            if (this.selected()) {
+              this.scheduleMapInit();
+            } else {
+              this.destroyMap();
+              this.mapNeedsInit = false;
+            }
+          }
+          this.toast.info(this.i18n.instant('factory.matches.excludedToast'));
+        },
+        error: () =>
+          this.toast.error(this.i18n.instant('factory.matches.excludeFailed')),
+      });
   }
 
   private initOrUpdateMap(match: FactoryMatchItem): void {
@@ -270,35 +308,28 @@ export class FactoryMatchesComponent
     }
 
     try {
-      const coords = this.resolveCoords(match);
+      const focusCoords = this.resolveCoords(match);
 
       // Angular may recreate #mapHost after L.map() runs, orphaning the instance
       // on a detached node and leaving a blank gray box in the new host.
       if (this.map && this.map.getContainer() !== host) {
         this.map.remove();
         this.map = undefined;
-        this.marker = undefined;
+        this.markerLayer = undefined;
+        this.markersByFarmId.clear();
       }
 
       if (!this.map) {
         host.replaceChildren();
-        this.map = L.map(host, { zoomControl: true }).setView(coords, 8);
+        this.map = L.map(host, { zoomControl: true }).setView(focusCoords, 8);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '&copy; OpenStreetMap',
           maxZoom: 18,
         }).addTo(this.map);
-      } else {
-        this.map.setView(coords, 8);
+        this.markerLayer = L.layerGroup().addTo(this.map);
       }
 
-      if (this.marker) {
-        this.marker.setLatLng(coords);
-        this.marker.setPopupContent(match.farmName);
-      } else {
-        this.marker = L.marker(coords).addTo(this.map);
-        this.marker.bindPopup(match.farmName);
-      }
-      this.marker.openPopup();
+      this.renderShortlistMarkers(match.farmId);
 
       // Leaflet often paints blank if invalidateSize runs before layout settles.
       if (this.sizeFixTimer) {
@@ -307,7 +338,7 @@ export class FactoryMatchesComponent
       this.sizeFixTimer = setTimeout(() => {
         if (this.map && this.mapHost?.nativeElement === this.map.getContainer()) {
           this.map.invalidateSize();
-          this.marker?.openPopup();
+          this.markersByFarmId.get(match.farmId)?.openPopup();
         } else if (this.selected()) {
           // Host was replaced after init — rebuild on the live element.
           this.mapNeedsInit = true;
@@ -318,6 +349,65 @@ export class FactoryMatchesComponent
       this.destroyMap();
       this.mapNeedsInit = true;
     }
+  }
+
+  /** Markers for all shortlisted farms; selected farm gets an open popup. */
+  private renderShortlistMarkers(selectedFarmId: string): void {
+    if (!this.map) {
+      return;
+    }
+    if (!this.markerLayer) {
+      this.markerLayer = L.layerGroup().addTo(this.map);
+    }
+
+    this.markerLayer.clearLayers();
+    this.markersByFarmId.clear();
+
+    const bounds: L.LatLngExpression[] = [];
+    for (const farm of this.matches()) {
+      const coords = this.resolveCoords(farm);
+      bounds.push(coords);
+      const label = this.markerLabel(farm);
+      const marker = L.marker(coords).bindPopup(
+        `<strong>${this.escapeHtml(farm.farmName)}</strong><br/>${this.escapeHtml(label)}`
+      );
+      marker.bindTooltip(label, {
+        permanent: farm.farmId === selectedFarmId,
+        direction: 'top',
+        offset: [0, -36],
+      });
+      marker.on('click', () => this.select(farm));
+      this.markerLayer.addLayer(marker);
+      this.markersByFarmId.set(farm.farmId, marker);
+    }
+
+    if (bounds.length > 1) {
+      this.map.fitBounds(L.latLngBounds(bounds), { padding: [28, 28], maxZoom: 11 });
+    } else if (bounds.length === 1) {
+      this.map.setView(bounds[0], 8);
+    }
+
+    this.markersByFarmId.get(selectedFarmId)?.openPopup();
+  }
+
+  private markerLabel(farm: FactoryMatchItem): string {
+    if (farm.distanceKm != null && Number.isFinite(farm.distanceKm)) {
+      return this.i18n.instant('factory.matches.distanceKm', {
+        km: Math.round(farm.distanceKm).toString(),
+      });
+    }
+    if (farm.usedGovernorateFallback) {
+      return this.i18n.instant('factory.matches.governorateFallback');
+    }
+    return this.i18n.instant('factory.matches.distanceUnknown');
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 
   /** Prefer scheduled init so #mapHost survives Angular's post-CD DOM pass. */
@@ -358,6 +448,7 @@ export class FactoryMatchesComponent
   private destroyMap(): void {
     this.map?.remove();
     this.map = undefined;
-    this.marker = undefined;
+    this.markerLayer = undefined;
+    this.markersByFarmId.clear();
   }
 }

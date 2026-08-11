@@ -251,12 +251,46 @@
                   <span class="fp-field__label">{{
                     'factory.profile.industryType' | translate
                   }}</span>
-                  <input
-                    id="factory-industry"
-                    type="text"
-                    class="ui-input fp-field__input"
-                    formControlName="industryType"
-                  />
+                  @if (cropsLoading()) {
+                    <span class="fp-field__value">{{
+                      'common.loading' | translate
+                    }}</span>
+                  } @else if (cropsError()) {
+                    <span class="fp-field-error" role="alert">
+                      {{ cropsError() }}
+                      <button
+                        type="button"
+                        class="ui-btn-ghost"
+                        (click)="loadCropTypes()"
+                      >
+                        {{ 'common.retry' | translate }}
+                      </button>
+                    </span>
+                  } @else {
+                    <select
+                      id="factory-industry"
+                      class="ui-input fp-field__input"
+                      formControlName="industryType"
+                    >
+                      <option value="">
+                        {{ 'factory.profile.selectIndustry' | translate }}
+                      </option>
+                      @for (opt of industryOptions(); track opt) {
+                        <option [value]="opt">{{ opt }}</option>
+                      }
+                    </select>
+                    @if (industryOptions().length === 0) {
+                      <span class="fp-field-error">{{
+                        'factory.profile.noCrops' | translate
+                      }}</span>
+                    }
+                    <a
+                      class="fp-field__hint text-primary font-label-sm"
+                      routerLink="/factory/crop-request"
+                    >
+                      {{ 'factory.profile.requestCrop' | translate }}
+                    </a>
+                  }
                 </span>
               </label>
 
@@ -329,13 +363,40 @@
                 <span class="fp-contact__icon" aria-hidden="true">
                   <span class="material-symbols-outlined">call</span>
                 </span>
-                <div class="min-w-0">
+                <div class="min-w-0 flex-1">
                   <p class="fp-contact__label">
                     {{ 'factory.profile.phone' | translate }}
                   </p>
-                  <p class="fp-contact__value">
-                    {{ data.phone || ('factory.profile.notProvided' | translate) }}
-                  </p>
+                  <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center mt-1">
+                    <input
+                      type="tel"
+                      class="ui-input"
+                      [value]="phoneNumber()"
+                      (input)="phoneNumber.set($any($event.target).value)"
+                      [attr.placeholder]="
+                        'factory.profile.phonePlaceholder' | translate
+                      "
+                      inputmode="numeric"
+                      autocomplete="tel"
+                    />
+                    <button
+                      type="button"
+                      class="ui-btn-secondary shrink-0"
+                      [disabled]="updatingPhone() || !phoneNumber()"
+                      (click)="updatePhone()"
+                    >
+                      @if (updatingPhone()) {
+                        <ui-loader size="sm" />
+                      } @else {
+                        {{ 'common.save' | translate }}
+                      }
+                    </button>
+                  </div>
+                  @if (phoneError()) {
+                    <p class="fp-field-error mt-1" role="alert">
+                      {{ phoneError() }}
+                    </p>
+                  }
                 </div>
               </div>
 

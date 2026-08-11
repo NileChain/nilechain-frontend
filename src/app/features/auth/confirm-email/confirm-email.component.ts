@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { AuthService } from '../../../core/services/auth.service';
+import { TranslateService } from '../../../core/services/translate.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
@@ -19,6 +20,7 @@ import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-to
 export class ConfirmEmailComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
+  private readonly i18n = inject(TranslateService);
 
   readonly status = signal<'loading' | 'success' | 'error'>('loading');
   readonly errorMessage = signal('');
@@ -33,7 +35,7 @@ export class ConfirmEmailComponent implements OnInit {
       const token = params['token'] || '';
       if (!userId || !token) {
         this.status.set('error');
-        this.errorMessage.set('Invalid or missing confirmation link.');
+        this.errorMessage.set(this.i18n.instant('confirmEmail.invalidLink'));
         return;
       }
       this.authService
@@ -43,7 +45,7 @@ export class ConfirmEmailComponent implements OnInit {
           error: () => {
             this.status.set('error');
             this.errorMessage.set(
-              'Email confirmation failed. The link may have expired.'
+              this.i18n.instant('confirmEmail.confirmFailed')
             );
           },
         });

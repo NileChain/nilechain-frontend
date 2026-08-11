@@ -7,6 +7,8 @@ import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-stat
 import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 import { AdminService } from '../../../core/services/admin/admin.service';
+import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
+import { TranslateService } from '../../../core/services/translate.service';
 import {
   AdminUser,
   CreateUserRequest,
@@ -28,6 +30,8 @@ import {
 })
 export class AdminUsersComponent implements OnInit {
   private readonly adminService = inject(AdminService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly i18n = inject(TranslateService);
 
   readonly loading = signal(true);
   readonly actionLoading = signal<string | null>(null);
@@ -69,7 +73,8 @@ export class AdminUsersComponent implements OnInit {
           this.totalCount.set(result.totalCount);
           this.totalPages.set(result.totalPages || 1);
         },
-        error: () => this.error.set('Failed to load users.'),
+        error: () =>
+          this.error.set(this.i18n.instant('admin.users.loadFailed')),
       });
   }
 
@@ -118,7 +123,17 @@ export class AdminUsersComponent implements OnInit {
     );
   }
 
-  block(user: AdminUser): void {
+  async block(user: AdminUser): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      titleKey: 'admin.users.confirmBlockTitle',
+      bodyKey: 'admin.users.confirmBlockBody',
+      confirmKey: 'admin.users.block',
+      cancelKey: 'common.cancel',
+      danger: true,
+    });
+    if (!confirmed) {
+      return;
+    }
     this.runAction(user.id, 'block', () =>
       this.adminService.blockUser(user.id)
     );
@@ -130,7 +145,17 @@ export class AdminUsersComponent implements OnInit {
     );
   }
 
-  deactivate(user: AdminUser): void {
+  async deactivate(user: AdminUser): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      titleKey: 'admin.users.confirmDeactivateTitle',
+      bodyKey: 'admin.users.confirmDeactivateBody',
+      confirmKey: 'admin.users.deactivate',
+      cancelKey: 'common.cancel',
+      danger: true,
+    });
+    if (!confirmed) {
+      return;
+    }
     this.runAction(user.id, 'deactivate', () =>
       this.adminService.deactivateUser(user.id)
     );
@@ -166,7 +191,10 @@ export class AdminUsersComponent implements OnInit {
           this.loadUsers();
         },
         error: (err) => {
-          this.error.set(err?.error?.error || 'Failed to create user.');
+          this.error.set(
+            err?.error?.error ||
+              this.i18n.instant('admin.users.createFailed')
+          );
         },
       });
   }
@@ -183,7 +211,10 @@ export class AdminUsersComponent implements OnInit {
       .subscribe({
         next: () => this.loadUsers(),
         error: (err) => {
-          this.error.set(err?.error?.error || `Failed to ${key} user.`);
+          this.error.set(
+            err?.error?.error ||
+              this.i18n.instant('admin.users.actionFailed', { action: key })
+          );
         },
       });
   }

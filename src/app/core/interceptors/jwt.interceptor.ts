@@ -1,13 +1,28 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, switchMap, throwError } from 'rxjs';
+import {
+  catchError,
+  finalize,
+  Observable,
+  shareReplay,
+  switchMap,
+  throwError,
+} from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { AuthResponse } from '../models/user.model';
 import { AuthService } from '../services/auth.service';
+import { ToastService } from '../services/toast.service';
+import { TranslateService } from '../services/translate.service';
+
+/** Single-flight refresh so parallel 401s share one refresh call. */
+let refreshInFlight$: Observable<AuthResponse> | null = null;
 
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+  const toast = inject(ToastService);
+  const i18n = inject(TranslateService);
 
   let headers = req.headers;
   const token = authService.accessToken();
@@ -26,14 +41,31 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(clonedReq).pipe(
     catchError((error) => {
+      if (!(error instanceof HttpErrorResponse)) {
+        return throwError(() => error);
+      }
+
+      if (error.status === 403) {
+        toast.error(i18n.instant('errors.forbidden'));
+        return throwError(() => error);
+      }
+
       if (
-        error instanceof HttpErrorResponse &&
         error.status === 401 &&
         !req.url.includes('refresh-token') &&
         !req.url.includes('login') &&
         !req.url.includes('register')
       ) {
-        return authService.refreshToken().pipe(
+        if (!refreshInFlight$) {
+          refreshInFlight$ = authService.refreshToken().pipe(
+            finalize(() => {
+              refreshInFlight$ = null;
+            }),
+            shareReplay({ bufferSize: 1, refCount: true })
+          );
+        }
+
+        return refreshInFlight$.pipe(
           switchMap((response) => {
             const newHeaders = clonedReq.headers.set(
               'Authorization',

@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
@@ -9,18 +10,24 @@ import { finalize } from 'rxjs';
 import { FarmService } from '../../../core/services/farm/farm.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
+import { TranslateService } from '../../../core/services/translate.service';
 import {
   CropType,
   FarmProfile,
 } from '../../../core/models/farm/farm-profile.model';
 import { UpdateFarmProfileRequest } from '../../../core/models/farm/update-farm-profile-request.model';
 import { PickedLocation } from '../../../shared/geo/egypt-governorates';
+import {
+  isValidEgyptianPhone,
+  normalizeEgyptianPhone,
+} from '../../../core/validation/egyptian-phone';
 
 @Component({
   selector: 'app-farm-profile',
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    RouterLink,
     TranslatePipe,
     AppTopBarComponent,
     UiLoaderComponent,
@@ -33,6 +40,7 @@ export class FarmProfileComponent implements OnInit {
   private readonly farmService = inject(FarmService);
   private readonly authService = inject(AuthService);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly i18n = inject(TranslateService);
   private readonly fb = inject(FormBuilder);
 
   private readonly SOIL_TYPE_MAP: Record<string, number> = {
@@ -110,7 +118,7 @@ export class FarmProfileComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.error.set('Failed to load profile.');
+          this.error.set(this.i18n.instant('farm.profile.loadFailed'));
         },
       });
   }
@@ -130,7 +138,8 @@ export class FarmProfileComponent implements OnInit {
   loadCropTypes(): void {
     this.farmService.getCropTypes().subscribe({
       next: (types) => this.cropTypes.set(types),
-      error: () => this.mutationError.set('Failed to load crop types.'),
+      error: () =>
+        this.mutationError.set(this.i18n.instant('farm.profile.cropsLoadFailed')),
     });
   }
 
@@ -140,7 +149,7 @@ export class FarmProfileComponent implements OnInit {
       return;
     }
     if (!this.form.controls.governorate.value) {
-      this.error.set('Pick a location on the map before saving.');
+      this.error.set(this.i18n.instant('farm.profile.pickLocation'));
       return;
     }
 
@@ -175,9 +184,13 @@ export class FarmProfileComponent implements OnInit {
           const serverErrors = err.error?.errors;
           if (serverErrors) {
             const messages = Object.values(serverErrors).flat().join('; ');
-            this.error.set(messages || 'Failed to save profile.');
+            this.error.set(
+              messages || this.i18n.instant('farm.profile.saveFailed')
+            );
           } else {
-            this.error.set(err.error?.title || 'Failed to save profile.');
+            this.error.set(
+              err.error?.title || this.i18n.instant('farm.profile.saveFailed')
+            );
           }
         },
       });
@@ -197,7 +210,8 @@ export class FarmProfileComponent implements OnInit {
           this.selectedCropTypeId.set('');
           this.loadProfile();
         },
-        error: () => this.mutationError.set('Failed to add crop.'),
+        error: () =>
+          this.mutationError.set(this.i18n.instant('farm.profile.addCropFailed')),
       });
   }
 
@@ -216,7 +230,10 @@ export class FarmProfileComponent implements OnInit {
       .pipe(finalize(() => this.deletingCropId.set(null)))
       .subscribe({
         next: () => this.loadProfile(),
-        error: () => this.mutationError.set('Failed to delete crop.'),
+        error: () =>
+          this.mutationError.set(
+            this.i18n.instant('farm.profile.deleteCropFailed')
+          ),
       });
   }
 
@@ -237,7 +254,10 @@ export class FarmProfileComponent implements OnInit {
       )
       .subscribe({
         next: () => this.loadProfile(),
-        error: () => this.mutationError.set('Failed to upload document.'),
+        error: () =>
+          this.mutationError.set(
+            this.i18n.instant('farm.profile.uploadDocumentFailed')
+          ),
       });
   }
 
@@ -256,22 +276,38 @@ export class FarmProfileComponent implements OnInit {
       .pipe(finalize(() => this.deletingDocumentId.set(null)))
       .subscribe({
         next: () => this.loadProfile(),
-        error: () => this.mutationError.set('Failed to delete document.'),
+        error: () =>
+          this.mutationError.set(
+            this.i18n.instant('farm.profile.deleteDocumentFailed')
+          ),
       });
   }
 
   updatePhone(): void {
     const phone = this.phoneNumber();
-    if (!phone) return;
+    if (!phone?.trim()) {
+      this.mutationError.set(this.i18n.instant('validation.egyptianPhone'));
+      return;
+    }
+    if (!isValidEgyptianPhone(phone)) {
+      this.mutationError.set(this.i18n.instant('validation.egyptianPhone'));
+      return;
+    }
 
+    const normalized = normalizeEgyptianPhone(phone);
+    this.phoneNumber.set(normalized);
     this.updatingPhone.set(true);
     this.mutationError.set(null);
     this.authService
-      .updatePhone(phone)
+      .updatePhone(normalized)
       .pipe(finalize(() => this.updatingPhone.set(false)))
       .subscribe({
         next: () => this.loadProfile(),
-        error: () => this.mutationError.set('Failed to update phone.'),
+        error: (err) =>
+          this.mutationError.set(
+            err?.error?.message ||
+              this.i18n.instant('validation.egyptianPhone')
+          ),
       });
   }
 

@@ -1,5 +1,12 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -9,11 +16,26 @@ import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-stat
 import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 import { FarmService } from '../../../core/services/farm/farm.service';
-import { FarmMatchItem } from '../../../core/models/farm/farm-match.model';
+import {
+  FarmMatchItem,
+  FarmMatchSummary,
+} from '../../../core/models/farm/farm-match.model';
 import { CropType } from '../../../core/models/farm/farm-profile.model';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslateService } from '../../../core/services/translate.service';
+import {
+  ListSortMode,
+  normalizeListSort,
+  relativeTimeParts,
+} from '../../../shared/list/list-ordering.util';
+
+type DateFilter = 'all' | '7d' | '30d' | '90d';
+
+interface FilterChip {
+  key: 'status' | 'crop' | 'date' | 'search';
+  label: string;
+}
 
 @Component({
   selector: 'app-farm-matches',
@@ -29,6 +51,7 @@ import { TranslateService } from '../../../core/services/translate.service';
     DecimalPipe,
   ],
   templateUrl: './farm-matches.component.html',
+  styleUrl: './farm-matches.component.scss',
 })
 export class FarmMatchesComponent implements OnInit {
   private readonly farmService = inject(FarmService);
@@ -40,12 +63,134 @@ export class FarmMatchesComponent implements OnInit {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly matches = signal<FarmMatchItem[]>([]);
+  readonly newMatches = signal<FarmMatchItem[]>([]);
   readonly cropTypes = signal<CropType[]>([]);
   readonly respondingId = signal<string | null>(null);
   readonly openingId = signal<string | null>(null);
+  readonly filtersOpen = signal(false);
+  readonly menuOpenId = signal<string | null>(null);
+  readonly expandedId = signal<string | null>(null);
 
-  statusFilter = '';
-  cropTypeFilter = '';
+  readonly summary = signal<FarmMatchSummary>({
+    total: 0,
+    proposed: 0,
+    accepted: 0,
+    rejected: 0,
+    newCount: 0,
+  });
+
+  readonly statusFilter = signal('');
+  readonly cropTypeFilter = signal('');
+  readonly searchQuery = signal('');
+  readonly dateFilter = signal<DateFilter>('all');
+  readonly sortMode = signal<ListSortMode>('newest');
+  readonly page = signal(1);
+  readonly pageSize = signal(20);
+  readonly totalCount = signal(0);
+  readonly totalPages = signal(1);
+
+  /** Draft values inside the filter panel (applied on confirm). */
+  readonly draftStatus = signal('');
+  readonly draftCrop = signal('');
+  readonly draftDate = signal<DateFilter>('all');
+
+  readonly hasActiveFilters = computed(
+    () =>
+      !!this.statusFilter() ||
+      !!this.cropTypeFilter() ||
+      !!this.searchQuery().trim() ||
+      this.dateFilter() !== 'all'
+  );
+
+  /** Reset is visible when filters, search, or non-default sort are applied. */
+  readonly showReset = computed(
+    () => this.hasActiveFilters() || this.sortMode() !== 'newest'
+  );
+
+  readonly activeFilterCount = computed(() => {
+    let n = 0;
+    if (this.statusFilter()) n++;
+    if (this.cropTypeFilter()) n++;
+    if (this.dateFilter() !== 'all') n++;
+    return n;
+  });
+
+  readonly filterChips = computed((): FilterChip[] => {
+    const chips: FilterChip[] = [];
+    const status = this.statusFilter();
+    if (status) {
+      chips.push({
+        key: 'status',
+        label: `${this.i18n.instant('farm.matches.status')}: ${this.i18n.instant(this.statusLabelKey(status))}`,
+      });
+    }
+    const cropId = this.cropTypeFilter();
+    if (cropId) {
+      const crop = this.cropTypes().find((c) => c.cropTypeId === cropId);
+      chips.push({
+        key: 'crop',
+        label: `${this.i18n.instant('farm.matches.crop')}: ${crop?.name ?? cropId}`,
+      });
+    }
+    const date = this.dateFilter();
+    if (date !== 'all') {
+      const dateKey =
+        date === '7d'
+          ? 'farm.matches.date7d'
+          : date === '30d'
+            ? 'farm.matches.date30d'
+            : 'farm.matches.date90d';
+      chips.push({
+        key: 'date',
+        label: `${this.i18n.instant('farm.matches.dateFilter')}: ${this.i18n.instant(dateKey)}`,
+      });
+    }
+    const q = this.searchQuery().trim();
+    if (q) {
+      chips.push({
+        key: 'search',
+        label: `${this.i18n.instant('common.search')}: ${q}`,
+      });
+    }
+    return chips;
+  });
+
+  readonly resultsCountLabel = computed(() => {
+    const total = this.totalCount();
+    if (total === 0) {
+      return this.i18n.instant('farm.matches.resultsCountZero');
+    }
+    return this.i18n.instant('farm.matches.resultsCount', { count: total });
+  });
+
+  readonly pageRangeLabel = computed(() => {
+    const total = this.totalCount();
+    if (total === 0) {
+      return this.i18n.instant('farm.matches.resultsNone');
+    }
+    const start = (this.page() - 1) * this.pageSize() + 1;
+    const end = Math.min(this.page() * this.pageSize(), total);
+    return this.i18n.instant('farm.matches.resultsRange', {
+      start,
+      end,
+      total,
+    });
+  });
+
+  readonly mainListEmpty = computed(
+    () => !this.loading() && !this.error() && this.matches().length === 0
+  );
+
+  readonly globallyEmpty = computed(
+    () =>
+      this.mainListEmpty() &&
+      !this.hasActiveFilters() &&
+      this.summary().total === 0
+  );
+
+  readonly filteredEmpty = computed(
+    () => this.mainListEmpty() && this.hasActiveFilters()
+  );
 
   ngOnInit(): void {
     this.farmService.getCropTypes().subscribe({
@@ -54,38 +199,237 @@ export class FarmMatchesComponent implements OnInit {
     this.loadMatches();
   }
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    if (!target.closest?.('.mx-menu')) {
+      this.menuOpenId.set(null);
+    }
+
+    if (
+      this.filtersOpen() &&
+      !target.closest?.('.mx-filter') &&
+      !target.closest?.('.mx-sheet') &&
+      !target.closest?.('.mx-sheet-backdrop')
+    ) {
+      const isMobile = window.matchMedia('(max-width: 767px)').matches;
+      if (!isMobile) {
+        this.closeFilters();
+      }
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.filtersOpen()) {
+      this.closeFilters();
+    }
+    this.menuOpenId.set(null);
+  }
+
   loadMatches(): void {
     this.loading.set(true);
     this.error.set(null);
+    this.menuOpenId.set(null);
+
+    const days =
+      this.dateFilter() === 'all'
+        ? null
+        : this.dateFilter() === '7d'
+          ? 7
+          : this.dateFilter() === '30d'
+            ? 30
+            : 90;
+
     this.farmService
-      .getMatches(this.statusFilter || null, this.cropTypeFilter || null)
+      .getMatches({
+        status: this.statusFilter() || null,
+        cropTypeId: this.cropTypeFilter() || null,
+        sort: this.sortMode(),
+        search: this.searchQuery().trim() || null,
+        days,
+        page: this.page(),
+        pageSize: this.pageSize(),
+      })
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: (items) => this.matches.set(items),
-        error: () => this.error.set('Failed to load matches.'),
+        next: (page) => {
+          this.matches.set(page.items ?? []);
+          this.newMatches.set(page.newMatches ?? []);
+          this.summary.set(
+            page.summary ?? {
+              total: 0,
+              proposed: 0,
+              accepted: 0,
+              rejected: 0,
+              newCount: 0,
+            }
+          );
+          this.totalCount.set(page.totalCount ?? 0);
+          this.totalPages.set(Math.max(1, page.totalPages ?? 1));
+          this.page.set(page.page ?? this.page());
+          this.pageSize.set(page.pageSize ?? this.pageSize());
+        },
+        error: () =>
+          this.error.set(this.i18n.instant('farm.matches.loadFailed')),
       });
   }
 
-  resetFilters(): void {
-    this.statusFilter = '';
-    this.cropTypeFilter = '';
+  applySearch(): void {
+    this.page.set(1);
     this.loadMatches();
   }
 
-  riskTone(score: number | null): 'safe' | 'risk' {
-    return score != null && score >= 70 ? 'safe' : 'risk';
+  onSortChange(value: string): void {
+    this.sortMode.set(normalizeListSort(value));
+    this.page.set(1);
+    this.loadMatches();
+  }
+
+  onPageSizeChange(value: string | number): void {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n < 1) return;
+    this.pageSize.set(n);
+    this.page.set(1);
+    this.loadMatches();
+  }
+
+  goToPage(page: number): void {
+    const p = Math.min(Math.max(1, page), this.totalPages());
+    if (p === this.page()) return;
+    this.page.set(p);
+    this.loadMatches();
+  }
+
+  openFilters(event?: Event): void {
+    event?.stopPropagation();
+    this.draftStatus.set(this.statusFilter());
+    this.draftCrop.set(this.cropTypeFilter());
+    this.draftDate.set(this.dateFilter());
+    this.filtersOpen.set(true);
+  }
+
+  closeFilters(): void {
+    this.filtersOpen.set(false);
+  }
+
+  toggleFilters(event?: Event): void {
+    if (this.filtersOpen()) {
+      this.closeFilters();
+      return;
+    }
+    this.openFilters(event);
+  }
+
+  applyFilters(): void {
+    this.statusFilter.set(this.draftStatus());
+    this.cropTypeFilter.set(this.draftCrop());
+    this.dateFilter.set(this.draftDate());
+    this.page.set(1);
+    this.filtersOpen.set(false);
+    this.loadMatches();
+  }
+
+  /** Clears draft fields + applied filters from the panel without leaving search. */
+  resetPanelFilters(): void {
+    this.draftStatus.set('');
+    this.draftCrop.set('');
+    this.draftDate.set('all');
+    this.statusFilter.set('');
+    this.cropTypeFilter.set('');
+    this.dateFilter.set('all');
+    this.page.set(1);
+    this.filtersOpen.set(false);
+    this.loadMatches();
+  }
+
+  resetFilters(): void {
+    this.statusFilter.set('');
+    this.cropTypeFilter.set('');
+    this.searchQuery.set('');
+    this.dateFilter.set('all');
+    this.draftStatus.set('');
+    this.draftCrop.set('');
+    this.draftDate.set('all');
+    this.sortMode.set('newest');
+    this.page.set(1);
+    this.filtersOpen.set(false);
+    this.loadMatches();
+  }
+
+  clearChip(key: FilterChip['key']): void {
+    if (key === 'status') this.statusFilter.set('');
+    if (key === 'crop') this.cropTypeFilter.set('');
+    if (key === 'date') this.dateFilter.set('all');
+    if (key === 'search') this.searchQuery.set('');
+    this.page.set(1);
+    this.loadMatches();
+  }
+
+  toggleMenu(matchId: string, event: Event): void {
+    event.stopPropagation();
+    this.menuOpenId.update((id) => (id === matchId ? null : matchId));
+  }
+
+  toggleExpand(matchId: string): void {
+    this.expandedId.update((id) => (id === matchId ? null : matchId));
+  }
+
+  statusKey(status: string | null | undefined): string {
+    return (status || '').toLowerCase();
+  }
+
+  statusLabelKey(status: string): string {
+    const s = this.statusKey(status);
+    if (s === 'accepted') return 'farm.matches.statusAccepted';
+    if (s === 'rejected') return 'farm.matches.statusRejected';
+    return 'farm.matches.statusProposed';
+  }
+
+  statusTone(status: string): 'pending' | 'success' | 'danger' | 'neutral' {
+    const s = this.statusKey(status);
+    if (s === 'accepted') return 'success';
+    if (s === 'rejected') return 'danger';
+    if (s === 'proposed') return 'pending';
+    return 'neutral';
+  }
+
+  riskLabel(score: number | null): string {
+    if (score == null) return '—';
+    if (score >= 70) return this.i18n.instant('farm.matches.riskLow');
+    if (score >= 40) return this.i18n.instant('farm.matches.riskMedium');
+    return this.i18n.instant('farm.matches.riskHigh');
+  }
+
+  riskTone(score: number | null): 'low' | 'med' | 'high' | 'none' {
+    if (score == null) return 'none';
+    if (score >= 70) return 'low';
+    if (score >= 40) return 'med';
+    return 'high';
+  }
+
+  scoreClass(score: number | null): string {
+    if (score == null) return 'mx-score--na';
+    if (score >= 80) return 'mx-score--high';
+    if (score >= 50) return 'mx-score--mid';
+    return 'mx-score--low';
+  }
+
+  relativeLabel(iso: string | null | undefined): string | null {
+    const parts = relativeTimeParts(iso);
+    if (!parts) return null;
+    return this.i18n.instant(parts.key, parts.params);
   }
 
   viewContract(match: FarmMatchItem): void {
+    this.menuOpenId.set(null);
     this.openingId.set(match.matchId);
-    this.error.set(null);
 
     const go = (contractId: string) => {
       void this.router.navigate(['/farm/contracts', contractId], {
-        queryParams: {
-          matchId: match.matchId,
-          from: 'matches',
-        },
+        queryParams: { matchId: match.matchId, from: 'matches' },
       });
     };
 
@@ -110,6 +454,7 @@ export class FarmMatchesComponent implements OnInit {
   }
 
   async rejectOffer(match: FarmMatchItem): Promise<void> {
+    this.menuOpenId.set(null);
     const ok = await this.confirm.confirm({
       titleKey: 'farm.matches.confirmRejectTitle',
       bodyKey: 'farm.matches.confirmRejectBody',
@@ -117,9 +462,7 @@ export class FarmMatchesComponent implements OnInit {
       cancelKey: 'common.cancel',
       danger: true,
     });
-    if (!ok) {
-      return;
-    }
+    if (!ok) return;
 
     this.respondingId.set(match.matchId);
     this.farmService

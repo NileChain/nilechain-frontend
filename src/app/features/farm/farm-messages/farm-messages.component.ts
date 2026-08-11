@@ -10,6 +10,7 @@ import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.compon
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { FarmService } from '../../../core/services/farm/farm.service';
+import { TranslateService } from '../../../core/services/translate.service';
 import {
   Conversation,
   Message,
@@ -33,6 +34,7 @@ import {
 export class FarmMessagesComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly farmService = inject(FarmService);
+  private readonly i18n = inject(TranslateService);
   readonly currentUser = this.authService.currentUser;
 
   readonly loading = signal(true);
@@ -63,7 +65,8 @@ export class FarmMessagesComponent implements OnInit {
             this.selectConversation(items[0].matchId);
           }
         },
-        error: () => this.error.set('Failed to load conversations.'),
+        error: () =>
+          this.error.set(this.i18n.instant('messages.loadConversationsFailed')),
       });
   }
 
@@ -76,7 +79,8 @@ export class FarmMessagesComponent implements OnInit {
       .pipe(finalize(() => this.messagesLoading.set(false)))
       .subscribe({
         next: (items) => this.messages.set(items),
-        error: () => this.threadError.set('Failed to load messages.'),
+        error: () =>
+          this.threadError.set(this.i18n.instant('messages.loadMessagesFailed')),
       });
   }
 
@@ -107,7 +111,8 @@ export class FarmMessagesComponent implements OnInit {
           this.selectConversation(matchId);
           this.loadConversations();
         },
-        error: () => this.threadError.set('Failed to send message.'),
+        error: () =>
+          this.threadError.set(this.i18n.instant('messages.sendFailed')),
       });
   }
 }

@@ -3,6 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { TranslateService } from '../../../core/services/translate.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
@@ -20,6 +21,7 @@ import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-to
 export class ForgotPasswordComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly i18n = inject(TranslateService);
 
   readonly email = signal('');
   readonly isSubmitting = signal(false);
@@ -44,9 +46,7 @@ export class ForgotPasswordComponent {
       .subscribe({
         next: () => this.submitted.set(true),
         error: () =>
-          this.errorMessage.set(
-            'Unable to send reset email. Please try again.'
-          ),
+          this.errorMessage.set(this.i18n.instant('forgotPassword.sendFailed')),
       });
   }
 }

@@ -8,15 +8,30 @@ import { UiIconComponent } from '../icon/icon.component';
   imports: [TranslatePipe, UiIconComponent],
   template: `
     <div
-      class="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-outline-variant bg-surface-container-low px-6 py-12 text-center animate-fade-in"
+      class="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-outline-variant bg-surface-container-low px-5 text-center animate-fade-in"
+      [class.py-12]="!compact"
+      [class.py-8]="compact"
+      [class.min-h-[240px]]="compact"
+      [class.max-h-[280px]]="compact"
       role="status"
     >
-      <ui-icon [name]="icon" size="xl" class="text-outline" />
-      <p class="font-title-md text-title-md text-on-surface">
+      <ui-icon [name]="icon" [size]="compact ? 'lg' : 'xl'" class="text-outline" />
+      <p
+        class="text-on-surface"
+        [class.font-title-md]="!compact"
+        [class.text-title-md]="!compact"
+        [class.text-sm]="compact"
+        [class.font-semibold]="compact"
+      >
         {{ titleKey | translate }}
       </p>
       @if (bodyKey) {
-        <p class="font-body-md text-body-md text-on-surface-variant max-w-sm">
+        <p
+          class="text-on-surface-variant max-w-sm"
+          [class.font-body-md]="!compact"
+          [class.text-body-md]="!compact"
+          [class.text-xs]="compact"
+        >
           {{ bodyKey | translate }}
         </p>
       }
@@ -28,4 +43,6 @@ export class UiEmptyStateComponent {
   @Input() titleKey = 'common.empty';
   @Input() bodyKey = '';
   @Input() icon = 'inbox';
+  /** Compact empty block for dense list pages (~240–280px). */
+  @Input() compact = false;
 }

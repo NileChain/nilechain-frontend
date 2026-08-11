@@ -1,97 +1,193 @@
 <article
-  class="paper"
+  class="deed"
   id="contract-print-root"
-  [class.paper--signed]="showWatermark"
+  [class.deed--signed]="showWatermark"
   [attr.dir]="documentDir"
   [attr.lang]="documentDir === 'rtl' ? 'ar' : 'en'"
 >
   @if (showWatermark) {
-    <div class="paper__watermark" aria-hidden="true">
+    <div class="deed__watermark" aria-hidden="true">
       {{ 'contractDoc.signedWatermark' | translate }}
     </div>
   }
 
-  <header class="paper__sticky-head">
-    <div class="paper__brand">
-      <span class="paper__mark" aria-hidden="true">
-        <span class="material-symbols-outlined">agriculture</span>
-      </span>
+  <!-- 1. Document identity / NileChain header -->
+  <header class="deed__masthead">
+    <div class="deed__brand">
+      <span class="deed__crest" aria-hidden="true">N</span>
       <div>
-        <p class="paper__brand-name">{{ 'app.name' | translate }}</p>
-        <p class="paper__brand-tag">
+        <p class="deed__brand-name">{{ 'app.name' | translate }}</p>
+        <p class="deed__brand-tag">
           {{ 'contractDoc.aiGeneratedLabel' | translate }}
         </p>
       </div>
     </div>
-    <div class="paper__head-meta">
-      <span class="paper__status" [attr.data-tone]="statusTone(contract.status)">
+    <div class="deed__stamp">
+      <span class="deed__status" [attr.data-tone]="statusTone(contract.status)">
         {{ statusLabelKey(contract.status) | translate }}
       </span>
-      <p class="paper__id">
-        {{ 'contractDoc.contractNumber' | translate }}
-        <strong>{{ shortId(contract.contractId) }}</strong>
-      </p>
     </div>
   </header>
 
-  @if (showSignedBanner) {
-    <div class="paper__banner" role="status">
+  @if (showSignedBanner || isFullySigned) {
+    <div class="deed__banner" role="status">
       <span class="material-symbols-outlined" aria-hidden="true">verified</span>
       <span>{{ 'contractDoc.fullySignedBanner' | translate }}</span>
     </div>
+  } @else if (isFactorySigned && !isFarmSigned) {
+    <div class="deed__banner deed__banner--pending" role="status">
+      <span class="material-symbols-outlined" aria-hidden="true">pending</span>
+      <span>{{ 'contractDoc.factorySignedBanner' | translate }}</span>
+    </div>
+  } @else if (isFarmSigned && !isFactorySigned) {
+    <div class="deed__banner deed__banner--pending" role="status">
+      <span class="material-symbols-outlined" aria-hidden="true">pending</span>
+      <span>{{ 'contractDoc.farmSignedBanner' | translate }}</span>
+    </div>
   }
 
-  <div class="paper__title-block animate-section">
-    <h1 class="paper__title">
+  @if (bismillah) {
+    <p class="deed__bismillah">{{ bismillah }}</p>
+  }
+
+  <!-- 2–6. Title + contract identity -->
+  <div class="deed__title-block">
+    <h1 class="deed__title">
       {{ contract.title || ('contractDoc.defaultTitle' | translate) }}
     </h1>
-    <div class="paper__dates">
-      <span>
-        {{ 'contractDoc.createdAt' | translate }}:
-        {{ contract.createdAt | date: 'mediumDate' }}
-      </span>
-      <span>
-        {{ 'contractDoc.updatedAt' | translate }}:
-        {{
-          (contract.updatedAt || contract.signedAt || contract.createdAt)
-            | date: 'mediumDate'
-        }}
-      </span>
-    </div>
   </div>
 
-  <section
-    class="paper__parties animate-section"
-    [attr.aria-label]="'contractDoc.parties' | translate"
-  >
-    <div class="party-card">
-      <p class="party-card__label">
-        {{ 'contractDoc.factoryParty' | translate }}
-      </p>
-      <p class="party-card__name">{{ contract.factoryName }}</p>
-      @if (locationOf(contract.factoryLocation)) {
-        <p class="party-card__sub">
-          <span class="material-symbols-outlined" aria-hidden="true"
-            >location_on</span
-          >
-          {{ locationOf(contract.factoryLocation) }}
-        </p>
-      }
-    </div>
-    <div class="party-card">
-      <p class="party-card__label">{{ 'contractDoc.farmParty' | translate }}</p>
-      <p class="party-card__name">{{ contract.farmName }}</p>
-    </div>
+  <table class="deed-table deed-table--identity">
+    <tbody>
+      <tr>
+        <th scope="row">{{ 'contractDoc.contractNumber' | translate }}</th>
+        <td class="deed-mono">{{ fullId(contract.contractId) }}</td>
+      </tr>
+      <tr>
+        <th scope="row">{{ 'contractDoc.createdAt' | translate }}</th>
+        <td>{{ contract.createdAt | date: 'mediumDate' }}</td>
+      </tr>
+      <tr>
+        <th scope="row">{{ 'contractDoc.updatedAt' | translate }}</th>
+        <td>
+          {{
+            (contract.updatedAt || contract.signedAt || contract.createdAt)
+              | date: 'mediumDate'
+          }}
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">{{ 'contractDoc.statusLabel' | translate }}</th>
+        <td>{{ statusLabelKey(contract.status) | translate }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 8–9. Parties from API record -->
+  <section class="deed-section" [attr.aria-label]="'contractDoc.parties' | translate">
+    <h2 class="deed-section__title">
+      {{ 'contractDoc.parties' | translate }}
+    </h2>
+    <table class="deed-table">
+      <tbody>
+        <tr>
+          <th scope="row">{{ 'contractDoc.factoryParty' | translate }}</th>
+          <td>
+            <strong>{{ contract.factoryName }}</strong>
+            @if (locationOf(contract.factoryLocation); as loc) {
+              @if (loc) {
+                <div class="deed-sub">{{ loc }}</div>
+              }
+            }
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">{{ 'contractDoc.farmParty' | translate }}</th>
+          <td>
+            <strong>{{ contract.farmName }}</strong>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </section>
 
-  <div class="animate-section">
-    <app-contract-metadata [contract]="contract" />
-  </div>
+  <!-- 10. Supply data from API record -->
+  <section
+    class="deed-section"
+    [attr.aria-label]="'contractDoc.supplyData' | translate"
+  >
+    <h2 class="deed-section__title">
+      {{ 'contractDoc.supplyData' | translate }}
+    </h2>
+    <table class="deed-table">
+      <tbody>
+        <tr>
+          <th scope="row">{{ 'contractDoc.cropType' | translate }}</th>
+          <td>{{ displayText(contract.cropName) }}</td>
+        </tr>
+        <tr>
+          <th scope="row">{{ 'contractDoc.quantity' | translate }}</th>
+          <td class="deed-mono">
+            {{ contract.quantityTons | number: '1.0-2' }}
+            {{ 'common.ton' | translate }}
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">{{ 'contractDoc.price' | translate }}</th>
+          <td class="deed-mono">
+            @if (contract.pricePerTon != null) {
+              {{ contract.pricePerTon | number: '1.0-0' }}
+              {{ 'common.egp' | translate }}/{{ 'common.ton' | translate }}
+            } @else {
+              —
+            }
+          </td>
+        </tr>
+        @if (totalValue != null) {
+          <tr>
+            <th scope="row">{{ 'contractDoc.totalValue' | translate }}</th>
+            <td class="deed-mono">
+              {{ totalValue | number: '1.0-0' }}
+              {{ 'common.egp' | translate }}
+            </td>
+          </tr>
+        }
+        <tr>
+          <th scope="row">{{ 'contractDoc.deliveryDate' | translate }}</th>
+          <td>
+            {{
+              contract.deliveryDate
+                ? (contract.deliveryDate | date: 'mediumDate')
+                : '—'
+            }}
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">{{ 'contractDoc.deliveryLocation' | translate }}</th>
+          <td>
+            {{
+              displayText(contract.deliveryLocation) !== '—'
+                ? displayText(contract.deliveryLocation)
+                : displayText(contract.factoryLocation)
+            }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
 
-  <section class="paper__body" [attr.aria-label]="'contractDoc.body' | translate">
-    <h2 class="paper__body-title">{{ 'contractDoc.fullText' | translate }}</h2>
+  <hr class="deed-rule" />
 
-    @if (!sections.length) {
+  <!-- Full generated legal text — primary content -->
+  <section
+    class="deed-body"
+    [attr.aria-label]="'contractDoc.fullText' | translate"
+  >
+    <h2 class="deed-section__title deed-section__title--body">
+      {{ 'contractDoc.fullText' | translate }}
+    </h2>
+
+    @if (!hasGeneratedText) {
       <ui-empty-state
         icon="description"
         titleKey="contractDoc.emptyBodyTitle"
@@ -99,18 +195,18 @@
       />
     } @else {
       @for (section of sections; track section.id; let i = $index) {
-        <section
-          class="clause animate-section"
-          [attr.id]="section.id"
-          [style.animation-delay.ms]="60 + i * 30"
-        >
-          <h3 class="clause__title">
-            <span class="clause__index">{{ i + 1 }}</span>
-            {{ section.title }}
-          </h3>
+        <section class="deed-clause" [attr.id]="section.id">
+          @if (section.title.trim()) {
+            <h3 class="deed-clause__title">
+              <span class="deed-clause__num" aria-hidden="true">{{
+                i + 1
+              }}</span>
+              <span>{{ section.title }}</span>
+            </h3>
+          }
           @for (para of section.paragraphs; track $index) {
             <p
-              class="clause__para"
+              class="deed-clause__para"
               [innerHTML]="htmlFor(section.id, $index)"
             ></p>
           }
@@ -119,74 +215,73 @@
     }
   </section>
 
+  <hr class="deed-rule" />
+
+  <!-- 21. Signatures -->
   <section
-    class="sig-grid animate-section"
+    class="deed-sign"
     [attr.aria-label]="'contractDoc.signatures' | translate"
   >
-    <article class="sig-card" [class.sig-card--done]="isFactorySigned">
-      <div class="sig-card__avatar" aria-hidden="true">
-        {{ initials(contract.factoryName) }}
-      </div>
-      <div class="sig-card__body">
-        <p class="sig-card__role">
+    <h2 class="deed-section__title">
+      {{ 'contractDoc.signatures' | translate }}
+    </h2>
+    <div class="deed-sign__grid">
+      <div class="deed-sign__block" [class.deed-sign__block--done]="isFactorySigned">
+        <p class="deed-sign__role">
           {{ 'contractDoc.signedByFactory' | translate }}
         </p>
-        <p class="sig-card__name">{{ contract.factoryName }}</p>
+        <p class="deed-sign__name">{{ contract.factoryName }}</p>
+        <div class="deed-sign__line" aria-hidden="true"></div>
         @if (isFactorySigned) {
-          <p class="sig-card__state">
-            <span class="material-symbols-outlined" aria-hidden="true"
-              >check_circle</span
-            >
+          <p class="deed-sign__state">
             {{ 'contractDoc.signed' | translate }}
-            <span class="sig-card__date">{{
-              contract.createdAt | date: 'medium'
-            }}</span>
-          </p>
-        } @else {
-          <p class="sig-card__pending">
-            <span aria-hidden="true">○</span>
-            {{ 'contractDoc.awaitingSignature' | translate }}
-          </p>
-        }
-      </div>
-    </article>
-
-    <article class="sig-card" [class.sig-card--done]="isFarmSigned">
-      <div class="sig-card__avatar sig-card__avatar--farm" aria-hidden="true">
-        {{ initials(contract.farmName) }}
-      </div>
-      <div class="sig-card__body">
-        <p class="sig-card__role">
-          {{ 'contractDoc.signedByFarm' | translate }}
-        </p>
-        <p class="sig-card__name">{{ contract.farmName }}</p>
-        @if (isFarmSigned) {
-          <p class="sig-card__state">
-            <span class="material-symbols-outlined" aria-hidden="true"
-              >check_circle</span
-            >
-            {{ 'contractDoc.signed' | translate }}
-            @if (contract.signedAt) {
-              <span class="sig-card__date">{{
-                contract.signedAt | date: 'medium'
-              }}</span>
+            @if (contract.factorySignedAt) {
+              · {{ contract.factorySignedAt | date: 'medium' }}
             }
           </p>
         } @else {
-          <p class="sig-card__pending">
-            <span aria-hidden="true">○</span>
-            {{ 'contractDoc.awaitingSignature' | translate }}
+          <p class="deed-sign__pending">
+            {{ 'contractDoc.unsigned' | translate }}
           </p>
         }
       </div>
-    </article>
+      <div class="deed-sign__block" [class.deed-sign__block--done]="isFarmSigned">
+        <p class="deed-sign__role">
+          {{ 'contractDoc.signedByFarm' | translate }}
+        </p>
+        <p class="deed-sign__name">{{ contract.farmName }}</p>
+        <div class="deed-sign__line" aria-hidden="true"></div>
+        @if (isFarmSigned) {
+          <p class="deed-sign__state">
+            {{ 'contractDoc.signed' | translate }}
+            @if (contract.farmSignedAt) {
+              · {{ contract.farmSignedAt | date: 'medium' }}
+            }
+          </p>
+        } @else {
+          <p class="deed-sign__pending">
+            {{ 'contractDoc.unsigned' | translate }}
+          </p>
+        }
+      </div>
+    </div>
   </section>
 
-  <footer class="paper__footer">
-    <span>{{ 'contractDoc.createdByAi' | translate }}</span>
-    <span>
+  <!-- 22–23. Footer -->
+  <footer class="deed__footer">
+    <div>
+      <span>{{ 'contractDoc.createdByAi' | translate }}</span>
+      @if (isFullySigned && contract.signedAt) {
+        <span class="deed__footer-sep">·</span>
+        <span>
+          {{ 'contractDoc.signedAtLabel' | translate }}:
+          {{ contract.signedAt | date: 'medium' }}
+        </span>
+      }
+    </div>
+    <div>
       {{ 'contractDoc.documentVersion' | translate }}:
       {{ contract.version || '1.0' }}
-    </span>
+    </div>
   </footer>
 </article>

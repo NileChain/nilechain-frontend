@@ -1,0 +1,154 @@
+<section
+  class="ff-card"
+  [attr.aria-label]="'fulfillment.title' | translate"
+>
+  <h3 class="ff-card__title">
+    <span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>
+    {{ 'fulfillment.title' | translate }}
+  </h3>
+
+  @if (loading()) {
+    <div class="ff-loading">
+      <ui-loader size="sm" [label]="'fulfillment.loading' | translate" />
+    </div>
+  } @else if (notFound()) {
+    <p class="ff-hint">{{ 'fulfillment.opensAfterSigning' | translate }}</p>
+  } @else if (loadError()) {
+    <div class="ff-error" role="alert">
+      <p>{{ loadError() }}</p>
+      <button type="button" class="ui-btn-ghost !py-1.5 !px-3" (click)="load()">
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  } @else if (fulfillment(); as f) {
+    @if (isVoided()) {
+      <div class="ff-voided" role="status">
+        <span class="material-symbols-outlined" aria-hidden="true">cancel</span>
+        <div>
+          <p class="ff-voided__title">{{ 'fulfillment.voidedBanner' | translate }}</p>
+          @if (f.voidedAt) {
+            <p class="ff-voided__time">
+              {{ f.voidedAt | date: 'medium' }}
+            </p>
+          }
+        </div>
+      </div>
+    }
+
+    <ol class="ff-timeline">
+      @for (step of steps(); track step.id; let i = $index) {
+        <li
+          class="ff-timeline__item"
+          [attr.data-state]="step.state"
+          [style.animation-delay.ms]="i * 60"
+        >
+          <span class="ff-timeline__icon" aria-hidden="true">
+            <span class="material-symbols-outlined">{{ step.icon }}</span>
+          </span>
+          <div class="ff-timeline__body">
+            <p class="ff-timeline__label">
+              {{ step.labelKey | translate }}
+              @if (step.optional) {
+                <span class="ff-optional">{{ 'fulfillment.optional' | translate }}</span>
+              }
+            </p>
+            <p class="ff-timeline__time">
+              @if (step.state === 'skipped') {
+                {{ 'fulfillment.skipped' | translate }}
+              } @else if (step.at) {
+                <span>{{ step.at | date: 'mediumDate' }}</span>
+                <span class="ff-dot">·</span>
+                <span>{{ step.at | date: 'shortTime' }}</span>
+              } @else if (step.state === 'upcoming') {
+                {{ 'fulfillment.pendingStep' | translate }}
+              } @else if (step.state === 'current') {
+                {{ 'fulfillment.inProgressStep' | translate }}
+              } @else {
+                —
+              }
+            </p>
+          </div>
+        </li>
+      }
+    </ol>
+
+    @if (f.qualityNotes && !canQualityCheck()) {
+      <p class="ff-notes">
+        <span class="ff-notes__label">{{ 'fulfillment.qualityNotes' | translate }}:</span>
+        {{ f.qualityNotes }}
+      </p>
+    }
+
+    @if (!isVoided() && (canShip() || canReceive() || canQualityCheck() || canFulfill())) {
+      <div class="ff-actions print:hidden">
+        @if (canQualityCheck()) {
+          <label class="ff-notes-field">
+            <span>{{ 'fulfillment.qualityNotesOptional' | translate }}</span>
+            <textarea
+              rows="2"
+              [(ngModel)]="qualityNotes"
+              [disabled]="acting()"
+              [attr.placeholder]="'fulfillment.qualityNotesPlaceholder' | translate"
+            ></textarea>
+          </label>
+        }
+
+        @if (canShip()) {
+          <button
+            type="button"
+            class="ui-btn-primary w-full"
+            [disabled]="acting()"
+            (click)="ship()"
+          >
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+              >local_shipping</span
+            >
+            {{ 'fulfillment.ship' | translate }}
+          </button>
+        }
+
+        @if (canReceive()) {
+          <button
+            type="button"
+            class="ui-btn-primary w-full"
+            [disabled]="acting()"
+            (click)="receive()"
+          >
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+              >inventory</span
+            >
+            {{ 'fulfillment.receive' | translate }}
+          </button>
+        }
+
+        @if (canQualityCheck()) {
+          <button
+            type="button"
+            class="ui-btn-secondary w-full"
+            [disabled]="acting()"
+            (click)="qualityCheck()"
+          >
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+              >fact_check</span
+            >
+            {{ 'fulfillment.qualityCheck' | translate }}
+          </button>
+        }
+
+        @if (canFulfill()) {
+          <button
+            type="button"
+            class="ui-btn-primary w-full"
+            [disabled]="acting()"
+            (click)="fulfill()"
+          >
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+              >task_alt</span
+            >
+            {{ 'fulfillment.fulfill' | translate }}
+          </button>
+        }
+      </div>
+    }
+  }
+</section>

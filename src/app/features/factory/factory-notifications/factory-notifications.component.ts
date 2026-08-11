@@ -1,19 +1,17 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { catchError, finalize, of } from 'rxjs';
+import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
+import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 import {
   FactoryNotification,
   FactoryService,
 } from '../../../core/services/factory/factory.service';
-import {
-  AppNotification,
-  NotificationCenterService,
-} from '../../../core/services/notification-center.service';
+import { NotificationCenterService } from '../../../core/services/notification-center.service';
 import { TranslateService } from '../../../core/services/translate.service';
 
 type NotifTab = 'all' | 'unread' | 'matches' | 'risks';
@@ -34,6 +32,7 @@ interface DisplayNotification {
   imports: [
     TranslatePipe,
     UiEmptyStateComponent,
+    UiErrorStateComponent,
     UiSkeletonComponent,
     AppTopBarComponent,
     RouterLink,
@@ -47,6 +46,7 @@ export class FactoryNotificationsComponent implements OnInit {
   private readonly i18n = inject(TranslateService);
 
   readonly loading = signal(true);
+  readonly loadError = signal<string | null>(null);
   readonly items = signal<DisplayNotification[]>([]);
   readonly activeTab = signal<NotifTab>('all');
 
@@ -82,22 +82,18 @@ export class FactoryNotificationsComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.factoryService
       .getNotifications()
-      .pipe(
-        catchError(() => of(null)),
-        finalize(() => this.loading.set(false))
-      )
-      .subscribe((apiItems) => {
-        if (apiItems?.length) {
-          this.items.set(apiItems.map((n) => this.fromApi(n)));
-        } else {
-          this.items.set(
-            this.notificationCenter
-              .notifications()
-              .map((n) => this.fromCenter(n))
-          );
-        }
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (apiItems) => {
+          this.items.set((apiItems ?? []).map((n) => this.fromApi(n)));
+        },
+        error: () => {
+          this.loadError.set(this.i18n.instant('notifications.loadFailed'));
+          this.items.set([]);
+        },
       });
   }
 
@@ -111,7 +107,9 @@ export class FactoryNotificationsComponent implements OnInit {
     this.notificationCenter.markRead(item.id);
     this.factoryService.markNotificationRead(item.id).subscribe({
       error: () => {
-        /* local state already updated */
+        this.items.update((list) =>
+          list.map((n) => (n.id === item.id ? { ...n, unread: true } : n))
+        );
       },
     });
   }
@@ -134,42 +132,32 @@ export class FactoryNotificationsComponent implements OnInit {
   private fromApi(n: FactoryNotification): DisplayNotification {
     return {
       id: n.notificationId,
-      title: n.title,
+      title: this.titleForType(n.type, n.title),
       body: n.message,
       time: n.createdAt,
-      type: (n.type ?? 'info').toLowerCase(),
+      type: this.normalizeType(n.type),
       unread: !n.isRead,
       link: n.link,
     };
   }
 
-  private fromCenter(n: AppNotification): DisplayNotification {
-    const type = this.inferType(n);
-    return {
-      id: n.id,
-      title: n.title || (n.titleKey ? this.i18n.instant(n.titleKey) : ''),
-      body: n.body || (n.bodyKey ? this.i18n.instant(n.bodyKey) : ''),
-      time: n.timeLabel || (n.timeKey ? this.i18n.instant(n.timeKey) : ''),
-      type,
-      unread: !n.read,
-      link: n.link,
-    };
+  private titleForType(type: string | null, fallback: string): string {
+    const key = type ? `notifications.types.${type}` : null;
+    if (key) {
+      const translated = this.i18n.instant(key);
+      if (translated !== key) {
+        return translated;
+      }
+    }
+    return fallback;
   }
 
-  private inferType(n: AppNotification): string {
-    const key = (n.titleKey || n.title || '').toLowerCase();
-    if (key.includes('match')) {
-      return 'match';
-    }
-    if (key.includes('risk')) {
-      return 'risk';
-    }
-    if (key.includes('contract')) {
-      return 'contract';
-    }
-    if (key.includes('message')) {
-      return 'message';
-    }
-    return 'info';
+  private normalizeType(type: string | null): string {
+    const t = (type ?? 'info').toLowerCase();
+    if (t.includes('match')) return 'match';
+    if (t.includes('risk')) return 'risk';
+    if (t.includes('contract')) return 'contract';
+    if (t.includes('message')) return 'message';
+    return t;
   }
 }

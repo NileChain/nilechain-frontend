@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { TranslateService } from '../../../core/services/translate.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
@@ -21,6 +22,7 @@ export class ResetPasswordComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly i18n = inject(TranslateService);
 
   readonly email = signal('');
   readonly token = signal('');
@@ -42,7 +44,7 @@ export class ResetPasswordComponent implements OnInit {
       const token = params['token'] || '';
       if (!email || !token) {
         this.tokenValid.set(false);
-        this.errorMessage.set('Invalid or missing reset link.');
+        this.errorMessage.set(this.i18n.instant('resetPassword.invalidLink'));
         return;
       }
       this.email.set(decodeURIComponent(email));
@@ -58,12 +60,14 @@ export class ResetPasswordComponent implements OnInit {
     const confirmPassword = this.confirmPassword();
 
     if (!email || !token || !newPassword || !confirmPassword) {
-      this.errorMessage.set('Please complete all fields.');
+      this.errorMessage.set(this.i18n.instant('resetPassword.completeFields'));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      this.errorMessage.set('Passwords do not match.');
+      this.errorMessage.set(
+        this.i18n.instant('resetPassword.passwordsMismatch')
+      );
       return;
     }
 
@@ -76,9 +80,7 @@ export class ResetPasswordComponent implements OnInit {
       .subscribe({
         next: () => this.submitted.set(true),
         error: () =>
-          this.errorMessage.set(
-            'Failed to reset password. The link may have expired.'
-          ),
+          this.errorMessage.set(this.i18n.instant('resetPassword.resetFailed')),
       });
   }
 }

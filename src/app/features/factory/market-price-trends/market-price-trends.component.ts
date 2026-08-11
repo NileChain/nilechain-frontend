@@ -283,7 +283,12 @@ export class MarketPriceTrendsComponent implements AfterViewInit, OnDestroy {
         maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
         animation: { duration: 650, easing: 'easeOutQuart' },
-        layout: { padding: { top: 4, right: 8, bottom: 0, left: 2 } },
+        layout: {
+          padding: (() => {
+            const rtl = document.documentElement.dir === 'rtl';
+            return { top: 4, bottom: 0, left: rtl ? 8 : 2, right: rtl ? 2 : 8 };
+          })(),
+        },
         plugins: {
           legend: {
             position: 'bottom',

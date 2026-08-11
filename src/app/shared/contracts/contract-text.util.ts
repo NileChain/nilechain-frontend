@@ -19,22 +19,44 @@ export interface ContractSummaryBullet {
   tone?: 'neutral' | 'price' | 'risk-low' | 'risk-mid' | 'risk-high';
 }
 
-const HEADING_RE =
-  /^(?:#{1,3}\s+|(?:\d{1,2}[\.\-\)]\s+)|(?:Article\s+\d+[:.\-\s]+)|(?:Section\s+\d+[:.\-\s]+)|(?:Clause\s+\d+[:.\-\s]+)|(?:البند\s*(?:الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|\d+)[:.\-\s]*)|(?:المادة\s*(?:\d+|الأولى|الثانية|الثالثة)[:.\-\s]*))/i;
+/** Arabic ordinals + digits used in المادة / البند headings. */
+const AR_ORDINAL =
+  '(?:الأول[ىي]?|الثان[ىي]ة?|الثالث(?:ة)?|الرابع(?:ة)?|الخامس(?:ة)?|السادس(?:ة)?|السابع(?:ة)?|الثامن(?:ة)?|التاسع(?:ة)?|العاشر(?:ة)?|الحادي(?:ة)?\\s*عشر(?:ة)?|الثاني(?:ة)?\\s*عشر(?:ة)?|\\d+)';
 
-const FALLBACK_TOC = [
-  'Parties',
-  'Scope',
-  'Payment',
-  'Delivery',
-  'Responsibilities',
-  'Quality Standards',
-  'Force Majeure',
-  'Termination',
-  'Signatures',
-];
+const HEADING_RE = new RegExp(
+  [
+    '^(?:#{1,3}\\s+)',
+    '^(?:\\d{1,2}[\\.\\-\\)]\\s+)',
+    '^(?:Article\\s+\\d+[:.\\-\\s]+)',
+    '^(?:Section\\s+\\d+[:.\\-\\s]+)',
+    '^(?:Clause\\s+\\d+[:.\\-\\s]+)',
+    `^(?:البند\\s*${AR_ORDINAL}[:.\\-\\s]*)`,
+    `^(?:المادة\\s*${AR_ORDINAL}[:.\\-\\s]*)`,
+    '^(?:أولا[ًا]?|ثانيا[ًا]?|ثالثا[ًا]?|رابعا[ًا]?|خامسا[ًا]?|سادسا[ًا]?|سابعا[ًا]?|ثامنا[ًا]?|تاسعا[ًا]?|عاشرا[ًا]?)[:.\\-\\s]',
+    '^(?:شروط\\s+(?:التسليم|الدفع|الجودة|العقد))',
+    '^(?:التزامات\\s+(?:المصنع|المزرعة|الطرف))',
+    '^(?:فض\\s+النزاعات|حل\\s+النزاعات|القانون\\s+المطبق)',
+    '^(?:مدة\\s+العقد|إنهاء\\s+العقد|التوقيعات|Signatures?|Parties|Payment|Delivery|Quality)',
+  ].join('|'),
+  'i'
+);
 
-export function parseContractSections(raw: string | null | undefined): ContractBodySection[] {
+/** Strip markdown emphasis markers without inventing content. */
+export function stripInlineMarkdown(value: string): string {
+  return value
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/__(.+?)__/g, '$1')
+    .replace(/^#+\s*/, '')
+    .trim();
+}
+
+/**
+ * Parse the full generated contract text into readable sections.
+ * Never fabricates legal clause titles that are not present in the source text.
+ */
+export function parseContractSections(
+  raw: string | null | undefined
+): ContractBodySection[] {
   const text = (raw || '').replace(/\r\n/g, '\n').trim();
   if (!text) {
     return [];
@@ -54,7 +76,7 @@ export function parseContractSections(raw: string | null | undefined): ContractB
       current.paragraphs.push(
         ...joined
           .split(/\n{2,}/)
-          .map((p) => p.trim())
+          .map((p) => stripInlineMarkdown(p.trim()))
           .filter(Boolean)
       );
     }
@@ -68,35 +90,34 @@ export function parseContractSections(raw: string | null | undefined): ContractB
       continue;
     }
 
+    const plain = stripInlineMarkdown(trimmed);
     const isHeading =
+      HEADING_RE.test(plain) ||
       HEADING_RE.test(trimmed) ||
-      (trimmed.length <= 72 &&
-        /^[A-Z][A-Za-z0-9 ,/\-]{2,}$/.test(trimmed) &&
-        !trimmed.endsWith('.') &&
-        !trimmed.includes('EGP'));
+      isStandaloneTitle(plain);
 
     if (isHeading) {
       flushBuffer();
       if (current) {
         sections.push(current);
       }
-      const title = trimmed.replace(/^#+\s*/, '').replace(/^\d{1,2}[\.\-\)]\s*/, '');
       current = {
         id: `sec-${sections.length + 1}`,
-        title,
+        title: plain.replace(/^\d{1,2}[\.\-\)]\s*/, ''),
         paragraphs: [],
       };
       continue;
     }
 
     if (!current) {
+      // Keep leading prose under a neutral body label — do not invent legal articles.
       current = {
         id: 'sec-1',
-        title: 'Preamble',
+        title: '',
         paragraphs: [],
       };
     }
-    buffer.push(trimmed);
+    buffer.push(plain);
   }
 
   flushBuffer();
@@ -104,48 +125,56 @@ export function parseContractSections(raw: string | null | undefined): ContractB
     sections.push(current);
   }
 
-  if (sections.length <= 1 && text.length > 400) {
-    // Fabricate readable TOC chunks for dense unstructured text.
-    return chunkUnstructured(text);
+  // If nothing split cleanly, keep the complete text as a single continuous body.
+  if (!sections.length) {
+    return [
+      {
+        id: 'sec-1',
+        title: '',
+        paragraphs: splitParagraphs(text),
+      },
+    ];
   }
 
   return sections;
 }
 
-function chunkUnstructured(text: string): ContractBodySection[] {
-  const paras = text
+function isStandaloneTitle(plain: string): boolean {
+  if (plain.length > 80 || plain.endsWith('.') || plain.includes('EGP')) {
+    return false;
+  }
+  // Short ALL-CAPS / bold-looking legal titles already stripped of **
+  if (/^عقد\s+توريد/.test(plain)) {
+    return true;
+  }
+  if (/^بسم\s+الله/.test(plain)) {
+    return true;
+  }
+  if (
+    /^[A-Z][A-Za-z0-9 ,/\-]{2,}$/.test(plain) &&
+    !plain.includes('ton') &&
+    plain.split(' ').length <= 8
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function splitParagraphs(text: string): string[] {
+  return text
     .split(/\n{2,}|\n/)
-    .map((p) => p.trim())
+    .map((p) => stripInlineMarkdown(p.trim()))
     .filter(Boolean);
-  const per = Math.max(2, Math.ceil(paras.length / FALLBACK_TOC.length));
-  const sections: ContractBodySection[] = [];
-  for (let i = 0; i < FALLBACK_TOC.length; i++) {
-    const slice = paras.slice(i * per, (i + 1) * per);
-    if (!slice.length) {
-      break;
-    }
-    sections.push({
-      id: `sec-${i + 1}`,
-      title: FALLBACK_TOC[i],
-      paragraphs: slice,
-    });
-  }
-  if (!sections.length) {
-    sections.push({
-      id: 'sec-1',
-      title: 'Contract Terms',
-      paragraphs: [text],
-    });
-  }
-  return sections;
 }
 
 export function buildToc(sections: ContractBodySection[]): ContractTocItem[] {
-  return sections.map((s, i) => ({
-    id: s.id,
-    index: i + 1,
-    title: s.title,
-  }));
+  return sections
+    .filter((s) => s.title.trim().length > 0 || s.paragraphs.length > 0)
+    .map((s, i) => ({
+      id: s.id,
+      index: i + 1,
+      title: s.title.trim() || `§ ${i + 1}`,
+    }));
 }
 
 export function escapeHtml(value: string): string {
@@ -162,7 +191,7 @@ export function highlightContractHtml(
   plain: string,
   contract: ContractDocumentModel
 ): string {
-  let html = escapeHtml(plain);
+  let html = escapeHtml(plain).replace(/\n/g, '<br>');
 
   const phrases: { label: string; className: string }[] = [];
   if (contract.cropName) {
@@ -185,7 +214,6 @@ export function highlightContractHtml(
     });
   }
 
-  // Generic legal emphasis patterns (EN + AR).
   const patterns: { re: RegExp; className: string }[] = [
     {
       re: /(\d[\d,]*(?:\.\d+)?\s*(?:EGP|ج\.?\s*م|جنيه)(?:\s*\/\s*(?:ton|طن))?)/gi,
@@ -264,47 +292,13 @@ export function buildContractSummary(
 
   if (contract.deliveryDate) {
     const d = new Date(contract.deliveryDate);
-    const days = Math.max(
-      0,
-      Math.ceil((d.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-    );
     bullets.push({
       icon: 'local_shipping',
       labelKey: 'contractDoc.summaryDelivery',
-      value:
-        days > 0
-          ? i18n.instant('contractDoc.summaryDeliveryWithin', { days })
-          : d.toLocaleDateString(),
+      value: d.toLocaleDateString(),
       tone: 'neutral',
     });
   }
-
-  bullets.push({
-    icon: 'account_balance',
-    labelKey: 'contractDoc.summaryPayment',
-    value: i18n.instant('contractDoc.summaryPaymentAfter'),
-    tone: 'neutral',
-  });
-
-  const status = (contract.status || '').toLowerCase();
-  const risk =
-    status === 'signed' || status === 'active'
-      ? 'low'
-      : status === 'cancelled' || status === 'rejected'
-        ? 'high'
-        : 'mid';
-  bullets.push({
-    icon: 'shield',
-    labelKey: 'contractDoc.summaryRisk',
-    value: i18n.instant(
-      risk === 'low'
-        ? 'contractDoc.riskLow'
-        : risk === 'high'
-          ? 'contractDoc.riskHigh'
-          : 'contractDoc.riskMedium'
-    ),
-    tone: risk === 'low' ? 'risk-low' : risk === 'high' ? 'risk-high' : 'risk-mid',
-  });
 
   return bullets;
 }
@@ -349,9 +343,40 @@ export function detectDocumentDir(
 export function contractStatusLabelKey(status: string | null | undefined): string {
   const s = (status || '').toLowerCase();
   if (s === 'signed' || s === 'active') return 'contractDoc.statusSigned';
+  if (s === 'pendingfarmsignature') return 'contractDoc.statusPendingFarmSignature';
+  if (s === 'pendingfactorysignature') return 'contractDoc.statusPendingFactorySignature';
   if (s === 'pendingsignature') return 'contractDoc.statusPendingSignature';
   if (s === 'draft') return 'contractDoc.statusDraft';
   if (s === 'cancelled' || s === 'rejected') return 'contractDoc.statusRejected';
   if (s === 'completed') return 'contractDoc.statusCompleted';
   return 'contractDoc.statusDraft';
+}
+
+export function computeTotalValue(
+  quantityTons: number | null | undefined,
+  pricePerTon: number | null | undefined
+): number | null {
+  if (quantityTons == null || pricePerTon == null) {
+    return null;
+  }
+  const q = Number(quantityTons);
+  const p = Number(pricePerTon);
+  if (!Number.isFinite(q) || !Number.isFinite(p)) {
+    return null;
+  }
+  return q * p;
+}
+
+/** Extract leading بسم الله line when present in the generated text. */
+export function extractBismillah(raw: string | null | undefined): string | null {
+  const first = (raw || '')
+    .replace(/\r\n/g, '\n')
+    .trim()
+    .split('\n')
+    .map((l) => stripInlineMarkdown(l.trim()))
+    .find(Boolean);
+  if (first && /^بسم\s+الله/.test(first)) {
+    return first;
+  }
+  return null;
 }

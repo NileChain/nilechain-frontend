@@ -15,6 +15,7 @@ export interface CreateSupplyRequestPayload {
   deliveryDate: string;
   quality: string;
   selectedGovernorates: string[];
+  geographicScope?: string;
 }
 
 export interface CreateSupplyRequestResult {

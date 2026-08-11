@@ -5,6 +5,10 @@ import { Title } from '@angular/platform-browser';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { RegisterRequest } from '../../../core/models/user.model';
+import {
+  isValidEgyptianPhone,
+  normalizeEgyptianPhone,
+} from '../../../core/validation/egyptian-phone';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
@@ -48,6 +52,7 @@ export class RegisterComponent {
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal('');
   readonly emailValue = signal('');
+  readonly phoneValue = signal('');
 
   readonly farmName = signal('');
   readonly farmGovernorate = signal('');
@@ -175,6 +180,9 @@ export class RegisterComponent {
     if (!this.emailValue().trim()) {
       return false;
     }
+    if (!isValidEgyptianPhone(this.phoneValue())) {
+      return false;
+    }
     if (!this.passwordValid() || this.passwordsMismatch()) {
       return false;
     }
@@ -189,6 +197,10 @@ export class RegisterComponent {
     }
     return true;
   });
+
+  phoneValid(): boolean {
+    return isValidEgyptianPhone(this.phoneValue());
+  }
 
   constructor(title: Title) {
     title.setTitle('NileChain - Register');
@@ -243,6 +255,11 @@ export class RegisterComponent {
       return;
     }
 
+    if (!isValidEgyptianPhone(this.phoneValue())) {
+      this.errorMessage.set('validation.egyptianPhone');
+      return;
+    }
+
     if (!this.passwordValid()) {
       this.errorMessage.set('register.errors.weakPassword');
       return;
@@ -293,6 +310,7 @@ export class RegisterComponent {
       password,
       confirmPassword,
       businessType: role,
+      phone: normalizeEgyptianPhone(this.phoneValue()),
     };
 
     if (role === 'farm') {

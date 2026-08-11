@@ -65,7 +65,8 @@ export function pendingToAgentRequest(
     quantityTons: pending.quantity,
     qualitySpecs: pending.quality,
     pricePerTon: pending.price,
-    deliveryDate: new Date(pending.deliveryDate).toISOString(),
+    // Egypt calendar date as yyyy-MM-dd (avoid Date→ISO timezone off-by-one).
+    deliveryDate: pending.deliveryDate,
     factoryGovernorate: capitalizeGov(gov),
   };
 }

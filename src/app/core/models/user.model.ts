@@ -9,6 +9,7 @@ export interface RegisterRequest {
   password: string;
   confirmPassword: string;
   businessType: string;
+  phone: string;
   name?: string;
   governorate?: string;
   sizeInFeddans?: number;

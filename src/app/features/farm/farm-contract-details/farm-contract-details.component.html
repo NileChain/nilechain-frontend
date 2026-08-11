@@ -71,70 +71,6 @@
         </div>
       }
 
-      <!-- Compact overview -->
-      <section class="lw-overview" aria-labelledby="lw-overview-title">
-        <header class="lw-overview__head">
-          <div class="min-w-0">
-            <p class="lw-overview__eyebrow">
-              {{ 'contractDoc.aiSummary' | translate }}
-            </p>
-            <h2 id="lw-overview-title" class="lw-overview__title">
-              {{ c.factoryName }}
-              <span class="lw-overview__sep" aria-hidden="true">·</span>
-              {{ c.farmName }}
-            </h2>
-            <p class="lw-overview__meta">
-              {{ 'contractDoc.contractNumber' | translate }}
-              <span class="ui-data-sm">{{ shortId(c.contractId) }}</span>
-              <span class="lw-overview__sep" aria-hidden="true">·</span>
-              <span
-                class="lw-status-pill lw-status-pill--sm"
-                [attr.data-tone]="statusTone(c.status)"
-              >
-                {{ statusLabelKey(c.status) | translate }}
-              </span>
-            </p>
-          </div>
-          <div class="lw-overview__scores">
-            <div class="lw-metric">
-              <span class="material-symbols-outlined" aria-hidden="true"
-                >auto_awesome</span
-              >
-              <div>
-                <p class="lw-metric__label">
-                  {{ 'farm.matches.aiScore' | translate }}
-                </p>
-                <p class="lw-metric__value ui-data-sm">
-                  {{
-                    c.matchScore != null
-                      ? (c.matchScore | number: '1.0-0') + '%'
-                      : '—'
-                  }}
-                </p>
-              </div>
-            </div>
-            <div class="lw-metric">
-              <span class="material-symbols-outlined" aria-hidden="true"
-                >health_and_safety</span
-              >
-              <div>
-                <p class="lw-metric__label">
-                  {{ 'farm.matches.safetyScore' | translate }}
-                </p>
-                <p class="lw-metric__value ui-data-sm">
-                  {{
-                    c.riskScore != null ? (c.riskScore | number: '1.0-0') : '—'
-                  }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <app-contract-summary [bullets]="summary()" />
-      </section>
-
-      <!-- 3-column workspace -->
       <div class="lw-workspace">
         <aside class="lw-toc print:hidden">
           <app-contract-toc
@@ -155,24 +91,6 @@
             />
           } @else {
             <div class="lw-paper-skeleton" aria-hidden="true"></div>
-          }
-
-          @if (!c.generatedText?.trim()) {
-            <div class="mt-4 print:hidden">
-              <ui-empty-state
-                icon="description"
-                titleKey="contractDoc.emptyBodyTitle"
-                bodyKey="contractDoc.emptyBodyHint"
-              >
-                <button
-                  type="button"
-                  class="ui-btn-secondary mt-2"
-                  (click)="load()"
-                >
-                  {{ 'common.refresh' | translate }}
-                </button>
-              </ui-empty-state>
-            </div>
           }
 
           <div class="lw-actions print:hidden">
@@ -199,8 +117,61 @@
         </div>
 
         <aside class="lw-rail print:hidden">
-          <app-contract-timeline [steps]="timeline()" />
-          <app-contract-attachments [items]="attachments()" />
+          <details class="lw-side-panel" open>
+            <summary>{{ 'contractDoc.timeline' | translate }}</summary>
+            <app-contract-timeline [steps]="timeline()" />
+          </details>
+          @if (isSigned()) {
+            <details class="lw-side-panel" open>
+              <summary>{{ 'fulfillment.title' | translate }}</summary>
+              <app-contract-fulfillment-timeline
+                portal="farm"
+                [contractId]="c.contractId"
+              />
+            </details>
+            <details class="lw-side-panel" open>
+              <summary>{{ 'paymentMilestones.title' | translate }}</summary>
+              <app-contract-payment-milestones
+                portal="farm"
+                [contractId]="c.contractId"
+              />
+            </details>
+            <details class="lw-side-panel" open>
+              <summary>{{ 'dispute.title' | translate }}</summary>
+              <app-contract-disputes-panel
+                portal="farm"
+                [contractId]="c.contractId"
+                [canOpen]="isSigned()"
+              />
+            </details>
+          }
+          <details class="lw-side-panel">
+            <summary>{{ 'contractDoc.attachments' | translate }}</summary>
+            <app-contract-attachments [items]="attachments()" />
+          </details>
+          @if (c.matchScore != null || c.riskScore != null) {
+            <details class="lw-side-panel">
+              <summary>{{ 'contractDoc.matchMeta' | translate }}</summary>
+              <dl class="lw-side-meta">
+                @if (c.matchScore != null) {
+                  <div>
+                    <dt>{{ 'farm.matches.aiScore' | translate }}</dt>
+                    <dd class="ui-data-sm">
+                      {{ c.matchScore | number: '1.0-0' }}%
+                    </dd>
+                  </div>
+                }
+                @if (c.riskScore != null) {
+                  <div>
+                    <dt>{{ 'farm.matches.safetyScore' | translate }}</dt>
+                    <dd class="ui-data-sm">
+                      {{ c.riskScore | number: '1.0-0' }}
+                    </dd>
+                  </div>
+                }
+              </dl>
+            </details>
+          }
         </aside>
       </div>
     }

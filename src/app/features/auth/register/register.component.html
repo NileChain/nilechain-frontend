@@ -256,6 +256,39 @@
           </div>
         </div>
 
+        <!-- Phone Input -->
+        <div class="space-y-xs">
+          <label
+            for="phone"
+            class="font-label-sm text-label-sm text-on-surface-variant flex justify-between"
+          >
+            {{ 'register.phone' | translate }}
+            <span
+              class="text-error"
+              [class.hidden]="!submitted() || phoneValid()"
+              role="alert"
+              >{{ 'validation.egyptianPhone' | translate }}</span
+            >
+          </label>
+          <div class="relative">
+            <span
+              class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-outline text-[20px]"
+              aria-hidden="true"
+              >phone</span
+            >
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              [attr.placeholder]="'register.phonePlaceholder' | translate"
+              required
+              autocomplete="tel"
+              (input)="phoneValue.set($any($event.target).value)"
+              class="ui-input ps-10"
+            />
+          </div>
+        </div>
+
         <!-- Password Input -->
         <div class="space-y-xs">
           <label

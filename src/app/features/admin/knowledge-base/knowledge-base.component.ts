@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
+import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { AdminService } from '../../../core/services/admin/admin.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslateService } from '../../../core/services/translate.service';
@@ -23,6 +24,7 @@ interface KbDoc {
   imports: [
     TranslatePipe,
     AppTopBarComponent,
+    UiErrorStateComponent,
     FormsModule,
     DatePipe,
   ],
@@ -41,6 +43,7 @@ export class KnowledgeBaseComponent implements OnInit {
 
   readonly documents = signal<KbDoc[]>([]);
   readonly loading = signal(false);
+  readonly loadError = signal<string | null>(null);
   readonly uploading = signal(false);
   selectedFiles: FileList | null = null;
   uploadCategory = 'quality';
@@ -52,6 +55,7 @@ export class KnowledgeBaseComponent implements OnInit {
 
   loadDocuments(): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.adminService
       .getRagDocuments()
       .pipe(finalize(() => this.loading.set(false)))
@@ -70,7 +74,10 @@ export class KnowledgeBaseComponent implements OnInit {
           this.refreshCategoryCounts();
         },
         error: () => {
-          // keep empty list on error
+          this.documents.set([]);
+          this.loadError.set(
+            this.i18n.instant('admin.knowledgeBase.loadFailed')
+          );
         },
       });
   }
@@ -97,12 +104,17 @@ export class KnowledgeBaseComponent implements OnInit {
       .pipe(finalize(() => this.uploading.set(false)))
       .subscribe({
         next: () => {
-          this.toast.success('Document uploaded');
+          this.toast.success(
+            this.i18n.instant('admin.knowledgeBase.uploadSuccess')
+          );
           this.selectedFiles = null;
           this.uploadTitle = '';
           this.loadDocuments();
         },
-        error: () => this.toast.error('Upload failed'),
+        error: () =>
+          this.toast.error(
+            this.i18n.instant('admin.knowledgeBase.uploadFailed')
+          ),
       });
   }
 

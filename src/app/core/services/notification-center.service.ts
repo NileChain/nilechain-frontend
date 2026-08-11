@@ -7,6 +7,8 @@ import {
 } from './factory/factory.service';
 import { FarmService } from './farm/farm.service';
 import { FarmNotification } from '../models/farm/farm-notification.model';
+import { TranslateService } from './translate.service';
+import { ToastService } from './toast.service';
 
 export interface AppNotification {
   id: string;
@@ -21,6 +23,7 @@ export interface AppNotification {
   timeLabel?: string;
   read: boolean;
   link?: string;
+  type?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -28,6 +31,8 @@ export class NotificationCenterService {
   private readonly auth = inject(AuthService);
   private readonly factoryService = inject(FactoryService);
   private readonly farmService = inject(FarmService);
+  private readonly i18n = inject(TranslateService);
+  private readonly toast = inject(ToastService);
 
   readonly open = signal(false);
   readonly loading = signal(false);
@@ -138,6 +143,7 @@ export class NotificationCenterService {
       return;
     }
 
+    const previous = this.notifications();
     this.notifications.update((list) =>
       list.map((n) => ({ ...n, read: true }))
     );
@@ -151,17 +157,18 @@ export class NotificationCenterService {
 
     const calls = unread.map((n) =>
       this.auth.hasAnyRole(['Factory'])
-        ? this.factoryService.markNotificationRead(n.id).pipe(
-            catchError(() => of(null))
-          )
-        : this.farmService.markNotificationAsRead(n.id).pipe(
-            catchError(() => of(null))
-          )
+        ? this.factoryService.markNotificationRead(n.id)
+        : this.farmService.markNotificationAsRead(n.id)
     );
 
     forkJoin(calls).subscribe({
       next: () => this.refresh(),
-      error: () => this.refresh(),
+      error: () => {
+        this.notifications.set(previous);
+        this.loadError.set('mark_all_failed');
+        this.toast.error(this.i18n.instant('errors.markAllFailed'));
+        this.refresh();
+      },
     });
   }
 
@@ -176,12 +183,22 @@ export class NotificationCenterService {
 
     return {
       id: n.notificationId,
-      title: n.title,
+      title: this.titleForType(n.type, n.title),
       body: n.message,
       timeLabel: this.formatTime(n.createdAt),
       read: n.isRead,
       link,
+      type: n.type,
     };
+  }
+
+  private titleForType(type: string | null, fallback: string): string {
+    if (!type) {
+      return fallback;
+    }
+    const key = `notifications.types.${type}`;
+    const translated = this.i18n.instant(key);
+    return translated === key ? fallback : translated;
   }
 
   private defaultLink(
@@ -191,7 +208,7 @@ export class NotificationCenterService {
     const t = (type || '').toLowerCase();
     if (role === 'factory') {
       if (t.includes('match')) return '/factory/matches';
-      if (t.includes('contract')) return '/factory/contract-signing';
+      if (t.includes('contract')) return '/factory/contracts';
       if (t.includes('risk')) return '/factory/risk-report';
       if (t.includes('message')) return '/factory/messages';
       return '/factory/notifications';

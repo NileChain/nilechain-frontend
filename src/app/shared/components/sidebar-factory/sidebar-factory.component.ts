@@ -82,7 +82,7 @@ export class SidebarFactoryComponent {
       key: 'contracts',
       icon: 'description',
       labelKey: 'nav.contracts',
-      link: '/factory/contract-signing',
+      link: '/factory/contracts',
     },
     {
       key: 'messages',

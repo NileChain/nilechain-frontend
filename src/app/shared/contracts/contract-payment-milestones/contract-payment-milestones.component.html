@@ -1,0 +1,108 @@
+<section
+  class="pm-card"
+  [attr.aria-label]="'paymentMilestones.title' | translate"
+>
+  <h3 class="pm-card__title">
+    <span class="material-symbols-outlined" aria-hidden="true">payments</span>
+    {{ 'paymentMilestones.title' | translate }}
+  </h3>
+
+  <p class="pm-disclaimer" role="note">
+    {{ 'paymentMilestones.disclaimer' | translate }}
+  </p>
+
+  @if (loading()) {
+    <div class="pm-loading">
+      <ui-loader size="sm" [label]="'paymentMilestones.loading' | translate" />
+    </div>
+  } @else if (loadError()) {
+    <div class="pm-error" role="alert">
+      <p>{{ loadError() }}</p>
+      <button type="button" class="ui-btn-ghost !py-1.5 !px-3" (click)="load()">
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  } @else if (schedule(); as s) {
+    @if (s.contractTotalUnavailable && s.milestones.length === 0) {
+      <p class="pm-hint">
+        {{
+          s.contractTotalUnavailableReason ||
+            ('paymentMilestones.totalUnavailable' | translate)
+        }}
+      </p>
+    } @else if (s.milestones.length === 0) {
+      <p class="pm-hint">{{ 'paymentMilestones.opensAfterSigning' | translate }}</p>
+    } @else {
+      @if (s.isVoided) {
+        <div class="pm-voided" role="status">
+          <span class="material-symbols-outlined" aria-hidden="true">cancel</span>
+          <p>{{ 'paymentMilestones.voidedBanner' | translate }}</p>
+        </div>
+      }
+
+      @if (s.contractTotal != null) {
+        <p class="pm-total">
+          {{ 'paymentMilestones.contractTotal' | translate }}:
+          <span class="tabular-nums">{{
+            s.contractTotal | number: '1.0-2'
+          }}</span>
+        </p>
+      }
+
+      <ul class="pm-list">
+        @for (m of s.milestones; track m.transactionId) {
+          <li class="pm-item" [attr.data-status]="m.status">
+            <div class="pm-item__head">
+              <p class="pm-item__label">{{ m.label }}</p>
+              <span class="pm-item__status">{{
+                statusKey(m.status) | translate
+              }}</span>
+            </div>
+            <p class="pm-item__meta">
+              <span class="tabular-nums">{{ m.percent | number: '1.0-0' }}%</span>
+              <span class="pm-dot">·</span>
+              <span class="tabular-nums">{{ m.amount | number: '1.0-2' }}</span>
+            </p>
+            @if (m.paidAt) {
+              <p class="pm-item__time">
+                {{ 'paymentMilestones.markedPaidAt' | translate }}:
+                {{ m.paidAt | date: 'medium' }}
+              </p>
+            }
+            @if (m.receivedAt) {
+              <p class="pm-item__time">
+                {{ 'paymentMilestones.receivedAt' | translate }}:
+                {{ m.receivedAt | date: 'medium' }}
+              </p>
+            }
+
+            @if (!s.isVoided && (canMarkPaid(m) || canConfirmReceived(m))) {
+              <div class="pm-actions print:hidden">
+                @if (canMarkPaid(m)) {
+                  <button
+                    type="button"
+                    class="ui-btn-primary w-full"
+                    [disabled]="acting()"
+                    (click)="markPaid(m)"
+                  >
+                    {{ 'paymentMilestones.markPaid' | translate }}
+                  </button>
+                }
+                @if (canConfirmReceived(m)) {
+                  <button
+                    type="button"
+                    class="ui-btn-primary w-full"
+                    [disabled]="acting()"
+                    (click)="confirmReceived(m)"
+                  >
+                    {{ 'paymentMilestones.confirmReceived' | translate }}
+                  </button>
+                }
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>

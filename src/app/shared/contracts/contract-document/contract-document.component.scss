@@ -2,465 +2,403 @@
   display: block;
 }
 
-.paper {
-  --paper-max: 920px;
+/* Legal deed page — always light/paper-like, even in dark app chrome */
+.deed {
+  --deed-ink: #1a1c19;
+  --deed-muted: #5a635c;
+  --deed-line: rgb(26 28 25 / 14%);
+  --deed-accent: #1b5e20;
+  --deed-paper: #fffcf5;
+  --deed-rule: #1b5e20;
+
   position: relative;
-  width: min(100%, var(--paper-max));
+  width: min(100%, 52rem);
   margin-inline: auto;
-  border-radius: 0.25rem 0.25rem 1rem 1rem;
-  background: #fffefb;
-  color: #1a1c19;
+  background:
+    linear-gradient(180deg, #fffef9 0%, var(--deed-paper) 40%, #faf7ef 100%);
+  color: var(--deed-ink);
+  border: 1px solid rgb(26 28 25 / 10%);
   box-shadow:
-    0 1px 2px rgb(16 24 40 / 5%),
-    0 18px 48px rgb(16 24 40 / 9%),
-    0 0 0 1px rgb(16 24 40 / 5%);
-  padding: clamp(1.5rem, 4vw, 3rem) clamp(1.25rem, 4vw, 3.25rem)
-    clamp(1.25rem, 3vw, 2rem);
+    0 0 0 1px rgb(255 255 255 / 70%) inset,
+    0 2px 4px rgb(16 24 40 / 4%),
+    0 24px 56px rgb(16 24 40 / 10%);
+  padding: clamp(1.75rem, 4.5vw, 3.25rem) clamp(1.35rem, 4.5vw, 3.5rem)
+    clamp(1.5rem, 3vw, 2.25rem);
   overflow: hidden;
-  animation: paperIn 0.4s ease both;
 }
 
-:host-context(html.dark) .paper {
-  background: #1c1f1b;
-  color: var(--color-on-surface, #e8ebe4);
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 35%),
-    0 18px 48px rgb(0 0 0 / 35%),
-    0 0 0 1px rgb(255 255 255 / 6%);
-}
-
-.paper__watermark {
+.deed__watermark {
   pointer-events: none;
   position: absolute;
-  inset: 18% 0 auto;
+  inset: 22% 0 auto;
   text-align: center;
-  font-size: clamp(4rem, 14vw, 7rem);
+  font-size: clamp(3.5rem, 12vw, 6.5rem);
   font-weight: 900;
-  letter-spacing: 0.18em;
-  color: color-mix(in srgb, #2e7d32 14%, transparent);
+  letter-spacing: 0.2em;
+  color: color-mix(in srgb, var(--deed-accent) 12%, transparent);
   transform: rotate(-28deg);
   z-index: 0;
   user-select: none;
 }
 
-.paper > *:not(.paper__watermark) {
+.deed > *:not(.deed__watermark) {
   position: relative;
   z-index: 1;
 }
 
-.paper__sticky-head {
-  position: sticky;
-  top: 0;
-  z-index: 5;
+.deed__masthead {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 1rem;
   padding-bottom: 1rem;
-  margin: -0.25rem -0.35rem 1.15rem;
-  padding: 0.75rem 0.35rem 1rem;
-  background: color-mix(in srgb, #fff 92%, transparent);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgb(16 24 40 / 8%);
+  border-bottom: 2px solid var(--deed-rule);
+  margin-bottom: 1.25rem;
 }
 
-:host-context(.dark) .paper__sticky-head,
-:host-context(html.dark) .paper__sticky-head {
-  background: color-mix(in srgb, var(--color-surface-container-lowest, #1e221c) 92%, transparent);
-  border-bottom-color: rgb(255 255 255 / 8%);
-}
-
-.paper__brand {
+.deed__brand {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-.paper__mark {
-  width: 2.6rem;
-  height: 2.6rem;
-  border-radius: 12px;
+.deed__crest {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1.5px solid var(--deed-accent);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, #1b5e20 12%, transparent);
-  color: #1b5e20;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--deed-accent);
+  background: color-mix(in srgb, var(--deed-accent) 6%, transparent);
 }
 
-.paper__brand-name {
+.deed__brand-name {
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 850;
-  letter-spacing: -0.02em;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--deed-accent);
 }
 
-.paper__brand-tag {
-  margin: 0.1rem 0 0;
-  font-size: 0.75rem;
-  color: #5f6b64;
-}
-
-.paper__head-meta {
-  text-align: end;
-}
-
-.paper__status {
-  display: inline-flex;
-  padding: 0.22rem 0.65rem;
-  border-radius: 999px;
+.deed__brand-tag {
+  margin: 0.15rem 0 0;
   font-size: 0.72rem;
-  font-weight: 750;
-  margin-bottom: 0.3rem;
+  color: var(--deed-muted);
 }
 
-.paper__status[data-tone='success'] {
-  background: color-mix(in srgb, var(--color-success) 16%, transparent);
-  color: var(--color-success);
-}
-.paper__status[data-tone='warning'] {
-  background: color-mix(in srgb, var(--color-warning) 16%, transparent);
-  color: var(--color-warning);
-}
-.paper__status[data-tone='danger'] {
-  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
-  color: var(--color-danger);
-}
-.paper__status[data-tone='neutral'] {
-  background: var(--color-surface-container-high, #e8ebe4);
-  color: var(--color-on-surface-variant, #5f6b64);
+.deed__status {
+  display: inline-flex;
+  padding: 0.2rem 0.65rem;
+  border: 1px solid var(--deed-line);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-.paper__id {
-  margin: 0;
-  font-size: 0.8rem;
-  color: #5f6b64;
+.deed__status[data-tone='success'] {
+  border-color: color-mix(in srgb, var(--deed-accent) 45%, transparent);
+  color: var(--deed-accent);
+  background: color-mix(in srgb, var(--deed-accent) 8%, transparent);
+}
+.deed__status[data-tone='warning'] {
+  border-color: #c47a00;
+  color: #9a5f00;
+  background: #fff6e5;
+}
+.deed__status[data-tone='danger'] {
+  border-color: #b3261e;
+  color: #8c1d18;
+  background: #fdecea;
 }
 
-.paper__banner {
+.deed__banner {
   display: flex;
   align-items: center;
   gap: 0.45rem;
   margin-bottom: 1.15rem;
   padding: 0.55rem 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid color-mix(in srgb, var(--color-success) 22%, transparent);
-  background: color-mix(in srgb, var(--color-success) 7%, transparent);
-  color: var(--color-success);
+  border: 1px solid color-mix(in srgb, var(--deed-accent) 30%, transparent);
+  background: color-mix(in srgb, var(--deed-accent) 7%, transparent);
+  color: var(--deed-accent);
   font-weight: 600;
   font-size: 0.8125rem;
 }
 
-.paper__banner .material-symbols-outlined {
+.deed__banner--pending {
+  border-color: color-mix(in srgb, #b45309 35%, transparent);
+  background: color-mix(in srgb, #b45309 8%, transparent);
+  color: #9a3412;
+}
+
+.deed__banner .material-symbols-outlined {
   font-size: 1.1rem;
 }
 
-.paper__title {
-  margin: 0;
-  font-family: Georgia, 'Times New Roman', Times, serif;
-  font-size: clamp(1.55rem, 2.4vw, 2.05rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
+.deed__bismillah {
+  margin: 0 0 1rem;
+  text-align: center;
+  font-family: 'IBM Plex Sans Arabic', 'Amiri', Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--deed-ink);
+  line-height: 1.8;
 }
 
-.paper__dates {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1.25rem;
-  margin-top: 0.55rem;
-  font-size: 0.82rem;
-  color: #5f6b64;
-}
-
-.paper__parties {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem;
-  margin: 1.5rem 0 0.35rem;
-}
-
-@media (min-width: 640px) {
-  .paper__parties {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.party-card {
-  border: 1px solid rgb(16 24 40 / 8%);
-  border-radius: 14px;
-  padding: 1rem 1.05rem;
-  background: linear-gradient(160deg, #f7faf5, #fff 55%);
-}
-
-:host-context(.dark) .party-card,
-:host-context(html.dark) .party-card {
-  background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--color-primary, #1b5e20) 10%, transparent),
-    transparent 55%
-  );
-  border-color: rgb(255 255 255 / 8%);
-}
-
-.party-card__label {
-  margin: 0;
-  font-size: 0.7rem;
-  font-weight: 750;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #5f6b64;
-}
-
-.party-card__name {
-  margin: 0.35rem 0 0;
-  font-size: 1.05rem;
-  font-weight: 800;
-}
-
-.party-card__sub {
-  margin: 0.35rem 0 0;
-  font-size: 0.8125rem;
-  color: #5f6b64;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2rem;
-}
-
-.party-card__sub .material-symbols-outlined {
-  font-size: 0.95rem;
-}
-
-.paper__body {
-  margin-top: 0.5rem;
-}
-
-.paper__body-title {
-  margin: 0.5rem 0 1rem;
-  font-size: 1rem;
-  font-weight: 800;
-}
-
-.clause {
+.deed__title-block {
+  text-align: center;
   margin-bottom: 1.35rem;
-  scroll-margin-top: 6.5rem;
 }
 
-.clause__title {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
+.deed__title {
+  margin: 0;
+  font-family: 'IBM Plex Sans Arabic', Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.55rem, 3vw, 2.1rem);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--deed-ink);
+}
+
+.deed[dir='ltr'] .deed__title {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.deed-section {
+  margin: 1.35rem 0 0;
+}
+
+.deed-section__title {
   margin: 0 0 0.65rem;
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--deed-accent);
+  border-bottom: 1px solid color-mix(in srgb, var(--deed-accent) 35%, transparent);
+  padding-bottom: 0.35rem;
+}
+
+.deed-section__title--body {
+  margin-top: 0.25rem;
+}
+
+.deed-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.deed-table th,
+.deed-table td {
+  border: 1px solid var(--deed-line);
+  padding: 0.55rem 0.75rem;
+  vertical-align: top;
+  text-align: start;
+}
+
+.deed-table th {
+  width: 34%;
+  max-width: 12rem;
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: var(--deed-muted);
+  background: color-mix(in srgb, var(--deed-accent) 5%, #fff);
+  white-space: nowrap;
+}
+
+.deed-table--identity {
+  margin-bottom: 0.25rem;
+}
+
+.deed-mono {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.deed-sub {
+  margin-top: 0.25rem;
+  font-size: 0.82rem;
+  color: var(--deed-muted);
+}
+
+.deed-rule {
+  border: 0;
+  border-top: 1px solid var(--deed-line);
+  margin: 1.75rem 0;
+}
+
+.deed-body {
+  margin-top: 0.25rem;
+}
+
+.deed-clause {
+  margin: 0 0 1.45rem;
+  scroll-margin-top: 6rem;
+}
+
+.deed-clause__title {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0 0 0.7rem;
   font-size: 1.05rem;
   font-weight: 800;
-  letter-spacing: -0.01em;
+  line-height: 1.45;
+  color: var(--deed-ink);
 }
 
-.clause__index {
-  width: 1.55rem;
-  height: 1.55rem;
-  border-radius: 999px;
+.deed-clause__num {
+  flex-shrink: 0;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 0.1rem;
+  border: 1px solid color-mix(in srgb, var(--deed-accent) 40%, transparent);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
-  background: #e8f5e9;
-  color: #1b5e20;
-  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--deed-accent);
+  background: color-mix(in srgb, var(--deed-accent) 7%, transparent);
 }
 
-.clause__para {
-  margin: 0 0 0.85rem;
-  font-family: Georgia, 'Times New Roman', 'IBM Plex Sans Arabic', Times, serif;
-  font-size: 1.02rem;
-  line-height: 1.85;
-  color: inherit;
-  max-width: 68ch;
-}
-
-.paper[dir='rtl'] .clause__para,
-.paper[dir='rtl'] .paper__title {
-  font-family: 'IBM Plex Sans Arabic', Georgia, serif;
+.deed-clause__para {
+  margin: 0 0 0.9rem;
+  font-family: 'IBM Plex Sans Arabic', Georgia, 'Times New Roman', serif;
+  font-size: 1.05rem;
+  line-height: 1.95;
+  color: var(--deed-ink);
+  text-align: start;
   max-width: none;
 }
 
+.deed[dir='ltr'] .deed-clause__para {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  max-width: 68ch;
+}
+
 :host ::ng-deep .hl {
-  border-radius: 0.3em;
-  padding: 0.05em 0.28em;
+  border-radius: 0.15em;
+  padding: 0.02em 0.2em;
   font-style: normal;
   font-family: inherit;
-  font-size: 0.92em;
+  font-size: inherit;
   font-weight: 700;
+  box-decoration-break: clone;
 }
 
 :host ::ng-deep .hl-price {
-  background: color-mix(in srgb, var(--color-warning) 18%, transparent);
-  color: var(--color-warning);
+  background: #fff3cd;
+  color: #7a5a00;
 }
 :host ::ng-deep .hl-qty {
-  background: color-mix(in srgb, #1565c0 16%, transparent);
+  background: #e3f2fd;
   color: #0d47a1;
 }
 :host ::ng-deep .hl-crop {
-  background: color-mix(in srgb, var(--color-success) 16%, transparent);
-  color: var(--color-success);
+  background: #e8f5e9;
+  color: #1b5e20;
 }
 :host ::ng-deep .hl-penalty {
-  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
-  color: var(--color-danger);
+  background: #fdecea;
+  color: #8c1d18;
 }
 :host ::ng-deep .hl-payment {
-  background: color-mix(in srgb, #6a1b9a 14%, transparent);
+  background: #f3e5f5;
   color: #4a148c;
 }
 :host ::ng-deep .hl-delivery {
-  background: color-mix(in srgb, #00838f 14%, transparent);
+  background: #e0f7fa;
   color: #006064;
 }
 
-.sig-grid {
+.deed-sign {
+  margin-top: 0.5rem;
+}
+
+.deed-sign__grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.85rem;
-  margin-top: 1.75rem;
-  padding-top: 1.25rem;
-  border-top: 1px dashed rgb(16 24 40 / 12%);
+  gap: 1.5rem;
+  margin-top: 0.85rem;
 }
 
 @media (min-width: 640px) {
-  .sig-grid {
+  .deed-sign__grid {
     grid-template-columns: 1fr 1fr;
+    gap: 2rem;
   }
 }
 
-.sig-card {
-  display: flex;
-  gap: 0.85rem;
-  align-items: flex-start;
-  border-radius: 16px;
-  border: 1px solid rgb(16 24 40 / 8%);
-  padding: 1rem;
-  background: #fafbf8;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+.deed-sign__block {
+  padding: 0.25rem 0.15rem 0.5rem;
 }
 
-.sig-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgb(16 24 40 / 6%);
-}
-
-.sig-card--done {
-  border-color: color-mix(in srgb, #2e7d32 35%, transparent);
-  background: color-mix(in srgb, #2e7d32 6%, #fff);
-}
-
-.sig-card__avatar {
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 0.85rem;
-  background: #e3f2fd;
-  color: #1565c0;
-  flex-shrink: 0;
-}
-
-.sig-card__avatar--farm {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
-
-.sig-card__role {
+.deed-sign__role {
   margin: 0;
-  font-size: 0.72rem;
-  font-weight: 750;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #5f6b64;
-}
-
-.sig-card__name {
-  margin: 0.2rem 0 0;
-  font-weight: 800;
-  font-size: 0.95rem;
-}
-
-.sig-card__state {
-  margin: 0.45rem 0 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.3rem;
-  color: #1b5e20;
-  font-weight: 750;
-  font-size: 0.86rem;
-}
-
-.sig-card__pending {
-  margin: 0.45rem 0 0;
-  color: #ef6c00;
+  font-size: 0.75rem;
   font-weight: 700;
-  font-size: 0.86rem;
+  color: var(--deed-muted);
 }
 
-.sig-card__date {
-  font-weight: 500;
-  color: #5f6b64;
-  font-size: 0.78rem;
+.deed-sign__name {
+  margin: 0.35rem 0 1.75rem;
+  font-weight: 800;
+  font-size: 0.98rem;
 }
 
-.paper__footer {
+.deed-sign__line {
+  border-bottom: 1px solid var(--deed-ink);
+  min-height: 2.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.deed-sign__state {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--deed-accent);
+}
+
+.deed-sign__pending {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #9a5f00;
+}
+
+.deed-sign__block--done .deed-sign__line {
+  border-bottom-color: var(--deed-accent);
+}
+
+.deed__footer {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 0.5rem;
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgb(16 24 40 / 8%);
-  font-size: 0.78rem;
-  color: #5f6b64;
+  margin-top: 2rem;
+  padding-top: 0.85rem;
+  border-top: 2px solid var(--deed-rule);
+  font-size: 0.75rem;
+  color: var(--deed-muted);
 }
 
-.animate-section {
-  animation: fadeUp 0.5s ease both;
-}
-
-@keyframes paperIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.995);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+.deed__footer-sep {
+  margin-inline: 0.35rem;
 }
 
 @media print {
-  .paper {
+  .deed {
     box-shadow: none;
+    border: 0;
     width: 100%;
     max-width: none;
     padding: 0;
+    background: #fff;
   }
-  .paper__sticky-head {
-    position: static;
-    background: transparent;
-  }
-  .paper__watermark {
-    color: color-mix(in srgb, #2e7d32 18%, transparent);
+  .deed__watermark {
+    color: color-mix(in srgb, var(--deed-accent) 16%, transparent);
   }
 }

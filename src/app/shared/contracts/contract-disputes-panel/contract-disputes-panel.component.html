@@ -1,0 +1,156 @@
+<div class="space-y-4">
+  @if (loading()) {
+    <div class="flex items-center gap-2 py-4">
+      <ui-loader />
+      <span class="font-body-md text-body-md text-on-surface-variant">{{
+        'common.loading' | translate
+      }}</span>
+    </div>
+  } @else if (loadError()) {
+    <p class="font-body-md text-body-md text-error">{{ loadError() }}</p>
+    <button type="button" class="ui-btn-ghost" (click)="load()">
+      {{ 'common.retry' | translate }}
+    </button>
+  } @else {
+    @if (hasActive) {
+      <p
+        class="font-label-sm text-label-sm text-on-surface-variant rounded-lg border border-outline-variant bg-surface-container px-3 py-2"
+      >
+        {{ 'dispute.frozenHint' | translate }}
+      </p>
+    }
+
+    @if (disputes().length === 0) {
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {{ 'dispute.empty' | translate }}
+      </p>
+    } @else {
+      <ul class="space-y-3" role="list">
+        @for (d of disputes(); track d.disputeId) {
+          <li
+            class="rounded-lg border border-outline-variant bg-surface-container-lowest p-3 space-y-2"
+          >
+            <div class="flex flex-wrap items-center gap-2">
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full border border-outline-variant font-label-sm text-label-sm"
+              >
+                {{ statusKey(d.status) | translate }}
+              </span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant">
+                {{ typeKey(d.type) | translate }}
+              </span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant ms-auto">
+                {{ d.createdAt | date: 'mediumDate' }}
+              </span>
+            </div>
+            <p class="font-body-md text-body-md text-on-surface">
+              {{ d.description }}
+            </p>
+            @if (outcomeNote(d); as note) {
+              <p
+                class="font-body-md text-body-md text-on-surface-variant border-s-2 border-primary ps-3"
+              >
+                {{ note }}
+              </p>
+            }
+            @if (d.evidence?.length) {
+              <ul class="space-y-1">
+                @for (e of d.evidence; track e.disputeEvidenceId) {
+                  <li>
+                    <a
+                      class="font-label-sm text-label-sm text-primary underline"
+                      [href]="e.fileUrl"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      {{ e.fileName }}
+                    </a>
+                  </li>
+                }
+              </ul>
+            }
+            @if (d.events?.length) {
+              <ol class="space-y-1 border-t border-outline-variant pt-2">
+                @for (ev of d.events; track ev.eventId) {
+                  <li class="font-label-sm text-label-sm text-on-surface-variant">
+                    {{ ev.createdAt | date: 'short' }} —
+                    {{ statusKey(ev.toStatus) | translate }}
+                    @if (ev.note) {
+                      <span>: {{ ev.note }}</span>
+                    }
+                  </li>
+                }
+              </ol>
+            }
+          </li>
+        }
+      </ul>
+    }
+
+    @if (canOpen && !hasActive) {
+      @if (!showForm()) {
+        <button
+          type="button"
+          class="ui-btn-secondary w-full"
+          (click)="showForm.set(true)"
+        >
+          {{ 'dispute.openCta' | translate }}
+        </button>
+      } @else {
+        <form class="space-y-3" (ngSubmit)="submit()">
+          <label class="block space-y-1">
+            <span class="font-label-sm text-label-sm text-on-surface-variant">{{
+              'dispute.typeLabel' | translate
+            }}</span>
+            <select class="ui-input w-full" [(ngModel)]="type" name="type">
+              @for (t of types; track t) {
+                <option [value]="t">{{ typeKey(t) | translate }}</option>
+              }
+            </select>
+          </label>
+          <label class="block space-y-1">
+            <span class="font-label-sm text-label-sm text-on-surface-variant">{{
+              'dispute.descriptionLabel' | translate
+            }}</span>
+            <textarea
+              class="ui-input w-full min-h-[96px]"
+              [(ngModel)]="description"
+              name="description"
+              maxlength="4000"
+              required
+            ></textarea>
+          </label>
+          <label class="block space-y-1">
+            <span class="font-label-sm text-label-sm text-on-surface-variant">{{
+              'dispute.evidenceLabel' | translate
+            }}</span>
+            <input
+              type="file"
+              class="block w-full text-sm"
+              multiple
+              accept=".pdf,.jpg,.jpeg,.png,.webp"
+              (change)="onFilesSelected($event)"
+            />
+          </label>
+          <div class="flex gap-2">
+            <button
+              type="submit"
+              class="ui-btn-primary"
+              [disabled]="submitting()"
+            >
+              {{ 'dispute.submit' | translate }}
+            </button>
+            <button
+              type="button"
+              class="ui-btn-ghost"
+              (click)="showForm.set(false)"
+              [disabled]="submitting()"
+            >
+              {{ 'common.cancel' | translate }}
+            </button>
+          </div>
+        </form>
+      }
+    }
+  }
+</div>

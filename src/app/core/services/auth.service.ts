@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, Observable, of, switchMap, tap } from 'rxjs';
+import { catchError, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AuthResponse,
@@ -144,11 +144,28 @@ export class AuthService {
     return this.hydrateCurrentUser();
   }
 
+  private meFailureCount = 0;
+
   private hydrateCurrentUser(): Observable<UserProfile> {
     return this.getMe().pipe(
-      tap((me) => this.applyUserResponse(me)),
+      tap((me) => {
+        this.meFailureCount = 0;
+        this.applyUserResponse(me);
+      }),
       map(() => this.userSignal() as UserProfile),
-      catchError(() => of(this.userSignal() as UserProfile))
+      catchError(() => {
+        this.meFailureCount += 1;
+        // After repeated /me failures, drop the session instead of serving stale cache forever.
+        if (this.meFailureCount >= 3) {
+          this.clearSession();
+          return throwError(() => new Error('Session hydration failed'));
+        }
+        const cached = this.userSignal();
+        if (cached) {
+          return of(cached);
+        }
+        return throwError(() => new Error('Session hydration failed'));
+      })
     );
   }
 

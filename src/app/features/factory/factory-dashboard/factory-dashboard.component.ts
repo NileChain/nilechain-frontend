@@ -139,14 +139,14 @@ export class FactoryDashboardComponent implements OnInit {
     this.pendingRequest.set(readPendingSupplyRequest());
 
     forkJoin({
-      matches: this.factoryService.getMatchedFarms().pipe(catchError(() => of([] as FactoryMatchedFarm[]))),
-      contracts: this.factoryService.getContracts().pipe(catchError(() => of([] as FactoryContract[]))),
-      notifications: this.factoryService
-        .getNotifications()
-        .pipe(catchError(() => of([] as FactoryNotification[]))),
-      conversations: this.factoryService
-        .getConversations()
-        .pipe(catchError(() => of([] as FactoryConversation[]))),
+      matches: this.factoryService.getMatchedFarms(),
+      contracts: this.factoryService.getContracts(),
+      notifications: this.factoryService.getNotifications().pipe(
+        catchError(() => of([] as FactoryNotification[]))
+      ),
+      conversations: this.factoryService.getConversations().pipe(
+        catchError(() => of([] as FactoryConversation[]))
+      ),
     })
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
@@ -258,7 +258,7 @@ export class FactoryDashboardComponent implements OnInit {
         titleParams: { count: awaiting },
         statusKey: 'factory.dashboard.attentionSignature',
         ctaKey: 'factory.dashboard.reviewContractsCta',
-        link: '/factory/contract-signing',
+        link: '/factory/contracts',
         tone: 'attention',
       });
     }
@@ -397,6 +397,11 @@ export class FactoryDashboardComponent implements OnInit {
         continue;
       }
       seen.add(requestId);
+      const latest = group.reduce((best, cur) => {
+        const bt = best.createdAt ? Date.parse(best.createdAt) : 0;
+        const ct = cur.createdAt ? Date.parse(cur.createdAt) : 0;
+        return ct >= bt ? cur : best;
+      }, group[0]);
       rows.push({
         id: `req-${requestId}`,
         requestId,
@@ -404,11 +409,20 @@ export class FactoryDashboardComponent implements OnInit {
         quantityTons: null,
         budgetEgp: null,
         status: 'matched',
-        date: null,
+        date: latest?.createdAt || null,
         matchCount: group.length,
         link: '/factory/matches',
       });
     }
+
+    // Newest procurement activity first (match CreatedAt / pending first).
+    rows.sort((a, b) => {
+      if (a.status === 'draft' && b.status !== 'draft') return -1;
+      if (b.status === 'draft' && a.status !== 'draft') return 1;
+      const ta = a.date ? Date.parse(a.date) : 0;
+      const tb = b.date ? Date.parse(b.date) : 0;
+      return tb - ta;
+    });
 
     return rows.slice(0, 8);
   }

@@ -133,7 +133,7 @@ export class ContractSigningComponent implements OnInit {
         quantityTons: 100,
         qualitySpecs: '',
         pricePerTon: 10000,
-        deliveryDate: tomorrow.toISOString(),
+        deliveryDate: tomorrow.toISOString().slice(0, 10),
         factoryGovernorate: 'Giza',
       };
     }

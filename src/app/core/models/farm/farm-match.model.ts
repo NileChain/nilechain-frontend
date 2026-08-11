@@ -16,6 +16,24 @@ export interface FarmMatchItem {
   contractId?: string | null;
 }
 
+export interface FarmMatchSummary {
+  total: number;
+  proposed: number;
+  accepted: number;
+  rejected: number;
+  newCount: number;
+}
+
+export interface FarmMatchesPage {
+  items: FarmMatchItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  summary: FarmMatchSummary;
+  newMatches: FarmMatchItem[];
+}
+
 export interface RespondToMatchRequest {
   action: 'reject';
 }

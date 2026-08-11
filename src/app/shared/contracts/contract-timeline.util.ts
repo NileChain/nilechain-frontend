@@ -10,9 +10,10 @@ export function buildContractTimeline(
 ): ContractTimelineStep[] {
   const status = (contract.status || '').toLowerCase();
   const isCancelled = status === 'cancelled' || status === 'rejected';
-  const isSigned = status === 'signed' || status === 'active';
-  const isPending = status === 'pendingsignature';
-  const isDraft = status === 'draft';
+  const factorySigned = !!contract.factorySigned;
+  const farmSigned = !!contract.farmSigned;
+  const isFullySigned =
+    status === 'signed' || status === 'active' || (factorySigned && farmSigned);
   const hasBody = !!contract.generatedText?.trim();
   const viewedAt = options?.viewedAt ?? null;
 
@@ -28,68 +29,59 @@ export function buildContractTimeline(
       id: 'generated',
       labelKey: 'contractDoc.timelineGenerated',
       icon: 'smart_toy',
-      state: hasBody || !isDraft ? 'done' : 'upcoming',
-      at: hasBody || !isDraft ? contract.createdAt : null,
+      state: hasBody ? 'done' : 'upcoming',
+      at: hasBody ? contract.createdAt : null,
     },
     {
       id: 'factory',
       labelKey: 'contractDoc.timelineFactorySigned',
       icon: 'factory',
-      state: isDraft ? 'upcoming' : 'done',
-      at: isDraft ? null : contract.createdAt,
+      state: factorySigned
+        ? 'done'
+        : isCancelled
+          ? 'rejected'
+          : farmSigned
+            ? 'current'
+            : hasBody
+              ? 'current'
+              : 'upcoming',
+      at: contract.factorySignedAt ?? null,
     },
     {
       id: 'viewed',
       labelKey: 'contractDoc.timelineFarmViewed',
       icon: 'visibility',
-      state: viewedAt ? 'done' : isPending || isSigned || isCancelled ? 'current' : 'upcoming',
+      state: viewedAt
+        ? 'done'
+        : factorySigned && !farmSigned
+          ? 'current'
+          : 'upcoming',
       at: viewedAt,
     },
     {
       id: 'farm',
       labelKey: 'contractDoc.timelineFarmSigned',
       icon: 'agriculture',
-      state: isSigned
+      state: farmSigned
         ? 'done'
         : isCancelled
           ? 'rejected'
-          : isPending
+          : factorySigned
             ? 'current'
             : 'upcoming',
-      at: isSigned ? contract.signedAt : null,
+      at: contract.farmSignedAt ?? null,
     },
     {
       id: 'completed',
       labelKey: 'contractDoc.timelineCompleted',
       icon: 'task_alt',
-      state: isSigned ? 'done' : isCancelled ? 'rejected' : 'upcoming',
-      at: isSigned ? contract.signedAt : null,
+      state: isFullySigned ? 'done' : isCancelled ? 'rejected' : 'upcoming',
+      at: isFullySigned ? contract.signedAt : null,
     },
   ];
 }
 
 export function defaultContractAttachments(): ContractAttachmentItem[] {
-  return [
-    {
-      id: 'cert',
-      name: 'Certificate.pdf',
-      sizeLabel: '240 KB',
-      typeLabel: 'PDF',
-      icon: 'workspace_premium',
-    },
-    {
-      id: 'delivery',
-      name: 'Delivery Terms.pdf',
-      sizeLabel: '180 KB',
-      typeLabel: 'PDF',
-      icon: 'local_shipping',
-    },
-    {
-      id: 'quality',
-      name: 'Quality Standards.pdf',
-      sizeLabel: '312 KB',
-      typeLabel: 'PDF',
-      icon: 'verified',
-    },
-  ];
+  // No placeholder PDFs — only show attachments when real files exist.
+  return [];
 }

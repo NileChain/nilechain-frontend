@@ -40,25 +40,45 @@
             <span class="sr-only">{{ 'common.required' | translate }}</span>
           </label>
           <div class="relative">
-            <select
-              id="crop_type"
-              formControlName="crop"
-              class="ui-input appearance-none pe-10"
-            >
-              <option disabled value="">
-                {{ 'factory.supplyRequest.selectCrop' | translate }}
-              </option>
-              @for (crop of crops; track crop.value) {
-                <option [value]="crop.value">
-                  {{ crop.labelKey | translate }}
+            @if (cropsLoading()) {
+              <div class="flex items-center gap-2 py-2">
+                <ui-loader size="sm" />
+                <span>{{ 'common.loading' | translate }}</span>
+              </div>
+            } @else if (cropsError()) {
+              <ui-error-state [message]="cropsError()" (retry)="loadCrops()" />
+            } @else {
+              <select
+                id="crop_type"
+                formControlName="crop"
+                class="ui-input appearance-none pe-10"
+              >
+                <option disabled value="">
+                  {{ 'factory.supplyRequest.selectCrop' | translate }}
                 </option>
+                @for (crop of cropTypes(); track crop.cropTypeId) {
+                  <option [value]="crop.name">
+                    {{ crop.name }}
+                  </option>
+                }
+              </select>
+              <span
+                class="material-symbols-outlined absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none"
+                aria-hidden="true"
+                >expand_more</span
+              >
+              @if (cropTypes().length === 0) {
+                <p class="font-body-md text-body-md text-on-surface-variant mt-2">
+                  {{ 'factory.supplyRequest.noCrops' | translate }}
+                </p>
               }
-            </select>
-            <span
-              class="material-symbols-outlined absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none"
-              aria-hidden="true"
-              >expand_more</span
-            >
+              <a
+                routerLink="/factory/crop-request"
+                class="inline-flex mt-2 text-primary font-label-md"
+              >
+                {{ 'factory.supplyRequest.requestCrop' | translate }}
+              </a>
+            }
           </div>
         </div>
 
@@ -145,12 +165,42 @@
 
       <fieldset class="space-y-3">
         <legend class="font-title-md text-title-md text-on-surface">
+          {{ 'factory.supplyRequest.geographicScope' | translate }}
+        </legend>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {{ 'factory.supplyRequest.geographicScopeHint' | translate }}
+        </p>
+        <div class="flex flex-wrap gap-2">
+          @for (scope of geographicScopes; track scope.value) {
+            <label
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer"
+              [class.border-primary]="
+                form.controls.geographicScope.value === scope.value
+              "
+              [class.bg-primary-container]="
+                form.controls.geographicScope.value === scope.value
+              "
+            >
+              <input
+                type="radio"
+                class="accent-[var(--color-primary)]"
+                [value]="scope.value"
+                formControlName="geographicScope"
+              />
+              {{ scope.labelKey | translate }}
+            </label>
+          }
+        </div>
+      </fieldset>
+
+      <fieldset class="space-y-3">
+        <legend class="font-title-md text-title-md text-on-surface">
           {{ 'factory.supplyRequest.governorates' | translate }}
         </legend>
         <p class="font-body-md text-body-md text-on-surface-variant">
           {{ 'factory.supplyRequest.governoratesHint' | translate }}
         </p>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
           @for (gov of governorates; track gov.value) {
             <button
               type="button"
@@ -163,7 +213,10 @@
               [class.border-primary-container]="isGovSelected(gov.value)"
               (click)="toggleGovernorate(gov.value)"
             >
-              {{ gov.labelKey | translate }}
+              {{ gov.labelEn }}
+              <span class="text-on-surface-variant ms-1 text-sm"
+                >({{ gov.labelAr }})</span
+              >
             </button>
           }
         </div>

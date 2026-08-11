@@ -64,7 +64,7 @@ export const routes: Routes = [
         (m) => m.FarmLayoutComponent
       ),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['Farm', 'Admin'] },
+    data: { roles: ['Farm'] },
     children: [
       {
         path: '',
@@ -120,6 +120,13 @@ export const routes: Routes = [
             (m) => m.FarmNotificationsComponent
           ),
       },
+      {
+        path: 'crop-request',
+        loadComponent: () =>
+          import('./features/crop-request/crop-request.component').then(
+            (m) => m.CropRequestComponent
+          ),
+      },
     ],
   },
 
@@ -143,7 +150,7 @@ export const routes: Routes = [
         (m) => m.FactoryLayoutComponent
       ),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['Factory', 'Admin'] },
+    data: { roles: ['Factory'] },
     children: [
       {
         path: '',
@@ -172,6 +179,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'crop-request',
+        loadComponent: () =>
+          import('./features/crop-request/crop-request.component').then(
+            (m) => m.CropRequestComponent
+          ),
+      },
+      {
         path: 'matches',
         loadComponent: () =>
           import('./features/factory/factory-matches/factory-matches.component').then(
@@ -191,6 +205,20 @@ export const routes: Routes = [
           import('./features/factory/risk-report/risk-report.component').then(
             (m) => m.RiskReportComponent
           ),
+      },
+      {
+        path: 'contracts',
+        loadComponent: () =>
+          import(
+            './features/factory/factory-contracts/factory-contracts.component'
+          ).then((m) => m.FactoryContractsComponent),
+      },
+      {
+        path: 'contracts/:contractId',
+        loadComponent: () =>
+          import(
+            './features/factory/factory-contract-details/factory-contract-details.component'
+          ).then((m) => m.FactoryContractDetailsComponent),
       },
       {
         path: 'contract-signing',
@@ -259,7 +287,7 @@ export const routes: Routes = [
         (m) => m.AdminLayoutComponent
       ),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['Admin'] },
+    data: { roles: ['Admin', 'SuperAdmin'] },
     children: [
       {
         path: '',
@@ -292,6 +320,20 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/admin/knowledge-base/knowledge-base.component').then(
             (m) => m.KnowledgeBaseComponent
+          ),
+      },
+      {
+        path: 'crop-requests',
+        loadComponent: () =>
+          import(
+            './features/admin/admin-crop-requests/admin-crop-requests.component'
+          ).then((m) => m.AdminCropRequestsComponent),
+      },
+      {
+        path: 'disputes',
+        loadComponent: () =>
+          import('./features/admin/admin-disputes/admin-disputes.component').then(
+            (m) => m.AdminDisputesComponent
           ),
       },
     ],

@@ -131,19 +131,19 @@
                         <span
                           class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-container text-on-primary-container border border-primary"
                         >
-                          {{ row.status }}
+                          {{ statusLabelKey(row.status) | translate }}
                         </span>
                       } @else if (isPending(row.status)) {
                         <span
                           class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-orange/15 text-warning-orange border border-warning-orange/30"
                         >
-                          {{ row.status }}
+                          {{ statusLabelKey(row.status) | translate }}
                         </span>
                       } @else {
                         <span
                           class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-container-high text-on-surface-variant border border-outline-variant"
                         >
-                          {{ row.status }}
+                          {{ statusLabelKey(row.status) | translate }}
                         </span>
                       }
                     </td>

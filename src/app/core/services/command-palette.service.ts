@@ -108,7 +108,7 @@ export class CommandPaletteService {
       id: 'factory-contracts',
       labelKey: 'nav.contracts',
       icon: 'description',
-      link: '/factory/contract-signing',
+      link: '/factory/contracts',
       roles: ['Factory', 'Admin'],
     },
     {
@@ -145,6 +145,13 @@ export class CommandPaletteService {
       labelKey: 'nav.contracts',
       icon: 'description',
       link: '/admin/contracts',
+      roles: ['Admin'],
+    },
+    {
+      id: 'admin-disputes',
+      labelKey: 'nav.disputes',
+      icon: 'gavel',
+      link: '/admin/disputes',
       roles: ['Admin'],
     },
     {

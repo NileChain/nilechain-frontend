@@ -36,6 +36,9 @@ export class AiAssistantService {
     },
   ];
 
+  /** Demo-only assistant — replies are canned, not a live LLM. */
+  readonly isDemo = true;
+
   private readonly mockReplies: Record<string, string> = {
     'explain-match':
       'This farm scored highly on crop alignment, delivery window, and historical fulfillment. Quantity capacity covers your request with a buffer, and logistics distance is within the preferred governorate set.',

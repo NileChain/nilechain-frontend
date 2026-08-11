@@ -1,0 +1,237 @@
+<main class="md:ms-[280px] min-h-screen bg-surface">
+  <app-top-bar titleKey="admin.disputes.title" portal="admin" />
+
+  <div
+    class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
+  >
+    <section
+      class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4"
+    >
+      <div class="space-y-1">
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {{ 'admin.disputes.subtitle' | translate }}
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        @for (f of statusFilters; track f.value) {
+          <button
+            type="button"
+            class="ui-btn-secondary !px-3 !py-1.5"
+            [class.!bg-primary]="statusFilter === f.value"
+            [class.!text-on-primary]="statusFilter === f.value"
+            [class.!border-primary]="statusFilter === f.value"
+            (click)="setStatusFilter(f.value)"
+          >
+            {{ f.labelKey | translate }}
+          </button>
+        }
+      </div>
+    </section>
+
+    <section class="flex flex-wrap gap-2">
+      @for (f of typeFilters; track f.value) {
+        <button
+          type="button"
+          class="ui-btn-ghost !px-3 !py-1.5"
+          [class.!bg-surface-container]="typeFilter === f.value"
+          (click)="setTypeFilter(f.value)"
+        >
+          {{ f.labelKey | translate }}
+        </button>
+      }
+    </section>
+
+    <section class="ui-card overflow-hidden">
+      <div
+        class="p-6 border-b border-outline-variant flex justify-between items-center gap-3 bg-surface-container-lowest"
+      >
+        <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+          {{ 'admin.disputes.listTitle' | translate }}
+        </h2>
+        <button
+          type="button"
+          class="ui-btn-ghost"
+          (click)="load()"
+          [disabled]="loading()"
+        >
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+            >refresh</span
+          >
+          {{ 'common.refresh' | translate }}
+        </button>
+      </div>
+
+      @if (loading()) {
+        <div class="flex items-center justify-center gap-2 py-16">
+          <ui-loader />
+          <span class="font-body-md text-body-md text-on-surface-variant">{{
+            'common.loading' | translate
+          }}</span>
+        </div>
+      } @else if (error()) {
+        <div class="p-6">
+          <ui-error-state [message]="error()" (retry)="load()" />
+        </div>
+      } @else if (disputes().length === 0) {
+        <div class="p-6">
+          <ui-empty-state
+            titleKey="admin.disputes.emptyTitle"
+            bodyKey="admin.disputes.emptyBody"
+            icon="gavel"
+          />
+        </div>
+      } @else {
+        <ul class="divide-y divide-outline-variant" role="list">
+          @for (d of disputes(); track d.disputeId) {
+            <li class="p-6 space-y-4 hover:bg-surface-container-low transition-colors">
+              <div
+                class="flex flex-col lg:flex-row lg:items-start justify-between gap-4"
+              >
+                <div class="space-y-1 min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h3 class="font-title-md text-title-md text-on-surface">
+                      {{ d.farmName || '—' }} ↔ {{ d.factoryName || '—' }}
+                    </h3>
+                    <span
+                      class="inline-flex items-center px-3 py-1 rounded-full border border-outline-variant bg-surface-container font-label-sm text-label-sm text-on-surface-variant"
+                    >
+                      {{ statusKey(d.status) | translate }}
+                    </span>
+                    <span
+                      class="inline-flex items-center px-3 py-1 rounded-full border border-outline-variant font-label-sm text-label-sm text-on-surface-variant"
+                    >
+                      {{ typeKey(d.type) | translate }}
+                    </span>
+                  </div>
+                  <p class="font-label-sm text-label-sm text-on-surface-variant">
+                    {{ 'admin.disputes.raisedBy' | translate }}:
+                    {{ d.raisedByParty }} ·
+                    {{ d.createdAt | date: 'medium' }}
+                  </p>
+                  <p class="font-body-md text-body-md text-on-surface-variant">
+                    {{ d.description }}
+                  </p>
+                  <button
+                    type="button"
+                    class="ui-btn-ghost !px-0"
+                    (click)="toggleDetail(d.disputeId)"
+                  >
+                    {{
+                      (selectedId() === d.disputeId
+                        ? 'admin.disputes.hideDetail'
+                        : 'admin.disputes.showDetail'
+                      ) | translate
+                    }}
+                  </button>
+                </div>
+              </div>
+
+              @if (selectedId() === d.disputeId) {
+                <div class="space-y-3 rounded-lg border border-outline-variant p-4 bg-surface-container-lowest">
+                  @if (d.evidence?.length) {
+                    <div>
+                      <h4 class="font-title-sm text-title-sm mb-2">
+                        {{ 'dispute.evidenceLabel' | translate }}
+                      </h4>
+                      <ul class="space-y-1">
+                        @for (e of d.evidence; track e.disputeEvidenceId) {
+                          <li>
+                            <a
+                              class="text-primary underline font-label-sm"
+                              [href]="e.fileUrl"
+                              target="_blank"
+                              rel="noopener"
+                              >{{ e.fileName }}</a
+                            >
+                          </li>
+                        }
+                      </ul>
+                    </div>
+                  }
+                  @if (d.events?.length) {
+                    <div>
+                      <h4 class="font-title-sm text-title-sm mb-2">
+                        {{ 'dispute.timeline' | translate }}
+                      </h4>
+                      <ol class="space-y-1">
+                        @for (ev of d.events; track ev.eventId) {
+                          <li class="font-label-sm text-label-sm text-on-surface-variant">
+                            {{ ev.createdAt | date: 'short' }} —
+                            {{ statusKey(ev.toStatus) | translate }}
+                            @if (ev.note) {
+                              <span>: {{ ev.note }}</span>
+                            }
+                          </li>
+                        }
+                      </ol>
+                    </div>
+                  }
+
+                  @if (d.status === 'Open' || d.status === 'UnderReview') {
+                    <label class="block space-y-1">
+                      <span class="font-label-sm text-label-sm">{{
+                        'admin.disputes.adminNote' | translate
+                      }}</span>
+                      <textarea
+                        class="ui-input w-full min-h-[80px]"
+                        [(ngModel)]="adminNotes[d.disputeId]"
+                        [name]="'note-' + d.disputeId"
+                      ></textarea>
+                    </label>
+                  }
+
+                  @if (d.status === 'UnderReview') {
+                    <label class="block space-y-1 max-w-xs">
+                      <span class="font-label-sm text-label-sm">{{
+                        'admin.disputes.outcomeFavor' | translate
+                      }}</span>
+                      <select
+                        class="ui-input w-full"
+                        [(ngModel)]="outcomeFavors[d.disputeId]"
+                        [name]="'favor-' + d.disputeId"
+                      >
+                        <option value="Farm">Farm</option>
+                        <option value="Factory">Factory</option>
+                      </select>
+                    </label>
+                  }
+
+                  <div class="flex flex-wrap gap-2">
+                    @if (d.status === 'Open') {
+                      <button
+                        type="button"
+                        class="ui-btn-primary"
+                        [disabled]="actionLoading() === d.disputeId"
+                        (click)="moveUnderReview(d)"
+                      >
+                        {{ 'admin.disputes.underReview' | translate }}
+                      </button>
+                    }
+                    @if (d.status === 'UnderReview') {
+                      <button
+                        type="button"
+                        class="ui-btn-primary"
+                        [disabled]="actionLoading() === d.disputeId"
+                        (click)="resolve(d)"
+                      >
+                        {{ 'admin.disputes.resolve' | translate }}
+                      </button>
+                      <button
+                        type="button"
+                        class="ui-btn-secondary"
+                        [disabled]="actionLoading() === d.disputeId"
+                        (click)="reject(d)"
+                      >
+                        {{ 'admin.disputes.reject' | translate }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+</main>

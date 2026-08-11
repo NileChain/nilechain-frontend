@@ -9,6 +9,8 @@ import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.compon
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 import { FarmService } from '../../../core/services/farm/farm.service';
 import { FarmContract } from '../../../core/models/farm/farm-contract.model';
+import { contractStatusLabelKey } from '../../../shared/contracts/contract-text.util';
+import { TranslateService } from '../../../core/services/translate.service';
 
 @Component({
   selector: 'app-farm-contracts',
@@ -28,6 +30,7 @@ import { FarmContract } from '../../../core/models/farm/farm-contract.model';
 export class FarmContractsComponent implements OnInit {
   private readonly farmService = inject(FarmService);
   private readonly router = inject(Router);
+  private readonly i18n = inject(TranslateService);
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
@@ -45,7 +48,8 @@ export class FarmContractsComponent implements OnInit {
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (items) => this.contracts.set(items),
-        error: () => this.error.set('Failed to load contracts.'),
+        error: () =>
+          this.error.set(this.i18n.instant('farm.contracts.loadFailed')),
       });
   }
 
@@ -68,6 +72,15 @@ export class FarmContractsComponent implements OnInit {
 
   isPending(status: string): boolean {
     const s = status.toLowerCase();
-    return s === 'pendingsignature' || s === 'draft';
+    return (
+      s === 'pendingsignature' ||
+      s === 'pendingfarmsignature' ||
+      s === 'pendingfactorysignature' ||
+      s === 'draft'
+    );
+  }
+
+  statusLabelKey(status: string): string {
+    return contractStatusLabelKey(status);
   }
 }

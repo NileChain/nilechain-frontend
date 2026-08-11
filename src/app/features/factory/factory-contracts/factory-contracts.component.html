@@ -1,0 +1,367 @@
+<main class="md:ms-[280px] min-h-screen bg-surface">
+  <app-top-bar
+    titleKey="factory.contracts.title"
+    portal="factory"
+    notificationsLink="/factory/notifications"
+  />
+
+  <div
+    class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
+  >
+    <section
+      class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4"
+    >
+      <div>
+        <p class="font-body-lg text-body-lg text-on-surface-variant">
+          {{ 'factory.contracts.subtitle' | translate }}
+        </p>
+      </div>
+      <a
+        class="ui-btn-secondary !py-2 !px-4 inline-flex items-center gap-2"
+        routerLink="/factory/contract-signing"
+      >
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+          >edit_document</span
+        >
+        {{ 'factory.contracts.generateNew' | translate }}
+      </a>
+    </section>
+
+    <section
+      class="ui-card p-4 flex flex-col gap-4"
+      [attr.aria-label]="'factory.contracts.filters' | translate"
+    >
+      <div class="flex flex-col lg:flex-row gap-3 lg:items-center">
+        <div class="relative flex-1 min-w-0">
+          <label class="sr-only" for="factory-contracts-search">{{
+            'common.search' | translate
+          }}</label>
+          <span
+            class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px] pointer-events-none"
+            aria-hidden="true"
+            >search</span
+          >
+          <input
+            id="factory-contracts-search"
+            type="search"
+            class="ui-input w-full ps-10"
+            [value]="searchQuery()"
+            (input)="onSearch($any($event.target).value)"
+            [attr.placeholder]="
+              'factory.contracts.searchPlaceholder' | translate
+            "
+          />
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <label
+            class="font-label-lg text-label-lg text-on-surface-variant whitespace-nowrap"
+            for="factory-contracts-sort"
+          >
+            {{ 'factory.contracts.sortBy' | translate }}
+          </label>
+          <select
+            id="factory-contracts-sort"
+            class="ui-input w-full sm:w-44 appearance-none pe-10"
+            [ngModel]="sortKey()"
+            (ngModelChange)="onSort($event)"
+            name="sortKey"
+          >
+            <option value="newest">
+              {{ 'listSort.newest' | translate }}
+            </option>
+            <option value="oldest">
+              {{ 'listSort.oldest' | translate }}
+            </option>
+            <option value="delivery">
+              {{ 'factory.contracts.sortDelivery' | translate }}
+            </option>
+            <option value="status">
+              {{ 'factory.contracts.sortStatus' | translate }}
+            </option>
+            <option value="farm">
+              {{ 'factory.contracts.sortFarm' | translate }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <button
+          type="button"
+          class="!rounded-full !px-4 !py-2 text-label-lg"
+          [class]="
+            statusFilter() === 'all'
+              ? 'ui-btn-primary'
+              : 'ui-btn-secondary border border-outline-variant'
+          "
+          (click)="setStatusFilter('all')"
+        >
+          {{ 'factory.contracts.filterAll' | translate }}
+        </button>
+        <button
+          type="button"
+          class="!rounded-full !px-4 !py-2 text-label-lg"
+          [class]="
+            statusFilter() === 'pending'
+              ? 'ui-btn-primary'
+              : 'ui-btn-secondary border border-outline-variant'
+          "
+          (click)="setStatusFilter('pending')"
+        >
+          {{ 'factory.contracts.filterPending' | translate }}
+        </button>
+        <button
+          type="button"
+          class="!rounded-full !px-4 !py-2 text-label-lg"
+          [class]="
+            statusFilter() === 'signed'
+              ? 'ui-btn-primary'
+              : 'ui-btn-secondary border border-outline-variant'
+          "
+          (click)="setStatusFilter('signed')"
+        >
+          {{ 'factory.contracts.filterSigned' | translate }}
+        </button>
+        <button
+          type="button"
+          class="!rounded-full !px-4 !py-2 text-label-lg"
+          [class]="
+            statusFilter() === 'cancelled'
+              ? 'ui-btn-primary'
+              : 'ui-btn-secondary border border-outline-variant'
+          "
+          (click)="setStatusFilter('cancelled')"
+        >
+          {{ 'factory.contracts.filterCancelled' | translate }}
+        </button>
+      </div>
+    </section>
+
+    @if (loading()) {
+      <div class="space-y-3" role="status" [attr.aria-busy]="true">
+        @for (i of [1, 2, 3, 4, 5]; track $index) {
+          <div
+            class="bg-surface-container-lowest rounded-xl p-4 flex items-center gap-4 border border-outline-variant"
+          >
+            <div class="flex-1 space-y-2">
+              <ui-skeleton height="1rem" width="30%" />
+              <ui-skeleton height="0.875rem" width="55%" />
+            </div>
+            <ui-skeleton width="6rem" height="1.5rem" />
+          </div>
+        }
+      </div>
+    } @else if (error()) {
+      <ui-error-state [message]="error()" (retry)="loadContracts()" />
+    } @else {
+      <section
+        class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-outline-variant"
+      >
+        <div class="overflow-x-auto">
+          @if (contracts().length === 0) {
+            <ui-empty-state
+              titleKey="factory.contracts.empty"
+              bodyKey="factory.contracts.emptyBody"
+              icon="description"
+            >
+              <a
+                class="ui-btn-primary mt-2"
+                routerLink="/factory/contract-signing"
+              >
+                {{ 'factory.contracts.generateNew' | translate }}
+              </a>
+            </ui-empty-state>
+          } @else if (filteredContracts().length === 0) {
+            <ui-empty-state
+              titleKey="factory.contracts.noResults"
+              bodyKey="factory.contracts.noResultsBody"
+              icon="search_off"
+            />
+          } @else {
+            <table class="w-full min-w-[980px] text-start">
+              <caption class="sr-only">
+                {{ 'factory.contracts.title' | translate }}
+              </caption>
+              <thead
+                class="bg-surface-container-low border-b border-outline-variant"
+              >
+                <tr>
+                  <th
+                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
+                  >
+                    {{ 'factory.contracts.contractId' | translate }}
+                  </th>
+                  <th
+                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
+                  >
+                    {{ 'factory.contracts.farm' | translate }}
+                  </th>
+                  <th
+                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
+                  >
+                    {{ 'factory.contracts.crop' | translate }}
+                  </th>
+                  <th
+                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
+                  >
+                    {{ 'factory.contracts.quantity' | translate }}
+                  </th>
+                  <th
+                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
+                  >
+                    {{ 'factory.contracts.price' | translate }}
+                  </th>
+                  <th
+                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
+                  >
+                    {{ 'factory.contracts.deliveryDate' | translate }}
+                  </th>
+                  <th
+                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
+                  >
+                    {{ 'common.status' | translate }}
+                  </th>
+                  <th
+                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
+                  >
+                    {{ 'factory.contracts.created' | translate }}
+                  </th>
+                  <th
+                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
+                  >
+                    {{ 'common.actions' | translate }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant">
+                @for (row of filteredContracts(); track row.contractId) {
+                  <tr
+                    class="hover:bg-surface-container-low transition-colors cursor-pointer"
+                    (click)="openContract(row)"
+                  >
+                    <td
+                      class="px-6 py-4 font-body-md text-body-md text-on-surface font-medium ui-data-sm"
+                    >
+                      {{ shortId(row.contractId) }}
+                    </td>
+                    <td
+                      class="px-6 py-4 font-body-md text-body-md text-on-surface"
+                    >
+                      {{ row.farmName || '—' }}
+                    </td>
+                    <td
+                      class="px-6 py-4 font-body-md text-body-md text-on-surface"
+                    >
+                      {{ row.cropName || '—' }}
+                    </td>
+                    <td
+                      class="px-6 py-4 font-body-md text-body-md text-on-surface"
+                    >
+                      {{ row.quantityTons | number: '1.0-2' }}
+                    </td>
+                    <td
+                      class="px-6 py-4 font-body-md text-body-md text-on-surface font-semibold"
+                    >
+                      @if (row.pricePerTon != null) {
+                        {{ row.pricePerTon | number: '1.0-0' }}
+                      } @else {
+                        —
+                      }
+                    </td>
+                    <td
+                      class="px-6 py-4 font-body-md text-body-md text-on-surface"
+                    >
+                      {{
+                        row.deliveryDate
+                          ? (row.deliveryDate | date: 'mediumDate')
+                          : '—'
+                      }}
+                    </td>
+                    <td class="px-6 py-4">
+                      @if (isActive(row.status)) {
+                        <span
+                          class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-container text-on-primary-container border border-primary"
+                        >
+                          {{ statusLabelKey(row.status) | translate }}
+                        </span>
+                      } @else if (isPending(row.status)) {
+                        <span
+                          class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-orange/15 text-warning-orange border border-warning-orange/30"
+                        >
+                          {{ statusLabelKey(row.status) | translate }}
+                        </span>
+                      } @else if (isCancelled(row.status)) {
+                        <span
+                          class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-error/10 text-error border border-error/25"
+                        >
+                          {{ statusLabelKey(row.status) | translate }}
+                        </span>
+                      } @else {
+                        <span
+                          class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-container-high text-on-surface-variant border border-outline-variant"
+                        >
+                          {{ statusLabelKey(row.status) | translate }}
+                        </span>
+                      }
+                    </td>
+                    <td
+                      class="px-6 py-4 font-body-md text-body-md text-on-surface"
+                    >
+                      {{ row.createdAt | date: 'mediumDate' }}
+                    </td>
+                    <td class="px-6 py-4" (click)="$event.stopPropagation()">
+                      <div class="flex items-center gap-3">
+                        <a
+                          class="text-primary hover:opacity-80 font-label-lg text-label-lg font-bold inline-flex items-center gap-1"
+                          [routerLink]="['/factory/contracts', row.contractId]"
+                        >
+                          {{ 'factory.contracts.viewContract' | translate }}
+                          <span
+                            class="material-symbols-outlined text-[18px]"
+                            aria-hidden="true"
+                            >visibility</span
+                          >
+                        </a>
+                        <button
+                          type="button"
+                          class="text-on-surface-variant hover:text-primary font-label-lg text-label-lg inline-flex items-center gap-1 disabled:opacity-50"
+                          [disabled]="downloadingId() === row.contractId"
+                          (click)="downloadPdf(row, $event)"
+                          [attr.aria-label]="
+                            'contractDoc.downloadPdf' | translate
+                          "
+                        >
+                          <span
+                            class="material-symbols-outlined text-[18px]"
+                            aria-hidden="true"
+                            >download</span
+                          >
+                          {{ 'common.download' | translate }}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+        <div
+          class="px-6 py-4 border-t border-outline-variant flex flex-col sm:flex-row items-center justify-between gap-3"
+        >
+          <span class="font-body-md text-body-md text-on-surface-variant">
+            {{ filteredContracts().length }}
+            {{ 'factory.contracts.countLabel' | translate }}
+            @if (filteredContracts().length !== contracts().length) {
+              <span>
+                ({{ contracts().length }}
+                {{ 'factory.contracts.totalLabel' | translate }})
+              </span>
+            }
+          </span>
+        </div>
+      </section>
+    }
+  </div>
+</main>

@@ -10,6 +10,16 @@ import {
   PagedResult,
   UpdateUserRequest,
 } from '../../models/admin/admin-user.model';
+import { StuckFulfillmentList } from '../../models/fulfillment/fulfillment.model';
+import {
+  AdminDisputeAction,
+  Dispute,
+  DisputeList,
+} from '../../models/dispute/dispute.model';
+import {
+  AdminContractList,
+  DashboardSummary,
+} from '../../models/admin/admin-dashboard.model';
 
 export interface RagUploadResult {
   documentId: string;
@@ -33,6 +43,91 @@ export interface RagDocumentDto {
 export class AdminService {
   private readonly http = inject(HttpClient);
   private readonly api = `${environment.backendUrl}/admin`;
+
+  getStuckFulfillments(
+    page = 1,
+    pageSize = 20
+  ): Observable<StuckFulfillmentList> {
+    const params = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize));
+    return this.http.get<StuckFulfillmentList>(
+      `${this.api}/fulfillments/stuck`,
+      { params }
+    );
+  }
+
+  getDashboardSummary(): Observable<DashboardSummary> {
+    return this.http.get<DashboardSummary>(`${this.api}/dashboard/summary`);
+  }
+
+  getContracts(options: {
+    status?: string | null;
+    search?: string | null;
+    page?: number;
+    pageSize?: number;
+  } = {}): Observable<AdminContractList> {
+    let params = new HttpParams()
+      .set('page', String(options.page ?? 1))
+      .set('pageSize', String(options.pageSize ?? 20));
+    if (options.status) {
+      params = params.set('status', options.status);
+    }
+    if (options.search) {
+      params = params.set('search', options.search);
+    }
+    return this.http.get<AdminContractList>(`${this.api}/contracts`, { params });
+  }
+
+  listDisputes(options: {
+    status?: string | null;
+    type?: string | null;
+    page?: number;
+    pageSize?: number;
+  } = {}): Observable<DisputeList> {
+    let params = new HttpParams()
+      .set('page', String(options.page ?? 1))
+      .set('pageSize', String(options.pageSize ?? 20));
+    if (options.status) {
+      params = params.set('status', options.status);
+    }
+    if (options.type) {
+      params = params.set('type', options.type);
+    }
+    return this.http.get<DisputeList>(`${this.api}/disputes`, { params });
+  }
+
+  getDispute(disputeId: string): Observable<Dispute> {
+    return this.http.get<Dispute>(`${this.api}/disputes/${disputeId}`);
+  }
+
+  moveDisputeUnderReview(
+    disputeId: string,
+    adminNote?: string
+  ): Observable<Dispute> {
+    return this.http.post<Dispute>(
+      `${this.api}/disputes/${disputeId}/under-review`,
+      { adminNote } satisfies AdminDisputeAction
+    );
+  }
+
+  resolveDispute(
+    disputeId: string,
+    adminNote: string,
+    outcomeFavor: string
+  ): Observable<Dispute> {
+    return this.http.post<Dispute>(
+      `${this.api}/disputes/${disputeId}/resolve`,
+      { adminNote, outcomeFavor } satisfies AdminDisputeAction
+    );
+  }
+
+  rejectDispute(disputeId: string, adminNote: string): Observable<Dispute> {
+    return this.http.post<Dispute>(
+      `${this.api}/disputes/${disputeId}/reject`,
+      { adminNote } satisfies AdminDisputeAction
+    );
+  }
 
   getUsers(query: AdminUsersQuery = {}): Observable<PagedResult<AdminUser>> {
     let params = new HttpParams()

@@ -64,6 +64,18 @@ export class SidebarAdminComponent {
       labelKey: 'nav.knowledgeBase',
       link: '/admin/knowledge-base',
     },
+    {
+      key: 'cropRequests',
+      icon: 'eco',
+      labelKey: 'nav.cropRequests',
+      link: '/admin/crop-requests',
+    },
+    {
+      key: 'disputes',
+      icon: 'gavel',
+      labelKey: 'nav.disputes',
+      link: '/admin/disputes',
+    },
   ];
 
   readonly active = signal(this.resolveActive(this.router.url));

@@ -40,6 +40,10 @@ export interface RiskWarningResult {
 export interface AgentResponse {
   success: boolean;
   topMatches: MatchResult[];
+  /** Eligible farms before Take-N truncation. */
+  totalEligible?: number;
+  /** Farms excluded by the shortlist cap. */
+  truncatedCount?: number;
   comparisonReport: string;
   contractDraft: string;
   errorMessage: string;

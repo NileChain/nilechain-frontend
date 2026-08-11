@@ -16,13 +16,14 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
-import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { ContractDocumentComponent } from '../../../shared/contracts/contract-document/contract-document.component';
 import { ContractTimelineComponent } from '../../../shared/contracts/contract-timeline/contract-timeline.component';
+import { ContractFulfillmentTimelineComponent } from '../../../shared/contracts/contract-fulfillment-timeline/contract-fulfillment-timeline.component';
+import { ContractPaymentMilestonesComponent } from '../../../shared/contracts/contract-payment-milestones/contract-payment-milestones.component';
+import { ContractDisputesPanelComponent } from '../../../shared/contracts/contract-disputes-panel/contract-disputes-panel.component';
 import { ContractActionBarComponent } from '../../../shared/contracts/contract-action-bar/contract-action-bar.component';
 import { ContractAttachmentsComponent } from '../../../shared/contracts/contract-attachments/contract-attachments.component';
 import { ContractTocComponent } from '../../../shared/contracts/contract-toc/contract-toc.component';
-import { ContractSummaryComponent } from '../../../shared/contracts/contract-summary/contract-summary.component';
 import { ContractReadingProgressComponent } from '../../../shared/contracts/contract-reading-progress/contract-reading-progress.component';
 import {
   ContractAttachmentItem,
@@ -34,9 +35,7 @@ import {
   defaultContractAttachments,
 } from '../../../shared/contracts/contract-timeline.util';
 import {
-  ContractSummaryBullet,
   ContractTocItem,
-  buildContractSummary,
   buildToc,
   contractStatusLabelKey,
   detectDocumentDir,
@@ -59,13 +58,14 @@ import { TranslateService } from '../../../core/services/translate.service';
     AppTopBarComponent,
     UiLoaderComponent,
     UiErrorStateComponent,
-    UiEmptyStateComponent,
     ContractDocumentComponent,
     ContractTimelineComponent,
+    ContractFulfillmentTimelineComponent,
+    ContractPaymentMilestonesComponent,
+    ContractDisputesPanelComponent,
     ContractActionBarComponent,
     ContractAttachmentsComponent,
     ContractTocComponent,
-    ContractSummaryComponent,
     ContractReadingProgressComponent,
   ],
   templateUrl: './farm-contract-details.component.html',
@@ -90,7 +90,6 @@ export class FarmContractDetailsComponent implements OnInit, AfterViewInit {
     defaultContractAttachments()
   );
   readonly toc = signal<ContractTocItem[]>([]);
-  readonly summary = signal<ContractSummaryBullet[]>([]);
   readonly activeSectionId = signal<string | null>(null);
   readonly readPercent = signal(0);
   readonly documentReady = signal(false);
@@ -165,8 +164,20 @@ export class FarmContractDetailsComponent implements OnInit, AfterViewInit {
   }
 
   canDecide(): boolean {
-    const s = (this.contract()?.status || '').toLowerCase();
-    return s === 'pendingsignature' || s === 'draft';
+    const c = this.contract();
+    if (!c) {
+      return false;
+    }
+    // Farm may sign only when the farm has not signed yet.
+    if (c.farmSigned) {
+      return false;
+    }
+    const s = (c.status || '').toLowerCase();
+    return (
+      s === 'pendingsignature' ||
+      s === 'pendingfarmsignature' ||
+      s === 'draft'
+    );
   }
 
   hasReviewedEnough(): boolean {
@@ -179,7 +190,11 @@ export class FarmContractDetailsComponent implements OnInit, AfterViewInit {
   }
 
   isSigned(): boolean {
-    const s = (this.contract()?.status || '').toLowerCase();
+    const c = this.contract();
+    if (c?.factorySigned != null && c?.farmSigned != null) {
+      return !!c.factorySigned && !!c.farmSigned;
+    }
+    const s = (c?.status || '').toLowerCase();
     return s === 'signed' || s === 'active';
   }
 
@@ -187,7 +202,14 @@ export class FarmContractDetailsComponent implements OnInit, AfterViewInit {
     const s = (status || '').toLowerCase();
     if (s === 'signed' || s === 'active' || s === 'completed') return 'success';
     if (s === 'cancelled' || s === 'rejected') return 'danger';
-    if (s === 'pendingsignature' || s === 'draft') return 'warning';
+    if (
+      s === 'pendingsignature' ||
+      s === 'pendingfarmsignature' ||
+      s === 'pendingfactorysignature' ||
+      s === 'draft'
+    ) {
+      return 'warning';
+    }
     return 'neutral';
   }
 
@@ -340,6 +362,10 @@ export class FarmContractDetailsComponent implements OnInit, AfterViewInit {
       createdAt: c.createdAt,
       updatedAt: c.updatedAt ?? c.signedAt ?? c.createdAt,
       signedAt: c.signedAt,
+      factorySigned: c.factorySigned ?? false,
+      farmSigned: c.farmSigned ?? false,
+      factorySignedAt: c.factorySignedAt ?? null,
+      farmSignedAt: c.farmSignedAt ?? null,
       factoryName: displayText(c.factoryName, '—'),
       farmName: displayText(c.farmName, '—'),
       factoryLocation: displayText(c.factoryLocation, ''),
@@ -362,7 +388,6 @@ export class FarmContractDetailsComponent implements OnInit, AfterViewInit {
     this.contract.set(model);
     this.documentDir.set(detectDocumentDir(model.generatedText));
     this.toc.set(buildToc(sections));
-    this.summary.set(buildContractSummary(model, this.i18n));
     this.timeline.set(
       buildContractTimeline(model, { viewedAt: this.viewedAt })
     );

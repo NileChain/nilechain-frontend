@@ -1,6 +1,8 @@
 export type ContractDocStatus =
   | 'Draft'
   | 'PendingSignature'
+  | 'PendingFarmSignature'
+  | 'PendingFactorySignature'
   | 'Signed'
   | 'Cancelled'
   | string;
@@ -13,6 +15,10 @@ export interface ContractDocumentModel {
   createdAt: string;
   updatedAt?: string | null;
   signedAt?: string | null;
+  factorySigned?: boolean;
+  farmSigned?: boolean;
+  factorySignedAt?: string | null;
+  farmSignedAt?: string | null;
   factoryName: string;
   farmName: string;
   factoryLocation?: string | null;

@@ -1,12 +1,18 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
+import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
+import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { SupplyRequestService } from '../../../core/services/supply-request.service';
+import { FarmService } from '../../../core/services/farm/farm.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslateService } from '../../../core/services/translate.service';
+import { CropType } from '../../../core/models/farm/farm-profile.model';
+import { EGYPT_GOVERNORATES } from '../../../shared/geo/egypt-governorates';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-supply-request',
@@ -16,32 +22,35 @@ import { TranslateService } from '../../../core/services/translate.service';
     TranslatePipe,
     AppTopBarComponent,
     RouterLink,
+    UiLoaderComponent,
+    UiErrorStateComponent,
   ],
   templateUrl: './supply-request.component.html',
 })
-export class SupplyRequestComponent {
+export class SupplyRequestComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly supplyRequestService = inject(SupplyRequestService);
+  private readonly farmService = inject(FarmService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
   private readonly i18n = inject(TranslateService);
 
   readonly submitting = signal(false);
+  readonly cropsLoading = signal(true);
+  readonly cropsError = signal<string | null>(null);
+  readonly cropTypes = signal<CropType[]>([]);
 
-  readonly crops = [
-    { value: 'Wheat', labelKey: 'factory.supplyRequest.cropWheat' },
-    { value: 'Corn', labelKey: 'factory.supplyRequest.cropCorn' },
-    { value: 'Rice', labelKey: 'factory.supplyRequest.cropRice' },
-    { value: 'Cotton', labelKey: 'factory.supplyRequest.cropCotton' },
+  readonly geographicScopes = [
+    { value: 'Exact', labelKey: 'factory.supplyRequest.scopeExact' },
+    { value: 'Nearby', labelKey: 'factory.supplyRequest.scopeNearby' },
+    { value: 'Nationwide', labelKey: 'factory.supplyRequest.scopeNationwide' },
   ] as const;
 
-  readonly governorates = [
-    { value: 'cairo', labelKey: 'factory.supplyRequest.govCairo' },
-    { value: 'giza', labelKey: 'factory.supplyRequest.govGiza' },
-    { value: 'alex', labelKey: 'factory.supplyRequest.govAlexandria' },
-    { value: 'beheira', labelKey: 'factory.supplyRequest.govBeheira' },
-    { value: 'minya', labelKey: 'factory.supplyRequest.govMinya' },
-  ] as const;
+  readonly governorates = EGYPT_GOVERNORATES.map((g) => ({
+    value: g.name,
+    labelEn: g.name,
+    labelAr: g.nameAr,
+  }));
 
   readonly form = this.fb.nonNullable.group({
     crop: this.fb.nonNullable.control('', Validators.required),
@@ -58,8 +67,28 @@ export class SupplyRequestComponent {
       Validators.required
     ),
     quality: this.fb.nonNullable.control(''),
-    selectedGovernorates: this.fb.nonNullable.control<string[]>(['giza']),
+    selectedGovernorates: this.fb.nonNullable.control<string[]>(['Giza']),
+    geographicScope: this.fb.nonNullable.control('Exact'),
   });
+
+  ngOnInit(): void {
+    this.loadCrops();
+  }
+
+  loadCrops(): void {
+    this.cropsLoading.set(true);
+    this.cropsError.set(null);
+    this.farmService
+      .getCropTypes()
+      .pipe(finalize(() => this.cropsLoading.set(false)))
+      .subscribe({
+        next: (crops) => this.cropTypes.set(crops),
+        error: () =>
+          this.cropsError.set(
+            this.i18n.instant('factory.supplyRequest.cropsLoadFailed')
+          ),
+      });
+  }
 
   isGovSelected(value: string): boolean {
     return this.form.controls.selectedGovernorates.value.includes(value);
@@ -93,6 +122,7 @@ export class SupplyRequestComponent {
         deliveryDate: value.deliveryDate,
         quality: value.quality,
         selectedGovernorates: value.selectedGovernorates,
+        geographicScope: value.geographicScope,
       })
       .pipe(finalize(() => this.submitting.set(false)))
       .subscribe({

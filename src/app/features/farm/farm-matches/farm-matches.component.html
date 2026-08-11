@@ -5,311 +5,609 @@
     notificationsLink="/farm/notifications"
   />
 
-  <div
-    class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
-  >
-    <!-- Page Heading -->
-    <section
-      class="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-4"
-    >
-      <div>
-        <h2 class="font-headline-lg text-headline-lg font-bold text-on-surface">
-          {{ 'farm.matches.pageHeading' | translate }}
-        </h2>
-        <p class="font-body-lg text-body-lg text-on-surface-variant mt-2">
-          {{ 'farm.matches.subtitle' | translate }}
-        </p>
+  <div class="mx-page p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto animate-fade-in">
+    <header class="mx-header">
+      <h2 class="mx-header__title">{{ 'farm.matches.pageHeading' | translate }}</h2>
+      <p class="mx-header__sub">{{ 'farm.matches.subtitle' | translate }}</p>
+    </header>
+
+    <!-- KPI strip -->
+    <section class="mx-kpi" [attr.aria-label]="'farm.matches.summary' | translate">
+      <div class="mx-kpi__item" data-tone="neutral">
+        <span class="material-symbols-outlined mx-kpi__icon" aria-hidden="true">hub</span>
+        <div>
+          <div class="mx-kpi__value">{{ summary().total }}</div>
+          <div class="mx-kpi__label">{{ 'farm.matches.statTotal' | translate }}</div>
+        </div>
+      </div>
+      <div class="mx-kpi__item" data-tone="success">
+        <span class="material-symbols-outlined mx-kpi__icon" aria-hidden="true">check_circle</span>
+        <div>
+          <div class="mx-kpi__value">{{ summary().accepted }}</div>
+          <div class="mx-kpi__label">{{ 'farm.matches.statAccepted' | translate }}</div>
+        </div>
+      </div>
+      <div class="mx-kpi__item" data-tone="pending">
+        <span class="material-symbols-outlined mx-kpi__icon" aria-hidden="true">schedule</span>
+        <div>
+          <div class="mx-kpi__value">{{ summary().proposed }}</div>
+          <div class="mx-kpi__label">{{ 'farm.matches.statPending' | translate }}</div>
+        </div>
+      </div>
+      <div class="mx-kpi__item" data-tone="new">
+        <span class="material-symbols-outlined mx-kpi__icon" aria-hidden="true">fiber_new</span>
+        <div>
+          <div class="mx-kpi__value">{{ summary().newCount }}</div>
+          <div class="mx-kpi__label">{{ 'farm.matches.statNew' | translate }}</div>
+        </div>
+      </div>
+      <div class="mx-kpi__item" data-tone="danger">
+        <span class="material-symbols-outlined mx-kpi__icon" aria-hidden="true">cancel</span>
+        <div>
+          <div class="mx-kpi__value">{{ summary().rejected }}</div>
+          <div class="mx-kpi__label">{{ 'farm.matches.statRejected' | translate }}</div>
+        </div>
       </div>
     </section>
 
-    <!-- Filters Bar -->
-    <section
-      class="ui-card p-4 flex flex-wrap gap-4 items-center justify-between"
-      [attr.aria-label]="'farm.matches.filters' | translate"
-    >
-      <div
-        class="flex gap-2 items-center text-outline font-title-md text-title-md"
-      >
-        <span class="material-symbols-outlined" aria-hidden="true"
-          >filter_list</span
-        >
-        <span>{{ 'farm.matches.filters' | translate }}</span>
-      </div>
-      <div class="flex flex-wrap gap-4 flex-1">
-        <!-- Status Filter -->
-        <div class="relative w-full sm:w-auto">
-          <label class="sr-only" for="filter-status">{{
-            'farm.matches.status' | translate
-          }}</label>
-          <select
-            id="filter-status"
-            class="ui-input w-full sm:w-48 appearance-none pe-10"
-            [(ngModel)]="statusFilter"
-            (ngModelChange)="loadMatches()"
-          >
-            <option value="">{{ 'farm.matches.allStatus' | translate }}</option>
-            <option value="Proposed">Proposed</option>
-            <option value="Accepted">Accepted</option>
-            <option value="Rejected">Rejected</option>
-          </select>
+    <!-- Compact search / filter / sort toolbar -->
+    <section class="mx-toolbar" [attr.aria-label]="'farm.matches.toolbarAria' | translate">
+      <div class="mx-toolbar__shell">
+        <div class="mx-toolbar__search">
+          <span class="material-symbols-outlined mx-toolbar__icon" aria-hidden="true">search</span>
+          <input
+            type="search"
+            class="ui-input mx-toolbar__input"
+            [placeholder]="'farm.matches.searchPlaceholder' | translate"
+            [attr.aria-label]="'farm.matches.searchPlaceholder' | translate"
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            (keydown.enter)="applySearch()"
+          />
         </div>
-        <!-- Crop Filter -->
-        <div class="relative w-full sm:w-auto">
-          <label class="sr-only" for="filter-crop">{{
-            'farm.matches.crop' | translate
-          }}</label>
-          <select
-            id="filter-crop"
-            class="ui-input w-full sm:w-48 appearance-none pe-10"
-            [(ngModel)]="cropTypeFilter"
-            (ngModelChange)="loadMatches()"
-          >
-            <option value="">{{ 'farm.matches.allCrops' | translate }}</option>
-            @for (crop of cropTypes(); track crop.cropTypeId) {
-              <option [value]="crop.cropTypeId">{{ crop.name }}</option>
+
+        <div class="mx-toolbar__actions">
+          <div class="mx-filter">
+            <button
+              type="button"
+              class="ui-btn-secondary mx-toolbar__filter"
+              [class.mx-toolbar__filter--active]="activeFilterCount() > 0"
+              (click)="toggleFilters($event)"
+              [attr.aria-expanded]="filtersOpen()"
+              [attr.aria-haspopup]="'dialog'"
+              [attr.aria-controls]="'farm-match-filters'"
+            >
+              <span class="material-symbols-outlined mx-toolbar__action-icon" aria-hidden="true">tune</span>
+              <span>{{ 'farm.matches.filters' | translate }}</span>
+              @if (activeFilterCount() > 0) {
+                <span class="mx-toolbar__badge">{{ activeFilterCount() }}</span>
+              }
+            </button>
+
+            <!-- Desktop / tablet popover -->
+            @if (filtersOpen()) {
+              <div
+                id="farm-match-filters"
+                class="mx-filter__popover mx-filter__popover--desktop"
+                role="dialog"
+                aria-modal="true"
+                [attr.aria-labelledby]="'farm-match-filters-title'"
+                (click)="$event.stopPropagation()"
+              >
+                <div class="mx-filter__head">
+                  <h3 id="farm-match-filters-title">{{ 'farm.matches.filters' | translate }}</h3>
+                  <button
+                    type="button"
+                    class="ui-icon-btn"
+                    (click)="closeFilters()"
+                    [attr.aria-label]="'common.close' | translate"
+                  >
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                  </button>
+                </div>
+
+                <div class="mx-filter__fields">
+                  <label class="mx-filter__field">
+                    <span class="mx-filter__label">{{ 'farm.matches.status' | translate }}</span>
+                    <select
+                      class="ui-input"
+                      [ngModel]="draftStatus()"
+                      (ngModelChange)="draftStatus.set($event)"
+                    >
+                      <option value="">{{ 'farm.matches.allStatus' | translate }}</option>
+                      <option value="Proposed">{{ 'farm.matches.statusProposed' | translate }}</option>
+                      <option value="Accepted">{{ 'farm.matches.statusAccepted' | translate }}</option>
+                      <option value="Rejected">{{ 'farm.matches.statusRejected' | translate }}</option>
+                    </select>
+                  </label>
+
+                  <label class="mx-filter__field">
+                    <span class="mx-filter__label">{{ 'farm.matches.crop' | translate }}</span>
+                    <select
+                      class="ui-input"
+                      [ngModel]="draftCrop()"
+                      (ngModelChange)="draftCrop.set($event)"
+                    >
+                      <option value="">{{ 'farm.matches.allCrops' | translate }}</option>
+                      @for (crop of cropTypes(); track crop.cropTypeId) {
+                        <option [value]="crop.cropTypeId">{{ crop.name }}</option>
+                      }
+                    </select>
+                  </label>
+
+                  <label class="mx-filter__field">
+                    <span class="mx-filter__label">{{ 'farm.matches.dateFilter' | translate }}</span>
+                    <select
+                      class="ui-input"
+                      [ngModel]="draftDate()"
+                      (ngModelChange)="draftDate.set($event)"
+                    >
+                      <option value="all">{{ 'farm.matches.dateAll' | translate }}</option>
+                      <option value="7d">{{ 'farm.matches.date7d' | translate }}</option>
+                      <option value="30d">{{ 'farm.matches.date30d' | translate }}</option>
+                      <option value="90d">{{ 'farm.matches.date90d' | translate }}</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="mx-filter__actions">
+                  <button type="button" class="ui-btn-ghost mx-filter__btn" (click)="resetPanelFilters()">
+                    {{ 'farm.matches.resetFiltersShort' | translate }}
+                  </button>
+                  <button type="button" class="ui-btn-primary mx-filter__btn" (click)="applyFilters()">
+                    {{ 'farm.matches.applyFilters' | translate }}
+                  </button>
+                </div>
+              </div>
             }
-          </select>
+          </div>
+
+          <div class="mx-toolbar__sort-wrap">
+            <span class="material-symbols-outlined mx-toolbar__sort-icon" aria-hidden="true"
+              >swap_vert</span
+            >
+            <select
+              class="ui-input mx-toolbar__sort"
+              [ngModel]="sortMode()"
+              (ngModelChange)="onSortChange($event)"
+              [attr.aria-label]="'listSort.label' | translate"
+            >
+              <option value="newest">{{ 'listSort.newest' | translate }}</option>
+              <option value="oldest">{{ 'listSort.oldest' | translate }}</option>
+              <option value="matchScore">{{ 'listSort.matchScoreDesc' | translate }}</option>
+              <option value="matchScoreAsc">{{ 'listSort.matchScoreAsc' | translate }}</option>
+            </select>
+          </div>
+
+          @if (showReset()) {
+            <button
+              type="button"
+              class="ui-btn-ghost mx-toolbar__reset"
+              (click)="resetFilters()"
+            >
+              <span class="material-symbols-outlined mx-toolbar__action-icon" aria-hidden="true"
+                >restart_alt</span
+              >
+              <span class="mx-toolbar__reset-label">{{ 'farm.matches.resetFiltersShort' | translate }}</span>
+            </button>
+          }
         </div>
       </div>
-      <button
-        type="button"
-        class="text-primary font-title-md text-title-md hover:underline w-full sm:w-auto text-center sm:text-end"
-        (click)="resetFilters()"
-      >
-        {{ 'common.reset' | translate }}
-      </button>
+
+      @if (filterChips().length > 0) {
+        <div class="mx-chips" [attr.aria-label]="'farm.matches.activeFilters' | translate">
+          @for (chip of filterChips(); track chip.key) {
+            <button
+              type="button"
+              class="mx-chip"
+              (click)="clearChip(chip.key)"
+              [attr.aria-label]="('farm.matches.removeFilter' | translate) + ': ' + chip.label"
+            >
+              <span>{{ chip.label }}</span>
+              <span class="material-symbols-outlined mx-chip__x" aria-hidden="true">close</span>
+            </button>
+          }
+          <button type="button" class="mx-chips__clear" (click)="resetFilters()">
+            {{ 'farm.matches.clearAllChips' | translate }}
+          </button>
+        </div>
+      }
     </section>
+
+    <!-- Mobile filter bottom sheet (same drafts as popover) -->
+    @if (filtersOpen()) {
+      <div
+        class="mx-sheet-backdrop"
+        (click)="closeFilters()"
+        aria-hidden="true"
+      ></div>
+      <aside
+        class="mx-sheet"
+        role="dialog"
+        aria-modal="true"
+        [attr.aria-labelledby]="'farm-match-sheet-title'"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="mx-sheet__head">
+          <h3 id="farm-match-sheet-title">{{ 'farm.matches.filters' | translate }}</h3>
+          <button
+            type="button"
+            class="ui-icon-btn"
+            (click)="closeFilters()"
+            [attr.aria-label]="'common.close' | translate"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+          </button>
+        </div>
+        <div class="mx-sheet__body">
+          <label class="mx-filter__field">
+            <span class="mx-filter__label">{{ 'farm.matches.status' | translate }}</span>
+            <select class="ui-input" [ngModel]="draftStatus()" (ngModelChange)="draftStatus.set($event)">
+              <option value="">{{ 'farm.matches.allStatus' | translate }}</option>
+              <option value="Proposed">{{ 'farm.matches.statusProposed' | translate }}</option>
+              <option value="Accepted">{{ 'farm.matches.statusAccepted' | translate }}</option>
+              <option value="Rejected">{{ 'farm.matches.statusRejected' | translate }}</option>
+            </select>
+          </label>
+
+          <label class="mx-filter__field">
+            <span class="mx-filter__label">{{ 'farm.matches.crop' | translate }}</span>
+            <select class="ui-input" [ngModel]="draftCrop()" (ngModelChange)="draftCrop.set($event)">
+              <option value="">{{ 'farm.matches.allCrops' | translate }}</option>
+              @for (crop of cropTypes(); track crop.cropTypeId) {
+                <option [value]="crop.cropTypeId">{{ crop.name }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="mx-filter__field">
+            <span class="mx-filter__label">{{ 'farm.matches.dateFilter' | translate }}</span>
+            <select class="ui-input" [ngModel]="draftDate()" (ngModelChange)="draftDate.set($event)">
+              <option value="all">{{ 'farm.matches.dateAll' | translate }}</option>
+              <option value="7d">{{ 'farm.matches.date7d' | translate }}</option>
+              <option value="30d">{{ 'farm.matches.date30d' | translate }}</option>
+              <option value="90d">{{ 'farm.matches.date90d' | translate }}</option>
+            </select>
+          </label>
+        </div>
+        <div class="mx-sheet__foot">
+          <button type="button" class="ui-btn-ghost flex-1" (click)="resetPanelFilters()">
+            {{ 'farm.matches.resetFiltersShort' | translate }}
+          </button>
+          <button type="button" class="ui-btn-primary flex-1" (click)="applyFilters()">
+            {{ 'farm.matches.applyFilters' | translate }}
+          </button>
+        </div>
+      </aside>
+    }
 
     @if (loading()) {
-      <div
-        class="grid grid-cols-1 lg:grid-cols-2 gap-gutter"
-        role="status"
-        [attr.aria-busy]="true"
-      >
-        @for (i of [1, 2, 3, 4]; track $index) {
-          <div
-            class="ui-card p-6 space-y-4"
-          >
-            <div class="flex justify-between items-start gap-4">
-              <div class="flex-1 space-y-2">
-                <ui-skeleton height="1.25rem" width="40%" />
-                <ui-skeleton height="0.875rem" width="60%" />
-              </div>
-              <ui-skeleton rounded="full" width="6rem" height="1.75rem" />
-            </div>
-            <ui-skeleton height="4rem" />
-            <div class="flex gap-3">
-              <ui-skeleton height="2.75rem" width="50%" />
-              <ui-skeleton height="2.75rem" width="50%" />
-            </div>
+      <div class="mx-table-wrap" role="status" [attr.aria-busy]="true">
+        @for (i of [1, 2, 3, 4, 5, 6]; track $index) {
+          <div class="mx-skel-row">
+            <ui-skeleton height="0.95rem" width="24%" />
+            <ui-skeleton height="0.95rem" width="12%" />
+            <ui-skeleton height="0.95rem" width="10%" />
+            <ui-skeleton height="0.95rem" width="10%" />
+            <ui-skeleton height="0.95rem" width="8%" />
+            <ui-skeleton height="0.95rem" width="12%" />
           </div>
         }
       </div>
     } @else if (error()) {
       <ui-error-state [message]="error()" (retry)="loadMatches()" />
-    } @else if (matches().length === 0) {
-      <ui-empty-state
-        titleKey="farm.matches.empty"
-        bodyKey="farm.matches.emptyBody"
-        icon="search_off"
-      />
     } @else {
-      <section
-        class="grid grid-cols-1 lg:grid-cols-2 gap-gutter"
-        [attr.aria-label]="'farm.matches.title' | translate"
-      >
-        @for (match of matches(); track match.matchId) {
-          <article
-            class="ui-card ui-card-interactive p-6 flex flex-col gap-6"
-            [class.animate-fade-in]="$index < 6"
-            [style.animation-delay]="
-              $index < 6 ? $index * 40 + 'ms' : null
-            "
-          >
-            <div class="flex justify-between items-start gap-4">
-              <div class="min-w-0">
-                <h3
-                  class="font-title-lg text-title-lg font-bold text-on-surface mb-1"
-                >
-                  {{ match.factoryName }}
-                </h3>
-                <p
-                  class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1"
-                >
-                  <span
-                    class="material-symbols-outlined text-[16px]"
-                    aria-hidden="true"
-                    >location_on</span
-                  >
-                  {{ match.factoryLocation || '—' }}
-                </p>
-                <p class="font-label-sm text-on-surface-variant mt-1">
-                  {{ match.status }}
-                </p>
-              </div>
-              <div class="flex gap-2 flex-col items-end shrink-0">
-                <div
-                  class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full flex items-center gap-1 shadow-sm"
-                >
-                  <span
-                    class="material-symbols-outlined text-[16px] fill"
-                    aria-hidden="true"
-                    >auto_awesome</span
-                  >
-                  <span class="ui-data-sm font-bold"
-                    >{{ 'farm.matches.aiScore' | translate }}
-                    {{
-                      match.matchScore != null
-                        ? (match.matchScore | number: '1.0-0')
-                        : '—'
-                    }}%</span
-                  >
+      @if (
+        newMatches().length > 0 &&
+        (!statusFilter() || statusFilter() === 'Proposed') &&
+        !globallyEmpty()
+      ) {
+        <section class="mx-new" [attr.aria-label]="'farm.matches.newSection' | translate">
+          <div class="mx-new__head">
+            <h3 class="mx-section-title">{{ 'farm.matches.newSection' | translate }}</h3>
+            <span class="mx-new__count">{{ summary().newCount }}</span>
+          </div>
+          <ul class="mx-new__list">
+            @for (match of newMatches(); track match.matchId) {
+              <li class="mx-new__item">
+                <div class="min-w-0">
+                  <div class="mx-new__name">
+                    {{ match.factoryName }}
+                    <span class="mx-badge-new">{{ 'farm.matches.badgeNew' | translate }}</span>
+                  </div>
+                  <div class="mx-new__meta">
+                    {{ match.cropName }}
+                    ·
+                    <span [class]="scoreClass(match.matchScore)">
+                      {{
+                        match.matchScore != null
+                          ? (match.matchScore | number: '1.0-0') + '%'
+                          : '—'
+                      }}
+                    </span>
+                    ·
+                    @if (relativeLabel(match.createdAt); as rel) {
+                      <span [title]="match.createdAt | date: 'medium'">{{ rel }}</span>
+                    } @else {
+                      {{ match.createdAt | date: 'mediumDate' }}
+                    }
+                  </div>
                 </div>
-                <div
-                  class="px-3 py-1 rounded-full flex items-center gap-1 border"
-                  [class]="
-                    riskTone(match.riskScore) === 'safe'
-                      ? 'bg-surface-container text-primary border-outline-variant'
-                      : 'bg-error-container text-on-error-container border-error-container'
-                  "
-                >
-                  <span
-                    class="material-symbols-outlined text-[16px]"
-                    aria-hidden="true"
-                    >security</span
-                  >
-                  <span class="ui-data-sm"
-                    >{{ 'farm.matches.safetyScore' | translate }}
-                    {{
-                      match.riskScore != null
-                        ? (match.riskScore | number: '1.0-0')
-                        : '—'
-                    }}</span
-                  >
-                </div>
-              </div>
-            </div>
-
-            <div
-              class="bg-surface-container rounded-lg p-4 grid grid-cols-2 gap-4"
-            >
-              <div class="flex flex-col">
-                <span class="font-label-sm text-label-sm text-outline mb-1">{{
-                  'farm.matches.crop' | translate
-                }}</span>
-                <div
-                  class="flex items-center gap-2 text-on-surface font-title-md text-title-md"
-                >
-                  <span
-                    class="material-symbols-outlined text-primary"
-                    aria-hidden="true"
-                    >grass</span
-                  >
-                  {{ match.cropName }}
-                </div>
-              </div>
-              <div class="flex flex-col">
-                <span class="font-label-sm text-label-sm text-outline mb-1">{{
-                  'farm.matches.quantity' | translate
-                }}</span>
-                <div
-                  class="flex items-center gap-2 text-on-surface ui-data-sm"
-                >
-                  <span
-                    class="material-symbols-outlined text-primary"
-                    aria-hidden="true"
-                    >scale</span
-                  >
-                  {{ match.quantityTons }} ton
-                </div>
-              </div>
-              <div class="flex flex-col">
-                <span class="font-label-sm text-label-sm text-outline mb-1">{{
-                  'farm.matches.price' | translate
-                }}</span>
-                <div
-                  class="flex items-center gap-2 text-on-surface ui-data-sm"
-                >
-                  <span
-                    class="material-symbols-outlined text-primary"
-                    aria-hidden="true"
-                    >payments</span
-                  >
-                  {{
-                    match.pricePerTon != null
-                      ? (match.pricePerTon | number: '1.0-0') + ' EGP / ton'
-                      : '—'
-                  }}
-                </div>
-              </div>
-              <div class="flex flex-col">
-                <span class="font-label-sm text-label-sm text-outline mb-1">{{
-                  'farm.matches.deliveryDate' | translate
-                }}</span>
-                <div
-                  class="flex items-center gap-2 text-on-surface font-title-md text-title-md"
-                >
-                  <span
-                    class="material-symbols-outlined text-primary"
-                    aria-hidden="true"
-                    >calendar_month</span
-                  >
-                  {{
-                    match.deliveryDate
-                      ? (match.deliveryDate | date: 'mediumDate')
-                      : '—'
-                  }}
-                </div>
-              </div>
-            </div>
-
-            @if (match.status === 'Proposed') {
-              <div class="flex flex-col sm:flex-row gap-3 mt-auto pt-2">
                 <button
                   type="button"
-                  class="flex-1 ui-btn-primary font-title-md text-title-md py-3 flex items-center justify-center gap-2"
-                  [disabled]="
-                    openingId() === match.matchId ||
-                    respondingId() === match.matchId
-                  "
-                  (click)="viewContract(match)"
-                >
-                  <span class="material-symbols-outlined" aria-hidden="true"
-                    >description</span
-                  >
-                  {{ 'farm.matches.viewContract' | translate }}
-                </button>
-                <button
-                  type="button"
-                  class="flex-1 ui-btn-secondary font-title-md text-title-md py-3 flex items-center justify-center gap-2"
-                  [disabled]="
-                    openingId() === match.matchId ||
-                    respondingId() === match.matchId
-                  "
-                  (click)="rejectOffer(match)"
-                >
-                  <span class="material-symbols-outlined" aria-hidden="true"
-                    >cancel</span
-                  >
-                  {{ 'farm.matches.declineOffer' | translate }}
-                </button>
-              </div>
-            } @else if (match.contractId || match.status === 'Accepted') {
-              <div class="mt-auto pt-2">
-                <button
-                  type="button"
-                  class="w-full ui-btn-secondary font-title-md text-title-md py-3 flex items-center justify-center gap-2"
+                  class="ui-btn-primary !py-1.5 !px-3 text-sm shrink-0"
                   [disabled]="openingId() === match.matchId"
                   (click)="viewContract(match)"
                 >
-                  <span class="material-symbols-outlined" aria-hidden="true"
-                    >visibility</span
-                  >
-                  {{ 'farm.matches.viewContract' | translate }}
+                  {{ 'farm.matches.view' | translate }}
                 </button>
-              </div>
+              </li>
             }
-          </article>
+          </ul>
+        </section>
+      }
+
+      <section class="mx-results" [attr.aria-label]="'farm.matches.allSection' | translate">
+        <div class="mx-list-head">
+          <div>
+            <h3 class="mx-section-title">{{ 'farm.matches.allSection' | translate }}</h3>
+            <p class="mx-list-head__count">{{ resultsCountLabel() }}</p>
+          </div>
+          @if (matches().length > 0) {
+            <span class="mx-list-head__meta">{{ pageRangeLabel() }}</span>
+          }
+        </div>
+
+        @if (globallyEmpty()) {
+          <ui-empty-state
+            [compact]="true"
+            titleKey="farm.matches.empty"
+            bodyKey="farm.matches.emptyBody"
+            icon="search_off"
+          />
+        } @else if (filteredEmpty()) {
+          <ui-empty-state
+            [compact]="true"
+            titleKey="farm.matches.filteredEmpty"
+            bodyKey="farm.matches.filteredEmptyBody"
+            icon="filter_alt_off"
+          >
+            <button type="button" class="ui-btn-secondary mt-2 !py-1.5 !px-3 text-sm" (click)="resetFilters()">
+              {{ 'farm.matches.resetFiltersCta' | translate }}
+            </button>
+          </ui-empty-state>
+        } @else {
+          <!-- Desktop table -->
+          <div class="mx-table-wrap hidden md:block">
+            <table class="mx-table">
+              <thead>
+                <tr>
+                  <th scope="col">{{ 'farm.matches.colBuyer' | translate }}</th>
+                  <th scope="col">{{ 'farm.matches.crop' | translate }}</th>
+                  <th scope="col">{{ 'farm.matches.quantity' | translate }}</th>
+                  <th scope="col">{{ 'farm.matches.price' | translate }}</th>
+                  <th scope="col">{{ 'farm.matches.aiScore' | translate }}</th>
+                  <th scope="col">{{ 'farm.matches.riskLevel' | translate }}</th>
+                  <th scope="col">{{ 'farm.matches.status' | translate }}</th>
+                  <th scope="col">{{ 'farm.matches.createdAt' | translate }}</th>
+                  <th scope="col" class="mx-table__actions">
+                    <span class="sr-only">{{ 'common.actions' | translate }}</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (match of matches(); track match.matchId) {
+                  <tr>
+                    <td>
+                      <div class="mx-primary__name">{{ match.factoryName }}</div>
+                      <div class="mx-secondary">{{ match.factoryLocation || '—' }}</div>
+                    </td>
+                    <td>{{ match.cropName }}</td>
+                    <td class="tabular-nums">{{ match.quantityTons | number: '1.0-0' }} t</td>
+                    <td class="tabular-nums">
+                      @if (match.pricePerTon != null) {
+                        {{ match.pricePerTon | number: '1.0-0' }}
+                        <span class="mx-muted">EGP/t</span>
+                      } @else {
+                        —
+                      }
+                    </td>
+                    <td>
+                      <span class="mx-score" [class]="scoreClass(match.matchScore)">
+                        {{
+                          match.matchScore != null
+                            ? (match.matchScore | number: '1.0-0') + '%'
+                            : '—'
+                        }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="mx-risk" [attr.data-tone]="riskTone(match.riskScore)">
+                        {{ riskLabel(match.riskScore) }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="mx-status" [attr.data-tone]="statusTone(match.status)">
+                        {{ statusLabelKey(match.status) | translate }}
+                      </span>
+                    </td>
+                    <td>
+                      @if (relativeLabel(match.createdAt); as rel) {
+                        <div class="mx-date" [title]="match.createdAt | date: 'medium'">
+                          {{ rel }}
+                        </div>
+                        <div class="mx-relative">{{ match.createdAt | date: 'mediumDate' }}</div>
+                      } @else {
+                        <div class="mx-date">{{ match.createdAt | date: 'mediumDate' }}</div>
+                      }
+                    </td>
+                    <td class="mx-table__actions">
+                      <div class="mx-actions">
+                        <button
+                          type="button"
+                          class="ui-btn-primary !py-1.5 !px-3 text-sm"
+                          [disabled]="openingId() === match.matchId"
+                          (click)="viewContract(match)"
+                        >
+                          {{ 'farm.matches.view' | translate }}
+                        </button>
+                        @if (statusKey(match.status) === 'proposed') {
+                          <div class="mx-menu">
+                            <button
+                              type="button"
+                              class="ui-icon-btn"
+                              [attr.aria-label]="'common.actions' | translate"
+                              [attr.aria-expanded]="menuOpenId() === match.matchId"
+                              (click)="toggleMenu(match.matchId, $event)"
+                            >
+                              <span class="material-symbols-outlined" aria-hidden="true">more_vert</span>
+                            </button>
+                            @if (menuOpenId() === match.matchId) {
+                              <div class="mx-menu__panel" role="menu">
+                                <button
+                                  type="button"
+                                  class="mx-menu__item mx-menu__item--danger"
+                                  role="menuitem"
+                                  [disabled]="respondingId() === match.matchId"
+                                  (click)="rejectOffer(match)"
+                                >
+                                  {{ 'farm.matches.declineOffer' | translate }}
+                                </button>
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Mobile cards -->
+          <div class="md:hidden space-y-2.5">
+            @for (match of matches(); track match.matchId) {
+              <article class="mx-card">
+                <div class="mx-card__top">
+                  <div class="min-w-0">
+                    <h4 class="mx-primary__name truncate">{{ match.factoryName }}</h4>
+                    <p class="mx-secondary">{{ match.cropName }}</p>
+                  </div>
+                  <span class="mx-status" [attr.data-tone]="statusTone(match.status)">
+                    {{ statusLabelKey(match.status) | translate }}
+                  </span>
+                </div>
+                <div class="mx-card__meta">
+                  <span class="mx-score" [class]="scoreClass(match.matchScore)">
+                    {{
+                      match.matchScore != null
+                        ? (match.matchScore | number: '1.0-0') + '%'
+                        : '—'
+                    }}
+                  </span>
+                  @if (relativeLabel(match.createdAt); as rel) {
+                    <span [title]="match.createdAt | date: 'medium'">{{ rel }}</span>
+                  } @else {
+                    <span>{{ match.createdAt | date: 'mediumDate' }}</span>
+                  }
+                </div>
+                <div class="mx-actions">
+                  <button
+                    type="button"
+                    class="ui-btn-primary flex-1 !py-2"
+                    [disabled]="openingId() === match.matchId"
+                    (click)="viewContract(match)"
+                  >
+                    {{ 'farm.matches.view' | translate }}
+                  </button>
+                  <button
+                    type="button"
+                    class="ui-btn-ghost !py-2"
+                    (click)="toggleExpand(match.matchId)"
+                    [attr.aria-expanded]="expandedId() === match.matchId"
+                  >
+                    {{
+                      (expandedId() === match.matchId
+                        ? 'farm.matches.hideDetails'
+                        : 'farm.matches.moreDetails'
+                      ) | translate
+                    }}
+                  </button>
+                </div>
+                @if (expandedId() === match.matchId) {
+                  <div class="mx-card__details">
+                    <div>
+                      <span class="mx-muted">{{ 'farm.matches.quantity' | translate }}</span>
+                      {{ match.quantityTons | number: '1.0-0' }} t
+                    </div>
+                    <div>
+                      <span class="mx-muted">{{ 'farm.matches.price' | translate }}</span>
+                      @if (match.pricePerTon != null) {
+                        {{ match.pricePerTon | number: '1.0-0' }} EGP/t
+                      } @else {
+                        —
+                      }
+                    </div>
+                    <div>
+                      <span class="mx-muted">{{ 'farm.matches.riskLevel' | translate }}</span>
+                      {{ riskLabel(match.riskScore) }}
+                    </div>
+                    <div>
+                      <span class="mx-muted">{{ 'farm.matches.createdAt' | translate }}</span>
+                      {{ match.createdAt | date: 'mediumDate' }}
+                    </div>
+                    @if (statusKey(match.status) === 'proposed') {
+                      <button
+                        type="button"
+                        class="ui-btn-ghost !py-1.5 text-sm self-start"
+                        (click)="rejectOffer(match)"
+                      >
+                        {{ 'farm.matches.declineOffer' | translate }}
+                      </button>
+                    }
+                  </div>
+                }
+              </article>
+            }
+          </div>
+
+          <nav class="mx-pager" [attr.aria-label]="'farm.matches.pagination' | translate">
+            <div class="mx-pager__size">
+              <label for="farm-match-page-size">{{ 'farm.matches.pageSize' | translate }}</label>
+              <select
+                id="farm-match-page-size"
+                class="ui-input !py-1.5 !text-sm w-auto"
+                [ngModel]="pageSize()"
+                (ngModelChange)="onPageSizeChange($event)"
+              >
+                <option [ngValue]="10">10</option>
+                <option [ngValue]="20">20</option>
+                <option [ngValue]="50">50</option>
+              </select>
+            </div>
+            <div class="mx-pager__nav">
+              <button
+                type="button"
+                class="ui-btn-secondary !py-1.5 !px-3"
+                [disabled]="page() <= 1"
+                (click)="goToPage(page() - 1)"
+              >
+                {{ 'common.previous' | translate }}
+              </button>
+              <span class="mx-pager__page">
+                {{ 'farm.matches.pageOf' | translate: { page: page(), pages: totalPages() } }}
+              </span>
+              <button
+                type="button"
+                class="ui-btn-secondary !py-1.5 !px-3"
+                [disabled]="page() >= totalPages()"
+                (click)="goToPage(page() + 1)"
+              >
+                {{ 'common.next' | translate }}
+              </button>
+            </div>
+          </nav>
         }
       </section>
     }

@@ -8,6 +8,7 @@ import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.compon
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 import { FarmService } from '../../../core/services/farm/farm.service';
 import { FarmNotification } from '../../../core/models/farm/farm-notification.model';
+import { TranslateService } from '../../../core/services/translate.service';
 
 @Component({
   selector: 'app-farm-notifications',
@@ -24,6 +25,7 @@ import { FarmNotification } from '../../../core/models/farm/farm-notification.mo
 })
 export class FarmNotificationsComponent implements OnInit {
   private readonly farmService = inject(FarmService);
+  private readonly i18n = inject(TranslateService);
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
@@ -51,7 +53,8 @@ export class FarmNotificationsComponent implements OnInit {
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (items) => this.notifications.set(items),
-        error: () => this.error.set('Failed to load notifications.'),
+        error: () =>
+          this.error.set(this.i18n.instant('notifications.loadFailed')),
       });
   }
 
@@ -77,8 +80,21 @@ export class FarmNotificationsComponent implements OnInit {
             )
           );
         },
-        error: () => this.error.set('Failed to mark notification as read.'),
+        error: () =>
+          this.error.set(this.i18n.instant('notifications.markReadFailed')),
       });
+  }
+
+  displayTitle(notification: FarmNotification): string {
+    const type = notification.type?.trim();
+    if (type) {
+      const key = `notifications.types.${type}`;
+      const translated = this.i18n.instant(key);
+      if (translated !== key) {
+        return translated;
+      }
+    }
+    return notification.title;
   }
 
   iconFor(type: string | null): string {

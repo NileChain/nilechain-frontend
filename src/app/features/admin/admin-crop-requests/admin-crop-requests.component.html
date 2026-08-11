@@ -1,0 +1,191 @@
+<main class="md:ms-[280px] min-h-screen bg-surface">
+  <app-top-bar titleKey="admin.cropRequests.title" portal="admin" />
+
+  <div
+    class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
+  >
+    <section
+      class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4"
+    >
+      <div class="space-y-1">
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {{ 'admin.cropRequests.subtitle' | translate }}
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        @for (f of filters; track f.value) {
+          <button
+            type="button"
+            class="ui-btn-secondary !px-3 !py-1.5"
+            [class.!bg-primary]="statusFilter === f.value"
+            [class.!text-on-primary]="statusFilter === f.value"
+            [class.!border-primary]="statusFilter === f.value"
+            (click)="setFilter(f.value)"
+          >
+            {{ f.labelKey | translate }}
+          </button>
+        }
+      </div>
+    </section>
+
+    <section class="ui-card overflow-hidden">
+      <div
+        class="p-6 border-b border-outline-variant flex justify-between items-center gap-3 bg-surface-container-lowest"
+      >
+        <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+          {{ 'admin.cropRequests.listTitle' | translate }}
+        </h2>
+        <button
+          type="button"
+          class="ui-btn-ghost"
+          (click)="loadRequests()"
+          [disabled]="loading()"
+        >
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+            >refresh</span
+          >
+          {{ 'common.refresh' | translate }}
+        </button>
+      </div>
+
+      @if (loading()) {
+        <div class="flex items-center justify-center gap-2 py-16">
+          <ui-loader />
+          <span class="font-body-md text-body-md text-on-surface-variant">{{
+            'common.loading' | translate
+          }}</span>
+        </div>
+      } @else if (error()) {
+        <div class="p-6">
+          <ui-error-state [message]="error()" (retry)="loadRequests()" />
+        </div>
+      } @else if (requests().length === 0) {
+        <div class="p-6">
+          <ui-empty-state
+            titleKey="admin.cropRequests.emptyTitle"
+            bodyKey="admin.cropRequests.emptyBody"
+            icon="eco"
+          />
+        </div>
+      } @else {
+        <ul class="divide-y divide-outline-variant" role="list">
+          @for (req of requests(); track req.cropRequestId) {
+            <li class="p-6 space-y-4 hover:bg-surface-container-low transition-colors">
+              <div
+                class="flex flex-col lg:flex-row lg:items-start justify-between gap-4"
+              >
+                <div class="space-y-1 min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h3 class="font-title-md text-title-md text-on-surface">
+                      {{ req.name }}
+                    </h3>
+                    <span
+                      class="inline-flex items-center px-3 py-1 rounded-full border border-outline-variant bg-surface-container font-label-sm text-label-sm text-on-surface-variant"
+                    >
+                      {{ statusKey(req.status) | translate }}
+                    </span>
+                  </div>
+                  @if (req.category) {
+                    <p
+                      class="font-label-sm text-label-sm text-on-surface-variant"
+                    >
+                      {{ 'cropRequest.category' | translate }}:
+                      {{ req.category }}
+                    </p>
+                  }
+                  @if (req.description) {
+                    <p
+                      class="font-body-md text-body-md text-on-surface-variant"
+                    >
+                      {{ req.description }}
+                    </p>
+                  }
+                  <p class="font-label-sm text-label-sm text-outline">
+                    {{ 'admin.cropRequests.requestedAt' | translate }}:
+                    {{ req.createdAt | date: 'medium' }}
+                  </p>
+                </div>
+
+                @if (isPending(req.status)) {
+                  <div
+                    class="flex flex-col sm:flex-row gap-2 shrink-0 w-full lg:w-auto"
+                  >
+                    <button
+                      type="button"
+                      class="ui-btn-primary"
+                      [disabled]="actionLoading() === req.cropRequestId"
+                      (click)="approve(req)"
+                    >
+                      @if (actionLoading() === req.cropRequestId) {
+                        <ui-loader size="sm" />
+                      } @else {
+                        <span
+                          class="material-symbols-outlined text-[18px]"
+                          aria-hidden="true"
+                          >check</span
+                        >
+                      }
+                      {{ 'common.accept' | translate }}
+                    </button>
+                    <button
+                      type="button"
+                      class="ui-btn-secondary"
+                      [disabled]="actionLoading() === req.cropRequestId"
+                      (click)="reject(req)"
+                    >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        aria-hidden="true"
+                        >close</span
+                      >
+                      {{ 'common.reject' | translate }}
+                    </button>
+                  </div>
+                }
+              </div>
+
+              @if (isPending(req.status)) {
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <label
+                      class="block font-label-lg text-label-lg text-on-surface-variant"
+                      [attr.for]="'approve-name-' + req.cropRequestId"
+                    >
+                      {{ 'admin.cropRequests.editName' | translate }}
+                    </label>
+                    <input
+                      class="ui-input"
+                      [id]="'approve-name-' + req.cropRequestId"
+                      [(ngModel)]="editNames[req.cropRequestId]"
+                      [name]="'name-' + req.cropRequestId"
+                    />
+                  </div>
+                  <div class="space-y-2">
+                    <label
+                      class="block font-label-lg text-label-lg text-on-surface-variant"
+                      [attr.for]="'admin-notes-' + req.cropRequestId"
+                    >
+                      {{ 'admin.cropRequests.adminNotes' | translate }}
+                      <span class="font-body-md text-body-md"
+                        >({{ 'common.optional' | translate }})</span
+                      >
+                    </label>
+                    <input
+                      class="ui-input"
+                      [id]="'admin-notes-' + req.cropRequestId"
+                      [(ngModel)]="adminNotes[req.cropRequestId]"
+                      [name]="'notes-' + req.cropRequestId"
+                      [attr.placeholder]="
+                        'admin.cropRequests.adminNotesPlaceholder' | translate
+                      "
+                    />
+                  </div>
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+</main>

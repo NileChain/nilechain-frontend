@@ -14,6 +14,10 @@ export interface FarmContract {
   status: string;
   createdAt: string;
   signedAt: string | null;
+  factorySigned?: boolean;
+  farmSigned?: boolean;
+  factorySignedAt?: string | null;
+  farmSignedAt?: string | null;
   updatedAt?: string | null;
   matchScore?: number | null;
   riskScore?: number | null;

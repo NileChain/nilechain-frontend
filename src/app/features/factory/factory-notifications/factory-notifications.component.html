@@ -54,6 +54,8 @@
           </div>
         }
       </div>
+    } @else if (loadError()) {
+      <ui-error-state [message]="loadError()" (retry)="load()" />
     } @else if (visible().length === 0) {
       <ui-empty-state
         titleKey="notifications.empty"

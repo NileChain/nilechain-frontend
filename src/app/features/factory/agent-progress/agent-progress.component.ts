@@ -40,6 +40,7 @@ interface ActivityRow extends StepActivity {
 }
 
 /** Presentation-only detail rows per pipeline station (does not drive the agent). */
+/** Decorative UI activity lines for the progress timeline — not live agent telemetry. */
 const STEP_ACTIVITIES: Record<string, StepActivity[]> = {
   retrieve: [
     {
@@ -262,7 +263,8 @@ export class AgentProgressComponent implements OnInit, OnDestroy {
       quantityTons: this.quantityTons,
       qualitySpecs: this.qualitySpecs,
       pricePerTon: this.pricePerTon,
-      deliveryDate: new Date(this.deliveryDate).toISOString(),
+      // Egypt calendar date as yyyy-MM-dd (no timezone shift via toISOString()).
+      deliveryDate: this.deliveryDate,
       factoryGovernorate: this.factoryGovernorate,
     };
 

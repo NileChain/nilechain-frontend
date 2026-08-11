@@ -1,0 +1,217 @@
+<main class="md:ms-[280px] min-h-screen bg-surface">
+  <app-top-bar
+    titleKey="cropRequest.title"
+    subtitleKey="cropRequest.subtitle"
+    [portal]="portal"
+    [notificationsLink]="notificationsLink"
+  />
+
+  <div
+    class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
+  >
+    <form
+      class="ui-card p-6 md:p-8 space-y-6 animate-slide-up"
+      [formGroup]="form"
+      (ngSubmit)="onSubmit()"
+      novalidate
+    >
+      <div class="space-y-1">
+        <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+          {{ 'cropRequest.formTitle' | translate }}
+        </h2>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {{ 'cropRequest.formHint' | translate }}
+        </p>
+      </div>
+
+      @if (submitSuccess()) {
+        <p
+          class="rounded-lg border border-secondary-container bg-secondary-container/30 px-4 py-3 font-body-md text-body-md text-on-secondary-container"
+          role="status"
+        >
+          {{ 'cropRequest.submitSuccess' | translate }}
+        </p>
+      }
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-2 md:col-span-2">
+          <label
+            class="block font-title-md text-title-md text-on-surface"
+            for="crop_request_name"
+          >
+            {{ 'cropRequest.name' | translate }}
+            <span class="text-error" aria-hidden="true">*</span>
+            <span class="sr-only">{{ 'common.required' | translate }}</span>
+          </label>
+          <input
+            id="crop_request_name"
+            type="text"
+            formControlName="name"
+            class="ui-input"
+            [attr.placeholder]="'cropRequest.namePlaceholder' | translate"
+          />
+          @if (
+            form.controls.name.touched && form.controls.name.hasError('required')
+          ) {
+            <p class="font-label-sm text-label-sm text-error" role="alert">
+              {{ 'cropRequest.nameRequired' | translate }}
+            </p>
+          }
+        </div>
+
+        <div class="space-y-2">
+          <label
+            class="block font-title-md text-title-md text-on-surface"
+            for="crop_request_category"
+          >
+            {{ 'cropRequest.category' | translate }}
+            <span class="text-on-surface-variant font-body-md text-body-md"
+              >({{ 'common.optional' | translate }})</span
+            >
+          </label>
+          <input
+            id="crop_request_category"
+            type="text"
+            formControlName="category"
+            class="ui-input"
+            [attr.placeholder]="'cropRequest.categoryPlaceholder' | translate"
+          />
+        </div>
+
+        <div class="space-y-2 md:col-span-2">
+          <label
+            class="block font-title-md text-title-md text-on-surface"
+            for="crop_request_description"
+          >
+            {{ 'cropRequest.description' | translate }}
+            <span class="text-on-surface-variant font-body-md text-body-md"
+              >({{ 'common.optional' | translate }})</span
+            >
+          </label>
+          <textarea
+            id="crop_request_description"
+            formControlName="description"
+            rows="4"
+            class="ui-input resize-y"
+            [attr.placeholder]="
+              'cropRequest.descriptionPlaceholder' | translate
+            "
+          ></textarea>
+        </div>
+      </div>
+
+      <hr class="border-outline-variant" />
+
+      <div
+        class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-4"
+      >
+        <a
+          [routerLink]="profileLink"
+          class="ui-btn-ghost w-full sm:w-auto text-center"
+        >
+          {{ 'common.cancel' | translate }}
+        </a>
+        <button
+          type="submit"
+          class="ui-btn-primary w-full sm:w-auto"
+          [disabled]="submitting()"
+        >
+          @if (submitting()) {
+            <span
+              class="material-symbols-outlined animate-spin text-[20px]"
+              aria-hidden="true"
+              >progress_activity</span
+            >
+            {{ 'cropRequest.submitting' | translate }}
+          } @else {
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >add_circle</span
+            >
+            {{ 'cropRequest.submit' | translate }}
+          }
+        </button>
+      </div>
+    </form>
+
+    <section class="ui-card p-6 md:p-8 space-y-4 animate-slide-up">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+          {{ 'cropRequest.myRequests' | translate }}
+        </h2>
+        <button
+          type="button"
+          class="ui-btn-ghost"
+          (click)="loadMyRequests()"
+          [disabled]="listLoading()"
+        >
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+            >refresh</span
+          >
+          {{ 'common.refresh' | translate }}
+        </button>
+      </div>
+
+      @if (listLoading()) {
+        <div class="flex items-center justify-center gap-2 py-12">
+          <ui-loader />
+          <span class="font-body-md text-body-md text-on-surface-variant">{{
+            'common.loading' | translate
+          }}</span>
+        </div>
+      } @else if (listError()) {
+        <ui-error-state [message]="listError()" (retry)="loadMyRequests()" />
+      } @else if (requests().length === 0) {
+        <ui-empty-state
+          titleKey="cropRequest.emptyTitle"
+          bodyKey="cropRequest.emptyBody"
+          icon="eco"
+        />
+      } @else {
+        <ul class="divide-y divide-outline-variant" role="list">
+          @for (req of requests(); track req.cropRequestId) {
+            <li class="py-4 flex flex-col sm:flex-row sm:items-start gap-3">
+              <div class="flex-1 min-w-0 space-y-1">
+                <p class="font-title-md text-title-md text-on-surface">
+                  {{ req.name }}
+                </p>
+                @if (req.category) {
+                  <p
+                    class="font-label-sm text-label-sm text-on-surface-variant"
+                  >
+                    {{ req.category }}
+                  </p>
+                }
+                @if (req.description) {
+                  <p
+                    class="font-body-md text-body-md text-on-surface-variant"
+                  >
+                    {{ req.description }}
+                  </p>
+                }
+                <p class="font-label-sm text-label-sm text-outline">
+                  {{ req.createdAt | date: 'medium' }}
+                </p>
+                @if (req.adminNotes) {
+                  <p
+                    class="font-body-md text-body-md text-on-surface-variant mt-1"
+                  >
+                    <span class="font-title-md text-title-md"
+                      >{{ 'cropRequest.adminNotes' | translate }}:</span
+                    >
+                    {{ req.adminNotes }}
+                  </p>
+                }
+              </div>
+              <span
+                class="inline-flex items-center self-start px-3 py-1 rounded-full border font-label-sm text-label-sm shrink-0"
+                [class]="statusClass(req.status)"
+              >
+                {{ statusKey(req.status) | translate }}
+              </span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+</main>

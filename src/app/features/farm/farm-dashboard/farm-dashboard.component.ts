@@ -147,7 +147,7 @@ export class FarmDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
             riskBreakdown: data.riskBreakdown ?? [],
             improvementTips: data.improvementTips ?? [],
           }),
-        error: () => this.error.set('Failed to load dashboard.'),
+        error: () => this.error.set(this.i18n.instant('farm.dashboard.loadFailed')),
       });
   }
 
