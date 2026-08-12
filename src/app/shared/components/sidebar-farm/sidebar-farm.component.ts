@@ -69,6 +69,18 @@ export class SidebarFarmComponent {
       link: '/farm/contracts',
     },
     {
+      key: 'disputes',
+      icon: 'gavel',
+      labelKey: 'nav.disputes',
+      link: '/farm/disputes',
+    },
+    {
+      key: 'wallet',
+      icon: 'account_balance_wallet',
+      labelKey: 'nav.wallet',
+      link: '/farm/wallet',
+    },
+    {
       key: 'messages',
       icon: 'forum',
       labelKey: 'nav.messages',

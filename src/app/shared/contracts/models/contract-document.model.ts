@@ -1,3 +1,5 @@
+import { ContractIntegrity } from '../../../core/models/integrity/contract-integrity.model';
+
 export type ContractDocStatus =
   | 'Draft'
   | 'PendingSignature'
@@ -32,6 +34,10 @@ export interface ContractDocumentModel {
   version?: string | null;
   matchScore?: number | null;
   riskScore?: number | null;
+  farmUserId?: string | null;
+  factoryUserId?: string | null;
+  canUnwindSigned?: boolean;
+  integrity?: ContractIntegrity | null;
 }
 
 export type TimelineStepState = 'done' | 'current' | 'upcoming' | 'rejected';
@@ -50,4 +56,20 @@ export interface ContractAttachmentItem {
   sizeLabel: string;
   typeLabel: string;
   icon?: string;
+  url?: string;
+  kind?: string;
+  canDelete?: boolean;
+}
+
+/** API DTO from GET/POST /api/{portal}/contracts/{id}/attachments */
+export interface ContractAttachmentDto {
+  attachmentId: string;
+  contractId: string;
+  kind: string;
+  fileName: string;
+  fileUrl: string;
+  contentType: string;
+  fileSize: number;
+  uploadedByUserId: string;
+  createdAt: string;
 }

@@ -47,6 +47,13 @@ export class CommandPaletteService {
       roles: ['Farm', 'Admin'],
     },
     {
+      id: 'farm-disputes',
+      labelKey: 'nav.disputes',
+      icon: 'gavel',
+      link: '/farm/disputes',
+      roles: ['Farm', 'Admin'],
+    },
+    {
       id: 'farm-messages',
       labelKey: 'nav.messages',
       icon: 'forum',
@@ -109,6 +116,13 @@ export class CommandPaletteService {
       labelKey: 'nav.contracts',
       icon: 'description',
       link: '/factory/contracts',
+      roles: ['Factory', 'Admin'],
+    },
+    {
+      id: 'factory-disputes',
+      labelKey: 'nav.disputes',
+      icon: 'gavel',
+      link: '/factory/disputes',
       roles: ['Factory', 'Admin'],
     },
     {

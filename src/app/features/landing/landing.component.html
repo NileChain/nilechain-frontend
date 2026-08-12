@@ -417,248 +417,386 @@
   </header>
 
   <!-- Hero -->
-  <header
-    class="hero-gradient relative min-h-[85vh] flex flex-col justify-center items-center px-4 py-xl md:py-0 overflow-hidden"
-  >
-    <div
-      class="absolute top-20 start-10 opacity-10 pointer-events-none"
-      aria-hidden="true"
-    >
-      <span class="material-symbols-outlined text-[120px] text-primary"
-        >agriculture</span
-      >
-    </div>
-    <div
-      class="absolute bottom-20 end-10 opacity-10 pointer-events-none"
-      aria-hidden="true"
-    >
-      <span class="material-symbols-outlined text-[120px] text-primary"
-        >factory</span
-      >
+  <header class="lp-hero hero-gradient">
+    <div class="lp-scroll-progress" aria-hidden="true">
+      <span class="lp-scroll-progress__bar" [style.width.%]="scrollProgress()"></span>
     </div>
 
-    <div class="max-w-4xl w-full text-center z-10 animate-fade-in">
-      <div
-        class="inline-flex items-center gap-2 bg-secondary-container px-3 py-1 rounded-full mb-6"
-      >
+    <div class="lp-hero__orb lp-hero__orb--a" aria-hidden="true"></div>
+    <div class="lp-hero__orb lp-hero__orb--b" aria-hidden="true"></div>
+    <div class="lp-hero__orb lp-hero__orb--c" aria-hidden="true"></div>
+
+    <div class="lp-particles" aria-hidden="true">
+      @for (p of particles; track p.id) {
         <span
-          class="material-symbols-outlined text-[18px] text-on-secondary-container"
-          aria-hidden="true"
+          class="lp-particle"
+          [style.--x]="p.x"
+          [style.--y]="p.y"
+          [style.--s]="p.s"
+          [style.--d]="p.d"
+        ></span>
+      }
+    </div>
+
+    <span class="lp-hero__float lp-hero__float--farm" aria-hidden="true">
+      <span class="material-symbols-outlined">agriculture</span>
+    </span>
+    <span class="lp-hero__float lp-hero__float--factory" aria-hidden="true">
+      <span class="material-symbols-outlined">factory</span>
+    </span>
+    <span class="lp-hero__float lp-hero__float--leaf" aria-hidden="true">
+      <span class="material-symbols-outlined">eco</span>
+    </span>
+
+    <div class="lp-hero__copy">
+      <div
+        class="lp-badge animate__animated animate__fadeInDown"
+        style="--animate-duration: 0.7s"
+      >
+        <span class="material-symbols-outlined lp-badge__spin" aria-hidden="true"
           >eco</span
         >
-        <span
-          class="text-label-sm font-label-sm text-on-secondary-container tracking-wider"
-          >{{ 'landing.badgeEgypt' | translate }}</span
-        >
+        <span>{{ 'landing.badgeEgypt' | translate }}</span>
       </div>
 
       <h1
-        class="font-headline-lg text-headline-lg md:text-5xl lg:text-6xl text-on-background mb-4 leading-tight"
+        class="lp-hero__title animate__animated animate__fadeInUp"
+        style="--animate-duration: 0.85s; --animate-delay: 0.08s"
       >
         {{ 'landing.titleLine1' | translate }}
         <br class="hidden md:block" />
-        <span class="text-primary">{{ 'landing.titleLine2' | translate }}</span>
+        <span class="lp-hero__title-accent lp-hero__title-shimmer">{{
+          'landing.titleLine2' | translate
+        }}</span>
       </h1>
 
       <p
-        class="font-body-lg text-body-lg text-on-surface-variant mb-10 max-w-2xl mx-auto"
+        class="lp-hero__subtitle animate__animated animate__fadeInUp"
+        style="--animate-duration: 0.85s; --animate-delay: 0.18s"
       >
         {{ 'landing.subtitle' | translate }}
       </p>
 
-      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-        <button
-          type="button"
+      <div
+        class="lp-hero__ctas animate__animated animate__fadeInUp"
+        style="--animate-duration: 0.85s; --animate-delay: 0.28s"
+      >
+        <a
           [routerLink]="'/register'"
-          class="ui-btn-primary w-full sm:w-auto shadow-md"
+          class="lp-btn lp-btn--primary lp-btn--lg lp-btn--shine"
         >
           <span class="material-symbols-outlined" aria-hidden="true"
             >agriculture</span
           >
           {{ 'landing.joinFarm' | translate }}
-        </button>
-        <button
-          type="button"
+        </a>
+        <a
           [routerLink]="'/register'"
-          class="ui-btn-secondary w-full sm:w-auto"
+          class="lp-btn lp-btn--ghost lp-btn--lg lp-btn--shine"
         >
           <span class="material-symbols-outlined" aria-hidden="true"
             >factory</span
           >
           {{ 'landing.joinFactory' | translate }}
-        </button>
+        </a>
+      </div>
+
+      <div
+        class="lp-flow animate__animated animate__fadeIn"
+        style="--animate-duration: 1s; --animate-delay: 0.45s"
+        aria-hidden="true"
+      >
+        <div class="lp-flow__node">
+          <span class="material-symbols-outlined">agriculture</span>
+          <span>{{ 'landing.flowFarm' | translate }}</span>
+        </div>
+        <div class="lp-flow__wire">
+          <span class="lp-flow__dash"></span>
+          <span class="lp-flow__dot"></span>
+        </div>
+        <div class="lp-flow__node lp-flow__node--ai">
+          <span class="material-symbols-outlined">psychology</span>
+          <span>{{ 'landing.flowAi' | translate }}</span>
+        </div>
+        <div class="lp-flow__wire">
+          <span class="lp-flow__dash"></span>
+          <span class="lp-flow__dot"></span>
+        </div>
+        <div class="lp-flow__node">
+          <span class="material-symbols-outlined">factory</span>
+          <span>{{ 'landing.flowFactory' | translate }}</span>
+        </div>
       </div>
     </div>
 
-    <div class="mt-16 w-full max-w-5xl px-4 hidden md:block" aria-hidden="true">
-      <div
-        class="ui-card rounded-xl p-6 shadow-md flex items-center justify-between gap-8 translate-y-12 transition-transform duration-700 hover:translate-y-8"
-      >
-        <div class="flex-1 space-y-3">
-          <div class="h-2 w-24 bg-primary/20 rounded-full"></div>
-          <div class="h-8 w-full bg-surface-container rounded-lg"></div>
-          <div class="h-2 w-48 bg-primary/20 rounded-full"></div>
+    <div
+      class="lp-preview lp-reveal animate__animated"
+      role="img"
+      [attr.aria-label]="'landing.previewAria' | translate"
+    >
+      <div class="lp-preview__chrome">
+        <span class="lp-preview__dot" aria-hidden="true"></span>
+        <span class="lp-preview__dot" aria-hidden="true"></span>
+        <span class="lp-preview__dot" aria-hidden="true"></span>
+        <span class="lp-preview__chrome-title">{{
+          'landing.previewTitle' | translate
+        }}</span>
+        <span class="lp-preview__live" aria-hidden="true">
+          <i></i> LIVE
+        </span>
+      </div>
+      <div class="lp-preview__body">
+        <div class="lp-preview__row lp-preview__row--a">
+          <span class="lp-preview__icon" aria-hidden="true">
+            <span class="material-symbols-outlined">handshake</span>
+          </span>
+          <div class="min-w-0 flex-1">
+            <p class="lp-preview__label">
+              {{ 'landing.previewMatch' | translate }}
+            </p>
+            <p class="lp-preview__meta">
+              {{ 'landing.previewCrop' | translate }}
+            </p>
+          </div>
+          <span class="lp-preview__pill lp-preview__pill--pop">{{
+            'landing.previewScore' | translate
+          }}</span>
         </div>
-        <div class="flex-1 flex gap-4">
-          <div
-            class="aspect-video bg-secondary-container/30 rounded-lg flex-1 flex items-center justify-center"
-          >
-            <span class="material-symbols-outlined text-primary text-4xl"
-              >trending_up</span
-            >
+        <div class="lp-preview__row lp-preview__row--b">
+          <span class="lp-preview__icon" aria-hidden="true">
+            <span class="material-symbols-outlined">shield</span>
+          </span>
+          <div class="min-w-0 flex-1">
+            <p class="lp-preview__label">
+              {{ 'landing.previewRisk' | translate }}
+            </p>
+            <div class="lp-preview__bars" aria-hidden="true">
+              <span style="--w: 92%"></span>
+              <span style="--w: 78%"></span>
+              <span style="--w: 86%"></span>
+            </div>
           </div>
-          <div
-            class="aspect-video bg-primary/10 rounded-lg flex-1 flex items-center justify-center"
-          >
-            <span class="material-symbols-outlined text-primary text-4xl"
-              >query_stats</span
-            >
+        </div>
+        <div class="lp-preview__row lp-preview__row--c">
+          <span class="lp-preview__icon" aria-hidden="true">
+            <span class="material-symbols-outlined">description</span>
+          </span>
+          <div class="min-w-0 flex-1">
+            <p class="lp-preview__label">
+              {{ 'landing.previewContract' | translate }}
+            </p>
+            <p class="lp-preview__meta">
+              {{ 'landing.previewStatus' | translate }}
+            </p>
           </div>
+          <span class="lp-preview__pulse" aria-hidden="true"></span>
         </div>
       </div>
     </div>
+
+    <a href="#how-it-works" class="lp-scroll-hint" (click)="closeAll()">
+      <span>{{ 'landing.scrollHint' | translate }}</span>
+      <span class="material-symbols-outlined" aria-hidden="true"
+        >keyboard_arrow_down</span
+      >
+    </a>
   </header>
 
-  <!-- Product value (no unverified metrics) -->
+  <!-- Capability ticker -->
+  <div class="lp-ticker" aria-hidden="true">
+    <div class="lp-ticker__track">
+      @for (pass of [1, 2]; track pass) {
+        <span class="lp-ticker__item"
+          ><span class="material-symbols-outlined">psychology</span
+          >{{ 'landing.tickerMatch' | translate }}</span
+        >
+        <span class="lp-ticker__item"
+          ><span class="material-symbols-outlined">shield</span
+          >{{ 'landing.tickerRisk' | translate }}</span
+        >
+        <span class="lp-ticker__item"
+          ><span class="material-symbols-outlined">description</span
+          >{{ 'landing.tickerContract' | translate }}</span
+        >
+        <span class="lp-ticker__item"
+          ><span class="material-symbols-outlined">verified</span
+          >{{ 'landing.tickerTrust' | translate }}</span
+        >
+        <span class="lp-ticker__item"
+          ><span class="material-symbols-outlined">inventory</span
+          >{{ 'landing.tickerSupply' | translate }}</span
+        >
+        <span class="lp-ticker__item"
+          ><span class="material-symbols-outlined">draw</span
+          >{{ 'landing.tickerSign' | translate }}</span
+        >
+      }
+    </div>
+  </div>
+
+  <!-- Product value -->
   <section
-    class="bg-surface-container-lowest py-10 px-4 md:px-margin-desktop border-y border-outline-variant"
+    class="lp-value"
     [attr.aria-label]="'landing.valueSectionAria' | translate"
   >
-    <div
-      class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-start text-center"
-    >
-      <div class="flex flex-col items-center gap-3 animate-slide-up px-2">
-        <span
-          class="material-symbols-outlined text-primary text-4xl"
-          aria-hidden="true"
-          >agriculture</span
-        >
-        <p class="font-title-md text-title-md text-on-surface">
+    <div class="lp-value__grid">
+      <article class="lp-value__item lp-reveal" data-anim="fadeInUp">
+        <span class="lp-value__icon lp-icon-bob" aria-hidden="true">
+          <span class="material-symbols-outlined">agriculture</span>
+        </span>
+        <h2 class="lp-value__title">
           {{ 'landing.valueFarmsTitle' | translate }}
-        </p>
-        <p class="font-body-md text-body-md text-on-surface-variant max-w-xs">
+        </h2>
+        <p class="lp-value__body">
           {{ 'landing.valueFarmsBody' | translate }}
         </p>
-      </div>
-      <div
-        class="hidden md:block stat-divider mx-auto self-center"
-        aria-hidden="true"
-      ></div>
-      <div class="flex flex-col items-center gap-3 animate-slide-up px-2">
-        <span
-          class="material-symbols-outlined text-primary text-4xl"
-          aria-hidden="true"
-          >hub</span
-        >
-        <p class="font-title-md text-title-md text-on-surface">
+      </article>
+      <article
+        class="lp-value__item lp-reveal"
+        style="--delay: 80ms"
+        data-anim="fadeInUp"
+      >
+        <span class="lp-value__icon lp-icon-bob" style="--bob-delay: 0.4s" aria-hidden="true">
+          <span class="material-symbols-outlined">hub</span>
+        </span>
+        <h2 class="lp-value__title">
           {{ 'landing.valueMatchTitle' | translate }}
-        </p>
-        <p class="font-body-md text-body-md text-on-surface-variant max-w-xs">
+        </h2>
+        <p class="lp-value__body">
           {{ 'landing.valueMatchBody' | translate }}
         </p>
-      </div>
-      <div
-        class="hidden md:block stat-divider mx-auto self-center"
-        aria-hidden="true"
-      ></div>
-      <div class="flex flex-col items-center gap-3 animate-slide-up px-2">
-        <span
-          class="material-symbols-outlined text-primary text-4xl"
-          aria-hidden="true"
-          >description</span
-        >
-        <p class="font-title-md text-title-md text-on-surface">
+      </article>
+      <article
+        class="lp-value__item lp-reveal"
+        style="--delay: 160ms"
+        data-anim="fadeInUp"
+      >
+        <span class="lp-value__icon lp-icon-bob" style="--bob-delay: 0.8s" aria-hidden="true">
+          <span class="material-symbols-outlined">description</span>
+        </span>
+        <h2 class="lp-value__title">
           {{ 'landing.valueContractsTitle' | translate }}
-        </p>
-        <p class="font-body-md text-body-md text-on-surface-variant max-w-xs">
+        </h2>
+        <p class="lp-value__body">
           {{ 'landing.valueContractsBody' | translate }}
         </p>
-      </div>
+      </article>
     </div>
   </section>
 
   <!-- How it works -->
-  <section
-    id="how-it-works"
-    class="py-xl px-4 md:px-margin-desktop max-w-7xl mx-auto"
-  >
-    <div class="text-center mb-16">
-      <h2 class="font-headline-lg text-headline-lg text-on-background mb-4">
-        {{ 'landing.howTitle' | translate }}
-      </h2>
-      <p
-        class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto"
+  <section id="how-it-works" class="lp-how">
+    <div class="lp-how__intro lp-reveal">
+      <h2 class="lp-section-title">{{ 'landing.howTitle' | translate }}</h2>
+      <p class="lp-section-sub">{{ 'landing.howSubtitle' | translate }}</p>
+    </div>
+
+    <ol class="lp-how__steps">
+      <li class="lp-how__step lp-reveal" style="--delay: 0ms" data-anim="zoomIn">
+        <span class="lp-how__num" aria-hidden="true">{{
+          'landing.howStep1Num' | translate
+        }}</span>
+        <span class="lp-how__icon" aria-hidden="true">
+          <span class="material-symbols-outlined">inventory</span>
+        </span>
+        <h3 class="lp-how__title">{{ 'landing.howStep1Title' | translate }}</h3>
+        <p class="lp-how__body">{{ 'landing.howStep1Body' | translate }}</p>
+      </li>
+      <li
+        class="lp-how__step lp-reveal"
+        style="--delay: 100ms"
+        data-anim="zoomIn"
       >
-        {{ 'landing.howSubtitle' | translate }}
+        <span class="lp-how__num" aria-hidden="true">{{
+          'landing.howStep2Num' | translate
+        }}</span>
+        <span class="lp-how__icon" aria-hidden="true">
+          <span class="material-symbols-outlined">psychology</span>
+        </span>
+        <h3 class="lp-how__title">{{ 'landing.howStep2Title' | translate }}</h3>
+        <p class="lp-how__body">{{ 'landing.howStep2Body' | translate }}</p>
+      </li>
+      <li
+        class="lp-how__step lp-reveal"
+        style="--delay: 200ms"
+        data-anim="zoomIn"
+      >
+        <span class="lp-how__num" aria-hidden="true">{{
+          'landing.howStep3Num' | translate
+        }}</span>
+        <span class="lp-how__icon" aria-hidden="true">
+          <span class="material-symbols-outlined">contract_edit</span>
+        </span>
+        <h3 class="lp-how__title">{{ 'landing.howStep3Title' | translate }}</h3>
+        <p class="lp-how__body">{{ 'landing.howStep3Body' | translate }}</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- Audiences -->
+  <section class="lp-audiences" aria-labelledby="lp-audiences-title">
+    <div class="lp-audiences__intro lp-reveal">
+      <h2 id="lp-audiences-title" class="lp-section-title">
+        {{ 'landing.audiencesTitle' | translate }}
+      </h2>
+      <p class="lp-section-sub">
+        {{ 'landing.audiencesSubtitle' | translate }}
       </p>
     </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter relative">
-      <div
-        class="hidden md:block absolute top-1/3 start-[15%] end-[15%] h-0.5 border-t-2 border-dashed border-outline-variant z-0"
-        aria-hidden="true"
-      ></div>
-
-      <article
-        class="group relative z-10 flex flex-col items-center text-center p-md bg-surface-container-lowest rounded-xl border border-outline-variant hover:shadow-md transition-all duration-300"
-      >
-        <div
-          class="w-20 h-20 bg-secondary-container rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm"
-        >
-          <span
-            class="material-symbols-outlined text-4xl text-on-secondary-container"
-            aria-hidden="true"
-            >inventory</span
-          >
-        </div>
-        <h3 class="font-headline-sm text-headline-sm mb-2">
-          {{ 'landing.howStep1Title' | translate }}
+    <div class="lp-audiences__grid">
+      <article class="lp-audience lp-reveal" data-anim="fadeInLeft">
+        <span class="lp-audience__icon lp-icon-bob" aria-hidden="true">
+          <span class="material-symbols-outlined">agriculture</span>
+        </span>
+        <h3 class="lp-audience__title">
+          {{ 'landing.audienceFarmTitle' | translate }}
         </h3>
-        <p class="font-body-md text-body-md text-on-surface-variant">
-          {{ 'landing.howStep1Body' | translate }}
+        <p class="lp-audience__body">
+          {{ 'landing.audienceFarmBody' | translate }}
         </p>
+        <a [routerLink]="'/register'" class="lp-btn lp-btn--primary lp-btn--shine">
+          {{ 'landing.audienceFarmCta' | translate }}
+          <span class="material-symbols-outlined icon-flip" aria-hidden="true"
+            >arrow_forward</span
+          >
+        </a>
       </article>
-
       <article
-        class="group relative z-10 flex flex-col items-center text-center p-md bg-surface-container-lowest rounded-xl border border-outline-variant hover:shadow-md transition-all duration-300"
+        class="lp-audience lp-reveal"
+        style="--delay: 120ms"
+        data-anim="fadeInRight"
       >
-        <div
-          class="w-20 h-20 bg-primary-container rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm"
-        >
-          <span
-            class="material-symbols-outlined text-4xl text-on-primary-container"
-            aria-hidden="true"
-            >psychology</span
-          >
-        </div>
-        <h3 class="font-headline-sm text-headline-sm mb-2">
-          {{ 'landing.howStep2Title' | translate }}
+        <span class="lp-audience__icon lp-icon-bob" style="--bob-delay: 0.5s" aria-hidden="true">
+          <span class="material-symbols-outlined">factory</span>
+        </span>
+        <h3 class="lp-audience__title">
+          {{ 'landing.audienceFactoryTitle' | translate }}
         </h3>
-        <p class="font-body-md text-body-md text-on-surface-variant">
-          {{ 'landing.howStep2Body' | translate }}
+        <p class="lp-audience__body">
+          {{ 'landing.audienceFactoryBody' | translate }}
         </p>
-      </article>
-
-      <article
-        class="group relative z-10 flex flex-col items-center text-center p-md bg-surface-container-lowest rounded-xl border border-outline-variant hover:shadow-md transition-all duration-300"
-      >
-        <div
-          class="w-20 h-20 bg-secondary-container rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm"
-        >
-          <span
-            class="material-symbols-outlined text-4xl text-on-secondary-container"
-            aria-hidden="true"
-            >contract_edit</span
+        <a [routerLink]="'/register'" class="lp-btn lp-btn--ghost lp-btn--shine">
+          {{ 'landing.audienceFactoryCta' | translate }}
+          <span class="material-symbols-outlined icon-flip" aria-hidden="true"
+            >arrow_forward</span
           >
-        </div>
-        <h3 class="font-headline-sm text-headline-sm mb-2">
-          {{ 'landing.howStep3Title' | translate }}
-        </h3>
-        <p class="font-body-md text-body-md text-on-surface-variant">
-          {{ 'landing.howStep3Body' | translate }}
-        </p>
+        </a>
       </article>
     </div>
+  </section>
+
+  <!-- Closing CTA -->
+  <section class="lp-cta lp-reveal" aria-labelledby="lp-cta-title" data-anim="pulse">
+    <h2 id="lp-cta-title" class="lp-cta__title">
+      {{ 'landing.ctaTitle' | translate }}
+    </h2>
+    <p class="lp-cta__body">{{ 'landing.ctaBody' | translate }}</p>
+    <a [routerLink]="'/register'" class="lp-btn lp-btn--primary lp-btn--lg lp-btn--shine">
+      {{ 'landing.ctaRegister' | translate }}
+      <span class="material-symbols-outlined icon-flip" aria-hidden="true"
+        >arrow_forward</span
+      >
+    </a>
   </section>
 
   <!-- Footer -->
@@ -671,7 +809,8 @@
         <div class="flex items-center gap-2 mb-4">
           <ui-brand-mark [size]="40" [decorative]="true" />
           <span class="lp-brand__name">
-            <span class="lp-brand__name-nile">Nile</span><span class="lp-brand__name-chain">Chain</span>
+            <span class="lp-brand__name-nile">Nile</span
+            ><span class="lp-brand__name-chain">Chain</span>
           </span>
         </div>
         <p class="font-body-md text-body-md text-on-surface-variant">

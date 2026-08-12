@@ -122,6 +122,9 @@
               'factory.supplyRequest.pricePlaceholder' | translate
             "
           />
+          @if (fairHint(); as hint) {
+            <p class="font-body-sm text-on-surface-variant mt-1">{{ hint }}</p>
+          }
         </div>
 
         <div class="space-y-2">
@@ -139,6 +142,32 @@
             type="date"
             class="ui-input"
           />
+        </div>
+
+        <div class="space-y-2 md:col-span-2">
+          <p class="block font-title-md text-title-md text-on-surface">
+            {{ 'factory.supplyRequest.deliveryPoint' | translate }}
+          </p>
+          <p class="font-body-sm text-on-surface-variant">
+            {{ 'factory.supplyRequest.deliveryPointHint' | translate }}
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <label class="inline-flex items-center gap-2 cursor-pointer">
+              <input type="radio" formControlName="deliveryPoint" value="FactoryGate" />
+              <span>{{ 'factory.supplyRequest.factoryGate' | translate }}</span>
+            </label>
+            <label class="inline-flex items-center gap-2 cursor-pointer">
+              <input type="radio" formControlName="deliveryPoint" value="FarmGate" />
+              <span>{{ 'factory.supplyRequest.farmGate' | translate }}</span>
+            </label>
+          </div>
+          <p class="font-body-sm text-on-surface-variant">
+            @if (form.controls.deliveryPoint.value === 'FarmGate') {
+              {{ 'factory.supplyRequest.farmGateHelper' | translate }}
+            } @else {
+              {{ 'factory.supplyRequest.factoryGateHelper' | translate }}
+            }
+          </p>
         </div>
       </div>
 
@@ -162,6 +191,58 @@
           "
         ></textarea>
       </div>
+
+      <fieldset class="space-y-4">
+        <legend class="font-title-md text-title-md text-on-surface">
+          {{ 'factory.supplyRequest.structuredQualityTitle' | translate }}
+        </legend>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {{ 'factory.supplyRequest.structuredQualityHint' | translate }}
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label class="space-y-2">
+            <span class="block font-label-md">{{ 'factory.supplyRequest.moistureMax' | translate }}</span>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              class="ui-input"
+              formControlName="moistureMaxPercent"
+              [attr.placeholder]="'factory.supplyRequest.moistureMaxPlaceholder' | translate"
+            />
+          </label>
+          <label class="space-y-2">
+            <span class="block font-label-md">{{ 'factory.supplyRequest.impuritiesMax' | translate }}</span>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              class="ui-input"
+              formControlName="impuritiesMaxPercent"
+              [attr.placeholder]="'factory.supplyRequest.impuritiesMaxPlaceholder' | translate"
+            />
+          </label>
+          <label class="space-y-2">
+            <span class="block font-label-md">{{ 'factory.supplyRequest.grade' | translate }}</span>
+            <input
+              type="text"
+              class="ui-input"
+              formControlName="grade"
+              [attr.placeholder]="'factory.supplyRequest.gradePlaceholder' | translate"
+            />
+          </label>
+          <label class="inline-flex items-center gap-2 pt-6">
+            <input
+              type="checkbox"
+              class="accent-[var(--color-primary)]"
+              formControlName="labRequired"
+            />
+            <span>{{ 'factory.supplyRequest.labRequired' | translate }}</span>
+          </label>
+        </div>
+      </fieldset>
 
       <fieldset class="space-y-3">
         <legend class="font-title-md text-title-md text-on-surface">

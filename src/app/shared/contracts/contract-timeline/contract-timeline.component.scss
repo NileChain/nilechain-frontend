@@ -7,6 +7,13 @@
   padding: 0.9rem 0.95rem;
 }
 
+.timeline-card--embedded {
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  padding: 0.15rem 0 0;
+}
+
 .timeline-card__title {
   display: flex;
   align-items: center;
@@ -30,26 +37,26 @@
 
 .timeline__item {
   display: grid;
-  grid-template-columns: 2.25rem 1fr;
-  gap: 0.75rem;
+  grid-template-columns: 2rem 1fr;
+  gap: 0.55rem;
   position: relative;
-  padding-bottom: 1.1rem;
+  padding-bottom: 0.85rem;
   animation: stepIn 0.4s ease both;
 }
 
 .timeline__item:not(:last-child)::before {
   content: '';
   position: absolute;
-  inset-inline-start: 1.05rem;
-  top: 2.2rem;
+  inset-inline-start: 0.95rem;
+  top: 2rem;
   bottom: 0;
   width: 2px;
   background: color-mix(in srgb, var(--color-outline-variant, #c4c8c0) 80%, transparent);
 }
 
 .timeline__icon {
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2rem;
+  height: 2rem;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
@@ -77,13 +84,13 @@
 
 .timeline__label {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 700;
 }
 
 .timeline__time {
-  margin: 0.15rem 0 0;
-  font-size: 0.78rem;
+  margin: 0.12rem 0 0;
+  font-size: 0.72rem;
   color: var(--color-on-surface-variant, #5f6b64);
 }
 

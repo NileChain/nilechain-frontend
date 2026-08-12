@@ -6,16 +6,15 @@ import { catchError, finalize, forkJoin, of } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { TranslateService } from '../../../core/services/translate.service';
 import {
-  FactoryContract,
+  FactoryAttentionItem,
+  FactoryDashboardResponse,
+  FactorySupplyRequestListItem,
+} from '../../../core/models/factory/factory-dashboard.model';
+import {
   FactoryConversation,
-  FactoryMatchedFarm,
   FactoryNotification,
   FactoryService,
 } from '../../../core/services/factory/factory.service';
-import {
-  PendingSupplyRequest,
-  readPendingSupplyRequest,
-} from '../../../core/utils/agent-session';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
@@ -24,10 +23,9 @@ import { MarketPriceTrendsComponent } from '../market-price-trends/market-price-
 export interface AttentionItem {
   id: string;
   icon: string;
-  titleKey: string;
-  titleParams?: Record<string, string | number>;
-  statusKey: string;
-  ctaKey: string;
+  title: string;
+  status: string;
+  cta: string;
   link: string;
   tone: 'attention' | 'info';
 }
@@ -47,7 +45,7 @@ export interface ProcurementRow {
   commodity: string | null;
   quantityTons: number | null;
   budgetEgp: number | null;
-  status: 'matched' | 'draft' | 'pending';
+  status: string;
   date: string | null;
   link: string;
   matchCount?: number;
@@ -75,47 +73,30 @@ export class FactoryDashboardComponent implements OnInit {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
 
-  readonly matches = signal<FactoryMatchedFarm[]>([]);
-  readonly contracts = signal<FactoryContract[]>([]);
+  readonly dashboard = signal<FactoryDashboardResponse | null>(null);
   readonly notifications = signal<FactoryNotification[]>([]);
   readonly conversations = signal<FactoryConversation[]>([]);
-  readonly pendingRequest = signal<PendingSupplyRequest | null>(null);
 
-  readonly openRequestCount = computed(() => {
-    const ids = new Set<string>();
-    for (const m of this.matches()) {
-      if (m.requestId) ids.add(m.requestId);
-    }
-    const pending = this.pendingRequest();
-    if (pending?.requestId) ids.add(pending.requestId);
-    return ids.size;
-  });
+  readonly openRequestCount = computed(
+    () => this.dashboard()?.openRequestsCount ?? 0
+  );
 
-  readonly matchesCount = computed(() => this.matches().length);
+  readonly matchesCount = computed(
+    () => this.dashboard()?.activeMatchesCount ?? 0
+  );
 
-  readonly activeContractsCount = computed(() =>
-    this.contracts().filter((c) => this.isActiveContract(c.status)).length
+  readonly activeContractsCount = computed(
+    () => this.dashboard()?.activeContractsCount ?? 0
   );
 
   readonly totalProcurement = computed(() => {
-    let total = 0;
-    let hasValue = false;
-    for (const c of this.contracts()) {
-      if (c.pricePerTon != null && c.quantityTons > 0) {
-        total += c.pricePerTon * c.quantityTons;
-        hasValue = true;
-      }
-    }
-    return hasValue ? total : null;
+    const value = this.dashboard()?.totalProcurementValue;
+    return value != null && value > 0 ? value : null;
   });
 
   readonly supplyHealthScore = computed(() => {
-    const scores = this.matches()
-      .map((m) => m.riskScore)
-      .filter((s): s is number => s != null && Number.isFinite(s));
-    if (!scores.length) return null;
-    // Matched-farm scores use higher = healthier / lower risk (same as matches UI).
-    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    const avg = this.dashboard()?.averageSupplierRiskScore;
+    if (avg == null || avg <= 0) return null;
     return Math.max(0, Math.min(100, Math.round(avg)));
   });
 
@@ -136,11 +117,9 @@ export class FactoryDashboardComponent implements OnInit {
   loadDashboard(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.pendingRequest.set(readPendingSupplyRequest());
 
     forkJoin({
-      matches: this.factoryService.getMatchedFarms(),
-      contracts: this.factoryService.getContracts(),
+      dashboard: this.factoryService.getDashboard(),
       notifications: this.factoryService.getNotifications().pipe(
         catchError(() => of([] as FactoryNotification[]))
       ),
@@ -150,9 +129,8 @@ export class FactoryDashboardComponent implements OnInit {
     })
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: ({ matches, contracts, notifications, conversations }) => {
-          this.matches.set(matches ?? []);
-          this.contracts.set(contracts ?? []);
+        next: ({ dashboard, notifications, conversations }) => {
+          this.dashboard.set(dashboard);
           this.notifications.set(notifications ?? []);
           this.conversations.set(conversations ?? []);
         },
@@ -182,15 +160,19 @@ export class FactoryDashboardComponent implements OnInit {
     return clean.length > 8 ? `#${clean.slice(0, 8).toUpperCase()}` : `#${clean.toUpperCase()}`;
   }
 
-  statusKey(status: ProcurementRow['status']): string {
-    if (status === 'matched') return 'factory.dashboard.statusMatched';
-    if (status === 'draft') return 'factory.dashboard.statusDraft';
+  statusKey(status: string): string {
+    const s = (status || '').toLowerCase();
+    if (s === 'matched') return 'factory.requests.statusMatched';
+    if (s === 'pending') return 'factory.requests.statusPending';
+    if (s === 'fulfilled') return 'factory.requests.statusFulfilled';
+    if (s === 'cancelled') return 'factory.requests.statusCancelled';
     return 'factory.dashboard.statusPendingApproval';
   }
 
-  statusTone(status: ProcurementRow['status']): string {
-    if (status === 'matched') return 'success';
-    if (status === 'draft') return 'muted';
+  statusTone(status: string): string {
+    const s = (status || '').toLowerCase();
+    if (s === 'matched' || s === 'fulfilled') return 'success';
+    if (s === 'cancelled') return 'muted';
     return 'attention';
   }
 
@@ -225,76 +207,33 @@ export class FactoryDashboardComponent implements OnInit {
     this.menuOpenId.set(null);
   }
 
-  private isActiveContract(status: string): boolean {
-    const s = (status || '').toLowerCase();
-    return s === 'signed' || s === 'active' || s === 'draft' || s === 'pending';
+  private buildAttention(): AttentionItem[] {
+    const items = this.dashboard()?.attention ?? [];
+    return items.slice(0, 3).map((item) => this.mapAttentionItem(item));
   }
 
-  private buildAttention(): AttentionItem[] {
-    const items: AttentionItem[] = [];
-    const matchCount = this.matches().length;
-    if (matchCount > 0) {
-      items.push({
-        id: 'matches',
-        icon: 'handshake',
-        titleKey: 'factory.dashboard.attentionMatches',
-        titleParams: { count: matchCount },
-        statusKey: 'factory.dashboard.attentionReady',
-        ctaKey: 'factory.dashboard.reviewMatchesCta',
-        link: '/factory/matches',
-        tone: 'attention',
-      });
-    }
+  private mapAttentionItem(item: FactoryAttentionItem): AttentionItem {
+    return {
+      id: item.id,
+      icon: this.attentionIcon(item.kind),
+      title: item.title,
+      status: item.status,
+      cta: item.cta,
+      link: item.link.startsWith('/') ? item.link : `/${item.link}`,
+      tone: item.tone === 'info' ? 'info' : 'attention',
+    };
+  }
 
-    const awaiting = this.contracts().filter((c) => {
-      const s = (c.status || '').toLowerCase();
-      return s === 'draft' || s === 'pending' || s === 'generated';
-    }).length;
-    if (awaiting > 0) {
-      items.push({
-        id: 'contracts',
-        icon: 'draw',
-        titleKey: 'factory.dashboard.attentionContracts',
-        titleParams: { count: awaiting },
-        statusKey: 'factory.dashboard.attentionSignature',
-        ctaKey: 'factory.dashboard.reviewContractsCta',
-        link: '/factory/contracts',
-        tone: 'attention',
-      });
+  private attentionIcon(kind: string): string {
+    const k = (kind || '').toLowerCase();
+    if (k.includes('sign')) return 'draw';
+    if (k.includes('counter')) return 'handshake';
+    if (k.includes('fulfill') || k.includes('receive') || k.includes('qc')) {
+      return 'local_shipping';
     }
-
-    const unreadMsgs = this.conversations().reduce(
-      (sum, c) => sum + (c.unreadCount || 0),
-      0
-    );
-    if (unreadMsgs > 0) {
-      items.push({
-        id: 'messages',
-        icon: 'chat',
-        titleKey: 'factory.dashboard.attentionMessages',
-        titleParams: { count: unreadMsgs },
-        statusKey: 'factory.dashboard.attentionUnread',
-        ctaKey: 'factory.dashboard.openMessagesCta',
-        link: '/factory/messages',
-        tone: 'info',
-      });
-    }
-
-    const unreadNotes = this.notifications().filter((n) => !n.isRead).length;
-    if (unreadNotes > 0 && items.length < 3) {
-      items.push({
-        id: 'notifications',
-        icon: 'notifications',
-        titleKey: 'factory.dashboard.attentionNotifications',
-        titleParams: { count: unreadNotes },
-        statusKey: 'factory.dashboard.attentionUnread',
-        ctaKey: 'factory.dashboard.viewNotificationsCta',
-        link: '/factory/notifications',
-        tone: 'info',
-      });
-    }
-
-    return items.slice(0, 3);
+    if (k.includes('pay')) return 'payments';
+    if (k.includes('pending') || k.includes('request')) return 'assignment';
+    return 'notifications';
   }
 
   private buildActivity(): ActivityItem[] {
@@ -356,75 +295,24 @@ export class FactoryDashboardComponent implements OnInit {
   }
 
   private buildProcurementRows(): ProcurementRow[] {
-    const rows: ProcurementRow[] = [];
-    const pending = this.pendingRequest();
-    const seen = new Set<string>();
+    const recent = this.dashboard()?.recentRequests ?? [];
+    return recent.map((r) => this.mapProcurementRow(r));
+  }
 
-    if (pending?.requestId) {
-      seen.add(pending.requestId);
-      const budget =
-        pending.price != null && pending.quantity != null
-          ? pending.price * pending.quantity
-          : null;
-      rows.push({
-        id: `pending-${pending.requestId}`,
-        requestId: pending.requestId,
-        commodity: pending.crop || null,
-        quantityTons: pending.quantity ?? null,
-        budgetEgp: budget,
-        status: 'draft',
-        date: pending.deliveryDate || null,
-        link: `/factory/agent-progress?requestId=${encodeURIComponent(pending.requestId)}`,
-      });
-    }
-
-    const byRequest = new Map<string, FactoryMatchedFarm[]>();
-    for (const m of this.matches()) {
-      const rid = m.requestId;
-      if (!rid) continue;
-      if (!byRequest.has(rid)) byRequest.set(rid, []);
-      byRequest.get(rid)!.push(m);
-    }
-
-    for (const [requestId, group] of byRequest) {
-      if (seen.has(requestId)) {
-        const existing = rows.find((r) => r.requestId === requestId);
-        if (existing) {
-          existing.status = 'matched';
-          existing.matchCount = group.length;
-          existing.link = '/factory/matches';
-        }
-        continue;
-      }
-      seen.add(requestId);
-      const latest = group.reduce((best, cur) => {
-        const bt = best.createdAt ? Date.parse(best.createdAt) : 0;
-        const ct = cur.createdAt ? Date.parse(cur.createdAt) : 0;
-        return ct >= bt ? cur : best;
-      }, group[0]);
-      rows.push({
-        id: `req-${requestId}`,
-        requestId,
-        commodity: null,
-        quantityTons: null,
-        budgetEgp: null,
-        status: 'matched',
-        date: latest?.createdAt || null,
-        matchCount: group.length,
-        link: '/factory/matches',
-      });
-    }
-
-    // Newest procurement activity first (match CreatedAt / pending first).
-    rows.sort((a, b) => {
-      if (a.status === 'draft' && b.status !== 'draft') return -1;
-      if (b.status === 'draft' && a.status !== 'draft') return 1;
-      const ta = a.date ? Date.parse(a.date) : 0;
-      const tb = b.date ? Date.parse(b.date) : 0;
-      return tb - ta;
-    });
-
-    return rows.slice(0, 8);
+  private mapProcurementRow(r: FactorySupplyRequestListItem): ProcurementRow {
+    const budget =
+      r.pricePerTon != null ? r.pricePerTon * r.quantityTons : null;
+    return {
+      id: r.requestId,
+      requestId: r.requestId,
+      commodity: r.crop || null,
+      quantityTons: r.quantityTons ?? null,
+      budgetEgp: budget,
+      status: r.status,
+      date: r.deliveryDate || r.createdAt || null,
+      matchCount: r.matchCount,
+      link: `/factory/requests/${r.requestId}`,
+    };
   }
 
   private notificationIcon(type: string | null): string {
@@ -433,6 +321,8 @@ export class FactoryDashboardComponent implements OnInit {
     if (t.includes('contract')) return 'description';
     if (t.includes('message') || t.includes('chat')) return 'mail';
     if (t.includes('agent')) return 'smart_toy';
+    if (t.includes('weather')) return 'thermostat';
+    if (t.includes('price')) return 'trending_up';
     return 'notifications';
   }
 

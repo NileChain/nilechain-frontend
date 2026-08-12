@@ -55,12 +55,14 @@ import { ContractTocItem } from '../contract-text.util';
   styles: [
     `
       .toc {
-        border-radius: 0.75rem;
-        border: 1px solid
-          color-mix(in srgb, var(--color-outline-variant, #c4c8c0) 70%, transparent);
-        background: var(--color-surface-container-lowest, #fff);
-        box-shadow: var(--shadow-sm, 0 1px 2px rgb(16 24 40 / 5%));
-        padding: 0.7rem 0.75rem;
+        border-radius: 0;
+        border: 0;
+        border-inline-start: 1px solid
+          color-mix(in srgb, var(--color-outline-variant, #c4c8c0) 55%, transparent);
+        background: transparent;
+        box-shadow: none;
+        padding-block: 0.15rem;
+        padding-inline: 0.65rem 0;
       }
       .toc__head {
         display: flex;

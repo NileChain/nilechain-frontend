@@ -9,6 +9,7 @@ import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-stat
 import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 import { AgentService } from '../../../core/services/agent/agent.service';
+import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslateService } from '../../../core/services/translate.service';
 import {
@@ -151,6 +152,7 @@ export class AgentProgressComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly toast = inject(ToastService);
   private readonly i18n = inject(TranslateService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -248,10 +250,10 @@ export class AgentProgressComponent implements OnInit, OnDestroy {
     if (id) {
       this.agentService.clearCachedRun(id);
     }
-    this.runAgent();
+    this.runAgent(false);
   }
 
-  runAgent(): void {
+  runAgent(confirmHighRisk = false): void {
     const id = this.requestId();
     if (!id) {
       this.error.set(this.i18n.instant('factory.progress.needRequestId'));
@@ -267,6 +269,9 @@ export class AgentProgressComponent implements OnInit, OnDestroy {
       deliveryDate: this.deliveryDate,
       factoryGovernorate: this.factoryGovernorate,
     };
+    if (confirmHighRisk) {
+      payload.confirmHighRiskWarning = true;
+    }
 
     this.loading.set(true);
     this.error.set(null);
@@ -284,7 +289,13 @@ export class AgentProgressComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (result) => {
-          this.applyAgentResult(id, payload, result, /*fromError*/ false);
+          this.applyAgentResult(
+            id,
+            payload,
+            result,
+            /*fromError*/ false,
+            confirmHighRisk
+          );
         },
         error: (err) => {
           // FIX: 400 now returns full AgentResponse (trail/partialResult/mode).
@@ -294,7 +305,8 @@ export class AgentProgressComponent implements OnInit, OnDestroy {
               id,
               payload,
               body as AgentResponse,
-              /*fromError*/ true
+              /*fromError*/ true,
+              confirmHighRisk
             );
             return;
           }
@@ -308,6 +320,19 @@ export class AgentProgressComponent implements OnInit, OnDestroy {
           this.error.set(message);
         },
       });
+  }
+
+  isTruncated(result: AgentResponse): boolean {
+    return (result.totalEligible ?? 0) > (result.topMatches?.length ?? 0);
+  }
+
+  truncatedLabel(result: AgentResponse): string {
+    const shown = result.topMatches?.length ?? 0;
+    const total = result.totalEligible ?? 0;
+    return this.i18n.instant('factory.progress.truncatedChip', {
+      shown,
+      total,
+    });
   }
 
   topMatches(): MatchResult[] {
@@ -432,26 +457,56 @@ export class AgentProgressComponent implements OnInit, OnDestroy {
     id: string,
     payload: AgentRequest,
     result: AgentResponse,
-    fromError: boolean
+    fromError: boolean,
+    confirmedHighRisk = false
   ): void {
     this.markAllStepsDone();
     this.response.set(result);
     this.agentService.setCachedRun(id, payload, result);
 
+    if ((result.supersededCount ?? 0) > 0) {
+      this.toast.info(
+        this.i18n.instant('factory.progress.supersededToast', {
+          count: result.supersededCount ?? 0,
+        })
+      );
+    }
+
     if (result.success) {
       this.error.set(null);
       this.toast.success(this.i18n.instant('factory.progress.runSuccess'));
-      return;
+    } else {
+      const message =
+        result.errorMessage ||
+        result.partialReason ||
+        this.i18n.instant('factory.progress.runFailed');
+      this.error.set(message);
+      if (fromError || result.partialResult) {
+        this.toast.error(message);
+      }
     }
 
-    const message =
-      result.errorMessage ||
-      result.partialReason ||
-      this.i18n.instant('factory.progress.runFailed');
-    this.error.set(message);
-    if (fromError || result.partialResult) {
-      this.toast.error(message);
+    const shouldPromptHighRisk =
+      (result.success || !!result.partialResult) &&
+      !!result.riskWarning?.requiresFactoryConfirmation &&
+      !confirmedHighRisk;
+    if (shouldPromptHighRisk) {
+      void this.promptHighRiskConfirmation();
     }
+  }
+
+  private async promptHighRiskConfirmation(): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      titleKey: 'factory.progress.highRiskTitle',
+      bodyKey: 'factory.progress.highRiskBody',
+      confirmKey: 'factory.progress.highRiskConfirm',
+      cancelKey: 'common.cancel',
+      danger: true,
+    });
+    if (confirmed) {
+      this.runAgent(true);
+    }
+    // Cancel: stay on results without generating a contract.
   }
 
   /** Restore a previous run without calling the API or toasting. */

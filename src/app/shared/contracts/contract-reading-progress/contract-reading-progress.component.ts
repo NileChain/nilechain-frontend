@@ -29,27 +29,29 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
   styles: [
     `
       .progress {
-        border-radius: 14px;
-        padding: 0.65rem 0.85rem;
-        background: color-mix(in srgb, var(--color-surface-container-lowest, #fff) 88%, transparent);
-        border: 1px solid color-mix(in srgb, var(--color-outline-variant, #c4c8c0) 65%, transparent);
-        box-shadow: 0 6px 18px rgb(16 24 40 / 5%);
-        backdrop-filter: blur(10px);
+        border-radius: 0;
+        padding: 0.35rem 0.15rem 0.45rem;
+        background: transparent;
+        border: 0;
+        border-block-end: 1px solid
+          color-mix(in srgb, var(--color-outline-variant, #c4c8c0) 50%, transparent);
+        box-shadow: none;
+        backdrop-filter: none;
       }
       .progress__meta {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.4rem;
-        font-size: 0.78rem;
-        font-weight: 700;
+        margin-bottom: 0.3rem;
+        font-size: 0.72rem;
+        font-weight: 650;
         color: var(--color-on-surface-variant, #5f6b64);
       }
       .progress__pct {
         color: var(--color-primary, #1b5e20);
       }
       .progress__track {
-        height: 6px;
+        height: 3px;
         border-radius: 999px;
         background: var(--color-surface-container-high, #e8ebe4);
         overflow: hidden;

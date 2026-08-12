@@ -6,20 +6,25 @@ import {
   ElementRef,
   HostListener,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import {
   FactoryContract,
   FactoryService,
 } from '../../../core/services/factory/factory.service';
+import { WalletService } from '../../../core/services/wallet/wallet.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslateService } from '../../../core/services/translate.service';
+import { AiAssistantContextService } from '../../../core/services/ai-assistant-context.service';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 import { ContractActionBarComponent } from '../../../shared/contracts/contract-action-bar/contract-action-bar.component';
 import { ContractAttachmentsComponent } from '../../../shared/contracts/contract-attachments/contract-attachments.component';
@@ -37,18 +42,18 @@ import { ContractTimelineComponent } from '../../../shared/contracts/contract-ti
 import { ContractFulfillmentTimelineComponent } from '../../../shared/contracts/contract-fulfillment-timeline/contract-fulfillment-timeline.component';
 import { ContractPaymentMilestonesComponent } from '../../../shared/contracts/contract-payment-milestones/contract-payment-milestones.component';
 import { ContractDisputesPanelComponent } from '../../../shared/contracts/contract-disputes-panel/contract-disputes-panel.component';
-import {
-  buildContractTimeline,
-  defaultContractAttachments,
-} from '../../../shared/contracts/contract-timeline.util';
+import { ContractReviewPanelComponent } from '../../../shared/contracts/contract-review-panel/contract-review-panel.component';
+import { buildContractTimeline } from '../../../shared/contracts/contract-timeline.util';
 import { ContractTocComponent } from '../../../shared/contracts/contract-toc/contract-toc.component';
 import {
+  ContractAttachmentDto,
   ContractAttachmentItem,
   ContractDocumentModel,
   ContractTimelineStep,
 } from '../../../shared/contracts/models/contract-document.model';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
+import { ContractIntegrityBadgeComponent } from '../../../shared/contracts/contract-integrity-badge/contract-integrity-badge.component';
 
 @Component({
   selector: 'app-factory-contract-details',
@@ -65,10 +70,12 @@ import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
     ContractFulfillmentTimelineComponent,
     ContractPaymentMilestonesComponent,
     ContractDisputesPanelComponent,
+    ContractReviewPanelComponent,
     ContractActionBarComponent,
     ContractAttachmentsComponent,
     ContractTocComponent,
     ContractReadingProgressComponent,
+    ContractIntegrityBadgeComponent,
   ],
   templateUrl: './factory-contract-details.component.html',
   styleUrl: './factory-contract-details.component.scss',
@@ -77,26 +84,48 @@ export class FactoryContractDetailsComponent implements OnInit, AfterViewInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly factoryApi = inject(FactoryService);
+  private readonly walletApi = inject(WalletService);
+  private readonly auth = inject(AuthService);
   private readonly confirm = inject(ConfirmDialogService);
   private readonly toast = inject(ToastService);
   private readonly i18n = inject(TranslateService);
+  private readonly assistantCtx = inject(AiAssistantContextService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly host = inject(ElementRef<HTMLElement>);
 
   readonly loading = signal(true);
   readonly acting = signal(false);
+  readonly uploadingAttachment = signal(false);
   readonly error = signal<string | null>(null);
   readonly contract = signal<ContractDocumentModel | null>(null);
   readonly timeline = signal<ContractTimelineStep[]>([]);
-  readonly attachments = signal<ContractAttachmentItem[]>(
-    defaultContractAttachments()
-  );
+  readonly attachments = signal<ContractAttachmentItem[]>([]);
   readonly toc = signal<ContractTocItem[]>([]);
   readonly activeSectionId = signal<string | null>(null);
   readonly readPercent = signal(0);
   readonly documentReady = signal(false);
   readonly fromMatches = signal(false);
   readonly documentDir = signal<'rtl' | 'ltr'>('ltr');
+  readonly availableBalanceEgp = signal<number | null>(null);
+  readonly fulfillmentFulfilled = signal(false);
+
+  readonly signFundsHint = computed(() => {
+    const c = this.contract();
+    if (!c || !this.canDecide()) {
+      return null;
+    }
+    const qty = c.quantityTons ?? 0;
+    const price = c.pricePerTon ?? 0;
+    const deal = qty > 0 && price > 0 ? qty * price : null;
+    const available = this.availableBalanceEgp();
+    if (deal != null && available != null) {
+      return this.i18n.instant('factory.contracts.signFundsHint', {
+        deal: Math.round(deal).toLocaleString(),
+        available: Math.round(available).toLocaleString(),
+      });
+    }
+    return this.i18n.instant('factory.contracts.signFundsHintNoWallet');
+  });
 
   private contractId: string | null = null;
   private viewedAt: string | null = null;
@@ -154,6 +183,7 @@ export class FactoryContractDetailsComponent implements OnInit, AfterViewInit {
       .subscribe({
         next: (c) => {
           this.applyContract(c);
+          this.loadWalletBalance();
           requestAnimationFrame(() => {
             this.documentReady.set(true);
             this.queueProgressUpdate();
@@ -200,6 +230,14 @@ export class FactoryContractDetailsComponent implements OnInit, AfterViewInit {
     }
     const s = (c?.status || '').toLowerCase();
     return s === 'signed' || s === 'active';
+  }
+
+  canUnwind(): boolean {
+    return !!this.contract()?.canUnwindSigned;
+  }
+
+  reviewTargetUserId(): string | null {
+    return this.contract()?.farmUserId ?? null;
   }
 
   statusTone(status: string): string {
@@ -274,10 +312,62 @@ export class FactoryContractDetailsComponent implements OnInit, AfterViewInit {
             }, 900);
           }
         },
-        error: (err) => {
+        error: (err: HttpErrorResponse) => {
+          this.toast.error(this.resolveApproveError(err));
+        },
+      });
+  }
+
+  private resolveApproveError(err: HttpErrorResponse): string {
+    const code = err?.error?.code;
+    if (typeof code === 'string') {
+      if (code.includes('InsufficientBalance')) {
+        return this.i18n.instant('factory.contracts.approveInsufficientBalance');
+      }
+      if (code.includes('DealValueInvalid')) {
+        return this.i18n.instant('factory.contracts.approveDealValueInvalid');
+      }
+    }
+    return (
+      err?.error?.message ||
+      this.i18n.instant('factory.contracts.approveFailed')
+    );
+  }
+
+  private loadWalletBalance(): void {
+    this.walletApi.getMine().subscribe({
+      next: (w) => this.availableBalanceEgp.set(w.availableBalanceEgp),
+      error: () => this.availableBalanceEgp.set(null),
+    });
+  }
+
+  async unwind(): Promise<void> {
+    if (!this.contractId || !this.canUnwind()) {
+      return;
+    }
+    const ok = await this.confirm.confirm({
+      titleKey: 'factory.contracts.confirmUnwindTitle',
+      bodyKey: 'factory.contracts.confirmUnwindBody',
+      confirmKey: 'contractDoc.unwindSigned',
+      cancelKey: 'common.cancel',
+      danger: true,
+    });
+    if (!ok) {
+      return;
+    }
+    this.acting.set(true);
+    this.factoryApi
+      .rejectContract(this.contractId)
+      .pipe(finalize(() => this.acting.set(false)))
+      .subscribe({
+        next: (c) => {
+          this.applyContract(c);
+          this.toast.info(this.i18n.instant('factory.contracts.unwindSuccess'));
+        },
+        error: (err: HttpErrorResponse) => {
           this.toast.error(
             err?.error?.message ||
-              this.i18n.instant('factory.contracts.approveFailed')
+              this.i18n.instant('factory.contracts.unwindFailed')
           );
         },
       });
@@ -370,7 +460,55 @@ export class FactoryContractDetailsComponent implements OnInit, AfterViewInit {
     void this.router.navigate(['/factory/contracts']);
   }
 
+  onUploadAttachment(event: { file: File; kind: string }): void {
+    if (!this.contractId || this.uploadingAttachment()) {
+      return;
+    }
+    this.uploadingAttachment.set(true);
+    this.factoryApi
+      .uploadContractAttachment(this.contractId, event.file, event.kind)
+      .pipe(finalize(() => this.uploadingAttachment.set(false)))
+      .subscribe({
+        next: () => {
+          this.loadAttachments(this.contractId!);
+          this.toast.success(
+            this.i18n.instant('contractDoc.uploadAttachment')
+          );
+        },
+        error: (err) =>
+          this.toast.error(
+            err?.error?.message ||
+              this.i18n.instant('factory.contracts.detailsLoadFailed')
+          ),
+      });
+  }
+
+  onRemoveAttachment(attachmentId: string): void {
+    if (!this.contractId) {
+      return;
+    }
+    this.factoryApi
+      .deleteContractAttachment(this.contractId, attachmentId)
+      .subscribe({
+        next: () => {
+          this.attachments.update((list) =>
+            list.filter((a) => a.id !== attachmentId)
+          );
+          this.toast.info(this.i18n.instant('contractDoc.deleteAttachment'));
+        },
+        error: (err) =>
+          this.toast.error(
+            err?.error?.message ||
+              this.i18n.instant('factory.contracts.detailsLoadFailed')
+          ),
+      });
+  }
+
   private applyContract(c: FactoryContract): void {
+    this.assistantCtx.set({
+      contractId: c.contractId,
+      matchId: c.matchId,
+    });
     const model: ContractDocumentModel = {
       contractId: c.contractId,
       matchId: c.matchId,
@@ -396,6 +534,10 @@ export class FactoryContractDetailsComponent implements OnInit, AfterViewInit {
       title: undefined,
       matchScore: c.matchScore,
       riskScore: c.riskScore,
+      farmUserId: c.farmUserId ?? null,
+      factoryUserId: c.factoryUserId ?? null,
+      canUnwindSigned: !!c.canUnwindSigned,
+      integrity: c.integrity ?? null,
     };
     const sections = parseContractSections(model.generatedText);
     this.contract.set(model);
@@ -405,6 +547,71 @@ export class FactoryContractDetailsComponent implements OnInit, AfterViewInit {
       buildContractTimeline(model, { viewedAt: this.viewedAt })
     );
     this.activeSectionId.set(sections[0]?.id ?? null);
+    this.loadAttachments(c.contractId);
+    this.loadFulfillment(c.contractId);
+  }
+
+  private loadFulfillment(contractId: string): void {
+    this.factoryApi.getFulfillment(contractId).subscribe({
+      next: (f) =>
+        this.fulfillmentFulfilled.set(
+          (f.status || '').toLowerCase() === 'fulfilled'
+        ),
+      error: () => this.fulfillmentFulfilled.set(false),
+    });
+  }
+
+  private loadAttachments(contractId: string): void {
+    this.factoryApi.listContractAttachments(contractId).subscribe({
+      next: (items) =>
+        this.attachments.set(
+          (items ?? []).map((dto) => this.mapAttachment(dto))
+        ),
+      error: () => this.attachments.set([]),
+    });
+  }
+
+  private mapAttachment(dto: ContractAttachmentDto): ContractAttachmentItem {
+    const userId = this.auth.currentUser()?.id;
+    const fullySigned = this.isSigned();
+    return {
+      id: dto.attachmentId,
+      name: dto.fileName,
+      sizeLabel: this.formatBytes(dto.fileSize),
+      typeLabel: dto.contentType || dto.kind || '—',
+      kind: dto.kind,
+      url: dto.fileUrl,
+      canDelete:
+        !!userId &&
+        dto.uploadedByUserId === userId &&
+        !fullySigned,
+      icon: this.iconForContentType(dto.contentType, dto.fileName),
+    };
+  }
+
+  private formatBytes(bytes: number): string {
+    if (!bytes || bytes < 0) {
+      return '';
+    }
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    }
+    if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  private iconForContentType(contentType: string, fileName: string): string {
+    const ct = (contentType || '').toLowerCase();
+    const name = (fileName || '').toLowerCase();
+    if (ct.includes('pdf') || name.endsWith('.pdf')) {
+      return 'picture_as_pdf';
+    }
+    if (ct.startsWith('image/') || /\.(png|jpe?g|gif|webp)$/.test(name)) {
+      return 'image';
+    }
+    return 'attach_file';
   }
 
   private queueProgressUpdate(): void {

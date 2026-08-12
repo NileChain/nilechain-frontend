@@ -48,6 +48,30 @@
       }
     </section>
 
+    <section class="ui-card p-6 space-y-3">
+      <div class="flex flex-wrap justify-between items-start gap-3">
+        <div>
+          <h3 class="font-title-lg text-title-lg text-on-surface">
+            {{ 'admin.dashboard.runMonitoring' | translate }}
+          </h3>
+          <p class="font-body-md text-body-md text-on-surface-variant mt-1">
+            {{ 'admin.dashboard.runMonitoringHint' | translate }}
+          </p>
+        </div>
+        <button
+          type="button"
+          class="ui-btn-primary"
+          (click)="runMonitoring()"
+          [disabled]="monitoringBusy()"
+        >
+          {{ 'admin.dashboard.runMonitoring' | translate }}
+        </button>
+      </div>
+      @if (monitoringSummary(); as note) {
+        <p class="font-body-sm text-on-surface-variant">{{ note }}</p>
+      }
+    </section>
+
     <!-- Live: stuck deliveries -->
     <section
       class="ui-card overflow-hidden"

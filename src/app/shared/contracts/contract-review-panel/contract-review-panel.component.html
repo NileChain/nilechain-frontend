@@ -1,0 +1,62 @@
+<section class="space-y-3">
+  @if (loading()) {
+    <div class="flex items-center gap-2 py-4">
+      <ui-loader />
+      <span class="font-body-sm text-on-surface-variant">{{
+        'common.loading' | translate
+      }}</span>
+    </div>
+  } @else if (loadError()) {
+    <p class="font-body-sm text-error">{{ loadError() }}</p>
+  } @else if (items().length === 0) {
+    <p class="font-body-sm text-on-surface-variant">{{
+      'reviews.empty' | translate
+    }}</p>
+  } @else {
+    <ul class="space-y-2">
+      @for (r of items(); track r.reviewId) {
+        <li class="rounded-lg border border-outline-variant p-3 space-y-1">
+          <p class="font-label-sm text-label-sm tabular-nums">
+            {{ r.rating }}/5 · {{ r.createdAt | date: 'mediumDate' }}
+          </p>
+          @if (r.comment) {
+            <p class="font-body-sm text-on-surface">{{ r.comment }}</p>
+          }
+        </li>
+      }
+    </ul>
+  }
+
+  @if (canWrite && !alreadyReviewed && targetUserId) {
+    <form class="space-y-2" (ngSubmit)="submit()">
+      <label class="block space-y-1">
+        <span class="font-label-sm">{{ 'reviews.rating' | translate }}</span>
+        <select class="ui-input w-full" [(ngModel)]="rating" name="rating">
+          @for (n of [5, 4, 3, 2, 1]; track n) {
+            <option [ngValue]="n">{{ n }}</option>
+          }
+        </select>
+      </label>
+      <label class="block space-y-1">
+        <span class="font-label-sm">{{ 'reviews.comment' | translate }}</span>
+        <textarea
+          class="ui-input w-full min-h-[72px]"
+          [(ngModel)]="comment"
+          name="comment"
+          [attr.placeholder]="'reviews.commentPlaceholder' | translate"
+        ></textarea>
+      </label>
+      <button
+        type="submit"
+        class="ui-btn-primary"
+        [disabled]="submitting()"
+      >
+        {{ 'reviews.submit' | translate }}
+      </button>
+    </form>
+  } @else if (alreadyReviewed) {
+    <p class="font-label-sm text-on-surface-variant">{{
+      'reviews.alreadySubmitted' | translate
+    }}</p>
+  }
+</section>

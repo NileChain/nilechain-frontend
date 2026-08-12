@@ -1,3 +1,5 @@
+import { ContractIntegrity } from '../integrity/contract-integrity.model';
+
 export interface FarmContract {
   contractId: string;
   matchId: string;
@@ -21,4 +23,8 @@ export interface FarmContract {
   updatedAt?: string | null;
   matchScore?: number | null;
   riskScore?: number | null;
+  integrity?: ContractIntegrity | null;
+  farmUserId?: string | null;
+  factoryUserId?: string | null;
+  canUnwindSigned?: boolean;
 }

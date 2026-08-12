@@ -147,14 +147,14 @@
                 </span>
                 <div class="min-w-0 flex-1">
                   <p class="fx-attention__title">
-                    {{ item.titleKey | translate: item.titleParams }}
+                    {{ item.title }}
                   </p>
                   <p class="fx-attention__status">
-                    {{ item.statusKey | translate }}
+                    {{ item.status }}
                   </p>
                 </div>
                 <a [routerLink]="item.link" class="fx-link-cta">
-                  {{ item.ctaKey | translate }}
+                  {{ item.cta }}
                   <span
                     class="material-symbols-outlined text-[16px] icon-flip"
                     aria-hidden="true"
@@ -178,7 +178,7 @@
             <h2 class="fx-section-title">
               {{ 'factory.dashboard.recentProcurementRequests' | translate }}
             </h2>
-            <a routerLink="/factory/matches" class="fx-link-cta">
+            <a routerLink="/factory/requests" class="fx-link-cta">
               {{ 'factory.dashboard.viewAll' | translate }}
               <span
                 class="material-symbols-outlined text-[16px] icon-flip"

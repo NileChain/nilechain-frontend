@@ -67,6 +67,17 @@ export class ContractFulfillmentTimelineComponent implements OnChanges {
   readonly fulfillment = signal<Fulfillment | null>(null);
   readonly steps = signal<FulfillmentStep[]>([]);
   qualityNotes = '';
+  specsMetChoice: '' | 'yes' | 'no' = '';
+  specsOutcomeNotes = '';
+  shipCarrier = '';
+  shipTracking = '';
+  shipNotes = '';
+  acceptedQuantityTons: number | null = null;
+  discountPercent = 0;
+  weighedQuantityTons: number | null = null;
+  weighbridgeTicketUrl = '';
+  rejectReason = 'QualityFail';
+  rejectNotes = '';
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['contractId'] || changes['portal']) {
@@ -111,6 +122,10 @@ export class ContractFulfillmentTimelineComponent implements OnChanges {
     return this.normalizeStatus(this.fulfillment()?.status) === 'Voided';
   }
 
+  isRejectedAtGate(): boolean {
+    return this.normalizeStatus(this.fulfillment()?.status) === 'RejectedAtGate';
+  }
+
   canShip(): boolean {
     return (
       this.portal === 'farm' &&
@@ -123,6 +138,18 @@ export class ContractFulfillmentTimelineComponent implements OnChanges {
       this.portal === 'factory' &&
       this.normalizeStatus(this.fulfillment()?.status) === 'Shipped'
     );
+  }
+
+  canRejectAtGate(): boolean {
+    return this.canReceive();
+  }
+
+  rejectReasonKey(reason: string): string {
+    return `fulfillment.reason${reason}`;
+  }
+
+  partyKey(party: string | null | undefined): string {
+    return party === 'Factory' ? 'fulfillment.partyFactory' : 'fulfillment.partyFarm';
   }
 
   canQualityCheck(): boolean {
@@ -155,11 +182,18 @@ export class ContractFulfillmentTimelineComponent implements OnChanges {
     }
     this.acting.set(true);
     this.farmApi
-      .shipFulfillment(this.contractId)
+      .shipFulfillment(this.contractId, {
+        carrier: this.shipCarrier.trim() || undefined,
+        trackingNumber: this.shipTracking.trim() || undefined,
+        notes: this.shipNotes.trim() || undefined,
+      })
       .pipe(finalize(() => this.acting.set(false)))
       .subscribe({
         next: (f) => {
           this.apply(f);
+          this.shipCarrier = '';
+          this.shipTracking = '';
+          this.shipNotes = '';
           this.toast.success(this.i18n.instant('fulfillment.shipSuccess'));
         },
         error: (err: HttpErrorResponse) => {
@@ -174,6 +208,11 @@ export class ContractFulfillmentTimelineComponent implements OnChanges {
     if (!this.canReceive() || !this.contractId) {
       return;
     }
+    const tons = this.weighedQuantityTons;
+    if (tons == null || !(tons > 0)) {
+      this.toast.error(this.i18n.instant('fulfillment.weighedQtyHint'));
+      return;
+    }
     const ok = await this.confirm.confirm({
       titleKey: 'fulfillment.confirmReceiveTitle',
       bodyKey: 'fulfillment.confirmReceiveBody',
@@ -185,7 +224,10 @@ export class ContractFulfillmentTimelineComponent implements OnChanges {
     }
     this.acting.set(true);
     this.factoryApi
-      .receiveFulfillment(this.contractId)
+      .receiveFulfillment(this.contractId, {
+        weighedQuantityTons: tons,
+        weighbridgeTicketUrl: this.weighbridgeTicketUrl.trim() || undefined,
+      })
       .pipe(finalize(() => this.acting.set(false)))
       .subscribe({
         next: (f) => {
@@ -214,19 +256,71 @@ export class ContractFulfillmentTimelineComponent implements OnChanges {
       return;
     }
     const notes = this.qualityNotes.trim();
+    const specsMet =
+      this.specsMetChoice === 'yes'
+        ? true
+        : this.specsMetChoice === 'no'
+          ? false
+          : undefined;
+    const specsOutcomeNotes = this.specsOutcomeNotes.trim();
     this.acting.set(true);
     this.factoryApi
       .qualityCheckFulfillment(this.contractId, {
         notes: notes || undefined,
+        acceptedQuantityTons: this.acceptedQuantityTons,
+        discountPercent: this.discountPercent || 0,
+        specsMet,
+        specsOutcomeNotes: specsOutcomeNotes || undefined,
       })
       .pipe(finalize(() => this.acting.set(false)))
       .subscribe({
         next: (f) => {
           this.apply(f);
           this.qualityNotes = '';
+          this.specsMetChoice = '';
+          this.specsOutcomeNotes = '';
+          this.acceptedQuantityTons = null;
+          this.discountPercent = 0;
           this.toast.success(
             this.i18n.instant('fulfillment.qualityCheckSuccess')
           );
+        },
+        error: (err: HttpErrorResponse) => {
+          this.toast.error(
+            err?.error?.message || this.i18n.instant('fulfillment.actionFailed')
+          );
+        },
+      });
+  }
+
+  async rejectAtGate(): Promise<void> {
+    if (!this.canRejectAtGate() || !this.contractId) {
+      return;
+    }
+    if (this.rejectReason === 'Other' && !this.rejectNotes.trim()) {
+      this.toast.error(this.i18n.instant('fulfillment.rejectNotesRequired'));
+      return;
+    }
+    const ok = await this.confirm.confirm({
+      titleKey: 'fulfillment.confirmRejectTitle',
+      bodyKey: 'fulfillment.rejectedBanner',
+      confirmKey: 'fulfillment.rejectAtGate',
+      cancelKey: 'common.cancel',
+    });
+    if (!ok) {
+      return;
+    }
+    this.acting.set(true);
+    this.factoryApi
+      .rejectAtGate(this.contractId, {
+        reason: this.rejectReason,
+        notes: this.rejectNotes.trim() || undefined,
+      })
+      .pipe(finalize(() => this.acting.set(false)))
+      .subscribe({
+        next: (f) => {
+          this.apply(f);
+          this.toast.success(this.i18n.instant('fulfillment.rejectAtGateSuccess'));
         },
         error: (err: HttpErrorResponse) => {
           this.toast.error(
@@ -271,6 +365,13 @@ export class ContractFulfillmentTimelineComponent implements OnChanges {
     this.loadError.set(null);
     this.fulfillment.set(f);
     this.steps.set(this.buildSteps(f));
+    if (
+      this.weighedQuantityTons == null &&
+      f.contractedQuantityTons != null &&
+      f.contractedQuantityTons > 0
+    ) {
+      this.weighedQuantityTons = f.contractedQuantityTons;
+    }
   }
 
   private buildSteps(f: Fulfillment): FulfillmentStep[] {
@@ -309,7 +410,7 @@ export class ContractFulfillmentTimelineComponent implements OnChanges {
       },
     };
 
-    if (status === 'Voided') {
+    if (status === 'Voided' || status === 'RejectedAtGate') {
       return FLOW.map((id) => ({
         id,
         labelKey: meta[id].labelKey,
@@ -371,6 +472,9 @@ export class ContractFulfillmentTimelineComponent implements OnChanges {
     }
     if (raw.toLowerCase() === 'voided') {
       return 'Voided';
+    }
+    if (raw.toLowerCase() === 'rejectedatgate') {
+      return 'RejectedAtGate';
     }
     return raw;
   }

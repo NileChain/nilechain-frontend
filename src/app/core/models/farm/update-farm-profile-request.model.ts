@@ -6,4 +6,9 @@ export interface UpdateFarmProfileRequest {
   longitude?: number | null;
   sizeInFeddans: number;
   soilType?: number | null;
+  description?: string | null;
+  bankName?: string | null;
+  accountHolderName?: string | null;
+  bankAccountNumber?: string | null;
+  iban?: string | null;
 }

@@ -44,6 +44,8 @@ export interface AgentResponse {
   totalEligible?: number;
   /** Farms excluded by the shortlist cap. */
   truncatedCount?: number;
+  /** Prior matches superseded by this agent run. */
+  supersededCount?: number;
   comparisonReport: string;
   contractDraft: string;
   errorMessage: string;

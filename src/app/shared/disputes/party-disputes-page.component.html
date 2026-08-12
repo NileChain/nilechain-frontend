@@ -1,0 +1,52 @@
+<main class="md:ms-[280px] min-h-screen bg-surface">
+  <app-top-bar titleKey="dispute.inboxTitle" [portal]="portal" />
+
+  <div
+    class="p-margin-mobile md:p-margin-desktop max-w-5xl mx-auto space-y-gutter animate-fade-in"
+  >
+    <p class="font-body-md text-on-surface-variant">
+      {{ 'dispute.inboxSubtitle' | translate }}
+    </p>
+
+    @if (loading()) {
+      <div class="flex items-center gap-2 py-16">
+        <ui-loader />
+        <span class="font-body-md text-on-surface-variant">{{
+          'common.loading' | translate
+        }}</span>
+      </div>
+    } @else if (error()) {
+      <ui-error-state [message]="error()" (retry)="load()" />
+    } @else if (disputes().length === 0) {
+      <ui-empty-state
+        titleKey="dispute.inboxEmptyTitle"
+        bodyKey="dispute.inboxEmptyBody"
+        icon="gavel"
+      />
+    } @else {
+      <ul class="ui-card divide-y divide-outline-variant" role="list">
+        @for (d of disputes(); track d.disputeId) {
+          <li class="p-5 space-y-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <span
+                class="inline-flex items-center px-3 py-1 rounded-full border border-outline-variant font-label-sm"
+              >
+                {{ statusKey(d.status) | translate }}
+              </span>
+              <span class="font-label-sm text-on-surface-variant">
+                {{ typeKey(d.type) | translate }}
+              </span>
+            </div>
+            <p class="font-body-md text-on-surface">{{ d.description }}</p>
+            <p class="font-label-sm text-on-surface-variant">
+              {{ d.createdAt | date: 'medium' }}
+            </p>
+            <a class="ui-btn-ghost !px-0" [routerLink]="contractLink(d.contractId)">
+              {{ 'dispute.openContract' | translate }}
+            </a>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</main>

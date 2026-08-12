@@ -8,11 +8,17 @@ import { ContractTimelineStep } from '../models/contract-document.model';
   standalone: true,
   imports: [TranslatePipe, DatePipe],
   template: `
-    <section class="timeline-card" [attr.aria-label]="'contractDoc.timeline' | translate">
-      <h3 class="timeline-card__title">
-        <span class="material-symbols-outlined" aria-hidden="true">history</span>
-        {{ 'contractDoc.historyTitle' | translate }}
-      </h3>
+    <section
+      class="timeline-card"
+      [class.timeline-card--embedded]="!showTitle"
+      [attr.aria-label]="'contractDoc.timeline' | translate"
+    >
+      @if (showTitle) {
+        <h3 class="timeline-card__title">
+          <span class="material-symbols-outlined" aria-hidden="true">history</span>
+          {{ 'contractDoc.historyTitle' | translate }}
+        </h3>
+      }
       <ol class="timeline">
         @for (step of steps; track step.id; let i = $index) {
           <li
@@ -48,4 +54,5 @@ import { ContractTimelineStep } from '../models/contract-document.model';
 })
 export class ContractTimelineComponent {
   @Input({ required: true }) steps: ContractTimelineStep[] = [];
+  @Input() showTitle = true;
 }

@@ -1,0 +1,144 @@
+<section class="wallet-page">
+  <app-top-bar [titleKey]="'wallet.pageTitle'" [portal]="portal" [showSearch]="false" />
+
+  <div class="wallet-page__body">
+    <p class="wallet-page__lead">{{ 'wallet.lead' | translate }}</p>
+
+    @if (loading() || confirming()) {
+      <ui-loader
+        size="md"
+        [label]="(confirming() ? 'wallet.confirming' : 'wallet.loading') | translate"
+      />
+    } @else if (loadError()) {
+      <div class="wallet-page__error" role="alert">
+        <p>{{ loadError() }}</p>
+        <button type="button" class="ui-btn-ghost" (click)="load()">
+          {{ 'common.retry' | translate }}
+        </button>
+      </div>
+    } @else if (wallet(); as w) {
+      <p class="wallet-page__disclaimer" role="note">{{ w.disclaimer }}</p>
+
+      <div class="wallet-page__balances">
+        <div>
+          <p class="wallet-page__label">{{ 'wallet.available' | translate }}</p>
+          <p class="wallet-page__amount tabular-nums">
+            {{ w.availableBalanceEgp | number: '1.0-2' }} EGP
+          </p>
+        </div>
+        <div>
+          <p class="wallet-page__label">{{ 'wallet.held' | translate }}</p>
+          <p class="wallet-page__amount tabular-nums">
+            {{ w.heldBalanceEgp | number: '1.0-2' }} EGP
+          </p>
+        </div>
+      </div>
+
+      <section class="wallet-page__panel">
+        <h2>{{ 'wallet.topUpTitle' | translate }}</h2>
+        <p class="wallet-page__hint">{{ 'wallet.topUpHint' | translate }}</p>
+        @if (w.paymobConfigured) {
+          <p class="wallet-page__hint">{{ 'wallet.paymobHint' | translate }}</p>
+        } @else if (w.simulatorAvailable) {
+          <p class="wallet-page__hint">{{ 'wallet.simulatorHint' | translate }}</p>
+        }
+
+        @if (redirecting()) {
+          <ui-loader size="md" [label]="'wallet.redirecting' | translate" />
+        } @else {
+          <label class="wallet-page__field">
+            <span>{{ 'wallet.amount' | translate }}</span>
+            <input
+              type="number"
+              class="ui-input"
+              min="50"
+              step="50"
+              [(ngModel)]="topUpAmount"
+              [disabled]="acting()"
+            />
+          </label>
+          <button
+            type="button"
+            class="ui-btn-primary"
+            [disabled]="acting()"
+            (click)="startTopUp()"
+          >
+            {{ 'wallet.topUp' | translate }}
+          </button>
+        }
+
+        @if (!redirecting() && pendingTopUp(); as session) {
+          @if (session.mode === 'Simulator' && w.simulatorAvailable) {
+            <div class="wallet-page__pending">
+              <p>
+                {{ 'wallet.pendingTopUp' | translate }}:
+                <span class="tabular-nums">{{ session.amountEgp | number: '1.0-2' }}</span>
+                EGP
+              </p>
+              @if (session.sandboxHint) {
+                <p class="wallet-page__hint">{{ session.sandboxHint }}</p>
+              }
+              <button
+                type="button"
+                class="ui-btn-primary"
+                [disabled]="acting()"
+                (click)="completeSimulator()"
+              >
+                {{ 'wallet.completeSimulator' | translate }}
+              </button>
+            </div>
+          }
+        }
+      </section>
+
+      <section class="wallet-page__panel">
+        <h2>{{ 'wallet.withdrawTitle' | translate }}</h2>
+        <p class="wallet-page__hint">{{ 'wallet.withdrawHint' | translate }}</p>
+        <label class="wallet-page__field">
+          <span>{{ 'wallet.amount' | translate }}</span>
+          <input
+            type="number"
+            class="ui-input"
+            min="50"
+            step="50"
+            [(ngModel)]="withdrawAmount"
+            [disabled]="acting()"
+          />
+        </label>
+        <label class="wallet-page__field">
+          <span>{{ 'wallet.destination' | translate }}</span>
+          <input
+            type="text"
+            class="ui-input"
+            [(ngModel)]="withdrawDest"
+            [disabled]="acting()"
+            [attr.placeholder]="'wallet.destinationPh' | translate"
+          />
+        </label>
+        <button
+          type="button"
+          class="ui-btn-primary"
+          [disabled]="acting()"
+          (click)="withdraw()"
+        >
+          {{ 'wallet.withdraw' | translate }}
+        </button>
+      </section>
+
+      @if (w.recentLedger.length) {
+        <section class="wallet-page__panel">
+          <h2>{{ 'wallet.ledgerTitle' | translate }}</h2>
+          <ul class="wallet-page__list">
+            @for (e of w.recentLedger; track e.ledgerEntryId) {
+              <li>
+                <span>{{ e.entryType }}</span>
+                <span class="tabular-nums">{{ e.amountEgp | number: '1.0-2' }}</span>
+                <span class="wallet-page__meta">{{ e.createdAt | date: 'short' }}</span>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    }
+  </div>
+</section>

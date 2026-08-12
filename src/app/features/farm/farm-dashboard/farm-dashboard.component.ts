@@ -38,6 +38,7 @@ import {
   RecentMatchItem,
   ReliabilityTrendPoint,
 } from '../../../core/models/farm/farm-dashboard.model';
+import { MarketPriceTrendsComponent } from '../../factory/market-price-trends/market-price-trends.component';
 
 export interface AttentionItem {
   id: string;
@@ -68,6 +69,7 @@ export interface ActivityItem {
     AppTopBarComponent,
     RouterLink,
     DecimalPipe,
+    MarketPriceTrendsComponent,
   ],
   templateUrl: './farm-dashboard.component.html',
   styleUrl: './farm-dashboard.component.scss',
@@ -146,6 +148,18 @@ export class FarmDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
             recentMatches: data.recentMatches ?? [],
             riskBreakdown: data.riskBreakdown ?? [],
             improvementTips: data.improvementTips ?? [],
+            collectionsSummary: data.collectionsSummary ?? {
+              pendingAmount: 0,
+              awaitingConfirmAmount: 0,
+              receivedAmount: 0,
+              overdueAmount: 0,
+              currency: 'EGP',
+            },
+            expiringCertifications: data.expiringCertifications ?? 0,
+            expiredCertifications: data.expiredCertifications ?? 0,
+            onTimeFulfillmentRate: data.onTimeFulfillmentRate ?? null,
+            qcIssueRate: data.qcIssueRate ?? null,
+            repeatBuyers: data.repeatBuyers ?? [],
           }),
         error: () => this.error.set(this.i18n.instant('farm.dashboard.loadFailed')),
       });
@@ -241,6 +255,21 @@ export class FarmDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
       return [];
     }
     const items: AttentionItem[] = [];
+    if ((data.collectionsSummary?.overdueAmount ?? 0) > 0) {
+      items.push({
+        id: 'overdue-payments',
+        icon: 'warning',
+        titleKey: 'farm.dashboard.attentionOverdue',
+        titleParams: {
+          amount: Math.round(data.collectionsSummary.overdueAmount),
+        },
+        statusKey: 'farm.dashboard.attentionOverdueStatus',
+        ctaKey: 'farm.dashboard.reviewContractsCta',
+        link: '/farm/contracts',
+        tone: 'attention',
+      });
+    }
+
     const proposed = this.proposedReviewCount(data);
     if (proposed > 0) {
       items.push({
@@ -255,10 +284,25 @@ export class FarmDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
       });
     }
 
+    const expired = data.expiredCertifications ?? 0;
+    const expiring = data.expiringCertifications ?? 0;
+    if (expired > 0 || expiring > 0) {
+      items.push({
+        id: 'certs-expiry',
+        icon: 'verified',
+        titleKey: 'farm.dashboard.attentionCertExpiry',
+        titleParams: { expired, expiring },
+        statusKey: 'farm.dashboard.attentionImprove',
+        ctaKey: 'farm.dashboard.completeProfileCta',
+        link: '/farm/profile',
+        tone: 'info',
+      });
+    }
+
     const profileTip = (data.improvementTips ?? []).find((t) =>
       /profile/i.test(t.category)
     );
-    if (profileTip && profileTip.currentScore < 100) {
+    if (profileTip && profileTip.currentScore < 100 && items.length < 4) {
       items.push({
         id: 'profile-incomplete',
         icon: 'person',
@@ -270,22 +314,7 @@ export class FarmDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
       });
     }
 
-    const certTip = (data.improvementTips ?? []).find((t) =>
-      /certif/i.test(t.category)
-    );
-    if (certTip && certTip.currentScore < 50 && items.length < 3) {
-      items.push({
-        id: 'certs',
-        icon: 'verified',
-        titleKey: 'farm.dashboard.attentionCerts',
-        statusKey: 'farm.dashboard.attentionImprove',
-        ctaKey: 'farm.dashboard.improveScoreCta',
-        link: '/farm/profile',
-        tone: 'info',
-      });
-    }
-
-    return items.slice(0, 3);
+    return items.slice(0, 4);
   }
 
   private buildActivity(data: FarmDashboard | null): ActivityItem[] {

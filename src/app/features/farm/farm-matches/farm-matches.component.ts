@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
@@ -47,6 +47,7 @@ interface FilterChip {
     UiEmptyStateComponent,
     UiSkeletonComponent,
     FormsModule,
+    RouterLink,
     DatePipe,
     DecimalPipe,
   ],
@@ -67,6 +68,12 @@ export class FarmMatchesComponent implements OnInit {
   readonly cropTypes = signal<CropType[]>([]);
   readonly respondingId = signal<string | null>(null);
   readonly openingId = signal<string | null>(null);
+  readonly counteringId = signal<string | null>(null);
+  readonly counterFormMatchId = signal<string | null>(null);
+  readonly counterQty = signal<number | null>(null);
+  readonly counterPrice = signal<number | null>(null);
+  readonly counterDelivery = signal('');
+  readonly counterNote = signal('');
   readonly filtersOpen = signal(false);
   readonly menuOpenId = signal<string | null>(null);
   readonly expandedId = signal<string | null>(null);
@@ -385,6 +392,7 @@ export class FarmMatchesComponent implements OnInit {
     const s = this.statusKey(status);
     if (s === 'accepted') return 'farm.matches.statusAccepted';
     if (s === 'rejected') return 'farm.matches.statusRejected';
+    if (s === 'countered') return 'farm.matches.statusCountered';
     return 'farm.matches.statusProposed';
   }
 
@@ -392,8 +400,60 @@ export class FarmMatchesComponent implements OnInit {
     const s = this.statusKey(status);
     if (s === 'accepted') return 'success';
     if (s === 'rejected') return 'danger';
-    if (s === 'proposed') return 'pending';
+    if (s === 'proposed' || s === 'countered') return 'pending';
     return 'neutral';
+  }
+
+  displayQty(match: FarmMatchItem): number {
+    return match.effectiveQuantityTons ?? match.quantityTons;
+  }
+
+  displayPrice(match: FarmMatchItem): number | null {
+    return match.effectivePricePerTon ?? match.pricePerTon;
+  }
+
+  displayDelivery(match: FarmMatchItem): string | null {
+    return match.effectiveDeliveryDate ?? match.deliveryDate;
+  }
+
+  openCounterForm(match: FarmMatchItem, event?: Event): void {
+    event?.stopPropagation();
+    this.menuOpenId.set(null);
+    this.counterFormMatchId.set(match.matchId);
+    this.counterQty.set(match.quantityTons);
+    this.counterPrice.set(match.pricePerTon);
+    this.counterDelivery.set(match.deliveryDate?.slice(0, 10) ?? '');
+    this.counterNote.set('');
+  }
+
+  closeCounterForm(): void {
+    this.counterFormMatchId.set(null);
+  }
+
+  submitCounterOffer(match: FarmMatchItem): void {
+    if (this.counteringId()) return;
+    this.counteringId.set(match.matchId);
+    this.farmService
+      .counterOffer(match.matchId, {
+        quantityTons: this.counterQty(),
+        pricePerTon: this.counterPrice(),
+        deliveryDate: this.counterDelivery().trim() || null,
+        note: this.counterNote().trim() || null,
+      })
+      .pipe(finalize(() => this.counteringId.set(null)))
+      .subscribe({
+        next: () => {
+          this.toast.info(this.i18n.instant('farm.matches.counterSuccess'));
+          this.closeCounterForm();
+          this.loadMatches();
+        },
+        error: (err) =>
+          this.toast.error(
+            err?.error?.detail ||
+              err?.error?.message ||
+              this.i18n.instant('farm.matches.counterFailed')
+          ),
+      });
   }
 
   riskLabel(score: number | null): string {
@@ -401,6 +461,13 @@ export class FarmMatchesComponent implements OnInit {
     if (score >= 70) return this.i18n.instant('farm.matches.riskLow');
     if (score >= 40) return this.i18n.instant('farm.matches.riskMedium');
     return this.i18n.instant('farm.matches.riskHigh');
+  }
+
+  truncateQuality(specs: string | null | undefined, max = 80): string | null {
+    const text = specs?.trim();
+    if (!text) return null;
+    if (text.length <= max) return text;
+    return `${text.slice(0, max - 1)}…`;
   }
 
   riskTone(score: number | null): 'low' | 'med' | 'high' | 'none' {

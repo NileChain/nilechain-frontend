@@ -8,8 +8,30 @@
   </h3>
 
   <p class="pm-disclaimer" role="note">
-    {{ 'paymentMilestones.disclaimer' | translate }}
+    @if (schedule()?.mockGatewayEnabled) {
+      {{ 'paymentMilestones.mockDisclaimer' | translate }}
+    } @else {
+      {{ 'paymentMilestones.disclaimer' | translate }}
+    }
   </p>
+
+  @if (schedule()?.mockGatewayEnabled) {
+    <p class="pm-hint">
+      {{ 'paymentMilestones.insufficientHint' | translate }}
+      @if (portal === 'factory') {
+        <a routerLink="/factory/wallet" class="text-primary hover:underline ms-1">{{
+          'paymentMilestones.walletTopUpLink' | translate
+        }}</a>
+      }
+    </p>
+  }
+
+  @if (schedule()?.mockGatewayEnabled && schedule()?.platformFeePercent != null) {
+    <p class="pm-hint">
+      {{ 'paymentMilestones.platformFeeHint' | translate }}:
+      <span class="tabular-nums">{{ schedule()!.platformFeePercent | number: '1.0-2' }}%</span>
+    </p>
+  }
 
   @if (loading()) {
     <div class="pm-loading">
@@ -40,6 +62,36 @@
         </div>
       }
 
+      @if (s.paymentsFrozenByDispute) {
+        <div class="pm-voided" role="status">
+          <span class="material-symbols-outlined" aria-hidden="true">gavel</span>
+          <p>{{ 'paymentMilestones.frozenByDispute' | translate }}</p>
+        </div>
+      }
+
+      @if (s.farmPayoutDetails; as bank) {
+        <div class="pm-notes mb-3 text-sm space-y-1">
+          <p class="font-label-md text-on-surface">
+            {{ 'paymentMilestones.farmBankTitle' | translate }}
+          </p>
+          <p class="text-on-surface-variant">
+            {{ 'paymentMilestones.farmBankHint' | translate }}
+          </p>
+          @if (bank.bankName) {
+            <p>{{ bank.bankName }}</p>
+          }
+          @if (bank.accountHolderName) {
+            <p>{{ bank.accountHolderName }}</p>
+          }
+          @if (bank.accountMasked) {
+            <p class="tabular-nums">{{ bank.accountMasked }}</p>
+          }
+          @if (bank.iban) {
+            <p class="tabular-nums">{{ bank.iban }}</p>
+          }
+        </div>
+      }
+
       @if (s.contractTotal != null) {
         <p class="pm-total">
           {{ 'paymentMilestones.contractTotal' | translate }}:
@@ -63,6 +115,38 @@
               <span class="pm-dot">·</span>
               <span class="tabular-nums">{{ m.amount | number: '1.0-2' }}</span>
             </p>
+            @if (m.escrowStatus) {
+              <p class="pm-item__time">
+                {{ 'paymentMilestones.escrowStatus' | translate }}:
+                <strong>{{ m.escrowStatus }}</strong>
+                @if (m.platformFeeEgp != null) {
+                  <span class="ms-2">
+                    {{ 'paymentMilestones.feeLine' | translate }}:
+                    <span class="tabular-nums">{{ m.platformFeeEgp | number: '1.0-2' }}</span>
+                  </span>
+                }
+                @if (m.totalChargedEgp != null) {
+                  <span class="ms-2">
+                    {{ 'paymentMilestones.totalCharged' | translate }}:
+                    <span class="tabular-nums">{{ m.totalChargedEgp | number: '1.0-2' }}</span>
+                  </span>
+                }
+              </p>
+            }
+            @if (m.dueDate) {
+              <p
+                class="pm-item__time"
+                [class.text-error]="m.isOverdue && m.status === 'Pending'"
+              >
+                {{ 'paymentMilestones.dueDate' | translate }}:
+                {{ m.dueDate | date: 'mediumDate' }}
+                @if (m.isOverdue && m.status === 'Pending') {
+                  <span class="ms-1 font-label-sm">{{
+                    'paymentMilestones.overdue' | translate
+                  }}</span>
+                }
+              </p>
+            }
             @if (m.paidAt) {
               <p class="pm-item__time">
                 {{ 'paymentMilestones.markedPaidAt' | translate }}:
@@ -75,10 +159,66 @@
                 {{ m.receivedAt | date: 'medium' }}
               </p>
             }
+            @if (m.receiptUrl) {
+              <p class="pm-item__time">
+                <a
+                  [href]="m.receiptUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-primary hover:underline"
+                >
+                  {{ 'paymentMilestones.receiptView' | translate }}
+                </a>
+                @if (m.receiptFileName) {
+                  <span class="text-on-surface-variant ms-1">({{ m.receiptFileName }})</span>
+                }
+              </p>
+            }
 
-            @if (!s.isVoided && (canMarkPaid(m) || canConfirmReceived(m))) {
+            @if (
+              !s.isVoided &&
+              (canMarkPaid(m) ||
+                canConfirmReceived(m) ||
+                canMockPay(m) ||
+                canReleaseEscrow(m))
+            ) {
               <div class="pm-actions print:hidden">
+                @if (canMockPay(m)) {
+                  <button
+                    type="button"
+                    class="ui-btn-primary w-full"
+                    [disabled]="acting()"
+                    (click)="openMockPay(m)"
+                  >
+                    {{ 'paymentMilestones.mockPay' | translate }}
+                  </button>
+                }
+                @if (canReleaseEscrow(m)) {
+                  <button
+                    type="button"
+                    class="ui-btn-primary w-full"
+                    [disabled]="acting()"
+                    (click)="releaseEscrow(m)"
+                  >
+                    {{ 'paymentMilestones.release' | translate }}
+                  </button>
+                }
                 @if (canMarkPaid(m)) {
+                  <label class="block text-sm mb-2">
+                    <span class="text-on-surface-variant">{{
+                      'paymentMilestones.receiptOptional' | translate
+                    }}</span>
+                    <input
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png,.webp"
+                      class="ui-input mt-1"
+                      [disabled]="acting()"
+                      (change)="onReceiptSelected(m, $event)"
+                    />
+                    <span class="text-xs text-on-surface-variant">{{
+                      receiptLabel(m)
+                    }}</span>
+                  </label>
                   <button
                     type="button"
                     class="ui-btn-primary w-full"
@@ -104,5 +244,47 @@
         }
       </ul>
     }
+  }
+
+  @if (checkoutSession(); as session) {
+    <div
+      class="pm-checkout-backdrop print:hidden"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="'paymentMilestones.mockCheckoutTitle' | translate"
+    >
+      <div class="pm-checkout">
+        <div class="pm-checkout__badge">{{ 'paymentMilestones.mockBadge' | translate }}</div>
+        <h4 class="pm-checkout__title">{{ 'paymentMilestones.mockCheckoutTitle' | translate }}</h4>
+        <p class="pm-checkout__sub">{{ session.milestoneLabel }}</p>
+        <ul class="pm-checkout__lines">
+          <li>
+            <span>{{ 'paymentMilestones.milestoneAmount' | translate }}</span>
+            <span class="tabular-nums">{{ session.milestoneAmountEgp | number: '1.0-2' }} {{ session.currency }}</span>
+          </li>
+          <li>
+            <span>{{ 'paymentMilestones.platformFee' | translate }} ({{ session.platformFeePercent | number: '1.0-2' }}%)</span>
+            <span class="tabular-nums">{{ session.platformFeeEgp | number: '1.0-2' }} {{ session.currency }}</span>
+          </li>
+          <li class="pm-checkout__total">
+            <span>{{ 'paymentMilestones.totalCharged' | translate }}</span>
+            <span class="tabular-nums">{{ session.totalChargedEgp | number: '1.0-2' }} {{ session.currency }}</span>
+          </li>
+          <li>
+            <span>{{ 'paymentMilestones.farmNet' | translate }}</span>
+            <span class="tabular-nums">{{ session.farmNetEgp | number: '1.0-2' }} {{ session.currency }}</span>
+          </li>
+        </ul>
+        <p class="pm-disclaimer" role="note">{{ session.disclaimer }}</p>
+        <div class="pm-checkout__actions">
+          <button type="button" class="ui-btn-ghost" [disabled]="acting()" (click)="closeCheckout()">
+            {{ 'common.cancel' | translate }}
+          </button>
+          <button type="button" class="ui-btn-primary" [disabled]="acting()" (click)="confirmMockPay()">
+            {{ 'paymentMilestones.mockPayConfirm' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
   }
 </section>

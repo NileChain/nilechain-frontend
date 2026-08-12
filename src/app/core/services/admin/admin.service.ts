@@ -61,6 +61,22 @@ export class AdminService {
     return this.http.get<DashboardSummary>(`${this.api}/dashboard/summary`);
   }
 
+  runMonitoringNow(): Observable<{
+    success: boolean;
+    summary: string;
+    alertsSent: number;
+    activeContractsReviewed: number;
+    errorMessage?: string | null;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      summary: string;
+      alertsSent: number;
+      activeContractsReviewed: number;
+      errorMessage?: string | null;
+    }>(`${this.api}/monitoring/run-now`, {});
+  }
+
   getContracts(options: {
     status?: string | null;
     search?: string | null;
@@ -126,6 +142,16 @@ export class AdminService {
     return this.http.post<Dispute>(
       `${this.api}/disputes/${disputeId}/reject`,
       { adminNote } satisfies AdminDisputeAction
+    );
+  }
+
+  refundHeldEscrow(
+    contractId: string,
+    reason?: string
+  ): Observable<void> {
+    return this.http.post<void>(
+      `${this.api}/contracts/${contractId}/escrow/refund-held`,
+      { reason: reason ?? 'Admin refund of held escrow' }
     );
   }
 

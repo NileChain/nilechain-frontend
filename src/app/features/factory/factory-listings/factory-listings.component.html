@@ -1,0 +1,216 @@
+<main class="md:ms-[280px] min-h-screen bg-surface">
+  <app-top-bar
+    titleKey="factory.listings.title"
+    portal="factory"
+    notificationsLink="/factory/notifications"
+  />
+
+  <div class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto animate-fade-in space-y-6">
+    <header>
+      <h2 class="font-headline-md text-headline-md text-on-surface">
+        {{ 'factory.listings.pageHeading' | translate }}
+      </h2>
+      <p class="mt-1 text-on-surface-variant">
+        {{ 'factory.listings.subtitle' | translate }}
+      </p>
+    </header>
+
+    <section
+      class="ui-card p-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-end"
+      [attr.aria-label]="'factory.listings.filtersAria' | translate"
+    >
+      <label class="flex-1 flex flex-col gap-1">
+        <span class="font-label-sm text-on-surface-variant">{{
+          'factory.listings.crop' | translate
+        }}</span>
+        <select
+          class="ui-input"
+          [ngModel]="cropFilter()"
+          (ngModelChange)="cropFilter.set($event)"
+        >
+          <option value="">{{ 'factory.listings.allCrops' | translate }}</option>
+          @for (crop of cropTypes(); track crop.cropTypeId) {
+            <option [value]="crop.cropTypeId">{{ crop.name }}</option>
+          }
+        </select>
+      </label>
+      <label class="flex-1 flex flex-col gap-1">
+        <span class="font-label-sm text-on-surface-variant">{{
+          'factory.listings.governorate' | translate
+        }}</span>
+        <select
+          class="ui-input"
+          [ngModel]="governorateFilter()"
+          (ngModelChange)="governorateFilter.set($event)"
+        >
+          <option value="">
+            {{ 'factory.listings.allGovernorates' | translate }}
+          </option>
+          @for (g of governorates; track g.name) {
+            <option [value]="g.name">{{ g.name }}</option>
+          }
+        </select>
+      </label>
+      <div class="flex gap-2">
+        <button type="button" class="ui-btn-primary" (click)="applyFilters()">
+          {{ 'factory.listings.apply' | translate }}
+        </button>
+        <button type="button" class="ui-btn-ghost" (click)="resetFilters()">
+          {{ 'common.reset' | translate }}
+        </button>
+      </div>
+    </section>
+
+    @if (loading()) {
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        @for (i of [1, 2, 3, 4, 5, 6]; track $index) {
+          <div class="ui-card p-4 space-y-3">
+            <ui-skeleton height="9rem" width="100%" />
+            <ui-skeleton height="1rem" width="60%" />
+            <ui-skeleton height="0.85rem" width="40%" />
+          </div>
+        }
+      </div>
+    } @else if (error()) {
+      <ui-error-state [message]="error()" (retry)="load()" />
+    } @else if (listings().length === 0) {
+      <ui-empty-state
+        titleKey="factory.listings.empty"
+        bodyKey="factory.listings.emptyBody"
+        icon="storefront"
+      >
+        <a routerLink="/factory/supply-request" class="ui-btn-primary mt-3 inline-flex">
+          {{ 'factory.listings.createRequestCta' | translate }}
+        </a>
+      </ui-empty-state>
+    } @else {
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        @for (item of listings(); track item.farmId + item.cropTypeId) {
+          <article class="ui-card overflow-hidden flex flex-col">
+            <div class="aspect-[16/9] bg-surface-container">
+              @if (item.coverImageUrl) {
+                <img
+                  [src]="item.coverImageUrl"
+                  [alt]="item.farmName"
+                  class="w-full h-full object-cover"
+                />
+              } @else {
+                <div
+                  class="w-full h-full flex items-center justify-center text-on-surface-variant"
+                >
+                  <span class="material-symbols-outlined text-4xl" aria-hidden="true"
+                    >agriculture</span
+                  >
+                </div>
+              }
+            </div>
+            <div class="p-4 flex flex-col gap-2 flex-1">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <h3 class="font-title-md text-on-surface truncate">
+                    {{ item.farmName }}
+                  </h3>
+                  <p class="text-sm text-on-surface-variant">
+                    {{ item.governorate || '—' }}
+                    @if (item.isVerified) {
+                      <span class="ms-1 text-primary">{{
+                        'factory.listings.verified' | translate
+                      }}</span>
+                    }
+                  </p>
+                </div>
+                <span class="tabular-nums text-sm shrink-0">
+                  ★ {{ item.averageRating | number: '1.1-1' }}
+                </span>
+              </div>
+              <p class="font-label-lg text-on-surface">{{ item.cropName }}</p>
+              <dl class="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <dt class="text-on-surface-variant">
+                    {{ 'factory.listings.qty' | translate }}
+                  </dt>
+                  <dd class="tabular-nums">
+                    @if (item.availableQuantityTons != null) {
+                      {{ item.availableQuantityTons | number: '1.0-0' }} t
+                    } @else {
+                      —
+                    }
+                  </dd>
+                </div>
+                <div>
+                  <dt class="text-on-surface-variant">
+                    {{ 'factory.listings.minPrice' | translate }}
+                  </dt>
+                  <dd class="tabular-nums">
+                    @if (item.minPricePerTon != null) {
+                      {{ item.minPricePerTon | number: '1.0-0' }} EGP/t
+                    } @else {
+                      —
+                    }
+                  </dd>
+                </div>
+                <div class="col-span-2">
+                  <dt class="text-on-surface-variant">
+                    {{ 'factory.listings.window' | translate }}
+                  </dt>
+                  <dd>
+                    @if (item.availableFrom || item.availableTo) {
+                      {{
+                        item.availableFrom
+                          ? (item.availableFrom | date: 'mediumDate')
+                          : '…'
+                      }}
+                      →
+                      {{
+                        item.availableTo
+                          ? (item.availableTo | date: 'mediumDate')
+                          : '…'
+                      }}
+                    } @else {
+                      —
+                    }
+                  </dd>
+                </div>
+              </dl>
+              <div class="mt-auto pt-2 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  class="ui-btn-secondary !py-1.5 !px-3 text-sm"
+                  (click)="openProfile(item.farmId)"
+                >
+                  {{ 'factory.listings.viewProfile' | translate }}
+                </button>
+                <a
+                  class="ui-btn-primary !py-1.5 !px-3 text-sm inline-flex"
+                  routerLink="/factory/supply-request"
+                  [queryParams]="{
+                    cropTypeId: item.cropTypeId,
+                    quantity: item.availableQuantityTons,
+                    price: item.minPricePerTon,
+                    governorate: item.governorate,
+                    farmId: item.farmId,
+                    availableTo: item.availableTo
+                  }"
+                >
+                  {{ 'factory.listings.requestSupply' | translate }}
+                </a>
+                <a
+                  class="ui-btn-ghost !py-1.5 !px-3 text-sm inline-flex"
+                  [routerLink]="['/factory/suppliers', item.farmId, 'scorecard']"
+                >
+                  {{ 'factory.listings.scorecard' | translate }}
+                </a>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </div>
+
+  <app-farm-profile-drawer
+    [open]="profileOpen()"
+    [farmId]="profileFarmId()"
+    (closed)="closeProfile()"
+  />
+</main>

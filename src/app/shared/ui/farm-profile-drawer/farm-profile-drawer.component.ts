@@ -14,6 +14,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import * as L from 'leaflet';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
@@ -58,6 +59,7 @@ configureLeafletDefaultIcon();
     TranslatePipe,
     DatePipe,
     DecimalPipe,
+    RouterLink,
     UiSkeletonComponent,
     UiErrorStateComponent,
     UiEmptyStateComponent,
@@ -75,6 +77,10 @@ export class FarmProfileDrawerComponent
 
   @Input() open = false;
   @Input() farmId: string | null = null;
+  /** When set, shows Message CTA deep-linked to this match thread. */
+  @Input() matchId: string | null = null;
+  /** When false, Message CTA is hidden (chat only after both parties signed). */
+  @Input() canMessage = false;
   @Input() matchRationale: string | null = null;
 
   @Output() readonly closed = new EventEmitter<void>();

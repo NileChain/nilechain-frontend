@@ -16,6 +16,7 @@
             <div class="flex-1 space-y-2">
               <ui-skeleton height="1rem" width="35%" />
               <ui-skeleton height="0.875rem" width="60%" />
+              <ui-skeleton height="0.75rem" width="45%" />
             </div>
           </div>
         }
@@ -26,14 +27,9 @@
       <ui-error-state [message]="error()" (retry)="loadConversations()" />
     </div>
   } @else {
-    <div
-      class="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-[calc(100vh-4rem)] animate-fade-in"
-    >
-      <section
-        class="w-full lg:w-[360px] bg-surface-container-lowest flex flex-col border-b lg:border-b-0 lg:border-e border-outline-variant shrink-0 max-h-[40vh] lg:max-h-none"
-        [attr.aria-label]="'messages.title' | translate"
-      >
-        <div class="flex-1 overflow-y-auto">
+    <div class="msg-inbox animate-fade-in">
+      <section class="msg-list" [attr.aria-label]="'messages.title' | translate">
+        <div class="msg-list__scroll">
           @if (conversations().length === 0) {
             <div class="p-4">
               <ui-empty-state
@@ -43,77 +39,115 @@
               />
             </div>
           } @else {
-            @for (convo of conversations(); track convo.matchId) {
-              <button
-                type="button"
-                class="w-full text-start flex items-start p-4 transition-colors border-s-4"
-                [class]="
-                  selectedMatchId() === convo.matchId
-                    ? 'bg-surface-container border-primary'
-                    : 'hover:bg-surface-container-low border-transparent'
-                "
-                (click)="selectConversation(convo.matchId)"
-              >
-                <div class="relative me-4 shrink-0">
-                  <div
-                    class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-title-lg font-bold shadow-sm"
-                  >
-                    {{ convo.farmName.charAt(0).toUpperCase() }}
+            @for (group of groups(); track group.key) {
+              <div class="msg-group">
+                <div class="msg-group__head">
+                  <div class="msg-group__avatar" aria-hidden="true">
+                    {{ group.name.charAt(0).toUpperCase() }}
                   </div>
-                  @if (convo.unreadCount > 0) {
-                    <span
-                      class="absolute -top-1 -end-1 min-w-5 h-5 px-1 bg-error text-on-error text-xs rounded-full flex items-center justify-center"
-                      >{{ convo.unreadCount }}</span
-                    >
-                  }
+                  <div class="min-w-0 flex-1">
+                    <h2 class="msg-group__name truncate">{{ group.name }}</h2>
+                    <p class="msg-group__count">
+                      {{
+                        'messages.dealsCount'
+                          | translate: { count: group.threads.length }
+                      }}
+                      @if (group.unreadTotal > 0) {
+                        · {{ group.unreadTotal }}
+                      }
+                    </p>
+                  </div>
                 </div>
-                <div class="flex-1 min-w-0">
-                  <div class="flex justify-between items-baseline mb-1 gap-2">
-                    <h2
-                      class="font-title-md text-title-md text-on-surface truncate"
-                    >
-                      {{ convo.farmName }}
-                    </h2>
-                    @if (convo.lastMessageAt) {
-                      <span
-                        class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap"
-                      >
-                        {{ convo.lastMessageAt | date: 'shortTime' }}
+
+                @for (convo of group.threads; track convo.matchId) {
+                  <button
+                    type="button"
+                    class="msg-thread"
+                    [class.is-active]="selectedMatchId() === convo.matchId"
+                    (click)="selectConversation(convo.matchId)"
+                  >
+                    <div class="msg-thread__top">
+                      <p class="msg-thread__title">{{ dealMeta(convo) }}</p>
+                      @if (activityAt(convo); as when) {
+                        <span class="msg-thread__when">{{
+                          when | date: 'd MMM'
+                        }}</span>
+                      }
+                    </div>
+                    <div class="msg-thread__chips">
+                      <span class="msg-chip tabular-nums">
+                        {{
+                          'messages.dealRef'
+                            | translate: { ref: matchRef(convo.matchId) }
+                        }}
                       </span>
-                    }
-                  </div>
-                  <p
-                    class="font-body-md text-body-md text-on-surface-variant truncate"
-                  >
-                    {{ convo.lastMessage || convo.cropName || '—' }}
-                  </p>
-                </div>
-              </button>
+                      @if (convo.status) {
+                        <span class="msg-chip msg-chip--status">
+                          {{ statusLabelKey(convo.status) | translate }}
+                        </span>
+                      }
+                      @if (convo.contractId) {
+                        <span class="msg-chip msg-chip--contract">
+                          {{ 'messages.hasContract' | translate }}
+                        </span>
+                      }
+                    </div>
+                    <p class="msg-thread__preview">{{ previewText(convo) }}</p>
+                  </button>
+                }
+              </div>
             }
           }
         </div>
       </section>
 
-      <section class="flex-1 flex flex-col bg-surface min-h-0">
-        @if (selectedConversation(); as active) {
-          <div class="p-4 border-b border-outline-variant">
-            <h2 class="font-title-lg text-title-lg text-on-surface">
-              {{ active.farmName }}
-            </h2>
-            @if (active.cropName) {
-              <p class="text-on-surface-variant font-body-md">
-                {{ active.cropName }}
+      <section class="msg-pane">
+        @if (selectedMatchId(); as mid) {
+          @if (selectedConversation(); as active) {
+            <header class="msg-pane__head">
+              <p class="msg-pane__kicker">
+                {{
+                  'messages.dealRef'
+                    | translate: { ref: matchRef(active.matchId) }
+                }}
               </p>
-            }
-          </div>
+              <h2 class="msg-pane__title">{{ active.farmName }}</h2>
+              <p class="msg-pane__deal">{{ dealMeta(active) }}</p>
+              <div class="msg-pane__meta">
+                @if (active.status) {
+                  <span>{{ statusLabelKey(active.status) | translate }}</span>
+                }
+                @if (active.deliveryDate) {
+                  <span>{{ active.deliveryDate | date: 'mediumDate' }}</span>
+                }
+                @if (active.matchCreatedAt) {
+                  <span>{{ active.matchCreatedAt | date: 'mediumDate' }}</span>
+                }
+              </div>
+            </header>
+          } @else {
+            <header class="msg-pane__head">
+              <p class="msg-pane__kicker">
+                {{ 'messages.dealRef' | translate: { ref: matchRef(mid) } }}
+              </p>
+              <h2 class="msg-pane__title">
+                {{ 'messages.conversationFallback' | translate }}
+              </h2>
+            </header>
+          }
 
           <div class="flex-1 overflow-y-auto p-4 space-y-4">
             @if (messagesLoading()) {
               <div class="flex justify-center py-8"><ui-loader /></div>
+            } @else if (chatGated()) {
+              <ui-empty-state
+                titleKey="messages.chatGatedTitle"
+                bodyKey="messages.chatAfterBothSigned"
+              />
             } @else if (threadError()) {
               <ui-error-state
                 [message]="threadError()"
-                (retry)="selectConversation(selectedMatchId()!)"
+                (retry)="selectConversation(mid)"
               />
             } @else if (messages().length === 0) {
               <p
@@ -157,29 +191,31 @@
             }
           </div>
 
-          <form
-            class="p-4 border-t border-outline-variant flex gap-3"
-            (submit)="$event.preventDefault(); send()"
-          >
-            <label class="sr-only" for="factory-message-draft">Message</label>
-            <input
-              id="factory-message-draft"
-              class="ui-input flex-1"
-              type="text"
-              [(ngModel)]="draft"
-              name="draft"
-              [attr.placeholder]="'messages.placeholder' | translate"
-            />
-            <button
-              type="submit"
-              class="ui-btn-primary"
-              [disabled]="sending() || !draft.trim()"
+          @if (!chatGated()) {
+            <form
+              class="p-4 border-t border-outline-variant flex gap-3"
+              (submit)="$event.preventDefault(); send()"
             >
-              <span class="material-symbols-outlined" aria-hidden="true"
-                >send</span
+              <label class="sr-only" for="factory-message-draft">Message</label>
+              <input
+                id="factory-message-draft"
+                class="ui-input flex-1"
+                type="text"
+                [(ngModel)]="draft"
+                name="draft"
+                [attr.placeholder]="'messages.placeholder' | translate"
+              />
+              <button
+                type="submit"
+                class="ui-btn-primary"
+                [disabled]="sending() || !draft.trim()"
               >
-            </button>
-          </form>
+                <span class="material-symbols-outlined" aria-hidden="true"
+                  >send</span
+                >
+              </button>
+            </form>
+          }
         } @else {
           <div
             class="flex-1 flex items-center justify-center text-on-surface-variant p-8"

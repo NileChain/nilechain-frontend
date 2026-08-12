@@ -190,8 +190,15 @@
                         [(ngModel)]="outcomeFavors[d.disputeId]"
                         [name]="'favor-' + d.disputeId"
                       >
-                        <option value="Farm">Farm</option>
-                        <option value="Factory">Factory</option>
+                        <option value="Farm">{{
+                          'admin.disputes.favorFarm' | translate
+                        }}</option>
+                        <option value="Factory">{{
+                          'admin.disputes.favorFactory' | translate
+                        }}</option>
+                        <option value="Split">{{
+                          'admin.disputes.favorSplit' | translate
+                        }}</option>
                       </select>
                     </label>
                   }
@@ -223,6 +230,16 @@
                         (click)="reject(d)"
                       >
                         {{ 'admin.disputes.reject' | translate }}
+                      </button>
+                    }
+                    @if (d.status === 'Open' || d.status === 'UnderReview') {
+                      <button
+                        type="button"
+                        class="ui-btn-ghost"
+                        [disabled]="actionLoading() === d.disputeId"
+                        (click)="refundHeld(d)"
+                      >
+                        {{ 'admin.disputes.refundHeld' | translate }}
                       </button>
                     }
                   </div>

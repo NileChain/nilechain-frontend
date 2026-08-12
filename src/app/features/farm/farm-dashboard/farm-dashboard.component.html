@@ -111,6 +111,156 @@
         </article>
       </section>
 
+      <!-- Collections (compact money strip) -->
+      <section
+        class="fd-panel fd-strip"
+        [attr.aria-label]="'farm.dashboard.collectionsAria' | translate"
+      >
+        <header class="fd-strip__head">
+          <h2 class="fd-section-title">
+            {{ 'farm.dashboard.collectionsAria' | translate }}
+          </h2>
+          <a routerLink="/farm/contracts" class="fd-text-link">
+            {{ 'common.viewAll' | translate }}
+            <span
+              class="material-symbols-outlined text-[16px] icon-flip"
+              aria-hidden="true"
+              >arrow_forward</span
+            >
+          </a>
+        </header>
+        <div class="fd-strip__grid">
+          <a routerLink="/farm/contracts" class="fd-strip__cell">
+            <p class="fd-strip__label">
+              {{ 'farm.dashboard.collectionsPending' | translate }}
+            </p>
+            <p class="fd-strip__value ui-data">
+              {{ data.collectionsSummary.pendingAmount | number: '1.0-0' }}
+              <span class="fd-strip__unit">{{
+                data.collectionsSummary.currency
+              }}</span>
+            </p>
+          </a>
+          <a routerLink="/farm/contracts" class="fd-strip__cell">
+            <p class="fd-strip__label">
+              {{ 'farm.dashboard.collectionsAwaiting' | translate }}
+            </p>
+            <p class="fd-strip__value ui-data">
+              {{
+                data.collectionsSummary.awaitingConfirmAmount | number: '1.0-0'
+              }}
+              <span class="fd-strip__unit">{{
+                data.collectionsSummary.currency
+              }}</span>
+            </p>
+          </a>
+          <a routerLink="/farm/contracts" class="fd-strip__cell">
+            <p class="fd-strip__label">
+              {{ 'farm.dashboard.collectionsReceived' | translate }}
+            </p>
+            <p class="fd-strip__value ui-data">
+              {{ data.collectionsSummary.receivedAmount | number: '1.0-0' }}
+              <span class="fd-strip__unit">{{
+                data.collectionsSummary.currency
+              }}</span>
+            </p>
+          </a>
+          <a
+            routerLink="/farm/contracts"
+            class="fd-strip__cell"
+            [class.fd-strip__cell--alert]="
+              data.collectionsSummary.overdueAmount > 0
+            "
+          >
+            <p class="fd-strip__label">
+              {{ 'farm.dashboard.collectionsOverdue' | translate }}
+            </p>
+            <p class="fd-strip__value ui-data">
+              {{ data.collectionsSummary.overdueAmount | number: '1.0-0' }}
+              <span class="fd-strip__unit">{{
+                data.collectionsSummary.currency
+              }}</span>
+            </p>
+          </a>
+        </div>
+      </section>
+
+      <!-- Ops metrics (compact) -->
+      <section
+        class="fd-panel fd-strip fd-strip--ops"
+        [attr.aria-label]="'farm.dashboard.opsAria' | translate"
+      >
+        <div class="fd-strip__grid fd-strip__grid--3">
+          <div class="fd-strip__cell fd-strip__cell--static">
+            <p class="fd-strip__label">
+              {{ 'farm.dashboard.onTimeRate' | translate }}
+            </p>
+            <p class="fd-strip__value ui-data">
+              @if (data.onTimeFulfillmentRate != null) {
+                {{ data.onTimeFulfillmentRate | number: '1.0-0' }}%
+              } @else {
+                —
+              }
+            </p>
+          </div>
+          <div class="fd-strip__cell fd-strip__cell--static">
+            <p class="fd-strip__label">
+              {{ 'farm.dashboard.qcIssueRate' | translate }}
+            </p>
+            <p class="fd-strip__value ui-data">
+              @if (data.qcIssueRate != null) {
+                {{ data.qcIssueRate | number: '1.0-0' }}%
+              } @else {
+                —
+              }
+            </p>
+          </div>
+          <div class="fd-strip__cell fd-strip__cell--static">
+            <p class="fd-strip__label">
+              {{ 'farm.dashboard.certHealth' | translate }}
+            </p>
+            <p class="fd-strip__value ui-data">
+              {{ data.expiringCertifications ?? 0 }}
+              <span class="fd-strip__unit">{{
+                'farm.dashboard.certExpiringShort' | translate
+              }}</span>
+            </p>
+            <p class="fd-strip__hint">
+              {{
+                'farm.dashboard.certExpiredCount'
+                  | translate: { count: data.expiredCertifications ?? 0 }
+              }}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      @if ((data.repeatBuyers ?? []).length > 0) {
+        <section
+          class="fd-panel fd-panel--pad"
+          [attr.aria-label]="'farm.dashboard.repeatBuyers' | translate"
+        >
+          <header class="fd-section-head fd-section-head--inline">
+            <h2 class="fd-section-title">
+              {{ 'farm.dashboard.repeatBuyers' | translate }}
+            </h2>
+          </header>
+          <ul class="fd-buyer-list">
+            @for (b of data.repeatBuyers!; track b.factoryId) {
+              <li class="fd-buyer-list__item">
+                <span class="fd-buyer-list__name">{{ b.factoryName }}</span>
+                <span class="fd-buyer-list__count">
+                  {{
+                    'farm.dashboard.repeatBuyerCount'
+                      | translate: { count: b.completedContracts }
+                  }}
+                </span>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
       <!-- Needs attention -->
       <section
         class="fd-panel fd-attention"
@@ -163,71 +313,86 @@
         }
       </section>
 
-      <!-- Reliability trend -->
-      <section class="fd-panel fd-trend-card">
-        <div class="fd-section-head fd-section-head--row">
-          <div class="min-w-0">
-            <h2 class="fd-section-title">
-              {{ 'farm.dashboard.reliabilityTrend' | translate }}
-            </h2>
-            @if (data.reliabilityTrend.length > 0) {
-              <p class="fd-section-sub">
-                {{ 'farm.dashboard.reliabilityTrendHint' | translate }}
-              </p>
+      <!-- Charts: market + reliability -->
+      <div class="fd-charts-grid">
+        <section
+          class="fd-panel fd-market"
+          [attr.aria-label]="'farm.dashboard.marketTrends' | translate"
+        >
+          <app-market-price-trends class="block" />
+        </section>
+
+        <section class="fd-panel fd-trend-card">
+          <div class="fd-section-head fd-section-head--row">
+            <div class="min-w-0">
+              <h2 class="fd-section-title">
+                {{ 'farm.dashboard.reliabilityTrend' | translate }}
+              </h2>
+              @if (data.reliabilityTrend.length > 0) {
+                <p class="fd-section-sub">
+                  {{ 'farm.dashboard.reliabilityTrendHint' | translate }}
+                </p>
+              }
+            </div>
+            @let delta = trendDelta(data.reliabilityTrend);
+            @if (delta !== null) {
+              <span
+                class="fd-trend-delta"
+                [class.fd-trend-delta--up]="delta > 0"
+                [class.fd-trend-delta--down]="delta < 0"
+                [class.fd-trend-delta--flat]="delta === 0"
+              >
+                @if (delta > 0) {
+                  <span
+                    class="material-symbols-outlined text-[16px]"
+                    aria-hidden="true"
+                    >trending_up</span
+                  >
+                  +{{ delta }}
+                } @else if (delta < 0) {
+                  <span
+                    class="material-symbols-outlined text-[16px]"
+                    aria-hidden="true"
+                    >trending_down</span
+                  >
+                  {{ delta }}
+                } @else {
+                  <span
+                    class="material-symbols-outlined text-[16px]"
+                    aria-hidden="true"
+                    >trending_flat</span
+                  >
+                  0
+                }
+              </span>
             }
           </div>
-          @let delta = trendDelta(data.reliabilityTrend);
-          @if (delta !== null) {
-            <span
-              class="fd-trend-delta"
-              [class.fd-trend-delta--up]="delta > 0"
-              [class.fd-trend-delta--down]="delta < 0"
-              [class.fd-trend-delta--flat]="delta === 0"
-            >
-              @if (delta > 0) {
-                <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
-                  >trending_up</span
-                >
-                +{{ delta }}
-              } @else if (delta < 0) {
-                <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
-                  >trending_down</span
-                >
-                {{ delta }}
-              } @else {
-                <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
-                  >trending_flat</span
-                >
-                0
-              }
-            </span>
-          }
-        </div>
 
-        @if (data.reliabilityTrend.length === 0) {
-          <div class="fd-empty fd-empty--compact">
-            <span class="material-symbols-outlined" aria-hidden="true"
-              >show_chart</span
-            >
-            <div>
-              <p class="fd-empty__title">
-                {{ 'farm.dashboard.reliabilityTrendEmptyTitle' | translate }}
-              </p>
-              <p class="fd-empty__body">
-                {{ 'farm.dashboard.reliabilityTrendEmpty' | translate }}
-              </p>
+          @if (data.reliabilityTrend.length === 0) {
+            <div class="fd-empty fd-empty--compact">
+              <span class="material-symbols-outlined" aria-hidden="true"
+                >show_chart</span
+              >
+              <div>
+                <p class="fd-empty__title">
+                  {{ 'farm.dashboard.reliabilityTrendEmptyTitle' | translate }}
+                </p>
+                <p class="fd-empty__body">
+                  {{ 'farm.dashboard.reliabilityTrendEmpty' | translate }}
+                </p>
+              </div>
             </div>
-          </div>
-        } @else {
-          <div
-            class="fd-trend-chart"
-            role="img"
-            [attr.aria-label]="'farm.dashboard.reliabilityTrend' | translate"
-          >
-            <canvas #trendChart></canvas>
-          </div>
-        }
-      </section>
+          } @else {
+            <div
+              class="fd-trend-chart"
+              role="img"
+              [attr.aria-label]="'farm.dashboard.reliabilityTrend' | translate"
+            >
+              <canvas #trendChart></canvas>
+            </div>
+          }
+        </section>
+      </div>
 
       <!-- Matches + Score -->
       <div class="fd-main-grid">

@@ -1,5 +1,5 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, ElementRef, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -42,8 +42,6 @@ import {
   styleUrl: './factory-profile.component.scss',
 })
 export class FactoryProfileComponent implements OnInit {
-  @ViewChild('nameInput') nameInput?: ElementRef<HTMLInputElement>;
-
   private readonly factoryService = inject(FactoryService);
   private readonly farmService = inject(FarmService);
   private readonly authService = inject(AuthService);
@@ -137,23 +135,15 @@ export class FactoryProfileComponent implements OnInit {
   }
 
   onLocationPicked(loc: PickedLocation): void {
+    const coords = `${loc.latitude.toFixed(5)}, ${loc.longitude.toFixed(5)}`;
     this.form.patchValue({
       latitude: loc.latitude,
       longitude: loc.longitude,
       governorate: loc.governorate,
-      location:
-        this.form.controls.location.value?.trim() ||
-        `${loc.governorateAr} (${loc.governorate})`,
+      location: `${loc.governorateAr} (${loc.governorate}) · ${coords}`,
     });
     this.form.controls.governorate.markAsDirty();
-  }
-
-  focusBasicInfo(): void {
-    this.nameInput?.nativeElement?.focus();
-    this.nameInput?.nativeElement?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center',
-    });
+    this.form.controls.location.markAsDirty();
   }
 
   starSlots(rating: number): Array<'full' | 'half' | 'empty'> {

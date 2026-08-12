@@ -7,13 +7,23 @@ import {
   FactoryProfile,
   UpdateFactoryProfileRequest,
 } from '../../models/factory/factory-profile.model';
-import { FactoryMatchItem } from '../../models/factory/factory-match.model';
+import { FactoryMatchItem, FarmListing } from '../../models/factory/factory-match.model';
 import {
   Fulfillment,
   QualityCheckRequest,
+  ReceiveFulfillmentRequest,
+  RejectAtGateRequest,
 } from '../../models/fulfillment/fulfillment.model';
-import { PaymentMilestoneSchedule } from '../../models/payment/payment-milestone.model';
-import { Dispute } from '../../models/dispute/dispute.model';
+import { MockEscrowSession, PaymentMilestoneSchedule } from '../../models/payment/payment-milestone.model';
+import { Dispute, DisputeList } from '../../models/dispute/dispute.model';
+import {
+  FactoryDashboardResponse,
+  FactorySupplierScorecard,
+  FactorySupplyRequestDetail,
+  FactorySupplyRequestPage,
+} from '../../models/factory/factory-dashboard.model';
+import { ContractAttachmentDto } from '../../../shared/contracts/models/contract-document.model';
+import { ContractIntegrity } from '../../models/integrity/contract-integrity.model';
 
 @Injectable({
   providedIn: 'root',
@@ -24,6 +34,42 @@ export class FactoryService {
 
   getProfile(): Observable<FactoryProfile> {
     return this.http.get<FactoryProfile>(`${this.api}/profile`);
+  }
+
+  getDashboard(): Observable<FactoryDashboardResponse> {
+    return this.http.get<FactoryDashboardResponse>(`${this.api}/dashboard`);
+  }
+
+  listRequests(
+    page: number,
+    pageSize: number,
+    status?: string | null
+  ): Observable<FactorySupplyRequestPage> {
+    let params = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize));
+    if (status) {
+      params = params.set('status', status);
+    }
+    return this.http.get<FactorySupplyRequestPage>(`${this.api}/requests`, {
+      params,
+    });
+  }
+
+  getRequest(requestId: string): Observable<FactorySupplyRequestDetail> {
+    return this.http.get<FactorySupplyRequestDetail>(
+      `${this.api}/requests/${requestId}`
+    );
+  }
+
+  cancelRequest(requestId: string): Observable<void> {
+    return this.http.post<void>(`${this.api}/requests/${requestId}/cancel`, {});
+  }
+
+  getSupplierScorecard(farmId: string): Observable<FactorySupplierScorecard> {
+    return this.http.get<FactorySupplierScorecard>(
+      `${this.api}/suppliers/${farmId}/scorecard`
+    );
   }
 
   updateProfile(payload: UpdateFactoryProfileRequest): Observable<void> {
@@ -48,8 +94,38 @@ export class FactoryService {
     return this.http.post<void>(`${this.api}/matches/${matchId}/exclude`, {});
   }
 
+  acceptCounterOffer(matchId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.api}/matches/${matchId}/accept-counter`,
+      {}
+    );
+  }
+
+  rejectCounterOffer(matchId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.api}/matches/${matchId}/reject-counter`,
+      {}
+    );
+  }
+
+  getPublishedListings(options?: {
+    cropTypeId?: string | null;
+    governorate?: string | null;
+  }): Observable<FarmListing[]> {
+    let params = new HttpParams();
+    if (options?.cropTypeId) params = params.set('cropTypeId', options.cropTypeId);
+    if (options?.governorate) params = params.set('governorate', options.governorate);
+    return this.http.get<FarmListing[]>(`${this.api}/listings`, { params });
+  }
+
   getMatchedFarms(): Observable<FactoryMatchedFarm[]> {
     return this.http.get<FactoryMatchedFarm[]>(`${this.api}/matched-farms`);
+  }
+
+  getActiveMatchWithFarm(farmId: string): Observable<FactoryActiveMatch> {
+    return this.http.get<FactoryActiveMatch>(
+      `${this.api}/farms/${farmId}/active-match`
+    );
   }
 
   getNotifications(): Observable<FactoryNotification[]> {
@@ -120,16 +196,60 @@ export class FactoryService {
     });
   }
 
+  listContractAttachments(
+    contractId: string
+  ): Observable<ContractAttachmentDto[]> {
+    return this.http.get<ContractAttachmentDto[]>(
+      `${this.api}/contracts/${contractId}/attachments`
+    );
+  }
+
+  uploadContractAttachment(
+    contractId: string,
+    file: File,
+    kind: string
+  ): Observable<ContractAttachmentDto> {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    form.append('kind', kind);
+    return this.http.post<ContractAttachmentDto>(
+      `${this.api}/contracts/${contractId}/attachments`,
+      form
+    );
+  }
+
+  deleteContractAttachment(
+    contractId: string,
+    attachmentId: string
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `${this.api}/contracts/${contractId}/attachments/${attachmentId}`
+    );
+  }
+
   getFulfillment(contractId: string): Observable<Fulfillment> {
     return this.http.get<Fulfillment>(
       `${this.api}/contracts/${contractId}/fulfillment`
     );
   }
 
-  receiveFulfillment(contractId: string): Observable<Fulfillment> {
+  receiveFulfillment(
+    contractId: string,
+    body: ReceiveFulfillmentRequest
+  ): Observable<Fulfillment> {
     return this.http.post<Fulfillment>(
       `${this.api}/contracts/${contractId}/fulfillment/receive`,
-      {}
+      body
+    );
+  }
+
+  rejectAtGate(
+    contractId: string,
+    body: RejectAtGateRequest
+  ): Observable<Fulfillment> {
+    return this.http.post<Fulfillment>(
+      `${this.api}/contracts/${contractId}/fulfillment/reject-at-gate`,
+      body
     );
   }
 
@@ -158,10 +278,49 @@ export class FactoryService {
 
   markPaymentMilestonePaid(
     contractId: string,
-    transactionId: string
+    transactionId: string,
+    receiptFile?: File
   ): Observable<PaymentMilestoneSchedule> {
+    const form = new FormData();
+    if (receiptFile) {
+      form.append('receipt', receiptFile, receiptFile.name);
+    }
     return this.http.post<PaymentMilestoneSchedule>(
       `${this.api}/contracts/${contractId}/payment-milestones/${transactionId}/mark-paid`,
+      form
+    );
+  }
+
+  createMockPaymentSession(
+    contractId: string,
+    transactionId: string,
+    idempotencyKey?: string
+  ): Observable<MockEscrowSession> {
+    return this.http.post<MockEscrowSession>(
+      `${this.api}/contracts/${contractId}/payments/mock/session`,
+      {
+        transactionId,
+        idempotencyKey: idempotencyKey ?? null,
+      }
+    );
+  }
+
+  confirmMockPayment(
+    contractId: string,
+    escrowId: string
+  ): Observable<PaymentMilestoneSchedule> {
+    return this.http.post<PaymentMilestoneSchedule>(
+      `${this.api}/contracts/${contractId}/payments/mock/${escrowId}/confirm-paid`,
+      {}
+    );
+  }
+
+  confirmEscrowRelease(
+    contractId: string,
+    escrowId: string
+  ): Observable<PaymentMilestoneSchedule> {
+    return this.http.post<PaymentMilestoneSchedule>(
+      `${this.api}/contracts/${contractId}/escrow/${escrowId}/confirm-release`,
       {}
     );
   }
@@ -170,6 +329,13 @@ export class FactoryService {
     return this.http.get<Dispute[]>(
       `${this.api}/contracts/${contractId}/disputes`
     );
+  }
+
+  listMyDisputes(page = 1, pageSize = 20): Observable<DisputeList> {
+    const params = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize));
+    return this.http.get<DisputeList>(`${this.api}/disputes`, { params });
   }
 
   openDispute(
@@ -203,11 +369,30 @@ export interface FactoryNotification {
 
 export interface FactoryConversation {
   matchId: string;
+  farmId?: string | null;
   farmName: string;
   cropName: string | null;
+  status?: string | null;
+  matchCreatedAt?: string | null;
+  quantityTons?: number | null;
+  pricePerTon?: number | null;
+  deliveryDate?: string | null;
+  contractId?: string | null;
+  contractFullySigned?: boolean;
   lastMessage: string | null;
   lastMessageAt: string | null;
   unreadCount: number;
+}
+
+export interface FactoryActiveMatch {
+  matchId: string;
+  farmId: string;
+  farmName: string;
+  cropName?: string | null;
+  createdAt: string;
+  contractId?: string | null;
+  contractFullySigned?: boolean;
+  canMessage?: boolean;
 }
 
 export interface FactoryMatchedFarm {
@@ -260,4 +445,8 @@ export interface FactoryContract {
   updatedAt?: string | null;
   matchScore?: number | null;
   riskScore?: number | null;
+  integrity?: ContractIntegrity | null;
+  farmUserId?: string | null;
+  factoryUserId?: string | null;
+  canUnwindSigned?: boolean;
 }

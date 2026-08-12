@@ -45,6 +45,8 @@ export class AdminDashboardComponent implements OnInit {
   readonly summaryLoading = signal(true);
   readonly summaryError = signal<string | null>(null);
   readonly summary = signal<DashboardSummary | null>(null);
+  readonly monitoringBusy = signal(false);
+  readonly monitoringSummary = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadSummary();
@@ -138,5 +140,29 @@ export class AdminDashboardComponent implements OnInit {
   formatPrice(n: number | null): string {
     if (n == null) return '—';
     return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  }
+
+  runMonitoring(): void {
+    this.monitoringBusy.set(true);
+    this.adminApi
+      .runMonitoringNow()
+      .pipe(finalize(() => this.monitoringBusy.set(false)))
+      .subscribe({
+        next: (res) => {
+          const text = this.i18n.instant('admin.dashboard.runMonitoringDone', {
+            count: res.alertsSent,
+            contracts: res.activeContractsReviewed,
+          });
+          this.monitoringSummary.set(res.summary || text);
+          this.toast.success(text);
+        },
+        error: (err) => {
+          const message =
+            err?.error?.message ||
+            this.i18n.instant('admin.dashboard.runMonitoringFailed');
+          this.monitoringSummary.set(message);
+          this.toast.error(message);
+        },
+      });
   }
 }

@@ -280,6 +280,63 @@
               </div>
             </dl>
 
+            @if (isCountered(farm)) {
+              <div class="rounded-lg border border-outline-variant bg-surface-container p-4 space-y-3">
+                <h3 class="font-title-md text-on-surface">
+                  {{ 'factory.matches.counterOfferTitle' | translate }}
+                </h3>
+                <dl class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                  <div>
+                    <dt class="text-on-surface-variant">{{ 'factory.matches.counterQty' | translate }}</dt>
+                    <dd class="tabular-nums">
+                      {{ (farm.counterQuantityTons ?? farm.effectiveQuantityTons) | number: '1.0-0' }} t
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-on-surface-variant">{{ 'factory.matches.counterPrice' | translate }}</dt>
+                    <dd class="tabular-nums">
+                      @if (farm.counterPricePerTon != null) {
+                        {{ farm.counterPricePerTon | number: '1.0-0' }} EGP/t
+                      } @else {
+                        —
+                      }
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-on-surface-variant">{{ 'factory.matches.counterDelivery' | translate }}</dt>
+                    <dd>
+                      @if (farm.counterDeliveryDate) {
+                        {{ farm.counterDeliveryDate | date: 'mediumDate' }}
+                      } @else {
+                        —
+                      }
+                    </dd>
+                  </div>
+                </dl>
+                @if (farm.counterNote) {
+                  <p class="text-sm text-on-surface-variant">{{ farm.counterNote }}</p>
+                }
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    class="ui-btn-primary"
+                    [disabled]="counterActionId() === farm.matchId"
+                    (click)="acceptCounter(farm)"
+                  >
+                    {{ 'factory.matches.acceptCounter' | translate }}
+                  </button>
+                  <button
+                    type="button"
+                    class="ui-btn-ghost text-error"
+                    [disabled]="counterActionId() === farm.matchId"
+                    (click)="rejectCounter(farm)"
+                  >
+                    {{ 'factory.matches.rejectCounter' | translate }}
+                  </button>
+                </div>
+              </div>
+            }
+
             <div
               class="rounded-xl border border-outline-variant bg-surface-container-low p-4 space-y-2"
             >
@@ -406,12 +463,20 @@
               >
                 {{ 'factory.matches.generateContract' | translate }}
               </a>
+              @if (farm.canMessage) {
+                <a
+                  class="ui-btn-ghost inline-flex"
+                  routerLink="/factory/messages"
+                  [queryParams]="{ matchId: farm.matchId }"
+                >
+                  {{ 'factory.matches.message' | translate }}
+                </a>
+              }
               <a
                 class="ui-btn-ghost inline-flex"
-                routerLink="/factory/messages"
-                [queryParams]="{ farmId: farm.farmId }"
+                [routerLink]="['/factory/suppliers', farm.farmId, 'scorecard']"
               >
-                {{ 'factory.matches.message' | translate }}
+                {{ 'factory.listings.scorecard' | translate }}
               </a>
               <button
                 type="button"
@@ -435,6 +500,8 @@
   <app-farm-profile-drawer
     [open]="profileOpen()"
     [farmId]="profileFarmId()"
+    [matchId]="profileMatchId()"
+    [canMessage]="profileCanMessage()"
     [matchRationale]="profileRationale()"
     (closed)="closeFarmProfile()"
   />

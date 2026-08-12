@@ -21,6 +21,25 @@
       </button>
     </div>
   } @else if (fulfillment(); as f) {
+    @if (isRejectedAtGate()) {
+      <div class="ff-voided" role="status">
+        <span class="material-symbols-outlined" aria-hidden="true">gpp_bad</span>
+        <div>
+          <p class="ff-voided__title">{{ 'fulfillment.rejectedBanner' | translate }}</p>
+          @if (f.gateRejectReason) {
+            <p class="ff-voided__time">
+              {{ 'fulfillment.rejectReason' | translate }}:
+              {{ rejectReasonKey(f.gateRejectReason) | translate }}
+              @if (f.returnFreightBearer) {
+                · {{ 'fulfillment.returnFreight' | translate }}:
+                {{ partyKey(f.returnFreightBearer) | translate }}
+              }
+            </p>
+          }
+        </div>
+      </div>
+    }
+
     @if (isVoided()) {
       <div class="ff-voided" role="status">
         <span class="material-symbols-outlined" aria-hidden="true">cancel</span>
@@ -72,6 +91,50 @@
       }
     </ol>
 
+    @if (f.deliveryPoint) {
+      <p class="ff-notes">
+        <span class="ff-notes__label">{{ 'fulfillment.deliveryTerms' | translate }}:</span>
+        {{
+          (f.deliveryPoint === 'FarmGate'
+            ? 'fulfillment.pointFarmGate'
+            : 'fulfillment.pointFactoryGate') | translate
+        }}
+        · {{ 'fulfillment.returnFreight' | translate }}:
+        {{ partyKey(f.freightPayer) | translate }}
+      </p>
+    }
+
+    @if (f.weighedQuantityTons != null) {
+      <p class="ff-notes">
+        <span class="ff-notes__label">{{ 'fulfillment.weighedQty' | translate }}:</span>
+        {{ f.weighedQuantityTons }} t
+      </p>
+    }
+
+    @if (f.carrier || f.trackingNumber) {
+      <p class="ff-notes">
+        <span class="ff-notes__label">{{ 'fulfillment.shipmentMeta' | translate }}:</span>
+        @if (f.carrier) {
+          {{ f.carrier }}
+        }
+        @if (f.trackingNumber) {
+          · {{ f.trackingNumber }}
+        }
+      </p>
+    }
+
+    @if (f.acceptedQuantityTons != null || (f.discountPercent ?? 0) > 0) {
+      <p class="ff-notes">
+        <span class="ff-notes__label">{{ 'fulfillment.qcResult' | translate }}:</span>
+        @if (f.acceptedQuantityTons != null) {
+          {{ f.acceptedQuantityTons }} t
+        }
+        @if ((f.discountPercent ?? 0) > 0) {
+          · {{ 'fulfillment.discount' | translate }} {{ f.discountPercent }}%
+        }
+      </p>
+    }
+
     @if (f.qualityNotes && !canQualityCheck()) {
       <p class="ff-notes">
         <span class="ff-notes__label">{{ 'fulfillment.qualityNotes' | translate }}:</span>
@@ -79,9 +142,129 @@
       </p>
     }
 
-    @if (!isVoided() && (canShip() || canReceive() || canQualityCheck() || canFulfill())) {
+    @if (f.requestedQuality; as rq) {
+      <div class="ff-notes space-y-1">
+        <p class="ff-notes__label">{{ 'fulfillment.requestedQuality' | translate }}</p>
+        <ul class="text-sm text-on-surface-variant space-y-0.5">
+          @if (rq.moistureMaxPercent != null) {
+            <li>{{ 'factory.supplyRequest.moistureMax' | translate }}: {{ rq.moistureMaxPercent }}%</li>
+          }
+          @if (rq.impuritiesMaxPercent != null) {
+            <li>{{ 'factory.supplyRequest.impuritiesMax' | translate }}: {{ rq.impuritiesMaxPercent }}%</li>
+          }
+          @if (rq.grade) {
+            <li>{{ 'factory.supplyRequest.grade' | translate }}: {{ rq.grade }}</li>
+          }
+          @if (rq.labRequired != null) {
+            <li>
+              {{ 'factory.supplyRequest.labRequired' | translate }}:
+              {{
+                (rq.labRequired
+                  ? 'factory.supplyRequest.labRequiredYes'
+                  : 'factory.supplyRequest.labRequiredNo') | translate
+              }}
+            </li>
+          }
+          @if (rq.raw) {
+            <li class="whitespace-pre-wrap">{{ rq.raw }}</li>
+          }
+        </ul>
+      </div>
+    }
+
+    @if (f.specsMet != null && !canQualityCheck()) {
+      <p class="ff-notes">
+        <span class="ff-notes__label">{{ 'fulfillment.specsMet' | translate }}:</span>
+        {{
+          (f.specsMet ? 'fulfillment.specsMetYes' : 'fulfillment.specsMetNo') | translate
+        }}
+        @if (f.specsOutcomeNotes) {
+          · {{ f.specsOutcomeNotes }}
+        }
+      </p>
+    }
+
+    @if (!isVoided() && !isRejectedAtGate() && (canShip() || canReceive() || canQualityCheck() || canFulfill())) {
       <div class="ff-actions print:hidden">
+        @if (canShip()) {
+          <p class="ff-notes">
+            {{
+              (f.transitRisk === 'Factory'
+                ? 'fulfillment.transitHelperFactory'
+                : 'fulfillment.transitHelperFarm') | translate
+            }}
+          </p>
+          <label class="ff-notes-field">
+            <span>{{ 'fulfillment.carrier' | translate }}</span>
+            <input
+              class="ui-input"
+              [(ngModel)]="shipCarrier"
+              [disabled]="acting()"
+            />
+          </label>
+          <label class="ff-notes-field">
+            <span>{{ 'fulfillment.trackingNumber' | translate }}</span>
+            <input
+              class="ui-input"
+              [(ngModel)]="shipTracking"
+              [disabled]="acting()"
+            />
+          </label>
+          <label class="ff-notes-field">
+            <span>{{ 'fulfillment.shipNotesOptional' | translate }}</span>
+            <textarea
+              rows="2"
+              [(ngModel)]="shipNotes"
+              [disabled]="acting()"
+            ></textarea>
+          </label>
+        }
+
         @if (canQualityCheck()) {
+          <label class="ff-notes-field">
+            <span>{{ 'fulfillment.acceptedQty' | translate }}</span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              class="ui-input"
+              [(ngModel)]="acceptedQuantityTons"
+              [disabled]="acting()"
+            />
+          </label>
+          <label class="ff-notes-field">
+            <span>{{ 'fulfillment.discountPercent' | translate }}</span>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              class="ui-input"
+              [(ngModel)]="discountPercent"
+              [disabled]="acting()"
+            />
+          </label>
+          <label class="ff-notes-field">
+            <span>{{ 'fulfillment.specsMet' | translate }}</span>
+            <select
+              class="ui-input"
+              [(ngModel)]="specsMetChoice"
+              [disabled]="acting()"
+            >
+              <option value="">{{ 'fulfillment.specsMetUnset' | translate }}</option>
+              <option value="yes">{{ 'fulfillment.specsMetYes' | translate }}</option>
+              <option value="no">{{ 'fulfillment.specsMetNo' | translate }}</option>
+            </select>
+          </label>
+          <label class="ff-notes-field">
+            <span>{{ 'fulfillment.specsOutcomeNotes' | translate }}</span>
+            <textarea
+              rows="2"
+              [(ngModel)]="specsOutcomeNotes"
+              [disabled]="acting()"
+              [attr.placeholder]="'fulfillment.specsOutcomeNotesPlaceholder' | translate"
+            ></textarea>
+          </label>
           <label class="ff-notes-field">
             <span>{{ 'fulfillment.qualityNotesOptional' | translate }}</span>
             <textarea
@@ -108,6 +291,25 @@
         }
 
         @if (canReceive()) {
+          <label class="ff-notes-field">
+            <span>{{ 'fulfillment.weighedQty' | translate }}</span>
+            <input
+              type="number"
+              min="0.001"
+              step="0.001"
+              class="ui-input"
+              [(ngModel)]="weighedQuantityTons"
+              [disabled]="acting()"
+            />
+          </label>
+          <label class="ff-notes-field">
+            <span>{{ 'fulfillment.ticketUrlOptional' | translate }}</span>
+            <input
+              class="ui-input"
+              [(ngModel)]="weighbridgeTicketUrl"
+              [disabled]="acting()"
+            />
+          </label>
           <button
             type="button"
             class="ui-btn-primary w-full"
@@ -118,6 +320,30 @@
               >inventory</span
             >
             {{ 'fulfillment.receive' | translate }}
+          </button>
+          <label class="ff-notes-field">
+            <span>{{ 'fulfillment.rejectReason' | translate }}</span>
+            <select class="ui-input" [(ngModel)]="rejectReason" [disabled]="acting()">
+              <option value="QualityFail">{{ 'fulfillment.reasonQualityFail' | translate }}</option>
+              <option value="WrongCrop">{{ 'fulfillment.reasonWrongCrop' | translate }}</option>
+              <option value="ExcessDamage">{{ 'fulfillment.reasonExcessDamage' | translate }}</option>
+              <option value="WeightShortage">{{ 'fulfillment.reasonWeightShortage' | translate }}</option>
+              <option value="LateArrival">{{ 'fulfillment.reasonLateArrival' | translate }}</option>
+              <option value="Other">{{ 'fulfillment.reasonOther' | translate }}</option>
+            </select>
+          </label>
+          <label class="ff-notes-field">
+            <span>{{ 'fulfillment.rejectNotes' | translate }}</span>
+            <textarea rows="2" [(ngModel)]="rejectNotes" [disabled]="acting()"></textarea>
+          </label>
+          <button
+            type="button"
+            class="ui-btn-ghost w-full"
+            [disabled]="acting()"
+            (click)="rejectAtGate()"
+          >
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">gpp_bad</span>
+            {{ 'fulfillment.rejectAtGate' | translate }}
           </button>
         }
 

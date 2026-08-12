@@ -132,13 +132,53 @@ export class FactoryNotificationsComponent implements OnInit {
   private fromApi(n: FactoryNotification): DisplayNotification {
     return {
       id: n.notificationId,
-      title: this.titleForType(n.type, n.title),
-      body: n.message,
+      title: this.resolveTitle(n),
+      body: this.resolveBody(n),
       time: n.createdAt,
       type: this.normalizeType(n.type),
       unread: !n.isRead,
       link: n.link,
     };
+  }
+
+  private resolveTitle(n: FactoryNotification): string {
+    const typed = this.typeI18n(n.type, 'title');
+    if (typed) {
+      return typed;
+    }
+    if (n.title?.startsWith('notifications.')) {
+      return this.i18n.instant(n.title);
+    }
+    return this.titleForType(n.type, n.title);
+  }
+
+  private resolveBody(n: FactoryNotification): string {
+    const typed = this.typeI18n(n.type, 'body');
+    if (typed) {
+      return typed;
+    }
+    if (n.message?.startsWith('notifications.')) {
+      return this.i18n.instant(n.message);
+    }
+    return n.message;
+  }
+
+  private typeI18n(
+    type: string | null | undefined,
+    part: 'title' | 'body'
+  ): string | null {
+    const t = type?.trim();
+    if (
+      t !== 'MatchSuperseded' &&
+      t !== 'MatchProposed' &&
+      t !== 'MatchExcluded'
+    ) {
+      return null;
+    }
+    const camel = t.charAt(0).toLowerCase() + t.slice(1);
+    const key = `notifications.types.${camel}.${part}`;
+    const translated = this.i18n.instant(key);
+    return translated !== key ? translated : null;
   }
 
   private titleForType(type: string | null, fallback: string): string {

@@ -274,6 +274,23 @@ export class MarketPriceTrendsComponent implements AfterViewInit, OnDestroy {
     const { labels, datasets } = this.buildChartModel(this.rawSeries);
     this.activeCrops.set(datasets.map((d) => String(d.label ?? '')));
 
+    const allY = datasets.flatMap((d) =>
+      (d.data as number[]).filter((n) => Number.isFinite(n))
+    );
+    let yMin: number | undefined;
+    let yMax: number | undefined;
+    if (allY.length) {
+      const lo = Math.min(...allY);
+      const hi = Math.max(...allY);
+      const span = Math.max(hi - lo, hi * 0.04, 1);
+      const pad = span * 0.14;
+      yMin = Math.max(0, lo - pad);
+      yMax = hi + pad;
+      if (yMax - yMin < 1) {
+        yMax = yMin + 1;
+      }
+    }
+
     const rtl = this.isRtl();
     const config: ChartConfiguration<'line'> = {
       type: 'line',
@@ -285,8 +302,13 @@ export class MarketPriceTrendsComponent implements AfterViewInit, OnDestroy {
         animation: { duration: 650, easing: 'easeOutQuart' },
         layout: {
           padding: (() => {
-            const rtl = document.documentElement.dir === 'rtl';
-            return { top: 4, bottom: 0, left: rtl ? 8 : 2, right: rtl ? 2 : 8 };
+            const rtlPad = document.documentElement.dir === 'rtl';
+            return {
+              top: 4,
+              bottom: 0,
+              left: rtlPad ? 8 : 2,
+              right: rtlPad ? 2 : 8,
+            };
           })(),
         },
         plugins: {
@@ -339,6 +361,8 @@ export class MarketPriceTrendsComponent implements AfterViewInit, OnDestroy {
           },
           y: {
             beginAtZero: false,
+            min: yMin,
+            max: yMax,
             border: { display: false },
             grid: {
               color: this.cssVar('--color-outline-variant', '#e4e7e1'),

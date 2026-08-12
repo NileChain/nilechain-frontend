@@ -103,7 +103,7 @@
                 </span>
               </div>
               <p class="font-body-md text-body-md text-on-surface-variant mt-1">
-                {{ item.message }}
+                {{ displayBody(item) }}
               </p>
               @if (!item.isRead) {
                 <button

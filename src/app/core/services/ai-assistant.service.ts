@@ -1,4 +1,8 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { AiAssistantContextService } from './ai-assistant-context.service';
+import { TranslateService } from './translate.service';
 
 export interface AiChatMessage {
   id: string;
@@ -12,11 +16,25 @@ export interface AiSuggestedPrompt {
   prompt: string;
 }
 
+interface CopilotChatResponse {
+  success: boolean;
+  reply: string;
+  errorCode?: string | null;
+  usedRag?: boolean;
+  provider?: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AiAssistantService {
+  private readonly http = inject(HttpClient);
+  private readonly ctx = inject(AiAssistantContextService);
+  private readonly i18n = inject(TranslateService);
+
   readonly open = signal(false);
   readonly messages = signal<AiChatMessage[]>([]);
   readonly thinking = signal(false);
+  readonly isDemo = false;
+  readonly lastError = signal<string | null>(null);
 
   readonly suggestedPrompts: AiSuggestedPrompt[] = [
     {
@@ -35,20 +53,6 @@ export class AiAssistantService {
       prompt: 'Draft a professional message to the selected farm.',
     },
   ];
-
-  /** Demo-only assistant — replies are canned, not a live LLM. */
-  readonly isDemo = true;
-
-  private readonly mockReplies: Record<string, string> = {
-    'explain-match':
-      'This farm scored highly on crop alignment, delivery window, and historical fulfillment. Quantity capacity covers your request with a buffer, and logistics distance is within the preferred governorate set.',
-    'summarize-risk':
-      'Overall risk is moderate-low. Watch certification expiry within 60 days and seasonal weather variance on the logistics corridor. Contract late-delivery clauses are recommended.',
-    'draft-message':
-      'Hello,\n\nWe reviewed your farm profile and match score for our current supply request. We would like to discuss quantity confirmation, delivery timeline, and quality specs before generating a draft contract.\n\nBest regards,\nProcurement Team',
-    default:
-      'I can help explain matches, summarize risk, or draft messages for factory workflows. Try one of the suggested prompts.',
-  };
 
   openDrawer(): void {
     this.open.set(true);
@@ -76,24 +80,46 @@ export class AiAssistantService {
     };
     this.messages.update((list) => [...list, userMsg]);
     this.thinking.set(true);
+    this.lastError.set(null);
 
-    window.setTimeout(() => {
-      const reply =
-        (promptId && this.mockReplies[promptId]) ||
-        this.mockReplies['default'] ||
-        '';
-      const assistantMsg: AiChatMessage = {
-        id: `a-${Date.now()}`,
-        role: 'assistant',
-        text: reply,
-      };
-      this.messages.update((list) => [...list, assistantMsg]);
-      this.thinking.set(false);
-    }, 700);
+    this.http
+      .post<CopilotChatResponse>(`${environment.backendUrl}/assistant/chat`, {
+        message: prompt,
+        promptId: promptId ?? null,
+        requestId: this.ctx.requestId(),
+        matchId: this.ctx.matchId(),
+        contractId: this.ctx.contractId(),
+        farmId: this.ctx.farmId(),
+      })
+      .subscribe({
+        next: (res) => {
+          const text =
+            res.reply?.trim() ||
+            this.i18n.instant('common.aiDrawerUnavailable');
+          this.messages.update((list) => [
+            ...list,
+            { id: `a-${Date.now()}`, role: 'assistant', text },
+          ]);
+          this.thinking.set(false);
+        },
+        error: (err: HttpErrorResponse) => {
+          const body = err.error as CopilotChatResponse | undefined;
+          const text =
+            body?.reply ||
+            this.i18n.instant('common.aiDrawerUnavailable');
+          this.lastError.set(text);
+          this.messages.update((list) => [
+            ...list,
+            { id: `a-${Date.now()}`, role: 'assistant', text },
+          ]);
+          this.thinking.set(false);
+        },
+      });
   }
 
   clear(): void {
     this.messages.set([]);
     this.thinking.set(false);
+    this.lastError.set(null);
   }
 }

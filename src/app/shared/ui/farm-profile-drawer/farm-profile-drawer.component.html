@@ -120,6 +120,34 @@
             </div>
           </dl>
 
+          @if (p.description) {
+            <section>
+              <h3 class="farm-drawer__section-label mb-2">
+                {{ 'factory.matches.farmDescription' | translate }}
+              </h3>
+              <p class="text-sm text-on-surface whitespace-pre-wrap">
+                {{ p.description }}
+              </p>
+            </section>
+          }
+
+          @if (p.imageUrls?.length) {
+            <section>
+              <h3 class="farm-drawer__section-label mb-2">
+                {{ 'factory.matches.farmImages' | translate }}
+              </h3>
+              <div class="grid grid-cols-2 gap-2">
+                @for (url of p.imageUrls!; track url) {
+                  <img
+                    [src]="url"
+                    alt=""
+                    class="rounded-lg aspect-[4/3] object-cover w-full border border-outline-variant"
+                  />
+                }
+              </div>
+            </section>
+          }
+
           <!-- Crops -->
           <section>
             <h3 class="farm-drawer__section-label mb-2">
@@ -137,6 +165,27 @@
             } @else {
               <p class="text-sm text-on-surface-variant">
                 {{ 'factory.matches.noCrops' | translate }}
+              </p>
+            }
+          </section>
+
+          <!-- Certifications -->
+          <section>
+            <h3 class="farm-drawer__section-label mb-2">
+              {{ 'factory.matches.certifications' | translate }}
+            </h3>
+            @if (p.certifications?.length) {
+              <div class="flex flex-wrap gap-2">
+                @for (cert of p.certifications!; track cert) {
+                  <span
+                    class="inline-flex items-center rounded-lg bg-secondary-container text-on-secondary-container px-2.5 py-1 text-sm font-medium"
+                    >{{ cert }}</span
+                  >
+                }
+              </div>
+            } @else {
+              <p class="text-sm text-on-surface-variant">
+                {{ 'factory.matches.noCertifications' | translate }}
               </p>
             }
           </section>
@@ -222,6 +271,26 @@
                 </p>
               </div>
             </section>
+          }
+
+          @if (matchId && canMessage) {
+            <div class="farm-drawer__cta">
+              <a
+                class="ui-btn-primary w-full inline-flex justify-center"
+                routerLink="/factory/messages"
+                [queryParams]="{ matchId: matchId }"
+                (click)="close()"
+              >
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+                  >chat</span
+                >
+                {{ 'factory.matches.message' | translate }}
+              </a>
+            </div>
+          } @else if (matchId) {
+            <p class="farm-drawer__cta text-sm text-on-surface-variant text-center">
+              {{ 'messages.chatAfterBothSigned' | translate }}
+            </p>
           }
         }
       </div>

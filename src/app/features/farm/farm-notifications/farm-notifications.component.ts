@@ -86,6 +86,13 @@ export class FarmNotificationsComponent implements OnInit {
   }
 
   displayTitle(notification: FarmNotification): string {
+    const typed = this.typeI18n(notification.type, 'title');
+    if (typed) {
+      return typed;
+    }
+    if (notification.title?.startsWith('notifications.')) {
+      return this.i18n.instant(notification.title);
+    }
     const type = notification.type?.trim();
     if (type) {
       const key = `notifications.types.${type}`;
@@ -95,6 +102,35 @@ export class FarmNotificationsComponent implements OnInit {
       }
     }
     return notification.title;
+  }
+
+  displayBody(notification: FarmNotification): string {
+    const typed = this.typeI18n(notification.type, 'body');
+    if (typed) {
+      return typed;
+    }
+    if (notification.message?.startsWith('notifications.')) {
+      return this.i18n.instant(notification.message);
+    }
+    return notification.message;
+  }
+
+  private typeI18n(
+    type: string | null | undefined,
+    part: 'title' | 'body'
+  ): string | null {
+    const t = type?.trim();
+    if (
+      t !== 'MatchSuperseded' &&
+      t !== 'MatchProposed' &&
+      t !== 'MatchExcluded'
+    ) {
+      return null;
+    }
+    const camel = t.charAt(0).toLowerCase() + t.slice(1);
+    const key = `notifications.types.${camel}.${part}`;
+    const translated = this.i18n.instant(key);
+    return translated !== key ? translated : null;
   }
 
   iconFor(type: string | null): string {

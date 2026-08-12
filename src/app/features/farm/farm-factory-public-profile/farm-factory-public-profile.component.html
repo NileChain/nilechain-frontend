@@ -1,0 +1,136 @@
+<main class="md:ms-[280px] min-h-screen fpp-page">
+  <app-top-bar
+    titleKey="farm.factoryProfile.title"
+    portal="farm"
+    notificationsLink="/farm/notifications"
+  >
+    <a routerLink="/farm/matches" class="ui-btn-ghost !py-2 !px-4">
+      {{ 'farm.factoryProfile.backToMatches' | translate }}
+    </a>
+  </app-top-bar>
+
+  <div class="fpp-shell animate-fade-in">
+    @if (loading()) {
+      <div class="fpp-hero fpp-hero--loading">
+        <ui-skeleton height="1.75rem" width="50%" />
+        <ui-skeleton height="0.9rem" width="30%" class="mt-3" />
+        <ui-skeleton height="0.9rem" width="24%" class="mt-2" />
+      </div>
+    } @else if (forbidden()) {
+      <ui-empty-state
+        titleKey="farm.factoryProfile.gatedTitle"
+        bodyKey="farm.factoryProfile.gatedBody"
+        icon="lock"
+      >
+        <a routerLink="/farm/matches" class="ui-btn-primary mt-3 inline-flex">
+          {{ 'farm.factoryProfile.backToMatches' | translate }}
+        </a>
+      </ui-empty-state>
+    } @else if (notFound()) {
+      <ui-empty-state
+        titleKey="farm.factoryProfile.notFoundTitle"
+        bodyKey="farm.factoryProfile.notFoundBody"
+        icon="business"
+      >
+        <a routerLink="/farm/matches" class="ui-btn-primary mt-3 inline-flex">
+          {{ 'farm.factoryProfile.backToMatches' | translate }}
+        </a>
+      </ui-empty-state>
+    } @else if (error()) {
+      <ui-error-state
+        [message]="error()"
+        (retry)="load(factoryId() ?? '')"
+      />
+    } @else if (profile(); as p) {
+      <header class="fpp-hero">
+        <div class="fpp-hero__main">
+          <p class="fpp-hero__eyebrow">
+            {{ 'farm.factoryProfile.title' | translate }}
+          </p>
+          <h1 class="fpp-hero__name">
+            {{ p.name }}
+            @if (p.isVerified) {
+              <span
+                class="material-symbols-outlined text-primary text-[28px] fill"
+                [attr.title]="'common.verified' | translate"
+                aria-hidden="true"
+                >verified</span
+              >
+            }
+          </h1>
+          <div class="fpp-hero__meta">
+            <span class="fpp-chip">
+              <span class="material-symbols-outlined" aria-hidden="true"
+                >location_on</span
+              >
+              {{ p.governorate || p.location || '—' }}
+            </span>
+            @if (p.industryType) {
+              <span class="fpp-chip">
+                <span class="material-symbols-outlined" aria-hidden="true"
+                  >factory</span
+                >
+                {{ p.industryType }}
+              </span>
+            }
+            <span class="fpp-chip fpp-chip--rating">
+              <span class="material-symbols-outlined fill" aria-hidden="true"
+                >star</span
+              >
+              <span class="tabular-nums">{{
+                p.averageRating | number: '1.1-1'
+              }}</span>
+              <span class="fpp-muted">
+                ({{
+                  'farm.factoryProfile.ratingCount'
+                    | translate: { count: p.ratingCount }
+                }})
+              </span>
+            </span>
+          </div>
+          @if (p.activeMatchId; as mid) {
+            @if (p.canMessage) {
+              <a
+                class="ui-btn-primary mt-5 inline-flex gap-2"
+                routerLink="/farm/messages"
+                [queryParams]="{ matchId: mid }"
+              >
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+                  >chat</span
+                >
+                {{ 'farm.factoryProfile.message' | translate }}
+              </a>
+            } @else {
+              <p class="mt-5 text-sm text-on-surface-variant">
+                {{ 'messages.chatAfterBothSigned' | translate }}
+              </p>
+            }
+          }
+        </div>
+      </header>
+
+      <section class="fpp-panel" aria-labelledby="fpp-about">
+        <h2 id="fpp-about" class="fpp-panel__title">
+          {{ 'farm.factoryProfile.about' | translate }}
+        </h2>
+        <dl class="fpp-facts">
+          <div>
+            <dt>{{ 'farm.factoryProfile.governorate' | translate }}</dt>
+            <dd>{{ p.governorate || '—' }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'farm.factoryProfile.location' | translate }}</dt>
+            <dd>{{ p.location || '—' }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'farm.factoryProfile.industry' | translate }}</dt>
+            <dd>{{ p.industryType || '—' }}</dd>
+          </div>
+        </dl>
+        <p class="fpp-hint">
+          {{ 'farm.factoryProfile.matchOnlyHint' | translate }}
+        </p>
+      </section>
+    }
+  </div>
+</main>

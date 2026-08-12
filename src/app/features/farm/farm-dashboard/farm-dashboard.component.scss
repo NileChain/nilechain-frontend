@@ -3,16 +3,22 @@
 }
 
 .fd-page {
-  background: var(--color-background);
+  background:
+    radial-gradient(
+      100% 50% at 50% 0%,
+      color-mix(in srgb, var(--color-primary) 3.5%, transparent),
+      transparent 55%
+    ),
+    var(--color-background);
 }
 
 .fd-shell {
   max-width: 1440px;
   margin-inline: auto;
-  padding: 0.85rem clamp(0.85rem, 2.5vw, 1.5rem) 1.75rem;
+  padding: 1rem clamp(0.9rem, 2.5vw, 1.65rem) 2.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 1.05rem;
 }
 
 .fd-panel {
@@ -150,13 +156,62 @@
   .fd-kpi-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+
+  .fd-collections {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
+
 
 .fd-kpi {
   padding: 0.85rem 0.95rem;
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
+}
+
+.fd-kpi--link {
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fd-kpi--link:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+.fd-kpi--alert {
+  border-color: color-mix(in srgb, var(--color-danger) 40%, transparent);
+}
+
+.fd-kpi--alert .fd-kpi__value {
+  color: var(--color-danger);
+}
+
+.fd-kpi__currency {
+  margin-inline-start: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-on-surface-variant);
+}
+
+.fd-charts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.05rem;
+  align-items: stretch;
+}
+
+@media (min-width: 1100px) {
+  .fd-charts-grid {
+    grid-template-columns: minmax(0, 1.55fr) minmax(16rem, 0.85fr);
+  }
+}
+
+.fd-market {
+  padding: 0.95rem 1rem 1.05rem;
+  overflow: hidden;
 }
 
 .fd-kpi--primary {
@@ -214,10 +269,143 @@
 }
 
 .fd-kpi__hint {
-  margin: 0.3rem 0 0;
+  margin: 0.35rem 0 0;
   font-size: 0.75rem;
   color: var(--color-on-surface-variant);
   line-height: 1.35;
+}
+
+/* —— Compact money / ops strips —— */
+.fd-strip {
+  padding: 0.85rem 0.95rem 0.95rem;
+}
+
+.fd-strip__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.7rem;
+}
+
+.fd-strip__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+
+@media (min-width: 900px) {
+  .fd-strip__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .fd-strip__grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.fd-strip__cell {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: 0.7rem 0.75rem;
+  border-radius: 0.55rem;
+  border: 1px solid
+    color-mix(in srgb, var(--color-outline-variant) 55%, transparent);
+  background: var(--color-surface-container-low);
+  min-width: 0;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+a.fd-strip__cell:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 5%, transparent);
+}
+
+.fd-strip__cell--static {
+  cursor: default;
+}
+
+.fd-strip__cell--alert {
+  border-color: color-mix(in srgb, var(--color-danger) 40%, transparent);
+  background: color-mix(in srgb, var(--color-danger) 6%, transparent);
+}
+
+.fd-strip__cell--alert .fd-strip__value {
+  color: var(--color-danger);
+}
+
+.fd-strip__label {
+  margin: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-on-surface-variant);
+}
+
+.fd-strip__value {
+  margin: 0.35rem 0 0;
+  font-size: 1.15rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  color: var(--color-on-surface);
+  line-height: 1.2;
+}
+
+.fd-strip__unit {
+  margin-inline-start: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 550;
+  color: var(--color-on-surface-variant);
+}
+
+.fd-strip__hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.7rem;
+  color: var(--color-on-surface-variant);
+  line-height: 1.3;
+}
+
+.fd-buyer-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.fd-buyer-list__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.45rem 0.15rem;
+  border-block-end: 1px solid
+    color-mix(in srgb, var(--color-outline-variant) 50%, transparent);
+  font-size: 0.875rem;
+}
+
+.fd-buyer-list__item:last-child {
+  border-block-end: 0;
+}
+
+.fd-buyer-list__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--color-on-surface);
+}
+
+.fd-buyer-list__count {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-on-surface-variant);
+  font-size: 0.8125rem;
 }
 
 /* —— Attention —— */
@@ -325,13 +513,17 @@
 
 /* —— Trend —— */
 .fd-trend-card {
-  padding: 0.85rem 0.95rem 0.95rem;
+  padding: 0.95rem 1rem 1.05rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .fd-trend-chart {
-  height: 11rem;
+  height: 12rem;
   width: 100%;
-  margin-top: 0.25rem;
+  margin-top: 0.45rem;
+  flex: 1;
+  min-height: 11rem;
 }
 
 .fd-trend-delta {
@@ -361,7 +553,7 @@
 .fd-main-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.85rem;
+  gap: 1.05rem;
   align-items: start;
 }
 
@@ -595,6 +787,9 @@
 .fd-score-panel__value {
   margin: 0.2rem 0 0;
   color: var(--color-primary);
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .fd-score-panel__body {

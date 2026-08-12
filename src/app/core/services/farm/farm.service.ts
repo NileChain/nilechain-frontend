@@ -4,13 +4,18 @@ import { Observable, map } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import {
+  CertificationCatalogItem,
   CropType,
+  FarmCertification,
+  FarmCropCommercialPayload,
   FarmDocument,
+  FarmImage,
   FarmProfile,
 } from '../../models/farm/farm-profile.model';
 import { UpdateFarmProfileRequest } from '../../models/farm/update-farm-profile-request.model';
 import { FarmDashboard } from '../../models/farm/farm-dashboard.model';
 import {
+  CounterOfferRequest,
   FarmMatchItem,
   FarmMatchesPage,
   RespondToMatchRequest,
@@ -21,10 +26,12 @@ import {
   Message,
   SendMessageRequest,
 } from '../../models/farm/farm-message.model';
+import { FactoryPublicProfile } from '../../models/farm/factory-public-profile.model';
 import { FarmNotification } from '../../models/farm/farm-notification.model';
 import { Fulfillment } from '../../models/fulfillment/fulfillment.model';
 import { PaymentMilestoneSchedule } from '../../models/payment/payment-milestone.model';
-import { Dispute } from '../../models/dispute/dispute.model';
+import { Dispute, DisputeList } from '../../models/dispute/dispute.model';
+import { ContractAttachmentDto } from '../../../shared/contracts/models/contract-document.model';
 
 function normalizeMatchesPage(
   res: FarmMatchesPage | FarmMatchItem[]
@@ -93,6 +100,12 @@ export class FarmService {
     return this.http.get<CropType[]>(`${environment.backendUrl}/crop-types`);
   }
 
+  getCertificationCatalog(): Observable<CertificationCatalogItem[]> {
+    return this.http.get<CertificationCatalogItem[]>(
+      `${environment.backendUrl}/certifications`
+    );
+  }
+
   addDocument(file: File): Observable<FarmDocument> {
     const formData = new FormData();
     formData.append('file', file);
@@ -103,12 +116,70 @@ export class FarmService {
     return this.http.delete<void>(`${this.api}/documents/${documentId}`);
   }
 
-  addCrop(cropTypeId: string): Observable<void> {
-    return this.http.post<void>(`${this.api}/crops`, { cropTypeId });
+  addCrop(
+    cropTypeId: string,
+    commercial?: FarmCropCommercialPayload
+  ): Observable<void> {
+    return this.http.post<void>(`${this.api}/crops`, {
+      cropTypeId,
+      availableQuantityTons: commercial?.availableQuantityTons ?? null,
+      availableFrom: commercial?.availableFrom ?? null,
+      availableTo: commercial?.availableTo ?? null,
+      minPricePerTon: commercial?.minPricePerTon ?? null,
+      isPublished: commercial?.isPublished ?? true,
+    });
+  }
+
+  updateCrop(
+    cropTypeId: string,
+    commercial: FarmCropCommercialPayload
+  ): Observable<void> {
+    return this.http.put<void>(`${this.api}/crops/${cropTypeId}`, {
+      availableQuantityTons: commercial.availableQuantityTons ?? null,
+      availableFrom: commercial.availableFrom ?? null,
+      availableTo: commercial.availableTo ?? null,
+      minPricePerTon: commercial.minPricePerTon ?? null,
+      isPublished: commercial.isPublished ?? null,
+    });
+  }
+
+  addImage(file: File): Observable<FarmImage> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<FarmImage>(`${this.api}/images`, formData);
+  }
+
+  deleteImage(imageId: string): Observable<void> {
+    return this.http.delete<void>(`${this.api}/images/${imageId}`);
+  }
+
+  counterOffer(matchId: string, payload: CounterOfferRequest): Observable<void> {
+    return this.http.post<void>(
+      `${this.api}/matches/${matchId}/counter-offer`,
+      payload
+    );
   }
 
   deleteCrop(cropTypeId: string): Observable<void> {
     return this.http.delete<void>(`${this.api}/crops/${cropTypeId}`);
+  }
+
+  getCertifications(): Observable<FarmCertification[]> {
+    return this.http.get<FarmCertification[]>(`${this.api}/certifications`);
+  }
+
+  addCertification(payload: {
+    certificationId: string;
+    issuedAt?: string | null;
+    expiresAt?: string | null;
+  }): Observable<void> {
+    return this.http.post<void>(`${this.api}/certifications`, payload);
+  }
+
+  deleteCertification(certificationId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.api}/certifications/${certificationId}`
+    );
   }
 
   getMatches(options?: {
@@ -175,16 +246,54 @@ export class FarmService {
     });
   }
 
+  listContractAttachments(
+    contractId: string
+  ): Observable<ContractAttachmentDto[]> {
+    return this.http.get<ContractAttachmentDto[]>(
+      `${this.api}/contracts/${contractId}/attachments`
+    );
+  }
+
+  uploadContractAttachment(
+    contractId: string,
+    file: File,
+    kind: string
+  ): Observable<ContractAttachmentDto> {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    form.append('kind', kind);
+    return this.http.post<ContractAttachmentDto>(
+      `${this.api}/contracts/${contractId}/attachments`,
+      form
+    );
+  }
+
+  deleteContractAttachment(
+    contractId: string,
+    attachmentId: string
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `${this.api}/contracts/${contractId}/attachments/${attachmentId}`
+    );
+  }
+
   getFulfillment(contractId: string): Observable<Fulfillment> {
     return this.http.get<Fulfillment>(
       `${this.api}/contracts/${contractId}/fulfillment`
     );
   }
 
-  shipFulfillment(contractId: string): Observable<Fulfillment> {
+  shipFulfillment(
+    contractId: string,
+    body: {
+      carrier?: string | null;
+      trackingNumber?: string | null;
+      notes?: string | null;
+    } = {}
+  ): Observable<Fulfillment> {
     return this.http.post<Fulfillment>(
       `${this.api}/contracts/${contractId}/fulfillment/ship`,
-      {}
+      body
     );
   }
 
@@ -210,6 +319,13 @@ export class FarmService {
     );
   }
 
+  listMyDisputes(page = 1, pageSize = 20): Observable<DisputeList> {
+    const params = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize));
+    return this.http.get<DisputeList>(`${this.api}/disputes`, { params });
+  }
+
   openDispute(
     contractId: string,
     type: string,
@@ -225,6 +341,14 @@ export class FarmService {
     return this.http.post<Dispute>(
       `${this.api}/contracts/${contractId}/disputes`,
       form
+    );
+  }
+
+  getMatchedFactoryPublicProfile(
+    factoryId: string
+  ): Observable<FactoryPublicProfile> {
+    return this.http.get<FactoryPublicProfile>(
+      `${this.api}/factories/${factoryId}/public-profile`
     );
   }
 

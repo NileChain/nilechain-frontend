@@ -1,5 +1,6 @@
 export interface FarmMatchItem {
   matchId: string;
+  factoryId?: string | null;
   factoryName: string;
   factoryLocation: string | null;
   factoryIsVerified: boolean;
@@ -14,6 +15,17 @@ export interface FarmMatchItem {
   status: string;
   createdAt: string;
   contractId?: string | null;
+  contractFullySigned?: boolean;
+  canMessage?: boolean;
+  counterQuantityTons?: number | null;
+  counterPricePerTon?: number | null;
+  counterDeliveryDate?: string | null;
+  counterNote?: string | null;
+  counteredAt?: string | null;
+  counterAccepted?: boolean;
+  effectiveQuantityTons?: number;
+  effectivePricePerTon?: number | null;
+  effectiveDeliveryDate?: string | null;
 }
 
 export interface FarmMatchSummary {
@@ -36,4 +48,11 @@ export interface FarmMatchesPage {
 
 export interface RespondToMatchRequest {
   action: 'reject';
+}
+
+export interface CounterOfferRequest {
+  quantityTons?: number | null;
+  pricePerTon?: number | null;
+  deliveryDate?: string | null;
+  note?: string | null;
 }

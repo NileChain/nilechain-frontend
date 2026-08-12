@@ -8,6 +8,26 @@ export interface FarmDashboard {
   recentMatches: RecentMatchItem[];
   improvementTips: ImprovementTip[];
   reliabilityTrend: ReliabilityTrendPoint[];
+  collectionsSummary: FarmCollectionsSummary;
+  expiringCertifications?: number;
+  expiredCertifications?: number;
+  onTimeFulfillmentRate?: number | null;
+  qcIssueRate?: number | null;
+  repeatBuyers?: RepeatBuyer[];
+}
+
+export interface RepeatBuyer {
+  factoryId: string;
+  factoryName: string;
+  completedContracts: number;
+}
+
+export interface FarmCollectionsSummary {
+  pendingAmount: number;
+  awaitingConfirmAmount: number;
+  receivedAmount: number;
+  overdueAmount: number;
+  currency: string;
 }
 
 export interface ReliabilityTrendPoint {

@@ -4,6 +4,7 @@ export type FulfillmentStatus =
   | 'Received'
   | 'QualityChecked'
   | 'Fulfilled'
+  | 'RejectedAtGate'
   | 'Voided';
 
 export interface FulfillmentEvent {
@@ -14,6 +15,8 @@ export interface FulfillmentEvent {
   note: string | null;
   createdAt: string;
 }
+
+import { StructuredQualitySpecs } from '../factory/factory-dashboard.model';
 
 export interface Fulfillment {
   fulfillmentId: string;
@@ -26,11 +29,49 @@ export interface Fulfillment {
   fulfilledAt: string | null;
   voidedAt: string | null;
   qualityNotes: string | null;
+  carrier?: string | null;
+  trackingNumber?: string | null;
+  shippedNotes?: string | null;
+  acceptedQuantityTons?: number | null;
+  discountPercent?: number;
+  specsMet?: boolean | null;
+  specsOutcomeNotes?: string | null;
+  deliveryPoint?: string;
+  freightPayer?: string;
+  transitRisk?: string;
+  contractedQuantityTons?: number | null;
+  weighedQuantityTons?: number | null;
+  weighbridgeTicketUrl?: string | null;
+  rejectedAtGateAt?: string | null;
+  gateRejectReason?: string | null;
+  gateRejectNotes?: string | null;
+  returnFreightBearer?: string | null;
+  requestedQuality?: StructuredQualitySpecs | null;
   events: FulfillmentEvent[];
+}
+
+export interface ReceiveFulfillmentRequest {
+  weighedQuantityTons: number;
+  weighbridgeTicketUrl?: string | null;
+}
+
+export interface RejectAtGateRequest {
+  reason: string;
+  notes?: string | null;
+}
+
+export interface ShipFulfillmentRequest {
+  carrier?: string | null;
+  trackingNumber?: string | null;
+  notes?: string | null;
 }
 
 export interface QualityCheckRequest {
   notes?: string | null;
+  acceptedQuantityTons?: number | null;
+  discountPercent?: number;
+  specsMet?: boolean | null;
+  specsOutcomeNotes?: string | null;
 }
 
 export interface StuckFulfillment {

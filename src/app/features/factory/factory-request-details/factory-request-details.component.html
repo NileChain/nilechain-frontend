@@ -1,0 +1,189 @@
+<main class="md:ms-[280px] min-h-screen bg-surface">
+  <app-top-bar
+    titleKey="factory.requests.detailTitle"
+    portal="factory"
+    notificationsLink="/factory/notifications"
+  >
+    <a routerLink="/factory/requests" class="ui-btn-ghost !py-2 !px-4">
+      {{ 'factory.requests.backToList' | translate }}
+    </a>
+  </app-top-bar>
+
+  <div class="p-margin-mobile md:p-margin-desktop max-w-[960px] mx-auto animate-fade-in space-y-6">
+    @if (loading()) {
+      <div class="ui-card p-6 space-y-4">
+        <ui-skeleton height="1.5rem" width="40%" />
+        <ui-skeleton height="8rem" width="100%" />
+      </div>
+    } @else if (error()) {
+      <ui-error-state [message]="error()" (retry)="load(requestId() ?? '')" />
+    } @else if (request(); as r) {
+      <header class="ui-card p-6 space-y-2">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p class="text-sm text-on-surface-variant">
+              {{ 'factory.dashboard.requestId' | translate }}
+            </p>
+            <h1 class="font-headline-md text-headline-md text-on-surface fx-mono">
+              {{ shortId(r.requestId) }}
+            </h1>
+          </div>
+          <span class="fx-badge" [attr.data-tone]="(r.status || '').toLowerCase() === 'cancelled' ? 'muted' : 'success'">
+            {{ statusKey(r.status) | translate }}
+          </span>
+        </div>
+
+        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 text-sm">
+          <div>
+            <dt class="text-on-surface-variant">{{ 'factory.dashboard.commodity' | translate }}</dt>
+            <dd class="font-label-lg">{{ r.crop }}</dd>
+          </div>
+          <div>
+            <dt class="text-on-surface-variant">{{ 'factory.dashboard.quantityTons' | translate }}</dt>
+            <dd class="tabular-nums">{{ r.quantityTons | number: '1.0-0' }}</dd>
+          </div>
+          <div>
+            <dt class="text-on-surface-variant">{{ 'factory.supplyRequest.targetPrice' | translate }}</dt>
+            <dd class="tabular-nums">
+              @if (r.pricePerTon != null) {
+                {{ r.pricePerTon | number: '1.0-0' }} EGP/t
+              } @else {
+                —
+              }
+            </dd>
+          </div>
+          <div>
+            <dt class="text-on-surface-variant">{{ 'factory.dashboard.budgetEgp' | translate }}</dt>
+            <dd class="tabular-nums">
+              @if (budget(r); as b) {
+                {{ b | number: '1.0-0' }}
+              } @else {
+                —
+              }
+            </dd>
+          </div>
+          <div>
+            <dt class="text-on-surface-variant">{{ 'factory.supplyRequest.deliveryDate' | translate }}</dt>
+            <dd>
+              @if (r.deliveryDate) {
+                {{ r.deliveryDate | date: 'mediumDate' }}
+              } @else {
+                —
+              }
+            </dd>
+          </div>
+          <div>
+            <dt class="text-on-surface-variant">{{ 'factory.supplyRequest.deliveryPoint' | translate }}</dt>
+            <dd>
+              {{
+                (r.deliveryPoint === 'FarmGate'
+                  ? 'factory.supplyRequest.farmGate'
+                  : 'factory.supplyRequest.factoryGate') | translate
+              }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-on-surface-variant">{{ 'factory.dashboard.date' | translate }}</dt>
+            <dd>{{ r.createdAt | date: 'medium' }}</dd>
+          </div>
+          <div>
+            <dt class="text-on-surface-variant">{{ 'factory.requests.matches' | translate }}</dt>
+            <dd class="tabular-nums">{{ r.matchCount }} ({{ r.activeMatchCount }} active)</dd>
+          </div>
+        </dl>
+      </header>
+
+      <section class="ui-card p-6 space-y-4">
+        <h2 class="font-title-md text-on-surface">
+          {{ 'factory.requests.qualitySection' | translate }}
+        </h2>
+
+        @if (r.qualitySpecsRaw) {
+          <p class="text-sm text-on-surface-variant whitespace-pre-wrap">{{ r.qualitySpecsRaw }}</p>
+        }
+
+        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+          @if (r.quality.moistureMaxPercent != null) {
+            <div>
+              <dt class="text-on-surface-variant">{{ 'factory.supplyRequest.moistureMax' | translate }}</dt>
+              <dd class="tabular-nums">{{ r.quality.moistureMaxPercent }}%</dd>
+            </div>
+          }
+          @if (r.quality.impuritiesMaxPercent != null) {
+            <div>
+              <dt class="text-on-surface-variant">{{ 'factory.supplyRequest.impuritiesMax' | translate }}</dt>
+              <dd class="tabular-nums">{{ r.quality.impuritiesMaxPercent }}%</dd>
+            </div>
+          }
+          @if (r.quality.grade) {
+            <div>
+              <dt class="text-on-surface-variant">{{ 'factory.supplyRequest.grade' | translate }}</dt>
+              <dd>{{ r.quality.grade }}</dd>
+            </div>
+          }
+          @if (r.quality.labRequired != null) {
+            <div>
+              <dt class="text-on-surface-variant">{{ 'factory.supplyRequest.labRequired' | translate }}</dt>
+              <dd>
+                {{
+                  (r.quality.labRequired
+                    ? 'factory.supplyRequest.labRequiredYes'
+                    : 'factory.supplyRequest.labRequiredNo') | translate
+                }}
+              </dd>
+            </div>
+          }
+          @if (r.quality.preferredGovernorates?.length) {
+            <div class="sm:col-span-2">
+              <dt class="text-on-surface-variant">{{ 'factory.supplyRequest.governorates' | translate }}</dt>
+              <dd>{{ r.quality.preferredGovernorates!.join(', ') }}</dd>
+            </div>
+          }
+          @if (r.quality.geographicScope) {
+            <div>
+              <dt class="text-on-surface-variant">{{ 'factory.supplyRequest.geographicScope' | translate }}</dt>
+              <dd>{{ r.quality.geographicScope }}</dd>
+            </div>
+          }
+        </dl>
+
+        @if (
+          !r.qualitySpecsRaw &&
+          r.quality.moistureMaxPercent == null &&
+          r.quality.impuritiesMaxPercent == null &&
+          !r.quality.grade &&
+          r.quality.labRequired == null
+        ) {
+          <p class="text-sm text-on-surface-variant">
+            {{ 'factory.requests.noQualitySpecs' | translate }}
+          </p>
+        }
+      </section>
+
+      <div class="flex flex-wrap gap-3">
+        @if (r.matchCount > 0) {
+          <a
+            routerLink="/factory/matches"
+            [queryParams]="{ requestId: r.requestId }"
+            class="ui-btn-primary inline-flex"
+          >
+            {{ 'factory.requests.viewMatches' | translate }}
+          </a>
+        }
+        @if (r.canRerunAgent) {
+          <button type="button" class="ui-btn-secondary" [disabled]="acting()" (click)="rerunAgent()">
+            {{ 'factory.requests.rerunAgent' | translate }}
+          </button>
+        }
+        @if (r.canCancel) {
+          <button type="button" class="ui-btn-ghost text-error" [disabled]="acting()" (click)="cancel()">
+            @if (acting()) {
+              <ui-loader size="sm" />
+            }
+            {{ 'factory.requests.cancelRequest' | translate }}
+          </button>
+        }
+      </div>
+    }
+  </div>
+</main>

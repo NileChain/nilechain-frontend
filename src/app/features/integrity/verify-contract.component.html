@@ -1,0 +1,95 @@
+<div
+  class="min-h-screen flex flex-col items-center justify-center p-margin-mobile md:p-margin-desktop bg-surface"
+>
+  <header
+    class="fixed top-0 inset-x-0 z-50 flex justify-between items-center gap-1 px-margin-mobile md:px-margin-desktop h-16"
+  >
+    <a routerLink="/landing" class="inline-flex items-center gap-2">
+      <ui-brand-mark [size]="36" />
+      <span class="font-headline-sm font-bold text-on-surface">{{
+        'app.name' | translate
+      }}</span>
+    </a>
+    <div class="flex items-center gap-1">
+      <ui-language-toggle />
+      <ui-theme-toggle />
+    </div>
+  </header>
+
+  <main class="w-full max-w-[560px] z-10 animate-fade-in pt-16">
+    <div class="ui-card rounded-xl p-lg md:p-xl space-y-md">
+      @if (loading()) {
+        <div class="text-center space-y-sm">
+          <span
+            class="material-symbols-outlined text-5xl text-primary animate-spin"
+            aria-hidden="true"
+            >sync</span
+          >
+          <p class="font-body-md text-on-surface-variant">
+            {{ 'integrity.verifying' | translate }}
+          </p>
+        </div>
+      } @else if (result(); as r) {
+        <div class="text-center space-y-sm">
+          <span
+            class="material-symbols-outlined text-5xl"
+            [class.text-success-green]="r.outcome === 'Verified'"
+            [class.text-error]="r.outcome === 'Tampered' || r.outcome === 'NotFound'"
+            [class.text-primary]="r.outcome === 'Superseded'"
+            aria-hidden="true"
+            >{{ outcomeIcon(r.outcome) }}</span
+          >
+          <h1 class="font-headline-md text-headline-md text-on-surface font-bold">
+            {{ outcomeKey(r.outcome) | translate }}
+          </h1>
+          <p class="font-body-sm text-on-surface-variant">
+            {{ 'integrity.honestyNote' | translate }}
+          </p>
+        </div>
+
+        <dl class="space-y-2 text-sm">
+          <div>
+            <dt class="text-on-surface-variant">{{ 'integrity.hash' | translate }}</dt>
+            <dd class="font-mono break-all">{{ r.contentHash }}</dd>
+          </div>
+          @if (r.txRef) {
+            <div>
+              <dt class="text-on-surface-variant">{{ 'integrity.txRef' | translate }}</dt>
+              <dd class="font-mono">{{ r.txRef }}</dd>
+            </div>
+          }
+          @if (r.chainIndex != null) {
+            <div>
+              <dt class="text-on-surface-variant">{{ 'integrity.indexLabel' | translate }}</dt>
+              <dd>{{ r.chainIndex }}</dd>
+            </div>
+          }
+          @if (r.farmName) {
+            <div>
+              <dt class="text-on-surface-variant">{{ 'contractDoc.farmParty' | translate }}</dt>
+              <dd>{{ r.farmName }}</dd>
+            </div>
+          }
+          @if (r.factoryName) {
+            <div>
+              <dt class="text-on-surface-variant">{{ 'contractDoc.factoryParty' | translate }}</dt>
+              <dd>{{ r.factoryName }}</dd>
+            </div>
+          }
+          @if (r.cropName) {
+            <div>
+              <dt class="text-on-surface-variant">{{ 'contractDoc.cropType' | translate }}</dt>
+              <dd>{{ r.cropName }}</dd>
+            </div>
+          }
+          @if (r.signedAt) {
+            <div>
+              <dt class="text-on-surface-variant">{{ 'contractDoc.signedAtLabel' | translate }}</dt>
+              <dd>{{ r.signedAt | date: 'medium' }}</dd>
+            </div>
+          }
+        </dl>
+      }
+    </div>
+  </main>
+</div>

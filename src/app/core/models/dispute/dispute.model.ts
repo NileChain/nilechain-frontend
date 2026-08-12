@@ -5,7 +5,7 @@ export type DisputeType =
   | 'QuantityDispute'
   | 'Other';
 export type DisputeParty = 'Farm' | 'Factory';
-export type DisputeOutcomeFavor = 'None' | 'Farm' | 'Factory';
+export type DisputeOutcomeFavor = 'None' | 'Farm' | 'Factory' | 'Split';
 
 export interface DisputeEvidence {
   disputeEvidenceId: string;

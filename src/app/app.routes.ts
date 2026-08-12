@@ -8,6 +8,13 @@ export const routes: Routes = [
 
   // Public
   {
+    path: 'verify/:hash',
+    loadComponent: () =>
+      import('./features/integrity/verify-contract.component').then(
+        (m) => m.VerifyContractComponent
+      ),
+  },
+  {
     path: 'landing',
     loadComponent: () =>
       import('./features/landing/landing.component').then(
@@ -93,6 +100,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'factories/:factoryId',
+        loadComponent: () =>
+          import(
+            './features/farm/farm-factory-public-profile/farm-factory-public-profile.component'
+          ).then((m) => m.FarmFactoryPublicProfileComponent),
+      },
+      {
         path: 'contracts',
         loadComponent: () =>
           import('./features/farm/farm-contracts/farm-contracts.component').then(
@@ -107,6 +121,13 @@ export const routes: Routes = [
           ).then((m) => m.FarmContractDetailsComponent),
       },
       {
+        path: 'wallet',
+        loadComponent: () =>
+          import('./features/wallet/wallet-page.component').then(
+            (m) => m.WalletPageComponent
+          ),
+      },
+      {
         path: 'messages',
         loadComponent: () =>
           import('./features/farm/farm-messages/farm-messages.component').then(
@@ -118,6 +139,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/farm/farm-notifications/farm-notifications.component').then(
             (m) => m.FarmNotificationsComponent
+          ),
+      },
+      {
+        path: 'disputes',
+        loadComponent: () =>
+          import('./shared/disputes/party-disputes-page.component').then(
+            (m) => m.PartyDisputesPageComponent
           ),
       },
       {
@@ -179,6 +207,27 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'requests',
+        loadComponent: () =>
+          import('./features/factory/factory-requests/factory-requests.component').then(
+            (m) => m.FactoryRequestsComponent
+          ),
+      },
+      {
+        path: 'requests/:requestId',
+        loadComponent: () =>
+          import(
+            './features/factory/factory-request-details/factory-request-details.component'
+          ).then((m) => m.FactoryRequestDetailsComponent),
+      },
+      {
+        path: 'suppliers/:farmId/scorecard',
+        loadComponent: () =>
+          import(
+            './features/factory/factory-supplier-scorecard/factory-supplier-scorecard.component'
+          ).then((m) => m.FactorySupplierScorecardComponent),
+      },
+      {
         path: 'crop-request',
         loadComponent: () =>
           import('./features/crop-request/crop-request.component').then(
@@ -190,6 +239,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/factory/factory-matches/factory-matches.component').then(
             (m) => m.FactoryMatchesComponent
+          ),
+      },
+      {
+        path: 'listings',
+        loadComponent: () =>
+          import('./features/factory/factory-listings/factory-listings.component').then(
+            (m) => m.FactoryListingsComponent
           ),
       },
       {
@@ -221,6 +277,13 @@ export const routes: Routes = [
           ).then((m) => m.FactoryContractDetailsComponent),
       },
       {
+        path: 'wallet',
+        loadComponent: () =>
+          import('./features/wallet/wallet-page.component').then(
+            (m) => m.WalletPageComponent
+          ),
+      },
+      {
         path: 'contract-signing',
         loadComponent: () =>
           import('./features/factory/contract-signing/contract-signing.component').then(
@@ -239,6 +302,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/factory/factory-notifications/factory-notifications.component').then(
             (m) => m.FactoryNotificationsComponent
+          ),
+      },
+      {
+        path: 'disputes',
+        loadComponent: () =>
+          import('./shared/disputes/party-disputes-page.component').then(
+            (m) => m.PartyDisputesPageComponent
           ),
       },
     ],

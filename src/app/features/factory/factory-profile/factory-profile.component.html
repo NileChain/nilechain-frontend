@@ -1,4 +1,4 @@
-<main class="md:ms-[280px] min-h-screen bg-surface">
+<main class="md:ms-[280px] min-h-screen fp-page-bg">
   <app-top-bar
     titleKey="factory.profile.title"
     subtitleKey="factory.profile.subtitle"
@@ -7,14 +7,14 @@
   >
     <button
       type="button"
-      class="ui-btn-primary shrink-0"
+      class="ui-btn-primary shrink-0 !py-2 !px-4 text-sm"
       [disabled]="saving() || loading()"
       (click)="save()"
     >
       @if (saving()) {
         <ui-loader size="sm" />
       } @else {
-        <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
           >save</span
         >
       }
@@ -22,15 +22,9 @@
     </button>
   </app-top-bar>
 
-  <div
-    class="fp-page p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto animate-fade-in"
-  >
+  <div class="fp-shell animate-fade-in">
     @if (loading()) {
-      <div
-        class="flex justify-center py-16"
-        role="status"
-        [attr.aria-busy]="true"
-      >
+      <div class="flex justify-center py-16" role="status" [attr.aria-busy]="true">
         <ui-loader />
       </div>
     } @else if (error() && !profile()) {
@@ -48,41 +42,28 @@
         </p>
       }
 
-      <div class="fp-layout">
-        <!-- Left rail: trust + completion -->
+      <div class="fp-layout" [formGroup]="form">
         <aside class="fp-rail">
           <section
-            class="fp-trust"
+            class="fp-status"
             [attr.data-verified]="data.isVerified ? 'true' : 'false'"
             aria-labelledby="fp-trust-title"
           >
-            <div class="fp-trust__hero">
-              <div class="fp-trust__icon" aria-hidden="true">
+            <div class="fp-status__top">
+              <div class="fp-status__icon" aria-hidden="true">
                 <span class="material-symbols-outlined fill">{{
                   data.isVerified ? 'verified' : 'pending'
                 }}</span>
               </div>
               <div class="min-w-0">
-                <div class="fp-trust__title-row">
-                  <h2 id="fp-trust-title" class="fp-trust__title">
-                    {{
-                      data.isVerified
-                        ? ('factory.profile.verifiedFactory' | translate)
-                        : ('factory.profile.pendingVerification' | translate)
-                    }}
-                  </h2>
-                  @if (data.isVerified) {
-                    <span class="fp-badge">
-                      <span
-                        class="material-symbols-outlined text-[14px] fill"
-                        aria-hidden="true"
-                        >verified</span
-                      >
-                      {{ 'common.verified' | translate }}
-                    </span>
-                  }
-                </div>
-                <p class="fp-trust__hint">
+                <h2 id="fp-trust-title" class="fp-status__title">
+                  {{
+                    data.isVerified
+                      ? ('factory.profile.verifiedFactory' | translate)
+                      : ('factory.profile.pendingVerification' | translate)
+                  }}
+                </h2>
+                <p class="fp-status__hint">
                   {{
                     data.isVerified
                       ? ('factory.profile.verifiedByNile' | translate)
@@ -92,16 +73,16 @@
               </div>
             </div>
 
-            <div class="fp-trust__rating">
+            <div class="fp-status__rating">
               <div
                 class="fp-stars"
                 [attr.aria-label]="
-                  ('factory.profile.ratingAria'
+                  'factory.profile.ratingAria'
                     | translate
                       : {
                           rating: (data.averageRating | number: '1.1-1') || '0',
                           count: data.ratingCount,
-                        })
+                        }
                 "
               >
                 @for (slot of starSlots(data.averageRating); track $index) {
@@ -114,11 +95,11 @@
                   >
                 }
               </div>
-              <p class="fp-trust__score">
-                <span class="ui-data-sm">{{
+              <p class="fp-status__score">
+                <span class="tabular-nums">{{
                   data.averageRating | number: '1.1-1'
                 }}</span>
-                <span class="fp-trust__reviews">
+                <span>
                   {{
                     'factory.profile.reviewCount'
                       | translate: { count: data.ratingCount }
@@ -127,40 +108,7 @@
               </p>
             </div>
 
-            <dl class="fp-trust__metrics">
-              <div class="fp-metric">
-                <dt>{{ 'factory.profile.metricRating' | translate }}</dt>
-                <dd>{{ data.averageRating | number: '1.1-1' }}/5</dd>
-              </div>
-              <div class="fp-metric">
-                <dt>{{ 'factory.profile.metricReviews' | translate }}</dt>
-                <dd>{{ data.ratingCount }}</dd>
-              </div>
-              <div class="fp-metric">
-                <dt>{{ 'factory.profile.metricCompletion' | translate }}</dt>
-                <dd>{{ data.completionPercent }}%</dd>
-              </div>
-            </dl>
-          </section>
-
-          <section
-            class="fp-completion ui-card"
-            aria-labelledby="fp-completion-title"
-          >
-            <div class="fp-completion__head">
-              <h2 id="fp-completion-title" class="fp-section-title">
-                {{ 'factory.profile.completion' | translate }}
-              </h2>
-              <p class="fp-section-sub">
-                @if (data.completionPercent >= 100) {
-                  {{ 'factory.profile.profileComplete' | translate }}
-                } @else {
-                  {{ 'factory.profile.completionHint' | translate }}
-                }
-              </p>
-            </div>
-
-            <div class="fp-completion__body">
+            <div class="fp-status__completion">
               <div
                 class="fp-ring"
                 role="progressbar"
@@ -180,278 +128,181 @@
                   <span class="fp-ring__value">{{ data.completionPercent }}%</span>
                 </div>
               </div>
-
-              @if (data.completionPercent < 100) {
-                <a
-                  class="ui-btn-secondary w-full justify-center"
-                  routerLink="/factory/supply-request"
-                >
-                  <span
-                    class="material-symbols-outlined text-[18px]"
-                    aria-hidden="true"
-                    >add_business</span
-                  >
-                  {{ 'factory.profile.ctaSupplyRequest' | translate }}
-                </a>
-              }
+              <div class="min-w-0">
+                <p class="fp-status__comp-label">
+                  {{ 'factory.profile.completion' | translate }}
+                </p>
+                <p class="fp-status__comp-hint">
+                  @if (data.completionPercent >= 100) {
+                    {{ 'factory.profile.profileComplete' | translate }}
+                  } @else {
+                    {{ 'factory.profile.completionHint' | translate }}
+                  }
+                </p>
+              </div>
             </div>
+
+            <dl class="fp-status__metrics">
+              <div>
+                <dt>{{ 'factory.profile.metricRating' | translate }}</dt>
+                <dd class="tabular-nums">{{ data.averageRating | number: '1.1-1' }}/5</dd>
+              </div>
+              <div>
+                <dt>{{ 'factory.profile.metricReviews' | translate }}</dt>
+                <dd class="tabular-nums">{{ data.ratingCount }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'factory.profile.metricCompletion' | translate }}</dt>
+                <dd class="tabular-nums">{{ data.completionPercent }}%</dd>
+              </div>
+            </dl>
           </section>
         </aside>
 
-        <!-- Main column -->
-        <div class="fp-main" [formGroup]="form">
-          <section class="fp-section ui-card" aria-labelledby="fp-basic-title">
-            <header class="fp-section__header">
+        <div class="fp-main">
+          <section class="fp-panel" aria-labelledby="fp-basic-title">
+            <header class="fp-panel__head">
               <div>
-                <h2 id="fp-basic-title" class="fp-section-title">
+                <h2 id="fp-basic-title" class="fp-panel__title">
                   {{ 'factory.profile.basicInfo' | translate }}
                 </h2>
-                <p class="fp-section-sub">
+                <p class="fp-panel__sub">
                   {{ 'factory.profile.basicInfoHint' | translate }}
                 </p>
               </div>
-              <button
-                type="button"
-                class="ui-btn-ghost shrink-0"
-                (click)="focusBasicInfo()"
-              >
-                <span
-                  class="material-symbols-outlined text-[18px]"
-                  aria-hidden="true"
-                  >edit</span
-                >
-                {{ 'common.edit' | translate }}
-              </button>
             </header>
 
-            <div class="fp-info-grid">
+            <div class="fp-form-grid">
               <label class="fp-field" for="factory-name">
-                <span class="fp-field__icon" aria-hidden="true">
-                  <span class="material-symbols-outlined">precision_manufacturing</span>
-                </span>
-                <span class="fp-field__meta">
-                  <span class="fp-field__label">{{
-                    'factory.profile.factoryName' | translate
-                  }}</span>
-                  <input
-                    #nameInput
-                    id="factory-name"
-                    type="text"
-                    class="ui-input fp-field__input"
-                    formControlName="name"
-                  />
-                </span>
+                <span class="fp-field__label">{{
+                  'factory.profile.factoryName' | translate
+                }}</span>
+                <input
+                  id="factory-name"
+                  type="text"
+                  class="ui-input"
+                  formControlName="name"
+                />
               </label>
 
               <label class="fp-field" for="factory-industry">
-                <span class="fp-field__icon" aria-hidden="true">
-                  <span class="material-symbols-outlined">category</span>
-                </span>
-                <span class="fp-field__meta">
-                  <span class="fp-field__label">{{
-                    'factory.profile.industryType' | translate
-                  }}</span>
-                  @if (cropsLoading()) {
-                    <span class="fp-field__value">{{
-                      'common.loading' | translate
-                    }}</span>
-                  } @else if (cropsError()) {
-                    <span class="fp-field-error" role="alert">
-                      {{ cropsError() }}
-                      <button
-                        type="button"
-                        class="ui-btn-ghost"
-                        (click)="loadCropTypes()"
-                      >
-                        {{ 'common.retry' | translate }}
-                      </button>
-                    </span>
-                  } @else {
-                    <select
-                      id="factory-industry"
-                      class="ui-input fp-field__input"
-                      formControlName="industryType"
-                    >
-                      <option value="">
-                        {{ 'factory.profile.selectIndustry' | translate }}
-                      </option>
-                      @for (opt of industryOptions(); track opt) {
-                        <option [value]="opt">{{ opt }}</option>
-                      }
-                    </select>
-                    @if (industryOptions().length === 0) {
-                      <span class="fp-field-error">{{
-                        'factory.profile.noCrops' | translate
-                      }}</span>
+                <span class="fp-field__label">{{
+                  'factory.profile.industryType' | translate
+                }}</span>
+                @if (cropsLoading()) {
+                  <span class="fp-field__hint">{{ 'common.loading' | translate }}</span>
+                } @else if (cropsError()) {
+                  <span class="fp-field-error" role="alert">
+                    {{ cropsError() }}
+                    <button type="button" class="ui-btn-ghost" (click)="loadCropTypes()">
+                      {{ 'common.retry' | translate }}
+                    </button>
+                  </span>
+                } @else {
+                  <select
+                    id="factory-industry"
+                    class="ui-input"
+                    formControlName="industryType"
+                  >
+                    <option value="">
+                      {{ 'factory.profile.selectIndustry' | translate }}
+                    </option>
+                    @for (opt of industryOptions(); track opt) {
+                      <option [value]="opt">{{ opt }}</option>
                     }
-                    <a
-                      class="fp-field__hint text-primary font-label-sm"
-                      routerLink="/factory/crop-request"
-                    >
-                      {{ 'factory.profile.requestCrop' | translate }}
-                    </a>
-                  }
-                </span>
+                  </select>
+                  <a
+                    class="fp-field__link"
+                    routerLink="/factory/crop-request"
+                  >
+                    {{ 'factory.profile.requestCrop' | translate }}
+                  </a>
+                }
               </label>
 
-              <div class="fp-field fp-field--readonly">
-                <span class="fp-field__icon" aria-hidden="true">
-                  <span class="material-symbols-outlined">map</span>
-                </span>
-                <span class="fp-field__meta">
-                  <span class="fp-field__label">{{
-                    'factory.profile.governorate' | translate
-                  }}</span>
-                  <span class="fp-field__value">{{
-                    form.controls.governorate.value || '—'
-                  }}</span>
-                </span>
-              </div>
+              <label class="fp-field" for="factory-phone">
+                <span class="fp-field__label">{{
+                  'factory.profile.phone' | translate
+                }}</span>
+                <div class="fp-field__row">
+                  <input
+                    id="factory-phone"
+                    type="tel"
+                    class="ui-input"
+                    [value]="phoneNumber()"
+                    (input)="phoneNumber.set($any($event.target).value)"
+                    [attr.placeholder]="
+                      'factory.profile.phonePlaceholder' | translate
+                    "
+                    inputmode="numeric"
+                    autocomplete="tel"
+                  />
+                  <button
+                    type="button"
+                    class="ui-btn-secondary shrink-0"
+                    [disabled]="updatingPhone() || !phoneNumber()"
+                    (click)="updatePhone()"
+                  >
+                    @if (updatingPhone()) {
+                      <ui-loader size="sm" />
+                    } @else {
+                      {{ 'common.save' | translate }}
+                    }
+                  </button>
+                </div>
+                @if (phoneError()) {
+                  <p class="fp-field-error" role="alert">{{ phoneError() }}</p>
+                }
+              </label>
 
-              <div class="fp-field fp-field--readonly">
-                <span class="fp-field__icon" aria-hidden="true">
-                  <span class="material-symbols-outlined">pin_drop</span>
-                </span>
-                <span class="fp-field__meta">
-                  <span class="fp-field__label">{{
-                    'factory.profile.address' | translate
-                  }}</span>
-                  <span class="fp-field__value">{{
-                    form.controls.location.value || '—'
-                  }}</span>
-                </span>
-              </div>
-            </div>
-
-            <div class="fp-map-block">
-              <h3 class="fp-section-title fp-section-title--sm">
-                {{ 'locationPicker.label' | translate }}
-              </h3>
-              <app-location-picker
-                [initialLocation]="mapInitial()"
-                (locationChange)="onLocationPicked($event)"
-              />
-              @if (
-                form.controls.governorate.invalid &&
-                form.controls.governorate.touched
-              ) {
-                <p class="fp-field-error">
-                  {{ 'locationPicker.required' | translate }}
+              <div class="fp-field">
+                <span class="fp-field__label">{{
+                  'factory.profile.address' | translate
+                }}</span>
+                <p class="fp-field__readonly">
+                  {{ form.controls.location.value || '—' }}
                 </p>
-              }
+                <p class="fp-field__hint">
+                  {{ 'factory.profile.addressFromMap' | translate }}
+                </p>
+              </div>
+
+              <div class="fp-field">
+                <span class="fp-field__label">{{
+                  'factory.profile.governorate' | translate
+                }}</span>
+                <p class="fp-field__readonly">
+                  {{ form.controls.governorate.value || '—' }}
+                </p>
+                <p class="fp-field__hint">
+                  {{ 'factory.profile.governorateFromMap' | translate }}
+                </p>
+              </div>
             </div>
           </section>
 
-          <!-- Contact & overview — only real fields from API -->
-          <section
-            class="fp-contact ui-card"
-            aria-labelledby="fp-contact-title"
-          >
-            <header class="fp-section__header">
+          <section class="fp-panel" aria-labelledby="fp-map-title">
+            <header class="fp-panel__head">
               <div>
-                <h2 id="fp-contact-title" class="fp-section-title">
-                  {{ 'factory.profile.contactOverview' | translate }}
+                <h2 id="fp-map-title" class="fp-panel__title">
+                  {{ 'locationPicker.label' | translate }}
                 </h2>
-                <p class="fp-section-sub">
-                  {{ 'factory.profile.contactOverviewHint' | translate }}
+                <p class="fp-panel__sub">
+                  {{ 'factory.profile.mapHint' | translate }}
                 </p>
               </div>
             </header>
-
-            <div class="fp-contact__grid">
-              <div class="fp-contact__item">
-                <span class="fp-contact__icon" aria-hidden="true">
-                  <span class="material-symbols-outlined">call</span>
-                </span>
-                <div class="min-w-0 flex-1">
-                  <p class="fp-contact__label">
-                    {{ 'factory.profile.phone' | translate }}
-                  </p>
-                  <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center mt-1">
-                    <input
-                      type="tel"
-                      class="ui-input"
-                      [value]="phoneNumber()"
-                      (input)="phoneNumber.set($any($event.target).value)"
-                      [attr.placeholder]="
-                        'factory.profile.phonePlaceholder' | translate
-                      "
-                      inputmode="numeric"
-                      autocomplete="tel"
-                    />
-                    <button
-                      type="button"
-                      class="ui-btn-secondary shrink-0"
-                      [disabled]="updatingPhone() || !phoneNumber()"
-                      (click)="updatePhone()"
-                    >
-                      @if (updatingPhone()) {
-                        <ui-loader size="sm" />
-                      } @else {
-                        {{ 'common.save' | translate }}
-                      }
-                    </button>
-                  </div>
-                  @if (phoneError()) {
-                    <p class="fp-field-error mt-1" role="alert">
-                      {{ phoneError() }}
-                    </p>
-                  }
-                </div>
-              </div>
-
-              <div class="fp-contact__item">
-                <span class="fp-contact__icon" aria-hidden="true">
-                  <span class="material-symbols-outlined">location_on</span>
-                </span>
-                <div class="min-w-0">
-                  <p class="fp-contact__label">
-                    {{ 'factory.profile.address' | translate }}
-                  </p>
-                  <p class="fp-contact__value">
-                    {{
-                      form.controls.location.value ||
-                        form.controls.governorate.value ||
-                        ('factory.profile.notProvided' | translate)
-                    }}
-                  </p>
-                </div>
-              </div>
-
-              <div class="fp-contact__item">
-                <span class="fp-contact__icon" aria-hidden="true">
-                  <span class="material-symbols-outlined">public</span>
-                </span>
-                <div class="min-w-0">
-                  <p class="fp-contact__label">
-                    {{ 'factory.profile.governorate' | translate }}
-                  </p>
-                  <p class="fp-contact__value">
-                    {{
-                      form.controls.governorate.value ||
-                        ('factory.profile.notProvided' | translate)
-                    }}
-                  </p>
-                </div>
-              </div>
-
-              <div class="fp-contact__item">
-                <span class="fp-contact__icon" aria-hidden="true">
-                  <span class="material-symbols-outlined">category</span>
-                </span>
-                <div class="min-w-0">
-                  <p class="fp-contact__label">
-                    {{ 'factory.profile.industryType' | translate }}
-                  </p>
-                  <p class="fp-contact__value">
-                    {{
-                      form.controls.industryType.value ||
-                        ('factory.profile.notProvided' | translate)
-                    }}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <app-location-picker
+              [initialLocation]="mapInitial()"
+              (locationChange)="onLocationPicked($event)"
+            />
+            @if (
+              form.controls.governorate.invalid && form.controls.governorate.touched
+            ) {
+              <p class="fp-field-error">
+                {{ 'locationPicker.required' | translate }}
+              </p>
+            }
           </section>
         </div>
       </div>

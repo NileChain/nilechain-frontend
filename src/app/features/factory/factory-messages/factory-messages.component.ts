@@ -1,6 +1,14 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
@@ -16,6 +24,13 @@ import {
   FactoryService,
 } from '../../../core/services/factory/factory.service';
 
+interface ConversationGroup {
+  key: string;
+  name: string;
+  unreadTotal: number;
+  threads: FactoryConversation[];
+}
+
 @Component({
   selector: 'app-factory-messages',
   standalone: true,
@@ -30,11 +45,14 @@ import {
     DatePipe,
   ],
   templateUrl: './factory-messages.component.html',
+  styleUrl: './factory-messages.component.scss',
 })
 export class FactoryMessagesComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly factoryService = inject(FactoryService);
   private readonly i18n = inject(TranslateService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   readonly currentUser = this.authService.currentUser;
 
   readonly loading = signal(true);
@@ -42,13 +60,53 @@ export class FactoryMessagesComponent implements OnInit {
   readonly sending = signal(false);
   readonly error = signal<string | null>(null);
   readonly threadError = signal<string | null>(null);
+  readonly chatGated = signal(false);
   readonly conversations = signal<FactoryConversation[]>([]);
   readonly messages = signal<FactoryMessage[]>([]);
   readonly selectedMatchId = signal<string | null>(null);
 
+  readonly groups = computed<ConversationGroup[]>(() => {
+    const map = new Map<string, ConversationGroup>();
+    for (const thread of this.conversations()) {
+      const key = thread.farmId || thread.farmName || thread.matchId;
+      const existing = map.get(key);
+      if (existing) {
+        existing.threads.push(thread);
+        existing.unreadTotal += thread.unreadCount || 0;
+      } else {
+        map.set(key, {
+          key,
+          name: thread.farmName,
+          unreadTotal: thread.unreadCount || 0,
+          threads: [thread],
+        });
+      }
+    }
+    return [...map.values()].map((g) => ({
+      ...g,
+      threads: [...g.threads].sort((a, b) => {
+        const aAt = Date.parse(a.lastMessageAt || a.matchCreatedAt || '') || 0;
+        const bAt = Date.parse(b.lastMessageAt || b.matchCreatedAt || '') || 0;
+        return bAt - aAt;
+      }),
+    }));
+  });
+
   draft = '';
+  private pendingMatchId: string | null = null;
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      const matchId = params.get('matchId');
+      this.pendingMatchId = matchId;
+      if (matchId && this.selectedMatchId() !== matchId) {
+        if (this.conversations().some((c) => c.matchId === matchId)) {
+          this.selectConversation(matchId);
+        } else if (!this.loading()) {
+          this.openMatchThread(matchId);
+        }
+      }
+    });
     this.loadConversations();
   }
 
@@ -61,6 +119,15 @@ export class FactoryMessagesComponent implements OnInit {
       .subscribe({
         next: (items) => {
           this.conversations.set(items);
+          const target = this.pendingMatchId;
+          if (target) {
+            if (items.some((c) => c.matchId === target)) {
+              this.selectConversation(target);
+            } else {
+              this.openMatchThread(target);
+            }
+            return;
+          }
           if (items.length > 0 && !this.selectedMatchId()) {
             this.selectConversation(items[0].matchId);
           }
@@ -72,15 +139,16 @@ export class FactoryMessagesComponent implements OnInit {
 
   selectConversation(matchId: string): void {
     this.selectedMatchId.set(matchId);
+    this.syncMatchQuery(matchId);
     this.messagesLoading.set(true);
     this.threadError.set(null);
+    this.chatGated.set(false);
     this.factoryService
       .getMessages(matchId)
       .pipe(finalize(() => this.messagesLoading.set(false)))
       .subscribe({
         next: (items) => this.messages.set(items),
-        error: () =>
-          this.threadError.set(this.i18n.instant('messages.loadMessagesFailed')),
+        error: (err: HttpErrorResponse) => this.handleThreadLoadError(err),
       });
   }
 
@@ -93,10 +161,71 @@ export class FactoryMessagesComponent implements OnInit {
     return message.senderId === this.currentUser()?.id;
   }
 
+  matchRef(matchId: string | null | undefined): string {
+    if (!matchId) return '—';
+    return matchId.replace(/-/g, '').slice(-6).toUpperCase();
+  }
+
+  activityAt(convo: FactoryConversation): string | null {
+    return convo.lastMessageAt || convo.matchCreatedAt || null;
+  }
+
+  dealMeta(convo: FactoryConversation): string {
+    const crop = convo.cropName || '—';
+    const qty =
+      convo.quantityTons != null && convo.quantityTons > 0
+        ? Math.round(convo.quantityTons)
+        : null;
+    const price =
+      convo.pricePerTon != null && convo.pricePerTon > 0
+        ? Math.round(convo.pricePerTon)
+        : null;
+
+    if (qty != null && price != null) {
+      return this.i18n.instant('messages.dealMetaWithPrice', {
+        crop,
+        qty: qty.toString(),
+        price: price.toLocaleString(),
+      });
+    }
+    if (qty != null) {
+      return this.i18n.instant('messages.dealMeta', {
+        crop,
+        qty: qty.toString(),
+      });
+    }
+    if (price != null) {
+      return this.i18n.instant('messages.dealMetaPriceOnly', {
+        crop,
+        price: price.toLocaleString(),
+      });
+    }
+    return crop;
+  }
+
+  statusLabelKey(status: string | null | undefined): string {
+    switch ((status || '').toLowerCase()) {
+      case 'proposed':
+        return 'farm.matches.statusProposed';
+      case 'accepted':
+        return 'farm.matches.statusAccepted';
+      case 'rejected':
+        return 'farm.matches.statusRejected';
+      case 'countered':
+        return 'farm.matches.statusCountered';
+      default:
+        return 'farm.matches.statusProposed';
+    }
+  }
+
+  previewText(convo: FactoryConversation): string {
+    return convo.lastMessage?.trim() || this.i18n.instant('messages.noPreview');
+  }
+
   send(): void {
     const matchId = this.selectedMatchId();
     const content = this.draft.trim();
-    if (!matchId || !content) {
+    if (!matchId || !content || this.chatGated()) {
       return;
     }
 
@@ -111,8 +240,75 @@ export class FactoryMessagesComponent implements OnInit {
           this.selectConversation(matchId);
           this.loadConversations();
         },
-        error: () =>
-          this.threadError.set(this.i18n.instant('messages.sendFailed')),
+        error: (err: HttpErrorResponse) => {
+          if (this.isChatGatedError(err)) {
+            this.chatGated.set(true);
+            this.threadError.set(null);
+            return;
+          }
+          this.threadError.set(this.i18n.instant('messages.sendFailed'));
+        },
       });
+  }
+
+  private openMatchThread(matchId: string): void {
+    this.selectedMatchId.set(matchId);
+    this.syncMatchQuery(matchId);
+    this.messagesLoading.set(true);
+    this.threadError.set(null);
+    this.chatGated.set(false);
+    this.factoryService
+      .getMessages(matchId)
+      .pipe(finalize(() => this.messagesLoading.set(false)))
+      .subscribe({
+        next: (items) => {
+          this.messages.set(items);
+          if (!this.conversations().some((c) => c.matchId === matchId)) {
+            this.conversations.update((list) => [
+              {
+                matchId,
+                farmId: null,
+                farmName: this.i18n.instant('messages.conversationFallback'),
+                cropName: null,
+                lastMessage: items.at(-1)?.content ?? null,
+                lastMessageAt: items.at(-1)?.createdAt ?? null,
+                unreadCount: 0,
+                contractFullySigned: true,
+              },
+              ...list,
+            ]);
+          }
+        },
+        error: (err: HttpErrorResponse) => this.handleThreadLoadError(err),
+      });
+  }
+
+  private handleThreadLoadError(err: HttpErrorResponse): void {
+    this.messages.set([]);
+    if (this.isChatGatedError(err)) {
+      this.chatGated.set(true);
+      this.threadError.set(null);
+      return;
+    }
+    this.chatGated.set(false);
+    this.threadError.set(this.i18n.instant('messages.loadMessagesFailed'));
+  }
+
+  private isChatGatedError(err: HttpErrorResponse): boolean {
+    const code = err?.error?.code;
+    return typeof code === 'string' && code.includes('CannotSendMessage');
+  }
+
+  private syncMatchQuery(matchId: string): void {
+    const current = this.route.snapshot.queryParamMap.get('matchId');
+    if (current === matchId) {
+      return;
+    }
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { matchId },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 }

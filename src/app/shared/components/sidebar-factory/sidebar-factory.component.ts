@@ -61,10 +61,22 @@ export class SidebarFactoryComponent {
       link: '/factory/supply-request',
     },
     {
+      key: 'requests',
+      icon: 'list_alt',
+      labelKey: 'nav.requests',
+      link: '/factory/requests',
+    },
+    {
       key: 'matches',
       icon: 'handshake',
       labelKey: 'nav.matches',
       link: '/factory/matches',
+    },
+    {
+      key: 'listings',
+      icon: 'storefront',
+      labelKey: 'nav.listings',
+      link: '/factory/listings',
     },
     {
       key: 'agentProgress',
@@ -83,6 +95,18 @@ export class SidebarFactoryComponent {
       icon: 'description',
       labelKey: 'nav.contracts',
       link: '/factory/contracts',
+    },
+    {
+      key: 'disputes',
+      icon: 'gavel',
+      labelKey: 'nav.disputes',
+      link: '/factory/disputes',
+    },
+    {
+      key: 'wallet',
+      icon: 'account_balance_wallet',
+      labelKey: 'nav.wallet',
+      link: '/factory/wallet',
     },
     {
       key: 'messages',
@@ -125,7 +149,9 @@ export class SidebarFactoryComponent {
           (e as NavigationEnd).urlAfterRedirects || (e as NavigationEnd).url;
         this.active.set(this.resolveActive(url));
         this.mobileNav.closeMenu();
-        const match = this.items.find((item) => url.startsWith(item.link));
+        const match = [...this.items]
+          .sort((a, b) => b.link.length - a.link.length)
+          .find((item) => url.startsWith(item.link));
         if (match) {
           this.personalization.trackRecent({
             id: `factory-${match.key}`,
@@ -161,7 +187,9 @@ export class SidebarFactoryComponent {
   }
 
   private resolveActive(url: string): string {
-    const match = this.items.find((item) => url.startsWith(item.link));
+    const match = [...this.items]
+      .sort((a, b) => b.link.length - a.link.length)
+      .find((item) => url.startsWith(item.link));
     return match?.key ?? 'dashboard';
   }
 

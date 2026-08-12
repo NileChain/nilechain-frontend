@@ -13,47 +13,49 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
       role="toolbar"
       [attr.aria-label]="'contractDoc.actions' | translate"
     >
-      <div class="action-bar__secondary">
-        @if (showDownload) {
-          <button
-            type="button"
-            class="ui-btn-secondary action-btn"
-            (click)="download.emit()"
-            [disabled]="busy"
-          >
-            <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
-              >download</span
+      @if (showDownload || showPrint || showShare) {
+        <div class="action-bar__secondary">
+          @if (showDownload) {
+            <button
+              type="button"
+              class="ui-btn-secondary action-btn"
+              (click)="download.emit()"
+              [disabled]="busy"
             >
-            <span class="btn-label">{{ 'contractDoc.downloadPdf' | translate }}</span>
-          </button>
-        }
-        @if (showPrint) {
-          <button
-            type="button"
-            class="ui-btn-ghost action-btn"
-            (click)="print.emit()"
-            [disabled]="busy"
-          >
-            <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
-              >print</span
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+                >download</span
+              >
+              <span class="btn-label">{{ 'contractDoc.downloadPdf' | translate }}</span>
+            </button>
+          }
+          @if (showPrint) {
+            <button
+              type="button"
+              class="ui-btn-ghost action-btn"
+              (click)="print.emit()"
+              [disabled]="busy"
             >
-            <span class="btn-label">{{ 'contractDoc.print' | translate }}</span>
-          </button>
-        }
-        @if (showShare) {
-          <button
-            type="button"
-            class="ui-btn-ghost action-btn"
-            (click)="share.emit()"
-            [disabled]="busy"
-          >
-            <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
-              >share</span
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+                >print</span
+              >
+              <span class="btn-label">{{ 'contractDoc.print' | translate }}</span>
+            </button>
+          }
+          @if (showShare) {
+            <button
+              type="button"
+              class="ui-btn-ghost action-btn"
+              (click)="share.emit()"
+              [disabled]="busy"
             >
-            <span class="btn-label">{{ 'contractDoc.share' | translate }}</span>
-          </button>
-        }
-      </div>
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+                >share</span
+              >
+              <span class="btn-label">{{ 'contractDoc.share' | translate }}</span>
+            </button>
+          }
+        </div>
+      }
 
       @if (canDecide) {
         <div class="action-bar__primary">
@@ -93,18 +95,18 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        justify-content: space-between;
+        justify-content: flex-end;
         gap: 0.75rem;
-        padding: 0.75rem 0.9rem;
-        border-radius: 0.85rem;
+        padding: 0.65rem 0.75rem;
+        border-radius: 0.65rem;
         border: 1px solid
-          color-mix(in srgb, var(--color-outline-variant, #c4c8c0) 75%, transparent);
+          color-mix(in srgb, var(--color-outline-variant, #c4c8c0) 55%, transparent);
         background: color-mix(
           in srgb,
-          var(--color-surface-container-lowest, #fff) 94%,
+          var(--color-surface-container-lowest, #fff) 96%,
           transparent
         );
-        box-shadow: var(--shadow-md, 0 8px 24px rgb(16 24 40 / 10%));
+        box-shadow: 0 8px 28px rgb(16 24 40 / 8%);
         backdrop-filter: blur(12px);
       }
       .action-bar--sticky {

@@ -7,6 +7,7 @@ import {
   PendingSupplyRequest,
   savePendingSupplyRequest,
 } from '../utils/agent-session';
+import { StructuredQualityInput } from '../models/factory/factory-dashboard.model';
 
 export interface CreateSupplyRequestPayload {
   crop: string;
@@ -16,6 +17,9 @@ export interface CreateSupplyRequestPayload {
   quality: string;
   selectedGovernorates: string[];
   geographicScope?: string;
+  deliveryPoint?: 'FactoryGate' | 'FarmGate';
+  structuredQuality?: StructuredQualityInput;
+  preferredFarmId?: string;
 }
 
 export interface CreateSupplyRequestResult {

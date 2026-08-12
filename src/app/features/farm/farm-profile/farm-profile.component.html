@@ -1,207 +1,187 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
   <app-top-bar
     titleKey="farm.profile.title"
+    subtitleKey="farm.profile.subtitle"
     portal="farm"
     notificationsLink="/farm/notifications"
-  />
-
-  @if (loading()) {
-    <div
-      class="flex justify-center py-20"
-      role="status"
-      [attr.aria-busy]="true"
-    >
-      <ui-loader size="lg" [label]="'common.loading' | translate" />
-    </div>
-  } @else if (!profile()) {
-    <div class="p-margin-mobile md:p-margin-desktop">
-      <ui-error-state [message]="error()" (retry)="loadProfile()" />
-    </div>
-  } @else {
-    @let p = profile()!;
-
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <div
-        class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
+  >
+    @if (profile()) {
+      <button
+        type="button"
+        class="ui-btn-primary shrink-0"
+        [disabled]="saving() || loading()"
+        (click)="onSubmit()"
       >
-        <section
-          class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4"
-        >
-          <div>
-            <p class="font-body-lg text-body-lg text-on-surface-variant">
-              {{ 'farm.profile.subtitle' | translate }}
-            </p>
-          </div>
-          <div class="flex items-center gap-3">
-            @if (saveSuccess()) {
-              <span
-                class="text-success-green font-label-md flex items-center gap-1"
-              >
-                <span
-                  class="material-symbols-outlined text-sm"
-                  aria-hidden="true"
-                  >check_circle</span
-                >
-                {{ 'common.saved' | translate }}
-              </span>
-            }
-            <button
-              type="submit"
-              [disabled]="saving()"
-              class="ui-btn-primary flex items-center justify-center gap-2 shrink-0"
-            >
-              @if (saving()) {
-                <ui-loader size="sm" />
-                <span>{{ 'common.saving' | translate }}</span>
-              } @else {
-                <span class="material-symbols-outlined" aria-hidden="true"
-                  >save</span
-                >
-                <span>{{ 'farm.profile.save' | translate }}</span>
-              }
-            </button>
-          </div>
-        </section>
-
-        @if (error()) {
-          <p class="text-error font-label-sm" role="alert">{{ error() }}</p>
-        }
-
-        @if (mutationError()) {
-          <p
-            class="text-error font-label-sm flex items-center gap-1"
-            role="alert"
+        @if (saving()) {
+          <ui-loader size="sm" />
+          <span>{{ 'common.saving' | translate }}</span>
+        } @else {
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+            >save</span
           >
-            <span
-              class="material-symbols-outlined text-[16px]"
-              aria-hidden="true"
-              >error_outline</span
-            >
-            {{ mutationError() }}
-          </p>
+          <span>{{ 'farm.profile.save' | translate }}</span>
         }
+      </button>
+    }
+  </app-top-bar>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-          <div class="lg:col-span-4 flex flex-col gap-gutter">
-            @if (p.isVerified) {
-              <article
-                class="ui-card p-6 relative overflow-hidden"
-              >
-                <div
-                  class="absolute -end-12 -top-12 w-32 h-32 bg-primary-container opacity-10 rounded-full"
-                  aria-hidden="true"
-                ></div>
-                <div class="flex items-center gap-4">
-                  <div
-                    class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shrink-0"
-                  >
-                    <span
-                      class="material-symbols-outlined text-on-primary-container text-2xl fill"
-                      aria-hidden="true"
-                      >verified</span
-                    >
-                  </div>
-                  <div>
-                    <h3
-                      class="font-title-lg text-title-lg text-primary font-bold"
-                    >
-                      {{ 'farm.profile.verified' | translate }}
-                    </h3>
-                    <p
-                      class="font-body-md text-body-md text-on-surface-variant"
-                    >
-                      {{ 'farm.profile.verifiedByNile' | translate }}
-                    </p>
-                  </div>
-                </div>
-              </article>
-            }
+  <div
+    class="fp-page p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto animate-fade-in"
+  >
+    @if (loading()) {
+      <div
+        class="flex justify-center py-16"
+        role="status"
+        [attr.aria-busy]="true"
+      >
+        <ui-loader size="lg" [label]="'common.loading' | translate" />
+      </div>
+    } @else if (!profile()) {
+      <ui-error-state [message]="error()" (retry)="loadProfile()" />
+    } @else {
+      @let p = profile()!;
 
-            <article
-              class="ui-card p-6 flex flex-col items-center justify-center"
+      @if (error()) {
+        <p class="fp-alert fp-alert--error" role="alert">{{ error() }}</p>
+      }
+      @if (mutationError()) {
+        <p class="fp-alert fp-alert--error" role="alert">
+          <span
+            class="material-symbols-outlined text-[18px]"
+            aria-hidden="true"
+            >error_outline</span
+          >
+          {{ mutationError() }}
+        </p>
+      }
+      @if (saveSuccess()) {
+        <p class="fp-alert fp-alert--success" role="status">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+            >check_circle</span
+          >
+          {{ 'common.saved' | translate }}
+        </p>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="fp-layout">
+          <aside class="fp-rail">
+            <section
+              class="fp-trust"
+              [attr.data-verified]="p.isVerified ? 'true' : 'false'"
+              aria-labelledby="farm-trust-title"
             >
-              <h3
-                class="font-title-md text-title-md text-on-surface mb-4 self-start w-full"
-              >
-                {{ 'farm.profile.completion' | translate }}
-              </h3>
-              <div
-                class="relative w-32 h-32 mb-4"
-                role="img"
-                [attr.aria-label]="'farm.profile.completionPercent' | translate"
-              >
-                <svg
-                  class="w-full h-full -rotate-90"
-                  viewBox="0 0 100 100"
-                  aria-hidden="true"
-                >
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    fill="transparent"
-                    stroke="var(--color-surface-container-highest)"
-                    stroke-width="8"
-                  ></circle>
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    fill="transparent"
-                    stroke="var(--color-primary-container)"
-                    stroke-width="8"
-                    stroke-dasharray="282.7"
-                    [attr.stroke-dashoffset]="
-                      282.7 - (282.7 * p.completionPercent) / 100
-                    "
-                    class="transition-all duration-1000 ease-out"
-                  ></circle>
-                </svg>
-                <div
-                  class="absolute inset-0 flex flex-col items-center justify-center"
-                >
-                  <span
-                    class="font-headline-lg text-headline-lg font-bold text-primary"
-                  >
-                    {{ p.completionPercent }}%
-                  </span>
+              <div class="fp-trust__hero">
+                <div class="fp-trust__icon" aria-hidden="true">
+                  <span class="material-symbols-outlined fill">{{
+                    p.isVerified ? 'verified' : 'pending'
+                  }}</span>
+                </div>
+                <div class="min-w-0">
+                  <div class="fp-trust__title-row">
+                    <h2 id="farm-trust-title" class="fp-trust__title">
+                      {{
+                        p.isVerified
+                          ? ('farm.profile.verified' | translate)
+                          : ('farm.profile.completion' | translate)
+                      }}
+                    </h2>
+                    @if (p.isVerified) {
+                      <span class="fp-badge">
+                        <span
+                          class="material-symbols-outlined text-[14px] fill"
+                          aria-hidden="true"
+                          >verified</span
+                        >
+                        {{ 'common.verified' | translate }}
+                      </span>
+                    }
+                  </div>
+                  <p class="fp-trust__hint">
+                    {{
+                      p.isVerified
+                        ? ('farm.profile.verifiedByNile' | translate)
+                        : ('farm.profile.completionHint' | translate)
+                    }}
+                  </p>
                 </div>
               </div>
-              <p
-                class="font-body-md text-body-md text-center text-on-surface-variant"
-              >
-                {{ 'farm.profile.completionHint' | translate }}
-              </p>
-            </article>
+              <dl class="fp-trust__metrics">
+                <div class="fp-metric">
+                  <dt>{{ 'farm.profile.completion' | translate }}</dt>
+                  <dd>{{ p.completionPercent }}%</dd>
+                </div>
+                <div class="fp-metric">
+                  <dt>{{ 'farm.profile.cropsGrown' | translate }}</dt>
+                  <dd>{{ p.cropTypes.length }}</dd>
+                </div>
+              </dl>
+            </section>
 
-            <article
-              class="ui-card p-6"
+            <section
+              class="fp-completion ui-card"
+              aria-labelledby="farm-completion-title"
             >
-              <h3
-                class="font-title-lg text-title-lg text-on-surface mb-4 flex items-center gap-2"
-              >
-                <span
-                  class="material-symbols-outlined text-primary"
-                  aria-hidden="true"
-                  >phone</span
+              <div class="fp-completion__head">
+                <h2 id="farm-completion-title" class="fp-section-title">
+                  {{ 'farm.profile.completion' | translate }}
+                </h2>
+                <p class="fp-section-sub">
+                  {{ 'farm.profile.completionHint' | translate }}
+                </p>
+              </div>
+              <div class="fp-completion__body">
+                <div
+                  class="fp-ring"
+                  role="progressbar"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  [attr.aria-valuenow]="p.completionPercent"
+                  [attr.aria-label]="
+                    'farm.profile.completionPercent' | translate
+                  "
+                  [style.background]="
+                    'conic-gradient(var(--color-primary) 0% ' +
+                    p.completionPercent +
+                    '%, var(--color-surface-container-high) ' +
+                    p.completionPercent +
+                    '% 100%)'
+                  "
                 >
-                {{ 'farm.profile.phone' | translate }}
-              </h3>
-              <div class="flex items-center gap-3">
+                  <div class="fp-ring__hole">
+                    <span class="fp-ring__value"
+                      >{{ p.completionPercent }}%</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="fp-phone ui-card" aria-labelledby="farm-phone-title">
+              <header class="fp-section__header">
+                <div>
+                  <h2 id="farm-phone-title" class="fp-section-title">
+                    {{ 'farm.profile.phone' | translate }}
+                  </h2>
+                </div>
+              </header>
+              <div class="fp-phone__row">
                 <input
                   type="tel"
-                  class="ui-input flex-1"
+                  class="ui-input w-full"
                   [value]="phoneNumber()"
                   (input)="phoneNumber.set($any($event.target).value)"
                   [attr.placeholder]="
                     'farm.profile.phonePlaceholder' | translate
                   "
+                  inputmode="numeric"
+                  autocomplete="tel"
                 />
                 <button
                   type="button"
                   (click)="updatePhone()"
                   [disabled]="updatingPhone() || !phoneNumber()"
-                  class="ui-btn-primary shrink-0"
+                  class="ui-btn-secondary w-full justify-center"
                 >
                   @if (updatingPhone()) {
                     <ui-loader size="sm" />
@@ -210,131 +190,306 @@
                   }
                 </button>
               </div>
-            </article>
-          </div>
+            </section>
+          </aside>
 
-          <div class="lg:col-span-8 flex flex-col gap-gutter">
-            <article
-              class="ui-card p-6"
+          <div class="fp-main">
+            <section
+              class="fp-section ui-card"
+              aria-labelledby="farm-basic-title"
             >
-              <h3
-                class="font-title-lg text-title-lg text-on-surface mb-6 flex items-center gap-2"
-              >
-                <span
-                  class="material-symbols-outlined text-primary"
-                  aria-hidden="true"
-                  >info</span
-                >
-                {{ 'farm.profile.basicInfo' | translate }}
-              </h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <header class="fp-section__header">
                 <div>
-                  <label
-                    class="block font-label-lg text-label-lg text-on-surface-variant mb-2"
-                    for="farm-name"
-                  >
-                    {{ 'farm.profile.farmName' | translate }}
-                  </label>
-                  <input
-                    id="farm-name"
-                    class="ui-input w-full"
-                    type="text"
-                    formControlName="name"
-                  />
+                  <h2 id="farm-basic-title" class="fp-section-title">
+                    {{ 'farm.profile.basicInfo' | translate }}
+                  </h2>
                 </div>
-                <div class="md:col-span-2">
-                  <app-location-picker
-                    [initialLocation]="mapInitial()"
-                    (locationChange)="onLocationPicked($event)"
-                  />
-                  @if (
-                    form.controls.governorate.invalid &&
-                    form.controls.governorate.touched
-                  ) {
-                    <p class="mt-2 text-sm text-error">
-                      {{ 'locationPicker.required' | translate }}
-                    </p>
-                  }
-                </div>
-                <div>
-                  <label
-                    class="block font-label-lg text-label-lg text-on-surface-variant mb-2"
-                    for="farm-area"
-                  >
-                    {{ 'farm.profile.area' | translate }}
-                  </label>
-                  <div class="flex items-center gap-2">
+              </header>
+
+              <div class="fp-info-grid">
+                <label class="fp-field" for="farm-name">
+                  <span class="fp-field__icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">agriculture</span>
+                  </span>
+                  <span class="fp-field__meta">
+                    <span class="fp-field__label">{{
+                      'farm.profile.farmName' | translate
+                    }}</span>
                     <input
-                      id="farm-area"
-                      class="ui-input w-full"
-                      type="number"
-                      formControlName="sizeInFeddans"
+                      id="farm-name"
+                      class="ui-input fp-field__input"
+                      type="text"
+                      formControlName="name"
                     />
-                    <span
-                      class="font-body-md text-body-md text-on-surface-variant bg-surface-container-high px-3 py-3 rounded-lg border border-outline-variant shrink-0"
-                    >
-                      {{ 'farm.profile.feddan' | translate }}
+                  </span>
+                </label>
+
+                <label class="fp-field" for="farm-area">
+                  <span class="fp-field__icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">straighten</span>
+                  </span>
+                  <span class="fp-field__meta">
+                    <span class="fp-field__label">{{
+                      'farm.profile.area' | translate
+                    }}</span>
+                    <span class="flex items-center gap-2">
+                      <input
+                        id="farm-area"
+                        class="ui-input fp-field__input flex-1"
+                        type="number"
+                        formControlName="sizeInFeddans"
+                      />
+                      <span class="fp-unit">{{
+                        'farm.profile.feddan' | translate
+                      }}</span>
                     </span>
-                  </div>
-                </div>
-                <div>
-                  <label
-                    class="block font-label-lg text-label-lg text-on-surface-variant mb-2"
-                    for="farm-soil"
-                  >
-                    {{ 'farm.profile.soilType' | translate }}
+                  </span>
+                </label>
+
+                <label class="fp-field" for="farm-soil">
+                  <span class="fp-field__icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">landscape</span>
+                  </span>
+                  <span class="fp-field__meta">
+                    <span class="fp-field__label">{{
+                      'farm.profile.soilType' | translate
+                    }}</span>
+                    <select
+                      id="farm-soil"
+                      class="ui-input fp-field__input appearance-none"
+                      formControlName="soilType"
+                    >
+                      <option value="">
+                        {{ 'common.select' | translate }}
+                      </option>
+                      <option value="Clay">
+                        {{ 'farm.profile.soilClay' | translate }}
+                      </option>
+                      <option value="Sandy">
+                        {{ 'farm.profile.soilSandy' | translate }}
+                      </option>
+                      <option value="Loamy">
+                        {{ 'farm.profile.soilLoamy' | translate }}
+                      </option>
+                      <option value="Silty">
+                        {{ 'farm.profile.soilSilty' | translate }}
+                      </option>
+                      <option value="Peaty">
+                        {{ 'farm.profile.soilPeaty' | translate }}
+                      </option>
+                      <option value="Chalky">
+                        {{ 'farm.profile.soilChalky' | translate }}
+                      </option>
+                      <option value="Saline">
+                        {{ 'farm.profile.soilSaline' | translate }}
+                      </option>
+                    </select>
+                  </span>
+                </label>
+
+                <label class="fp-field fp-field--span" for="farm-description">
+                  <span class="fp-field__icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">notes</span>
+                  </span>
+                  <span class="fp-field__meta">
+                    <span class="fp-field__label">{{
+                      'farm.profile.description' | translate
+                    }}</span>
+                    <textarea
+                      id="farm-description"
+                      class="ui-input fp-field__input min-h-[100px]"
+                      rows="4"
+                      formControlName="description"
+                      [attr.placeholder]="
+                        'farm.profile.descriptionPlaceholder' | translate
+                      "
+                    ></textarea>
+                    <span class="fp-field__hint">{{
+                      'farm.profile.descriptionHint' | translate
+                    }}</span>
+                  </span>
+                </label>
+              </div>
+
+              <div class="fp-map-block">
+                <h3 class="fp-section-title fp-section-title--sm">
+                  {{ 'locationPicker.label' | translate }}
+                </h3>
+                <app-location-picker
+                  [initialLocation]="mapInitial()"
+                  (locationChange)="onLocationPicked($event)"
+                />
+                @if (
+                  form.controls.governorate.invalid &&
+                  form.controls.governorate.touched
+                ) {
+                  <p class="fp-field-error">
+                    {{ 'locationPicker.required' | translate }}
+                  </p>
+                }
+              </div>
+
+              <div class="fp-subblock">
+                <h3 class="fp-subblock__title">
+                  {{ 'farm.profile.bankTitle' | translate }}
+                </h3>
+                <p class="fp-section-sub mb-3">
+                  {{ 'farm.profile.bankHint' | translate }}
+                </p>
+                <div class="fp-info-grid">
+                  <label class="fp-field" for="farm-bank-name">
+                    <span class="fp-field__icon" aria-hidden="true">
+                      <span class="material-symbols-outlined">account_balance</span>
+                    </span>
+                    <span class="fp-field__meta">
+                      <span class="fp-field__label">{{
+                        'farm.profile.bankName' | translate
+                      }}</span>
+                      <input
+                        id="farm-bank-name"
+                        class="ui-input fp-field__input"
+                        formControlName="bankName"
+                      />
+                    </span>
                   </label>
-                  <select
-                    id="farm-soil"
-                    class="ui-input w-full appearance-none"
-                    formControlName="soilType"
-                  >
-                    <option value="">{{ 'common.select' | translate }}</option>
-                    <option value="Clay">
-                      {{ 'farm.profile.soilClay' | translate }}
-                    </option>
-                    <option value="Sandy">
-                      {{ 'farm.profile.soilSandy' | translate }}
-                    </option>
-                    <option value="Loamy">
-                      {{ 'farm.profile.soilLoamy' | translate }}
-                    </option>
-                    <option value="Silty">
-                      {{ 'farm.profile.soilSilty' | translate }}
-                    </option>
-                    <option value="Peaty">
-                      {{ 'farm.profile.soilPeaty' | translate }}
-                    </option>
-                    <option value="Chalky">
-                      {{ 'farm.profile.soilChalky' | translate }}
-                    </option>
-                    <option value="Saline">
-                      {{ 'farm.profile.soilSaline' | translate }}
-                    </option>
-                  </select>
+                  <label class="fp-field" for="farm-account-holder">
+                    <span class="fp-field__icon" aria-hidden="true">
+                      <span class="material-symbols-outlined">person</span>
+                    </span>
+                    <span class="fp-field__meta">
+                      <span class="fp-field__label">{{
+                        'farm.profile.accountHolder' | translate
+                      }}</span>
+                      <input
+                        id="farm-account-holder"
+                        class="ui-input fp-field__input"
+                        formControlName="accountHolderName"
+                      />
+                    </span>
+                  </label>
+                  <label class="fp-field" for="farm-account-number">
+                    <span class="fp-field__icon" aria-hidden="true">
+                      <span class="material-symbols-outlined">pin</span>
+                    </span>
+                    <span class="fp-field__meta">
+                      <span class="fp-field__label">{{
+                        'farm.profile.accountNumber' | translate
+                      }}</span>
+                      <input
+                        id="farm-account-number"
+                        class="ui-input fp-field__input"
+                        formControlName="bankAccountNumber"
+                        [attr.placeholder]="
+                          p.bankAccountMasked
+                            ? ('farm.profile.accountMaskedHint'
+                              | translate: { masked: p.bankAccountMasked })
+                            : ('farm.profile.accountNumberPlaceholder'
+                              | translate)
+                        "
+                      />
+                    </span>
+                  </label>
+                  <label class="fp-field" for="farm-iban">
+                    <span class="fp-field__icon" aria-hidden="true">
+                      <span class="material-symbols-outlined">credit_card</span>
+                    </span>
+                    <span class="fp-field__meta">
+                      <span class="fp-field__label">{{
+                        'farm.profile.iban' | translate
+                      }}</span>
+                      <input
+                        id="farm-iban"
+                        class="ui-input fp-field__input"
+                        formControlName="iban"
+                      />
+                    </span>
+                  </label>
                 </div>
               </div>
-            </article>
+            </section>
 
-            <article
-              class="ui-card p-6"
+            <section
+              class="fp-section ui-card"
+              aria-labelledby="farm-images-title"
             >
-              <div
-                class="flex justify-between items-center mb-6 gap-4 flex-wrap"
-              >
-                <h3
-                  class="font-title-lg text-title-lg text-on-surface flex items-center gap-2"
+              <header class="fp-section__header">
+                <div>
+                  <h2 id="farm-images-title" class="fp-section-title">
+                    {{ 'farm.profile.imagesTitle' | translate }}
+                  </h2>
+                  <p class="fp-section-sub">
+                    {{ 'farm.profile.imagesHint' | translate }}
+                  </p>
+                </div>
+                <label
+                  class="ui-btn-secondary cursor-pointer inline-flex items-center gap-2 shrink-0"
                 >
-                  <span
-                    class="material-symbols-outlined text-primary"
-                    aria-hidden="true"
-                    >eco</span
-                  >
-                  {{ 'farm.profile.cropsGrown' | translate }}
-                </h3>
+                  <input
+                    type="file"
+                    class="sr-only"
+                    accept="image/jpeg,image/png,image/webp"
+                    (change)="onImageSelected($event)"
+                    [disabled]="uploadingImage()"
+                  />
+                  @if (uploadingImage()) {
+                    <ui-loader size="sm" />
+                  } @else {
+                    <span
+                      class="material-symbols-outlined text-[18px]"
+                      aria-hidden="true"
+                      >upload</span
+                    >
+                    {{ 'farm.profile.uploadImage' | translate }}
+                  }
+                </label>
+              </header>
+
+              @if (p.images.length > 0) {
+                <ul class="fp-image-grid">
+                  @for (img of p.images; track img.imageId) {
+                    <li class="fp-image-tile">
+                      <img [src]="img.fileUrl" [alt]="img.fileName" />
+                      <button
+                        type="button"
+                        class="fp-image-tile__del ui-icon-btn bg-surface/90"
+                        [disabled]="deletingImageId() === img.imageId"
+                        (click)="deleteImage(img.imageId)"
+                        [attr.aria-label]="'common.delete' | translate"
+                      >
+                        @if (deletingImageId() === img.imageId) {
+                          <ui-loader size="sm" />
+                        } @else {
+                          <span
+                            class="material-symbols-outlined text-sm text-error"
+                            aria-hidden="true"
+                            >delete</span
+                          >
+                        }
+                      </button>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p class="fp-empty">{{ 'farm.profile.noImages' | translate }}</p>
+              }
+            </section>
+
+            <section
+              class="fp-section ui-card"
+              aria-labelledby="farm-crops-title"
+            >
+              <header class="fp-section__header">
+                <div>
+                  <h2 id="farm-crops-title" class="fp-section-title">
+                    {{ 'farm.profile.cropsGrown' | translate }}
+                  </h2>
+                  <p class="fp-section-sub">
+                    {{ 'farm.profile.cropsHint' | translate }}
+                  </p>
+                </div>
                 <a
                   routerLink="/farm/crop-request"
-                  class="text-primary font-label-md inline-flex items-center gap-1"
+                  class="text-primary font-label-md inline-flex items-center gap-1 shrink-0"
                 >
                   <span
                     class="material-symbols-outlined text-[18px]"
@@ -343,15 +498,14 @@
                   >
                   {{ 'farm.profile.requestCrop' | translate }}
                 </a>
-              </div>
-              <p class="font-body-md text-body-md text-on-surface-variant mb-4">
-                {{ 'farm.profile.cropsHint' | translate }}
-              </p>
-              <div class="flex items-center gap-3 mb-4">
+              </header>
+
+              <div class="fp-toolbar">
                 <select
-                  class="ui-input flex-1"
+                  class="ui-input fp-toolbar__span"
                   [value]="selectedCropTypeId()"
                   (change)="selectedCropTypeId.set($any($event.target).value)"
+                  [disabled]="!!editingCropTypeId()"
                 >
                   <option value="">{{ 'common.select' | translate }}</option>
                   @for (ct of cropTypes(); track ct.cropTypeId) {
@@ -366,92 +520,294 @@
                     </option>
                   }
                 </select>
+                <label class="flex flex-col gap-1">
+                  <span class="fp-field__label">{{
+                    'farm.profile.availableQty' | translate
+                  }}</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="ui-input"
+                    [formControl]="cropForm.controls.availableQuantityTons"
+                    [attr.placeholder]="
+                      'farm.profile.availableQtyPlaceholder' | translate
+                    "
+                  />
+                </label>
+                <label class="flex flex-col gap-1">
+                  <span class="fp-field__label">{{
+                    'farm.profile.minPrice' | translate
+                  }}</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    class="ui-input"
+                    [formControl]="cropForm.controls.minPricePerTon"
+                    [attr.placeholder]="
+                      'farm.profile.minPricePlaceholder' | translate
+                    "
+                  />
+                </label>
+                <label class="flex flex-col gap-1">
+                  <span class="fp-field__label">{{
+                    'farm.profile.availableFrom' | translate
+                  }}</span>
+                  <input
+                    type="date"
+                    class="ui-input"
+                    [formControl]="cropForm.controls.availableFrom"
+                  />
+                </label>
+                <label class="flex flex-col gap-1">
+                  <span class="fp-field__label">{{
+                    'farm.profile.availableTo' | translate
+                  }}</span>
+                  <input
+                    type="date"
+                    class="ui-input"
+                    [formControl]="cropForm.controls.availableTo"
+                  />
+                </label>
+                <label class="fp-check fp-toolbar__span">
+                  <input
+                    type="checkbox"
+                    [formControl]="cropForm.controls.isPublished"
+                  />
+                  {{ 'farm.profile.publishListing' | translate }}
+                </label>
+              </div>
+
+              <div class="fp-actions">
+                @if (editingCropTypeId()) {
+                  <button
+                    type="button"
+                    (click)="saveCropEdit()"
+                    [disabled]="savingCrop()"
+                    class="ui-btn-primary shrink-0"
+                  >
+                    @if (savingCrop()) {
+                      <ui-loader size="sm" />
+                    } @else {
+                      {{ 'farm.profile.saveCrop' | translate }}
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    (click)="cancelEditCrop()"
+                    class="ui-btn-secondary shrink-0"
+                  >
+                    {{ 'common.cancel' | translate }}
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    (click)="addCrop()"
+                    [disabled]="addingCrop() || !selectedCropTypeId()"
+                    class="ui-btn-primary shrink-0"
+                  >
+                    @if (addingCrop()) {
+                      <ui-loader size="sm" />
+                    } @else {
+                      {{ 'common.add' | translate }}
+                    }
+                  </button>
+                }
+              </div>
+
+              @if (p.cropTypes.length > 0) {
+                <ul class="fp-list">
+                  @for (crop of p.cropTypes; track crop.cropTypeId) {
+                    <li class="fp-list__item">
+                      <div class="min-w-0">
+                        <p class="fp-list__title">{{ crop.name }}</p>
+                        @if (formatCropMeta(crop)) {
+                          <p class="fp-list__meta">{{ formatCropMeta(crop) }}</p>
+                        } @else {
+                          <p class="fp-list__meta fp-list__meta--muted">
+                            {{ 'farm.profile.noCommercialTerms' | translate }}
+                          </p>
+                        }
+                      </div>
+                      <div class="fp-list__actions">
+                        <button
+                          type="button"
+                          (click)="startEditCrop(crop)"
+                          class="ui-icon-btn"
+                          [attr.aria-label]="'common.edit' | translate"
+                        >
+                          <span
+                            class="material-symbols-outlined text-sm text-primary"
+                            aria-hidden="true"
+                            >edit</span
+                          >
+                        </button>
+                        <button
+                          type="button"
+                          (click)="deleteCrop(crop.cropTypeId)"
+                          [disabled]="deletingCropId() === crop.cropTypeId"
+                          class="ui-icon-btn"
+                          [attr.aria-label]="'common.remove' | translate"
+                        >
+                          @if (deletingCropId() === crop.cropTypeId) {
+                            <ui-loader size="sm" />
+                          } @else {
+                            <span
+                              class="material-symbols-outlined text-sm text-error"
+                              aria-hidden="true"
+                              >close</span
+                            >
+                          }
+                        </button>
+                      </div>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p class="fp-empty">{{ 'common.empty' | translate }}</p>
+              }
+            </section>
+
+            <section
+              class="fp-section ui-card"
+              aria-labelledby="farm-certs-title"
+            >
+              <header class="fp-section__header">
+                <div>
+                  <h2 id="farm-certs-title" class="fp-section-title">
+                    {{ 'farm.profile.certificationsTitle' | translate }}
+                  </h2>
+                  <p class="fp-section-sub">
+                    {{ 'farm.profile.certificationsHint' | translate }}
+                  </p>
+                </div>
+              </header>
+
+              <div class="fp-actions flex-col sm:flex-row items-stretch">
+                <select
+                  class="ui-input flex-1"
+                  [value]="selectedCertificationId()"
+                  (change)="
+                    selectedCertificationId.set($any($event.target).value)
+                  "
+                >
+                  <option value="">{{ 'common.select' | translate }}</option>
+                  @for (
+                    cert of certificationCatalog();
+                    track cert.certificationId
+                  ) {
+                    <option
+                      [value]="cert.certificationId"
+                      [disabled]="isCertificationAdded(cert.certificationId)"
+                    >
+                      {{ cert.name }}
+                    </option>
+                  }
+                </select>
+                <input
+                  type="date"
+                  class="ui-input"
+                  [value]="certExpiresAt()"
+                  (input)="certExpiresAt.set($any($event.target).value)"
+                  [attr.aria-label]="'farm.profile.certExpiresAt' | translate"
+                />
                 <button
                   type="button"
-                  (click)="addCrop()"
-                  [disabled]="addingCrop() || !selectedCropTypeId()"
+                  (click)="addCertification()"
+                  [disabled]="
+                    addingCertification() || !selectedCertificationId()
+                  "
                   class="ui-btn-primary shrink-0"
                 >
-                  @if (addingCrop()) {
+                  @if (addingCertification()) {
                     <ui-loader size="sm" />
                   } @else {
                     {{ 'common.add' | translate }}
                   }
                 </button>
               </div>
-              @if (p.cropTypes.length > 0) {
-                <div class="flex flex-wrap gap-3">
-                  @for (crop of p.cropTypes; track crop.cropTypeId) {
-                    <span
-                      class="bg-primary-container text-on-primary-container border border-primary-container px-4 py-2 rounded-full font-label-lg text-label-lg flex items-center gap-2"
-                    >
-                      {{ crop.name }}
+
+              @if (p.certifications.length > 0) {
+                <ul class="fp-list">
+                  @for (cert of p.certifications; track cert.certificationId) {
+                    <li class="fp-list__item">
+                      <div class="min-w-0">
+                        <p class="fp-list__title">
+                          {{ cert.name }}
+                          @if (cert.isExpired) {
+                            <span class="fp-cert-expired">{{
+                              'farm.profile.certExpired' | translate
+                            }}</span>
+                          }
+                        </p>
+                        <p class="fp-list__meta">
+                          {{ cert.issuedAt | slice: 0 : 10 }}
+                          @if (cert.expiresAt) {
+                            → {{ cert.expiresAt | slice: 0 : 10 }}
+                          }
+                        </p>
+                      </div>
                       <button
                         type="button"
-                        (click)="deleteCrop(crop.cropTypeId)"
-                        [disabled]="deletingCropId() === crop.cropTypeId"
-                        class="text-on-primary-container hover:text-error transition-colors ms-1"
+                        (click)="deleteCertification(cert.certificationId)"
+                        [disabled]="
+                          deletingCertificationId() === cert.certificationId
+                        "
+                        class="ui-icon-btn shrink-0"
                         [attr.aria-label]="'common.remove' | translate"
                       >
-                        @if (deletingCropId() === crop.cropTypeId) {
+                        @if (
+                          deletingCertificationId() === cert.certificationId
+                        ) {
                           <ui-loader size="sm" />
                         } @else {
                           <span
-                            class="material-symbols-outlined text-sm"
+                            class="material-symbols-outlined text-sm text-error"
                             aria-hidden="true"
-                            >close</span
+                            >delete</span
                           >
                         }
                       </button>
-                    </span>
+                    </li>
                   }
-                </div>
+                </ul>
               } @else {
-                <p
-                  class="font-body-md text-body-md text-on-surface-variant italic"
-                >
-                  {{ 'common.empty' | translate }}
-                </p>
+                <p class="fp-empty">{{ 'common.empty' | translate }}</p>
               }
-            </article>
+            </section>
 
-            <article
-              class="ui-card p-6"
+            <section
+              class="fp-section ui-card"
+              aria-labelledby="farm-docs-title"
             >
-              <h3
-                class="font-title-lg text-title-lg text-on-surface mb-6 flex items-center gap-2"
-              >
-                <span
-                  class="material-symbols-outlined text-primary"
-                  aria-hidden="true"
-                  >folder</span
-                >
-                {{ 'farm.profile.documentsTitle' | translate }}
-              </h3>
+              <header class="fp-section__header">
+                <div>
+                  <h2 id="farm-docs-title" class="fp-section-title">
+                    {{ 'farm.profile.documentsTitle' | translate }}
+                  </h2>
+                </div>
+              </header>
+
               <div
-                class="border-2 border-dashed border-outline-variant bg-surface-container-low rounded-xl p-8 flex flex-col items-center justify-center text-center mb-6 group hover:bg-surface-container transition-colors cursor-pointer"
-                role="region"
+                class="fp-dropzone"
+                role="button"
+                tabindex="0"
                 [attr.aria-label]="'farm.profile.dropzone' | translate"
                 (click)="fileInput.click()"
+                (keydown.enter)="fileInput.click()"
+                (keydown.space)="$event.preventDefault(); fileInput.click()"
               >
-                <div
-                  class="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mb-4 group-hover:bg-primary-container transition-colors"
-                >
-                  <span
-                    class="material-symbols-outlined text-3xl text-on-surface-variant group-hover:text-on-primary-container transition-colors"
-                    aria-hidden="true"
-                    >upload_file</span
-                  >
+                <div class="fp-dropzone__icon" aria-hidden="true">
+                  <span class="material-symbols-outlined">upload_file</span>
                 </div>
-                <h4 class="font-title-md text-title-md text-on-surface mb-2">
+                <h3 class="fp-dropzone__title">
                   {{ 'farm.profile.dropzone' | translate }}
-                </h4>
-                <p
-                  class="font-body-md text-body-md text-on-surface-variant mb-4"
-                >
+                </h3>
+                <p class="fp-dropzone__hint">
                   {{ 'farm.profile.browseFiles' | translate }}
                 </p>
-                <p class="font-label-sm text-label-sm text-outline">
+                <p class="fp-dropzone__hint">
                   {{ 'farm.profile.supportedFormats' | translate }}
                 </p>
                 <input
@@ -462,18 +818,17 @@
                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                 />
                 @if (uploadingDocument()) {
-                  <ui-loader size="sm" class="mt-4" />
+                  <ui-loader size="sm" class="mt-2" />
                 }
               </div>
+
               @if (p.documents.length > 0) {
-                <ul class="space-y-3">
+                <ul class="fp-list">
                   @for (doc of p.documents; track doc.documentId) {
-                    <li
-                      class="flex items-center justify-between bg-surface-container px-4 py-3 rounded-lg border border-outline-variant"
-                    >
-                      <div class="flex items-center gap-4 min-w-0">
+                    <li class="fp-list__item">
+                      <div class="flex items-center gap-3 min-w-0">
                         <span
-                          class="material-symbols-outlined text-secondary shrink-0"
+                          class="material-symbols-outlined fp-doc-icon"
                           aria-hidden="true"
                         >
                           {{
@@ -483,29 +838,21 @@
                           }}
                         </span>
                         <div class="min-w-0">
-                          <p
-                            class="font-body-md text-body-md text-on-surface truncate"
-                          >
-                            {{ doc.name }}
-                          </p>
-                          <p
-                            class="font-label-sm text-label-sm text-on-surface-variant"
-                          >
-                            {{ doc.size }}
-                          </p>
+                          <p class="fp-list__title truncate">{{ doc.name }}</p>
+                          <p class="fp-list__meta">{{ doc.size }}</p>
                         </div>
                       </div>
-                      <div class="flex items-center gap-1">
+                      <div class="fp-list__actions">
                         @if (doc.fileUrl) {
                           <a
                             [href]="doc.fileUrl"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="text-primary hover:bg-primary-container p-2 rounded-full transition-colors flex items-center justify-center shrink-0"
+                            class="ui-icon-btn"
                             [attr.aria-label]="'common.download' | translate"
                           >
                             <span
-                              class="material-symbols-outlined text-sm"
+                              class="material-symbols-outlined text-sm text-primary"
                               aria-hidden="true"
                               >download</span
                             >
@@ -515,14 +862,14 @@
                           type="button"
                           (click)="deleteDocument(doc.documentId)"
                           [disabled]="deletingDocumentId() === doc.documentId"
-                          class="text-error hover:bg-error-container p-2 rounded-full transition-colors flex items-center justify-center shrink-0"
+                          class="ui-icon-btn"
                           [attr.aria-label]="'common.remove' | translate"
                         >
                           @if (deletingDocumentId() === doc.documentId) {
                             <ui-loader size="sm" />
                           } @else {
                             <span
-                              class="material-symbols-outlined text-sm"
+                              class="material-symbols-outlined text-sm text-error"
                               aria-hidden="true"
                               >delete</span
                             >
@@ -533,16 +880,12 @@
                   }
                 </ul>
               } @else {
-                <p
-                  class="font-body-md text-body-md text-on-surface-variant italic"
-                >
-                  {{ 'common.empty' | translate }}
-                </p>
+                <p class="fp-empty">{{ 'common.empty' | translate }}</p>
               }
-            </article>
+            </section>
           </div>
         </div>
-      </div>
-    </form>
-  }
+      </form>
+    }
+  </div>
 </main>

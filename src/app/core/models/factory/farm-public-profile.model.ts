@@ -18,11 +18,14 @@ export interface FarmPublicProfileDto {
   latitude: number | null;
   longitude: number | null;
   sizeInFeddans: number | null;
+  description?: string | null;
   isVerified: boolean;
   riskScore: number | null;
   riskLevel: string;
   ownerDisplayName: string;
   cropTypes: string[];
+  certifications?: string[];
+  imageUrls?: string[];
   documents: FarmPublicDocumentDto[];
   rating: FarmPublicRatingSummaryDto;
 }

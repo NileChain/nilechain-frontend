@@ -178,6 +178,38 @@ export class AdminDisputesComponent implements OnInit {
       });
   }
 
+  async refundHeld(d: Dispute): Promise<void> {
+    if (this.actionLoading()) {
+      return;
+    }
+    const confirmed = await this.confirmDialog.confirm({
+      titleKey: 'admin.disputes.confirmRefundTitle',
+      bodyKey: 'admin.disputes.confirmRefundBody',
+      danger: true,
+    });
+    if (!confirmed) {
+      return;
+    }
+
+    this.actionLoading.set(d.disputeId);
+    this.adminApi
+      .refundHeldEscrow(
+        d.contractId,
+        this.adminNotes[d.disputeId] || undefined
+      )
+      .pipe(finalize(() => this.actionLoading.set(null)))
+      .subscribe({
+        next: () => {
+          this.toast.success(this.i18n.instant('admin.disputes.refunded'));
+          this.load();
+        },
+        error: (err: HttpErrorResponse) =>
+          this.toast.error(
+            err?.error?.message ?? this.i18n.instant('admin.disputes.actionFailed')
+          ),
+      });
+  }
+
   async reject(d: Dispute): Promise<void> {
     if (this.actionLoading()) {
       return;

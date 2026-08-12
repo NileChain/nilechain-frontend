@@ -22,6 +22,7 @@ import { FactoryService } from '../../../core/services/factory/factory.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslateService } from '../../../core/services/translate.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
+import { AiAssistantContextService } from '../../../core/services/ai-assistant-context.service';
 import { FactoryMatchItem } from '../../../core/models/factory/factory-match.model';
 import { readAgentSession } from '../../../core/utils/agent-session';
 import {
@@ -84,6 +85,7 @@ export class FactoryMatchesComponent
   private readonly toast = inject(ToastService);
   private readonly i18n = inject(TranslateService);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly assistantCtx = inject(AiAssistantContextService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -92,9 +94,12 @@ export class FactoryMatchesComponent
   readonly selected = signal<FactoryMatchItem | null>(null);
   readonly profileOpen = signal(false);
   readonly profileFarmId = signal<string | null>(null);
+  readonly profileMatchId = signal<string | null>(null);
+  readonly profileCanMessage = signal(false);
   readonly profileRationale = signal<string | null>(null);
   readonly sortMode = signal<ListSortMode>('newest');
   readonly excludingId = signal<string | null>(null);
+  readonly counterActionId = signal<string | null>(null);
 
   private map?: L.Map;
   private markerLayer?: L.LayerGroup;
@@ -107,6 +112,7 @@ export class FactoryMatchesComponent
     this.route.queryParamMap.subscribe((params) => {
       const id = params.get('requestId');
       this.requestId.set(id);
+      this.assistantCtx.set({ requestId: id, matchId: null, farmId: null });
       if (id) {
         this.loadMatches(id);
       } else {
@@ -160,6 +166,7 @@ export class FactoryMatchesComponent
         next: (items) => {
           this.matches.set(items);
           this.selected.set(items[0] ?? null);
+          this.syncAssistantContext(items[0] ?? null);
           this.mapInitAttempts = 0;
           if (items[0]) {
             this.scheduleMapInit();
@@ -188,6 +195,7 @@ export class FactoryMatchesComponent
 
   select(match: FactoryMatchItem): void {
     this.selected.set(match);
+    this.syncAssistantContext(match);
     this.mapInitAttempts = 0;
     this.scheduleMapInit();
     this.toast.info(
@@ -200,12 +208,16 @@ export class FactoryMatchesComponent
   openFarmProfile(match: FactoryMatchItem, event?: Event): void {
     event?.stopPropagation();
     this.profileFarmId.set(match.farmId);
+    this.profileMatchId.set(match.matchId);
+    this.profileCanMessage.set(!!match.canMessage);
     this.profileRationale.set(this.whyMatched(match));
     this.profileOpen.set(true);
   }
 
   closeFarmProfile(): void {
     this.profileOpen.set(false);
+    this.profileMatchId.set(null);
+    this.profileCanMessage.set(false);
   }
 
   whyMatched(match: FactoryMatchItem): string {
@@ -286,6 +298,7 @@ export class FactoryMatchesComponent
           );
           if (this.selected()?.matchId === match.matchId) {
             this.selected.set(this.matches()[0] ?? null);
+            this.syncAssistantContext(this.selected());
             if (this.selected()) {
               this.scheduleMapInit();
             } else {
@@ -297,6 +310,63 @@ export class FactoryMatchesComponent
         },
         error: () =>
           this.toast.error(this.i18n.instant('factory.matches.excludeFailed')),
+      });
+  }
+
+  isCountered(match: FactoryMatchItem): boolean {
+    return (match.status || '').toLowerCase() === 'countered';
+  }
+
+  async acceptCounter(match: FactoryMatchItem): Promise<void> {
+    if (this.counterActionId()) return;
+    const confirmed = await this.confirmDialog.confirm({
+      titleKey: 'factory.matches.acceptCounterTitle',
+      bodyKey: 'factory.matches.acceptCounterBody',
+      confirmKey: 'factory.matches.acceptCounter',
+      cancelKey: 'common.cancel',
+    });
+    if (!confirmed) return;
+    this.counterActionId.set(match.matchId);
+    this.factoryService
+      .acceptCounterOffer(match.matchId)
+      .pipe(finalize(() => this.counterActionId.set(null)))
+      .subscribe({
+        next: () => {
+          this.toast.info(this.i18n.instant('factory.matches.acceptCounterToast'));
+          const id = this.requestId();
+          if (id) this.loadMatches(id);
+        },
+        error: () =>
+          this.toast.error(
+            this.i18n.instant('factory.matches.acceptCounterFailed')
+          ),
+      });
+  }
+
+  async rejectCounter(match: FactoryMatchItem): Promise<void> {
+    if (this.counterActionId()) return;
+    const confirmed = await this.confirmDialog.confirm({
+      titleKey: 'factory.matches.rejectCounterTitle',
+      bodyKey: 'factory.matches.rejectCounterBody',
+      confirmKey: 'factory.matches.rejectCounter',
+      cancelKey: 'common.cancel',
+      danger: true,
+    });
+    if (!confirmed) return;
+    this.counterActionId.set(match.matchId);
+    this.factoryService
+      .rejectCounterOffer(match.matchId)
+      .pipe(finalize(() => this.counterActionId.set(null)))
+      .subscribe({
+        next: () => {
+          this.toast.info(this.i18n.instant('factory.matches.rejectCounterToast'));
+          const id = this.requestId();
+          if (id) this.loadMatches(id);
+        },
+        error: () =>
+          this.toast.error(
+            this.i18n.instant('factory.matches.rejectCounterFailed')
+          ),
       });
   }
 
@@ -443,6 +513,14 @@ export class FactoryMatchesComponent
         governorate: match.farmGovernorate || match.farmLocation,
       }) ?? EGYPT_MAP_CENTER
     );
+  }
+
+  private syncAssistantContext(match: FactoryMatchItem | null): void {
+    this.assistantCtx.set({
+      requestId: this.requestId(),
+      matchId: match?.matchId ?? null,
+      farmId: match?.farmId ?? null,
+    });
   }
 
   private destroyMap(): void {

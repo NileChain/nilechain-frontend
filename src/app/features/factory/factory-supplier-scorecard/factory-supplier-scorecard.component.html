@@ -1,0 +1,252 @@
+<main class="md:ms-[280px] min-h-screen sc-page">
+  <app-top-bar
+    titleKey="factory.scorecard.title"
+    portal="factory"
+    notificationsLink="/factory/notifications"
+  >
+    <a routerLink="/factory/listings" class="ui-btn-ghost !py-2 !px-4">
+      {{ 'factory.scorecard.backToListings' | translate }}
+    </a>
+  </app-top-bar>
+
+  <div class="sc-shell animate-fade-in">
+    @if (loading()) {
+      <div class="sc-hero sc-hero--loading">
+        <ui-skeleton height="1.75rem" width="55%" />
+        <ui-skeleton height="0.9rem" width="35%" class="mt-3" />
+        <ui-skeleton height="0.9rem" width="28%" class="mt-2" />
+      </div>
+      <div class="sc-metrics">
+        @for (i of [1, 2, 3, 4, 5, 6]; track $index) {
+          <div class="sc-metric">
+            <ui-skeleton height="0.65rem" width="60%" />
+            <ui-skeleton height="1.5rem" width="40%" class="mt-2" />
+          </div>
+        }
+      </div>
+      <div class="sc-panel p-6">
+        <ui-skeleton height="1.1rem" width="30%" />
+        <ui-skeleton height="3rem" width="100%" class="mt-4" />
+        <ui-skeleton height="3rem" width="100%" class="mt-2" />
+      </div>
+    } @else if (notFound()) {
+      <ui-empty-state
+        titleKey="factory.scorecard.notFoundTitle"
+        bodyKey="factory.scorecard.notFoundBody"
+        icon="person_off"
+      >
+        <a routerLink="/factory/listings" class="ui-btn-primary mt-3 inline-flex">
+          {{ 'factory.scorecard.backToListings' | translate }}
+        </a>
+      </ui-empty-state>
+    } @else if (error()) {
+      <ui-error-state [message]="error()" (retry)="load(farmId() ?? '')" />
+    } @else if (scorecard(); as s) {
+      <header class="sc-hero">
+        <div class="sc-hero__main">
+          <p class="sc-hero__eyebrow">{{ 'factory.scorecard.title' | translate }}</p>
+          <h1 class="sc-hero__name">{{ s.farmName }}</h1>
+          <div class="sc-hero__meta">
+            <span class="sc-hero__chip">
+              <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+              {{ s.governorate || '—' }}
+            </span>
+            @if (s.isVerified) {
+              <span class="sc-hero__chip sc-hero__chip--ok">
+                <span class="material-symbols-outlined" aria-hidden="true">verified</span>
+                {{ 'factory.listings.verified' | translate }}
+              </span>
+            }
+            <span class="sc-hero__chip sc-hero__chip--rating">
+              <span class="material-symbols-outlined fill" aria-hidden="true">star</span>
+              <span class="tabular-nums">{{ s.averageRating | number: '1.1-1' }}</span>
+              <span class="sc-hero__muted">
+                ({{ 'factory.scorecard.ratingCount' | translate: { count: s.ratingCount } }})
+              </span>
+            </span>
+          </div>
+          @if (activeMatchId(); as mid) {
+            @if (canMessage()) {
+              <a
+                class="ui-btn-primary mt-4 inline-flex"
+                routerLink="/factory/messages"
+                [queryParams]="{ matchId: mid }"
+              >
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true">chat</span>
+                {{ 'factory.scorecard.message' | translate }}
+              </a>
+            } @else {
+              <p class="mt-4 text-sm text-on-surface-variant">
+                {{ 'messages.chatAfterBothSigned' | translate }}
+              </p>
+            }
+          }
+        </div>
+        @if (s.riskScore != null) {
+          <div class="sc-hero__risk" [attr.data-tone]="riskTone(s.riskScore)">
+            <p class="sc-hero__risk-label">{{ 'factory.scorecard.riskScore' | translate }}</p>
+            <p class="sc-hero__risk-value tabular-nums">{{ s.riskScore | number: '1.0-0' }}</p>
+            <ui-risk-score-badge [score]="s.riskScore" />
+          </div>
+        }
+      </header>
+
+      <section
+        class="sc-metrics"
+        [attr.aria-label]="'factory.scorecard.title' | translate"
+      >
+        <article class="sc-metric sc-metric--lead">
+          <div class="sc-metric__top">
+            <p class="sc-metric__label">{{ 'factory.scorecard.dealsWithFactory' | translate }}</p>
+            <span class="sc-metric__icon" aria-hidden="true">
+              <span class="material-symbols-outlined">handshake</span>
+            </span>
+          </div>
+          <p class="sc-metric__value tabular-nums">{{ s.dealsWithThisFactory }}</p>
+        </article>
+        <article class="sc-metric">
+          <div class="sc-metric__top">
+            <p class="sc-metric__label">{{ 'factory.scorecard.completedContracts' | translate }}</p>
+            <span class="sc-metric__icon" aria-hidden="true">
+              <span class="material-symbols-outlined">task_alt</span>
+            </span>
+          </div>
+          <p class="sc-metric__value tabular-nums">{{ s.completedContracts }}</p>
+        </article>
+        <article class="sc-metric">
+          <div class="sc-metric__top">
+            <p class="sc-metric__label">{{ 'factory.scorecard.onTimeRate' | translate }}</p>
+            <span class="sc-metric__icon" aria-hidden="true">
+              <span class="material-symbols-outlined">schedule</span>
+            </span>
+          </div>
+          <p class="sc-metric__value">{{ formatPercent(s.onTimeFulfillmentRate) }}</p>
+        </article>
+        <article class="sc-metric">
+          <div class="sc-metric__top">
+            <p class="sc-metric__label">{{ 'factory.scorecard.qcIssueRate' | translate }}</p>
+            <span class="sc-metric__icon" aria-hidden="true">
+              <span class="material-symbols-outlined">fact_check</span>
+            </span>
+          </div>
+          <p class="sc-metric__value">{{ formatPercent(s.qcIssueRate) }}</p>
+        </article>
+        <article class="sc-metric" [class.sc-metric--warn]="s.openDisputes > 0">
+          <div class="sc-metric__top">
+            <p class="sc-metric__label">{{ 'factory.scorecard.openDisputes' | translate }}</p>
+            <span class="sc-metric__icon" aria-hidden="true">
+              <span class="material-symbols-outlined">gavel</span>
+            </span>
+          </div>
+          <p class="sc-metric__value tabular-nums">{{ s.openDisputes }}</p>
+        </article>
+        @if (s.riskScore != null) {
+          <article class="sc-metric">
+            <div class="sc-metric__top">
+              <p class="sc-metric__label">{{ 'factory.scorecard.riskScore' | translate }}</p>
+              <span class="sc-metric__icon" aria-hidden="true">
+                <span class="material-symbols-outlined">shield</span>
+              </span>
+            </div>
+            <p class="sc-metric__value tabular-nums">{{ s.riskScore | number: '1.0-0' }}</p>
+          </article>
+        }
+      </section>
+
+      <section class="sc-panel" aria-labelledby="sc-deals-heading">
+        <div class="sc-panel__head">
+          <div>
+            <h2 id="sc-deals-heading" class="sc-panel__title">
+              {{ 'factory.scorecard.recentDeals' | translate }}
+            </h2>
+            <p class="sc-panel__sub">
+              {{ 'factory.scorecard.recentDealsHint' | translate }}
+            </p>
+          </div>
+          <span class="sc-panel__count tabular-nums">{{ s.recentDeals.length }}</span>
+        </div>
+
+        @if (s.recentDeals.length === 0) {
+          <p class="sc-empty">{{ 'factory.scorecard.noDeals' | translate }}</p>
+        } @else {
+          <ul class="sc-deals">
+            @for (deal of s.recentDeals; track deal.contractId) {
+              <li class="sc-deal">
+                <div class="sc-deal__icon" aria-hidden="true">
+                  <span class="material-symbols-outlined">agriculture</span>
+                </div>
+                <div class="sc-deal__body">
+                  <p class="sc-deal__title">
+                    {{ deal.crop }}
+                    <span class="sc-deal__qty tabular-nums"
+                      >{{ deal.quantityTons | number: '1.0-0' }} t</span
+                    >
+                  </p>
+                  <p class="sc-deal__meta">
+                    <span class="sc-deal__status">{{ deal.contractStatus }}</span>
+                    @if (deal.fulfillmentStatus) {
+                      <span aria-hidden="true">·</span>
+                      <span>{{ deal.fulfillmentStatus }}</span>
+                    }
+                    @if (deal.signedAt) {
+                      <span aria-hidden="true">·</span>
+                      <time [attr.datetime]="deal.signedAt">{{
+                        deal.signedAt | date: 'mediumDate'
+                      }}</time>
+                    }
+                  </p>
+                </div>
+                <a
+                  [routerLink]="['/factory/contracts', deal.contractId]"
+                  class="sc-deal__action"
+                >
+                  {{ 'common.view' | translate }}
+                  <span class="material-symbols-outlined" aria-hidden="true">arrow_outward</span>
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <section class="sc-panel" aria-labelledby="sc-reviews-heading">
+        <div class="sc-panel__head">
+          <div>
+            <h2 id="sc-reviews-heading" class="sc-panel__title">
+              {{ 'reviews.title' | translate }}
+            </h2>
+            <p class="sc-panel__sub">
+              {{ 'reviews.scorecardHint' | translate }}
+            </p>
+          </div>
+          <span class="sc-panel__count tabular-nums">{{ reviews().length }}</span>
+        </div>
+        @if (reviews().length === 0) {
+          <p class="sc-empty">{{ 'reviews.empty' | translate }}</p>
+        } @else {
+          <ul class="sc-deals">
+            @for (r of reviews(); track r.reviewId) {
+              <li class="sc-deal">
+                <div class="sc-deal__icon" aria-hidden="true">
+                  <span class="material-symbols-outlined fill">star</span>
+                </div>
+                <div class="sc-deal__body">
+                  <p class="sc-deal__title tabular-nums">{{ r.rating }}/5</p>
+                  <p class="sc-deal__meta">
+                    <time [attr.datetime]="r.createdAt">{{
+                      r.createdAt | date: 'mediumDate'
+                    }}</time>
+                    @if (r.comment) {
+                      <span aria-hidden="true">·</span>
+                      <span>{{ r.comment }}</span>
+                    }
+                  </p>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+  </div>
+</main>

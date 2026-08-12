@@ -66,9 +66,9 @@ import {
                   {{ 'common.aiDrawerTitle' | translate }}
                 </h2>
                 <span
-                  class="inline-flex items-center rounded-full px-2 py-0.5 font-label-sm text-label-sm bg-provenance-container text-on-provenance-container"
+                  class="inline-flex items-center rounded-full px-2 py-0.5 font-label-sm text-label-sm bg-primary-container text-on-primary-container"
                 >
-                  {{ 'common.aiDrawerPreviewBadge' | translate }}
+                  {{ 'common.aiDrawerLiveBadge' | translate }}
                 </span>
               </div>
               <p class="text-label-sm text-on-surface-variant">
@@ -173,7 +173,8 @@ export class UiAiAssistantDrawerComponent {
 
   readonly canUseAssistant = computed(
     () =>
-      this.auth.isAuthenticated() && this.auth.hasAnyRole(['Factory', 'Admin'])
+      this.auth.isAuthenticated() &&
+      this.auth.hasAnyRole(['Factory', 'Farm', 'Admin', 'SuperAdmin'])
   );
 
   draft = '';

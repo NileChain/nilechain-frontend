@@ -93,42 +93,40 @@
             <div class="lw-paper-skeleton" aria-hidden="true"></div>
           }
 
-          <div class="lw-actions print:hidden">
-            <app-contract-action-bar
-              [canDecide]="canDecide()"
-              [acceptEnabled]="acceptEnabled()"
-              [busy]="acting()"
-              [floating]="false"
-              [sticky]="true"
-              acceptLabelKey="contractDoc.acceptContract"
-              rejectLabelKey="contractDoc.rejectContract"
-              [reviewHintKey]="
-                canDecide() && !hasReviewedEnough()
-                  ? 'farm.contracts.reviewBeforeAccept'
-                  : ''
-              "
-              (approve)="approve()"
-              (reject)="reject()"
-              (download)="downloadPdf()"
-              (print)="print()"
-              (share)="share()"
-            />
-          </div>
+          @if (canDecide()) {
+            <div class="lw-actions print:hidden">
+              <app-contract-action-bar
+                [canDecide]="true"
+                [acceptEnabled]="acceptEnabled()"
+                [busy]="acting()"
+                [floating]="false"
+                [sticky]="true"
+                [showDownload]="false"
+                [showPrint]="false"
+                [showShare]="false"
+                acceptLabelKey="contractDoc.acceptContract"
+                rejectLabelKey="contractDoc.rejectContract"
+                [reviewHintKey]="
+                  !hasReviewedEnough()
+                    ? 'farm.contracts.reviewBeforeAccept'
+                    : ''
+                "
+                (approve)="approve()"
+                (reject)="reject()"
+              />
+            </div>
+          }
         </div>
 
         <aside class="lw-rail print:hidden">
+          @if (c.integrity) {
+            <app-contract-integrity-badge [integrity]="c.integrity" />
+          }
           <details class="lw-side-panel" open>
             <summary>{{ 'contractDoc.timeline' | translate }}</summary>
-            <app-contract-timeline [steps]="timeline()" />
+            <app-contract-timeline [steps]="timeline()" [showTitle]="false" />
           </details>
           @if (isSigned()) {
-            <details class="lw-side-panel" open>
-              <summary>{{ 'fulfillment.title' | translate }}</summary>
-              <app-contract-fulfillment-timeline
-                portal="farm"
-                [contractId]="c.contractId"
-              />
-            </details>
             <details class="lw-side-panel" open>
               <summary>{{ 'paymentMilestones.title' | translate }}</summary>
               <app-contract-payment-milestones
@@ -136,7 +134,14 @@
                 [contractId]="c.contractId"
               />
             </details>
-            <details class="lw-side-panel" open>
+            <details class="lw-side-panel">
+              <summary>{{ 'fulfillment.title' | translate }}</summary>
+              <app-contract-fulfillment-timeline
+                portal="farm"
+                [contractId]="c.contractId"
+              />
+            </details>
+            <details class="lw-side-panel">
               <summary>{{ 'dispute.title' | translate }}</summary>
               <app-contract-disputes-panel
                 portal="farm"
@@ -144,10 +149,36 @@
                 [canOpen]="isSigned()"
               />
             </details>
+            <details class="lw-side-panel" [open]="fulfillmentFulfilled()">
+              <summary>{{ 'reviews.title' | translate }}</summary>
+              <app-contract-review-panel
+                [contractId]="c.contractId"
+                [targetUserId]="reviewTargetUserId()"
+                [canWrite]="fulfillmentFulfilled()"
+              />
+            </details>
+          }
+          @if (canUnwind()) {
+            <div class="lw-side-panel p-3">
+              <button
+                type="button"
+                class="ui-btn-secondary w-full"
+                [disabled]="acting()"
+                (click)="unwind()"
+              >
+                {{ 'contractDoc.unwindSigned' | translate }}
+              </button>
+            </div>
           }
           <details class="lw-side-panel">
             <summary>{{ 'contractDoc.attachments' | translate }}</summary>
-            <app-contract-attachments [items]="attachments()" />
+            <app-contract-attachments
+              [items]="attachments()"
+              [canUpload]="true"
+              [uploading]="uploadingAttachment()"
+              (upload)="onUploadAttachment($event)"
+              (remove)="onRemoveAttachment($event)"
+            />
           </details>
           @if (c.matchScore != null || c.riskScore != null) {
             <details class="lw-side-panel">
