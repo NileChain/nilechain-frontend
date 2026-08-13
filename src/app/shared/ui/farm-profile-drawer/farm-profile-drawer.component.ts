@@ -28,7 +28,6 @@ import {
 } from '../../a11y/focus-trap';
 import { UiSkeletonComponent } from '../skeleton/skeleton.component';
 import { UiErrorStateComponent } from '../error-state/error-state.component';
-import { UiEmptyStateComponent } from '../empty-state/empty-state.component';
 import { UiRiskScoreBadgeComponent } from '../risk-score-badge/risk-score-badge.component';
 import {
   EGYPT_MAP_CENTER,
@@ -62,7 +61,6 @@ configureLeafletDefaultIcon();
     RouterLink,
     UiSkeletonComponent,
     UiErrorStateComponent,
-    UiEmptyStateComponent,
     UiRiskScoreBadgeComponent,
   ],
   templateUrl: './farm-profile-drawer.component.html',
