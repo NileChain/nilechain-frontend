@@ -21,6 +21,18 @@
     </a>
   </app-top-bar>
 
+  <div
+    class="p-margin-mobile md:p-margin-desktop max-w-[1440px] w-full mx-auto pt-4"
+  >
+    <ui-portal-hero
+      size="compact"
+      imageUrl="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1600&q=75"
+      quoteKey="portalHero.matchesQuote"
+      titleKey="factory.matches.title"
+      bodyKey="factory.matches.subtitle"
+    />
+  </div>
+
   @if (!requestId()) {
     <div
       class="p-margin-mobile md:p-margin-desktop max-w-3xl mx-auto py-16"
@@ -29,6 +41,7 @@
         icon="agriculture"
         titleKey="factory.matches.needRequestId"
         bodyKey="factory.matches.needRequestIdHint"
+        imageUrl="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1200&q=70"
       >
         <a class="ui-btn-primary mt-2" routerLink="/factory/supply-request">
           {{ 'factory.matches.startSupplyRequest' | translate }}
@@ -101,12 +114,13 @@
               titleKey="factory.matches.empty"
               bodyKey="factory.matches.emptyBody"
               icon="hub"
+              imageUrl="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1200&q=70"
             />
           } @else {
             @for (farm of matches(); track farm.matchId) {
               <button
                 type="button"
-                class="w-full text-start ui-card ui-card-interactive p-4 relative overflow-hidden"
+                class="w-full text-start ui-card ui-card--lift ui-card-interactive p-4 relative overflow-hidden"
                 [class.ui-card-selected]="selected()?.matchId === farm.matchId"
                 [class.animate-fade-in]="$index < 6"
                 [style.animation-delay]="

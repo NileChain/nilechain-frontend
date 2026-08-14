@@ -23,6 +23,7 @@ import {
   FactoryMessage,
   FactoryService,
 } from '../../../core/services/factory/factory.service';
+import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
 
 interface ConversationGroup {
   key: string;
@@ -43,6 +44,7 @@ interface ConversationGroup {
     AppTopBarComponent,
     FormsModule,
     DatePipe,
+    UiPortalHeroComponent,
   ],
   templateUrl: './factory-messages.component.html',
   styleUrl: './factory-messages.component.scss',

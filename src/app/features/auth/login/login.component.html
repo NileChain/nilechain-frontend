@@ -8,7 +8,7 @@
       [attr.aria-label]="'app.name' | translate"
     >
       <ui-brand-mark [size]="32" [decorative]="true" />
-      <span class="font-headline-sm text-headline-sm font-bold text-primary">{{
+      <span class="font-headline-sm text-headline-sm font-bold text-primary" dir="ltr">{{
         'app.name' | translate
       }}</span>
     </a>
@@ -23,8 +23,22 @@
   </header>
 
   <main
-    class="flex-grow flex items-center justify-center pt-24 pb-12 px-margin-mobile"
+    class="flex-grow flex items-stretch justify-center pt-16 min-h-screen"
   >
+    <div class="auth-split animate-fade-in">
+      <aside class="auth-aside" aria-hidden="true">
+        <img
+          src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=75"
+          alt=""
+        />
+        <div class="auth-aside__veil"></div>
+        <div class="auth-aside__copy">
+          <p class="font-heritage">{{ 'login.asideQuote' | translate }}</p>
+          <span>{{ 'login.asideAttr' | translate }}</span>
+        </div>
+      </aside>
+
+      <div class="flex items-center justify-center px-margin-mobile py-12">
     <div
       class="w-full max-w-[440px] bg-surface-container-lowest border border-outline-variant rounded-xl login-card-shadow overflow-hidden animate-scale-in"
     >
@@ -127,7 +141,10 @@
         </div>
 
         @if (errorMessage()) {
-          <p class="font-label-sm text-label-sm text-error" role="alert">
+          <p
+            class="font-label-sm text-label-sm text-error ui-anim-shake"
+            role="alert"
+          >
             {{ errorMessage() | translate }}
           </p>
         }
@@ -174,6 +191,8 @@
         </div>
       </form>
     </div>
+      </div>
+    </div>
   </main>
 
   <footer class="bg-surface-container-highest text-on-surface w-full mt-auto">
@@ -181,7 +200,7 @@
       class="flex flex-col md:flex-row justify-between items-center px-margin-mobile md:px-margin-desktop py-lg w-full max-w-7xl mx-auto gap-4"
     >
       <div class="flex flex-col md:flex-row items-center gap-4">
-        <span class="font-bold text-primary">{{ 'app.name' | translate }}</span>
+        <span class="font-bold text-primary" dir="ltr">{{ 'app.name' | translate }}</span>
         <p class="font-label-sm text-label-sm text-on-surface-variant">
           {{ 'landing.footerRights' | translate }}
         </p>

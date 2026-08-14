@@ -1,6 +1,4 @@
-<div
-  class="min-h-screen flex flex-col items-center justify-center p-margin-mobile md:p-margin-desktop overflow-x-hidden bg-surface"
->
+<div class="min-h-screen flex flex-col overflow-x-hidden bg-surface">
   <header
     class="fixed top-0 inset-x-0 z-50 flex justify-end items-center gap-1 px-margin-mobile md:px-margin-desktop h-16"
   >
@@ -8,14 +6,24 @@
     <ui-theme-toggle />
   </header>
 
-  <!-- Atmospheric Background -->
-  <div
-    class="fixed inset-0 -z-10 bg-surface-container-low opacity-50"
-    aria-hidden="true"
-  ></div>
-
-  <!-- Registration Container -->
-  <main class="w-full max-w-[480px] z-10 animate-fade-in pt-16">
+  <div class="flex-grow pt-16">
+    <div class="auth-split animate-fade-in">
+      <aside class="auth-aside" aria-hidden="true">
+        <img
+          src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=1400&q=75"
+          alt=""
+        />
+        <div class="auth-aside__veil"></div>
+        <div class="auth-aside__copy">
+          <p class="font-heritage">{{ 'portalHero.registerQuote' | translate }}</p>
+          <span>NileChain</span>
+        </div>
+      </aside>
+      <div
+        class="flex flex-col items-center justify-center p-margin-mobile md:p-margin-desktop"
+      >
+        <!-- Registration Container -->
+        <main class="w-full max-w-[480px] z-10">
     <!-- Brand Header -->
     <div class="flex flex-col items-center mb-xl">
       <a [routerLink]="'/landing'" class="flex flex-col items-center mb-md">
@@ -508,7 +516,10 @@
         }}</span>
       </div>
     </footer>
-  </main>
+        </main>
+      </div>
+    </div>
+  </div>
 
   <!-- Success Toast -->
   <div

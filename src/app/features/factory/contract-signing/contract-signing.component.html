@@ -1,170 +1,245 @@
 <main class="md:ms-[280px] min-h-screen bg-surface">
   <app-top-bar
     titleKey="contractSign.title"
+    subtitleKey="contractSign.subtitle"
     portal="factory"
     notificationsLink="/factory/notifications"
-  />
+  >
+    <span class="ui-status-pill ui-status-pill--success hidden sm:inline-flex">
+      <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
+        >gavel</span
+      >
+      {{ 'contractSign.legalActive' | translate }}
+    </span>
+  </app-top-bar>
 
   <div
-    class="p-margin-mobile md:p-margin-desktop max-w-4xl mx-auto space-y-gutter animate-fade-in"
+    class="p-margin-mobile md:p-margin-desktop max-w-6xl mx-auto space-y-gutter animate-fade-in pb-28"
   >
-    <section class="ui-card p-6 space-y-4">
-      <p class="font-body-md text-on-surface-variant">
-        {{ 'contractSign.subtitle' | translate }}
-      </p>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block font-label-md mb-1" for="factory-name-contract">{{
-            'contractSign.factoryName' | translate
-          }}</label>
-          <input
-            id="factory-name-contract"
-            class="ui-input"
-            [(ngModel)]="factoryName"
-            name="factoryName"
-          />
-        </div>
-        <div>
-          <label class="block font-label-md mb-1">{{
-            'contractSign.farm' | translate
-          }}</label>
-          <input class="ui-input" [value]="farmName || '—'" readonly />
-        </div>
-        <div>
-          <label class="block font-label-md mb-1">{{
-            'contractSign.requestId' | translate
-          }}</label>
-          <input class="ui-input" [value]="requestId || '—'" readonly />
-        </div>
-        <div>
-          <label class="block font-label-md mb-1">{{
-            'contractSign.farmId' | translate
-          }}</label>
-          <input class="ui-input" [value]="farmId || '—'" readonly />
-        </div>
-      </div>
-      <button
-        type="button"
-        class="ui-btn-primary"
-        [disabled]="loading()"
-        (click)="generate()"
-      >
-        {{
-          loading()
-            ? ('contractSign.generating' | translate)
-            : ('contractSign.generate' | translate)
-        }}
-      </button>
-    </section>
+    <ui-portal-hero
+      size="compact"
+      imageUrl="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1600&q=75"
+      quoteKey="portalHero.contractsQuote"
+      titleKey="contractSign.title"
+      bodyKey="contractSign.subtitle"
+    />
 
     <!-- Status stepper -->
     <nav
       class="ui-card p-4"
       [attr.aria-label]="'contractSign.timeline' | translate"
     >
-      <ol class="flex flex-col sm:flex-row gap-3 sm:gap-0 sm:justify-between">
+      <ol class="ui-stepper">
         @for (step of statusSteps; track step.id; let i = $index) {
-          <li class="flex items-center gap-2 flex-1">
-            <span
-              class="w-8 h-8 rounded-full flex items-center justify-center font-label-md shrink-0"
-              [class.bg-primary-container]="stepIndex(status()) >= i"
-              [class.text-on-primary-container]="stepIndex(status()) >= i"
-              [class.bg-surface-container-high]="stepIndex(status()) < i"
-              [class.text-on-surface-variant]="stepIndex(status()) < i"
-            >
+          <li
+            class="ui-stepper__item"
+            [class.ui-stepper__item--done]="stepIndex(status()) > i"
+            [class.ui-stepper__item--current]="status() === step.id"
+          >
+            <span class="ui-stepper__index" aria-hidden="true">
               @if (stepIndex(status()) > i) {
-                <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
-                  >check</span
-                >
+                <span class="material-symbols-outlined text-[18px]">check</span>
               } @else {
                 {{ i + 1 }}
               }
             </span>
-            <span
-              class="font-label-md"
-              [class.text-primary]="status() === step.id"
-              [class.text-on-surface]="stepIndex(status()) > i"
-              [class.text-on-surface-variant]="stepIndex(status()) < i"
-            >
+            <span class="ui-stepper__label">
               {{ step.labelKey | translate }}
             </span>
           </li>
         }
       </ol>
+
+      @if (keyTerms().length) {
+        <div class="flex flex-wrap gap-2 mt-4 pt-3 border-t border-outline-variant">
+          @for (term of keyTerms(); track term) {
+            <span
+              class="px-3 py-1.5 rounded-full bg-primary-container text-on-primary-container font-label-sm"
+            >
+              {{ term }}
+            </span>
+          }
+        </div>
+      }
     </nav>
 
-    @if (loading()) {
-      <div class="flex justify-center py-8"><ui-loader /></div>
-    }
+    <div class="contract-workspace">
+      <aside class="contract-workspace__aside space-y-3">
+        <section class="ui-card p-4 space-y-3">
+          <h2 class="m-0 font-title-md text-on-surface">
+            {{ 'contractSign.summary' | translate }}
+          </h2>
+          <div class="grid grid-cols-1 gap-3">
+            <div>
+              <label class="block font-label-md mb-1" for="factory-name-contract">{{
+                'contractSign.factoryName' | translate
+              }}</label>
+              <input
+                id="factory-name-contract"
+                class="ui-input"
+                [(ngModel)]="factoryName"
+                name="factoryName"
+              />
+            </div>
+            <div>
+              <label class="block font-label-md mb-1">{{
+                'contractSign.farm' | translate
+              }}</label>
+              <input class="ui-input" [value]="farmName || '—'" readonly />
+            </div>
+            <div>
+              <label class="block font-label-md mb-1">{{
+                'contractSign.requestId' | translate
+              }}</label>
+              <input class="ui-input" [value]="requestId || '—'" readonly />
+            </div>
+            <div>
+              <label class="block font-label-md mb-1">{{
+                'contractSign.farmId' | translate
+              }}</label>
+              <input class="ui-input" [value]="farmId || '—'" readonly />
+            </div>
+          </div>
+          <button
+            type="button"
+            class="ui-btn-secondary w-full justify-center border-dashed"
+            [disabled]="loading()"
+            (click)="generate()"
+          >
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+              >autorenew</span
+            >
+            {{
+              loading()
+                ? ('contractSign.generating' | translate)
+                : contractText()
+                  ? ('contractSign.regenerate' | translate)
+                  : ('contractSign.generate' | translate)
+            }}
+          </button>
+        </section>
 
-    @if (error()) {
-      <ui-error-state [message]="error()" (retry)="generate()" />
-    }
-
-    @if (contractText(); as text) {
-      <section class="space-y-4">
-        @if (keyTerms().length) {
-          <div class="flex flex-wrap gap-2">
-            <span class="font-label-md text-on-surface-variant self-center">{{
-              'contractSign.keyTerms' | translate
-            }}:</span>
-            @for (term of keyTerms(); track term) {
-              <span
-                class="px-3 py-1 rounded-lg bg-surface-container-high text-on-surface font-label-sm text-label-sm"
+        @if (error()) {
+          <div
+            class="rounded-xl border p-4 space-y-3"
+            [class.border-error]="isWalletError"
+            [class.bg-error-container]="isWalletError"
+            [class.border-outline-variant]="!isWalletError"
+            role="alert"
+          >
+            @if (isWalletError) {
+              <div class="flex items-start gap-2">
+                <span
+                  class="material-symbols-outlined text-error shrink-0"
+                  aria-hidden="true"
+                  >account_balance_wallet</span
+                >
+                <div class="min-w-0 space-y-1">
+                  <p class="m-0 font-title-md text-on-error-container">
+                    {{ 'contractSign.walletBlockedTitle' | translate }}
+                  </p>
+                  <p class="m-0 font-body-sm text-on-error-container/90">
+                    {{ error() }}
+                  </p>
+                </div>
+              </div>
+              <a
+                routerLink="/factory/wallet"
+                class="ui-btn-primary w-full justify-center !bg-error hover:!opacity-90"
               >
-                {{ term }}
-              </span>
+                {{ 'contractSign.goToWallet' | translate }}
+              </a>
+              <button
+                type="button"
+                class="ui-btn-ghost w-full justify-center"
+                (click)="retryLastAction()"
+              >
+                {{ 'contractSign.retryAfterTopUp' | translate }}
+              </button>
+            } @else {
+              <ui-error-state
+                [message]="error()"
+                [titleKey]="errorTitleKey()"
+                (retry)="retryLastAction()"
+              />
             }
           </div>
         }
+      </aside>
 
-        <article class="ui-card p-6 space-y-4">
-          <header class="flex justify-between items-center gap-3 flex-wrap">
-            <h2 class="font-title-lg text-on-surface">
-              {{ 'contractSign.document' | translate }}
-            </h2>
+      <div class="contract-workspace__main min-w-0 space-y-4">
+        @if (loading()) {
+          <div class="flex justify-center py-8"><ui-loader /></div>
+        }
+
+        @if (contractText(); as text) {
+          @if (previewDocument(); as doc) {
+            <app-contract-document
+              [contract]="doc"
+              [documentDir]="previewDir()"
+              [showSignedBanner]="false"
+              [showWatermark]="false"
+            />
+          }
+
+          @if (contractId() && status() !== 'approved') {
+            <div class="print:hidden">
+              <app-contract-request-changes
+                portal="factory"
+                [contractId]="contractId()!"
+                [enabled]="!loading()"
+                (applied)="onChangesApplied($event)"
+              />
+            </div>
+          }
+        } @else if (!loading() && !error()) {
+          <section class="ui-card p-8 text-center space-y-3">
             <span
-              class="px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-label-sm"
+              class="material-symbols-outlined text-primary text-4xl"
+              aria-hidden="true"
+              >description</span
             >
-              {{
-                status() === 'approved'
-                  ? ('contractSign.statusApproved' | translate)
-                  : status() === 'ready'
-                    ? ('contractSign.statusReady' | translate)
-                    : ('contractSign.statusDraft' | translate)
-              }}
-            </span>
-          </header>
-          <div
-            class="prose-contract bg-surface-container-low p-5 rounded-xl border border-outline-variant max-h-[28rem] overflow-y-auto"
-          >
-            <pre
-              class="whitespace-pre-wrap font-body-md text-body-md text-on-surface leading-relaxed m-0 font-sans"
-              >{{ text }}</pre
-            >
-          </div>
-          <div class="flex flex-wrap gap-3 pt-2">
+            <p class="m-0 font-body-md text-on-surface-variant">
+              {{ 'contractSign.needGenerateHint' | translate }}
+            </p>
             <button
               type="button"
-              class="ui-btn-primary"
-              [disabled]="status() === 'approved'"
-              (click)="approve()"
+              class="ui-btn-primary inline-flex"
+              [disabled]="loading()"
+              (click)="generate()"
             >
-              {{ 'contractSign.approve' | translate }}
+              {{ 'contractSign.generate' | translate }}
             </button>
-            <button type="button" class="ui-btn-secondary" (click)="download()">
-              {{ 'contractSign.download' | translate }}
-            </button>
-            <button
-              type="button"
-              class="ui-btn-ghost"
-              (click)="requestChanges()"
-            >
-              {{ 'contractSign.requestChanges' | translate }}
-            </button>
-          </div>
-        </article>
-      </section>
-    }
+          </section>
+        }
+      </div>
+    </div>
   </div>
+
+  @if (contractText()) {
+    <div class="contract-workspace__bar print:hidden">
+      <div class="contract-workspace__bar-inner">
+        @if (contractId() && status() !== 'approved') {
+          <span class="font-label-sm text-on-surface-variant">
+            {{ 'contractSign.requestChanges' | translate }}
+          </span>
+        } @else {
+          <span></span>
+        }
+        <div class="flex flex-wrap gap-2 justify-end">
+          <button type="button" class="ui-btn-secondary" (click)="download()">
+            {{ 'contractSign.download' | translate }}
+          </button>
+          <button
+            type="button"
+            class="ui-btn-primary"
+            [disabled]="status() === 'approved' || isWalletError"
+            (click)="approve()"
+          >
+            {{ 'contractSign.approve' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </main>

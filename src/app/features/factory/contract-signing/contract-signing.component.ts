@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { finalize, switchMap } from 'rxjs';
 import { of } from 'rxjs';
@@ -17,8 +17,18 @@ import {
   MatchResult,
 } from '../../../core/models/agent/agent.model';
 import { readAgentSession } from '../../../core/utils/agent-session';
+import { resolveApiErrorMessage } from '../../../core/utils/api-error.util';
+import {
+  ContractChangesApplied,
+  ContractRequestChangesComponent,
+} from '../../../shared/contracts/contract-request-changes/contract-request-changes.component';
+import { ContractDocumentComponent } from '../../../shared/contracts/contract-document/contract-document.component';
+import { ContractDocumentModel } from '../../../shared/contracts/models/contract-document.model';
+import { detectDocumentDir } from '../../../shared/contracts/contract-text.util';
+import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
 
 type ContractStatus = 'draft' | 'ready' | 'approved';
+type ErrorAction = 'generate' | 'approve' | 'reject';
 
 @Component({
   selector: 'app-contract-signing',
@@ -29,8 +39,13 @@ type ContractStatus = 'draft' | 'ready' | 'approved';
     UiErrorStateComponent,
     AppTopBarComponent,
     FormsModule,
+    RouterLink,
+    ContractRequestChangesComponent,
+    ContractDocumentComponent,
+    UiPortalHeroComponent,
   ],
   templateUrl: './contract-signing.component.html',
+  styleUrl: './contract-signing.component.scss',
 })
 export class ContractSigningComponent implements OnInit {
   private readonly agentService = inject(AgentService);
@@ -41,6 +56,9 @@ export class ContractSigningComponent implements OnInit {
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly errorCode = signal<string | null>(null);
+  readonly errorTitleKey = signal('common.errorTitle');
+  readonly lastErrorAction = signal<ErrorAction>('generate');
   readonly contractText = signal<string | null>(null);
   readonly status = signal<ContractStatus>('draft');
   readonly contractId = signal<string | null>(null);
@@ -78,6 +96,11 @@ export class ContractSigningComponent implements OnInit {
     });
   }
 
+  get isWalletError(): boolean {
+    const code = this.errorCode() ?? '';
+    return code.includes('InsufficientBalance');
+  }
+
   keyTerms(): string[] {
     const terms: string[] = [];
     if (this.agentRequest) {
@@ -94,8 +117,59 @@ export class ContractSigningComponent implements OnInit {
     return terms;
   }
 
+  /** Structured deed preview for generated text (signing page). */
+  previewDocument(): ContractDocumentModel | null {
+    const text = this.contractText();
+    if (!text?.trim()) {
+      return null;
+    }
+
+    const req = this.agentRequest;
+    return {
+      contractId: this.contractId() || '00000000-0000-0000-0000-000000000000',
+      matchId: this.matchId,
+      status:
+        this.status() === 'approved'
+          ? 'PendingFarmSignature'
+          : this.status() === 'ready'
+            ? 'PendingSignature'
+            : 'Draft',
+      createdAt: new Date().toISOString(),
+      factorySigned: this.status() === 'approved',
+      farmSigned: false,
+      factoryName: this.factoryName || '—',
+      farmName: this.farmName || '—',
+      cropName: req?.cropType || '—',
+      quantityTons: req?.quantityTons ?? 0,
+      unit: 'MT',
+      pricePerTon: req?.pricePerTon ?? null,
+      deliveryDate: req?.deliveryDate ?? null,
+      deliveryLocation: req?.factoryGovernorate ?? null,
+      qualityRequirements: req?.qualitySpecs?.trim() || null,
+      generatedText: text,
+      version: '1.0',
+      riskScore: this.selectedFarm?.riskScore ?? null,
+    };
+  }
+
+  previewDir(): 'rtl' | 'ltr' {
+    return detectDocumentDir(this.contractText());
+  }
+
   stepIndex(status: ContractStatus): number {
     return this.statusSteps.findIndex((s) => s.id === status);
+  }
+
+  retryLastAction(): void {
+    const action = this.lastErrorAction();
+    if (action === 'approve') {
+      this.approve();
+      return;
+    }
+    if (action === 'reject') {
+      return;
+    }
+    this.generate();
   }
 
   private hydrateFromSession(): void {
@@ -140,7 +214,7 @@ export class ContractSigningComponent implements OnInit {
 
     if (!this.selectedFarm) {
       if (!this.farmId || !this.farmName) {
-        this.error.set(this.i18n.instant('contractSign.needFarm'));
+        this.setError(this.i18n.instant('contractSign.needFarm'), null, 'generate');
         return;
       }
       this.selectedFarm = {
@@ -156,7 +230,11 @@ export class ContractSigningComponent implements OnInit {
     }
 
     if (!this.factoryName.trim()) {
-      this.error.set(this.i18n.instant('contractSign.needFactoryName'));
+      this.setError(
+        this.i18n.instant('contractSign.needFactoryName'),
+        null,
+        'generate'
+      );
       return;
     }
 
@@ -168,7 +246,7 @@ export class ContractSigningComponent implements OnInit {
     };
 
     this.loading.set(true);
-    this.error.set(null);
+    this.clearError();
     this.agentService
       .generateContract(payload)
       .pipe(
@@ -197,13 +275,7 @@ export class ContractSigningComponent implements OnInit {
           this.status.set('ready');
           this.toast.success(this.i18n.instant('contractSign.generateSuccess'));
         },
-        error: (err) => {
-          const message =
-            err?.error?.message ||
-            (typeof err?.error === 'string' ? err.error : null) ||
-            this.i18n.instant('contractSign.generateFailed');
-          this.error.set(message);
-        },
+        error: (err) => this.applyHttpError(err, 'generate', 'contractSign.generateFailed'),
       });
   }
 
@@ -215,6 +287,7 @@ export class ContractSigningComponent implements OnInit {
       return;
     }
     this.loading.set(true);
+    this.clearError();
     this.factoryService
       .approveContract(id)
       .pipe(finalize(() => this.loading.set(false)))
@@ -223,30 +296,17 @@ export class ContractSigningComponent implements OnInit {
           this.status.set('approved');
           this.toast.success(this.i18n.instant('contractSign.approveSuccess'));
         },
-        error: () =>
-          this.error.set(this.i18n.instant('contractSign.generateFailed')),
+        error: (err) =>
+          this.applyHttpError(err, 'approve', 'contractSign.approveFailed'),
       });
   }
 
-  requestChanges(): void {
-    const id = this.contractId();
-    if (!id) {
-      this.status.set('draft');
-      this.toast.info(this.i18n.instant('contractSign.changesRequested'));
-      return;
+  onChangesApplied(result: ContractChangesApplied): void {
+    if (result.generatedText) {
+      this.contractText.set(result.generatedText);
     }
-    this.loading.set(true);
-    this.factoryService
-      .rejectContract(id)
-      .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({
-        next: () => {
-          this.status.set('draft');
-          this.toast.info(this.i18n.instant('contractSign.changesRequested'));
-        },
-        error: () =>
-          this.error.set(this.i18n.instant('contractSign.generateFailed')),
-      });
+    this.status.set('ready');
+    this.clearError();
   }
 
   download(): void {
@@ -284,5 +344,48 @@ export class ContractSigningComponent implements OnInit {
     a.click();
     URL.revokeObjectURL(url);
     this.toast.success(this.i18n.instant('contractSign.downloadSuccess'));
+  }
+
+  private applyHttpError(
+    err: unknown,
+    action: ErrorAction,
+    fallbackKey: string
+  ): void {
+    const resolved = resolveApiErrorMessage(err, this.i18n, {
+      fallbackKey,
+      mapCode: (code) => {
+        if (code.includes('InsufficientBalance')) {
+          return this.i18n.instant('wallet.insufficientForDeal');
+        }
+        if (code.includes('DealValueInvalid')) {
+          return this.i18n.instant('wallet.dealValueInvalid');
+        }
+        return null;
+      },
+    });
+
+    const titleKey = resolved.code?.includes('InsufficientBalance')
+      ? 'contractSign.walletBlockedTitle'
+      : 'common.errorTitle';
+
+    this.setError(resolved.message, resolved.code, action, titleKey);
+  }
+
+  private setError(
+    message: string,
+    code: string | null,
+    action: ErrorAction,
+    titleKey = 'common.errorTitle'
+  ): void {
+    this.error.set(message);
+    this.errorCode.set(code);
+    this.errorTitleKey.set(titleKey);
+    this.lastErrorAction.set(action);
+  }
+
+  private clearError(): void {
+    this.error.set(null);
+    this.errorCode.set(null);
+    this.errorTitleKey.set('common.errorTitle');
   }
 }

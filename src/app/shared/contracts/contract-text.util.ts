@@ -36,10 +36,72 @@ const HEADING_RE = new RegExp(
     '^(?:شروط\\s+(?:التسليم|الدفع|الجودة|العقد))',
     '^(?:التزامات\\s+(?:المصنع|المزرعة|الطرف))',
     '^(?:فض\\s+النزاعات|حل\\s+النزاعات|القانون\\s+المطبق)',
-    '^(?:مدة\\s+العقد|إنهاء\\s+العقد|التوقيعات|Signatures?|Parties|Payment|Delivery|Quality)',
+    '^(?:مدة\\s+العقد|إنهاء\\s+العقد|Parties|Payment|Delivery|Quality)',
   ].join('|'),
   'i'
 );
+
+const SIGNATURE_HEADING_RE =
+  /^(?:#{1,3}\s*)?(?:التوقيعات|خانات\s*التوقيع|Signatures?|Signature\s*blocks?)\s*:?\s*$/i;
+
+const SIGNATURE_LINE_RE =
+  /^(?:توقيع\s*(?:المورد|المشتري|الطرف|المصنع|المزرعة|الأول|الثاني)|(?:التوقيع|التاريخ)\s*:)/i;
+
+const SIGNATURE_BLANK_RE = /_{3,}|\.{3,}|…|ـ{3,}/;
+
+/**
+ * Remove handwritten signature blanks from generated prose.
+ * Platform e-signature UI is the source of truth for signing state.
+ */
+export function stripHandwrittenSignatureBlocks(
+  raw: string | null | undefined
+): string {
+  const text = (raw || '').replace(/\r\n/g, '\n');
+  if (!text.trim()) {
+    return text;
+  }
+
+  const lines = text.split('\n');
+  const kept: string[] = [];
+  let dropping = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const plain = stripInlineMarkdown(trimmed);
+
+    if (SIGNATURE_HEADING_RE.test(plain) || SIGNATURE_HEADING_RE.test(trimmed)) {
+      dropping = true;
+      continue;
+    }
+
+    if (dropping) {
+      if (
+        HEADING_RE.test(plain) &&
+        !SIGNATURE_HEADING_RE.test(plain) &&
+        !SIGNATURE_LINE_RE.test(plain)
+      ) {
+        dropping = false;
+      } else {
+        continue;
+      }
+    }
+
+    if (
+      SIGNATURE_LINE_RE.test(plain) ||
+      (SIGNATURE_BLANK_RE.test(plain) &&
+        /توقيع|التاريخ|signature|date/i.test(plain))
+    ) {
+      continue;
+    }
+
+    kept.push(line);
+  }
+
+  return kept
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
 
 /** Strip markdown emphasis markers without inventing content. */
 export function stripInlineMarkdown(value: string): string {
@@ -57,7 +119,7 @@ export function stripInlineMarkdown(value: string): string {
 export function parseContractSections(
   raw: string | null | undefined
 ): ContractBodySection[] {
-  const text = (raw || '').replace(/\r\n/g, '\n').trim();
+  const text = stripHandwrittenSignatureBlocks(raw);
   if (!text) {
     return [];
   }
@@ -91,6 +153,16 @@ export function parseContractSections(
     }
 
     const plain = stripInlineMarkdown(trimmed);
+
+    // Document chrome is not a legal clause heading.
+    if (
+      /^بسم\s+الله/.test(plain) ||
+      /^عقد\s+توريد/.test(plain) ||
+      /^Agricultural Supply (Agreement|Contract)$/i.test(plain)
+    ) {
+      continue;
+    }
+
     const isHeading =
       HEADING_RE.test(plain) ||
       HEADING_RE.test(trimmed) ||
@@ -143,17 +215,15 @@ function isStandaloneTitle(plain: string): boolean {
   if (plain.length > 80 || plain.endsWith('.') || plain.includes('EGP')) {
     return false;
   }
-  // Short ALL-CAPS / bold-looking legal titles already stripped of **
-  if (/^عقد\s+توريد/.test(plain)) {
-    return true;
-  }
-  if (/^بسم\s+الله/.test(plain)) {
-    return true;
+  // Document title / bismillah are chrome — handled separately, not clause headings.
+  if (/^عقد\s+توريد/.test(plain) || /^بسم\s+الله/.test(plain)) {
+    return false;
   }
   if (
     /^[A-Z][A-Za-z0-9 ,/\-]{2,}$/.test(plain) &&
     !plain.includes('ton') &&
-    plain.split(' ').length <= 8
+    plain.split(' ').length <= 8 &&
+    !/^Agricultural Supply (Agreement|Contract)$/i.test(plain)
   ) {
     return true;
   }
@@ -168,13 +238,49 @@ function splitParagraphs(text: string): string[] {
 }
 
 export function buildToc(sections: ContractBodySection[]): ContractTocItem[] {
-  return sections
+  const legal = sections
     .filter((s) => s.title.trim().length > 0 || s.paragraphs.length > 0)
     .map((s, i) => ({
       id: s.id,
-      index: i + 1,
+      index: i + 3,
       title: s.title.trim() || `§ ${i + 1}`,
     }));
+
+  return [
+    { id: 'sec-parties', index: 1, title: 'Parties' },
+    { id: 'sec-commercial', index: 2, title: 'Commercial terms' },
+    ...legal,
+    {
+      id: 'sec-signatures',
+      index: legal.length + 3,
+      title: 'Signatures',
+    },
+  ];
+}
+
+/** Localized TOC labels for structured document chrome. */
+export function buildDocumentToc(
+  sections: ContractBodySection[],
+  labels: { parties: string; commercial: string; signatures: string }
+): ContractTocItem[] {
+  const legal = sections
+    .filter((s) => s.title.trim().length > 0 || s.paragraphs.length > 0)
+    .map((s, i) => ({
+      id: s.id,
+      index: i + 3,
+      title: s.title.trim() || `§ ${i + 1}`,
+    }));
+
+  return [
+    { id: 'sec-parties', index: 1, title: labels.parties },
+    { id: 'sec-commercial', index: 2, title: labels.commercial },
+    ...legal,
+    {
+      id: 'sec-signatures',
+      index: legal.length + 3,
+      title: labels.signatures,
+    },
+  ];
 }
 
 export function escapeHtml(value: string): string {
@@ -340,6 +446,19 @@ export function detectDocumentDir(
   return arabic > latin ? 'rtl' : 'ltr';
 }
 
+export function isPreSignContractStatus(
+  status: string | null | undefined
+): boolean {
+  const s = (status || '').toLowerCase();
+  return (
+    s === 'pendingsignature' ||
+    s === 'pendingfarmsignature' ||
+    s === 'pendingfactorysignature' ||
+    s === 'draft' ||
+    s === 'pending'
+  );
+}
+
 export function contractStatusLabelKey(status: string | null | undefined): string {
   const s = (status || '').toLowerCase();
   if (s === 'signed' || s === 'active') return 'contractDoc.statusSigned';
@@ -378,5 +497,37 @@ export function extractBismillah(raw: string | null | undefined): string | null 
   if (first && /^بسم\s+الله/.test(first)) {
     return first;
   }
+  return null;
+}
+
+/**
+ * Best-effort payment terms from generated prose.
+ * Returns null when absent — never invents payment schedules.
+ */
+export function extractPaymentTermsHint(
+  raw: string | null | undefined
+): string | null {
+  const text = stripHandwrittenSignatureBlocks(raw);
+  if (!text.trim()) {
+    return null;
+  }
+
+  for (const line of text.split('\n')) {
+    const plain = stripInlineMarkdown(line.trim());
+    if (plain.length < 12 || plain.length > 220) {
+      continue;
+    }
+    if (HEADING_RE.test(plain)) {
+      continue;
+    }
+    if (
+      /(الدفع|السداد|التسوية|Payment|paid|settlement|invoice|مقدما|مقدماً|عند الاستلام)/i.test(
+        plain
+      )
+    ) {
+      return plain;
+    }
+  }
+
   return null;
 }

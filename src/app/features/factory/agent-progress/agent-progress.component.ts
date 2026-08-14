@@ -8,6 +8,7 @@ import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
+import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
 import { AgentService } from '../../../core/services/agent/agent.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -140,6 +141,7 @@ const STEP_ACTIVITIES: Record<string, StepActivity[]> = {
     UiErrorStateComponent,
     UiEmptyStateComponent,
     AppTopBarComponent,
+    UiPortalHeroComponent,
     FormsModule,
     RouterLink,
     DecimalPipe,

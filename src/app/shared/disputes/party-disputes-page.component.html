@@ -4,9 +4,42 @@
   <div
     class="p-margin-mobile md:p-margin-desktop max-w-5xl mx-auto space-y-gutter animate-fade-in"
   >
-    <p class="font-body-md text-on-surface-variant">
+    <ui-portal-hero
+      size="compact"
+      imageUrl="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1600&q=75"
+      quoteKey="portalHero.disputesQuote"
+      titleKey="dispute.inboxTitle"
+      bodyKey="dispute.inboxSubtitle"
+    />
+
+    <p class="font-body-md text-on-surface-variant m-0">
       {{ 'dispute.inboxSubtitle' | translate }}
     </p>
+
+    @if (!loading() && !error() && disputes().length > 0) {
+      <div
+        class="flex flex-wrap gap-1 border-b border-outline-variant"
+        role="tablist"
+        [attr.aria-label]="'dispute.filterAria' | translate"
+      >
+        @for (tab of filterTabs; track tab.id) {
+          <button
+            type="button"
+            role="tab"
+            class="px-4 py-2.5 font-label-md border-b-2 -mb-px transition-colors"
+            [class.border-primary]="filter() === tab.id"
+            [class.text-primary]="filter() === tab.id"
+            [class.border-transparent]="filter() !== tab.id"
+            [class.text-on-surface-variant]="filter() !== tab.id"
+            [attr.aria-selected]="filter() === tab.id"
+            (click)="setFilter(tab.id)"
+          >
+            {{ tab.labelKey | translate }}
+            ({{ countFor(tab.id) }})
+          </button>
+        }
+      </div>
+    }
 
     @if (loading()) {
       <div class="flex items-center gap-2 py-16">
@@ -22,28 +55,85 @@
         titleKey="dispute.inboxEmptyTitle"
         bodyKey="dispute.inboxEmptyBody"
         icon="gavel"
+        imageUrl="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=70"
+      />
+    } @else if (filteredDisputes().length === 0) {
+      <ui-empty-state
+        titleKey="dispute.filterEmptyTitle"
+        bodyKey="dispute.filterEmptyBody"
+        icon="filter_list"
       />
     } @else {
-      <ul class="ui-card divide-y divide-outline-variant" role="list">
-        @for (d of disputes(); track d.disputeId) {
-          <li class="p-5 space-y-2">
-            <div class="flex flex-wrap items-center gap-2">
-              <span
-                class="inline-flex items-center px-3 py-1 rounded-full border border-outline-variant font-label-sm"
+      <ul class="space-y-3" role="list" uiAutoAnimate uiReveal="fadeUp">
+        @for (d of filteredDisputes(); track d.disputeId) {
+          <li class="ui-card ui-card--lift p-5">
+            <div
+              class="flex flex-col-reverse sm:flex-row sm:items-start gap-4"
+            >
+              <div
+                class="flex flex-col gap-2 shrink-0 sm:min-w-[11rem] order-2 sm:order-1"
               >
-                {{ statusKey(d.status) | translate }}
-              </span>
-              <span class="font-label-sm text-on-surface-variant">
-                {{ typeKey(d.type) | translate }}
-              </span>
+                <a
+                  class="ui-btn-primary w-full justify-center text-center"
+                  [routerLink]="contractLink(d.contractId)"
+                >
+                  {{ 'dispute.openContract' | translate }}
+                </a>
+                <a
+                  class="ui-btn-secondary w-full justify-center text-center"
+                  [routerLink]="contractLink(d.contractId)"
+                  [fragment]="'dispute-' + d.disputeId"
+                >
+                  {{ 'dispute.viewDetails' | translate }}
+                </a>
+              </div>
+
+              <div class="min-w-0 flex-1 space-y-3 order-1 sm:order-2">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span [class]="'ui-status-pill ' + statusPillClass(d.status)">
+                    {{ statusKey(d.status) | translate }}
+                  </span>
+                  <span class="font-label-sm text-on-surface-variant tabular-nums">
+                    #{{ d.disputeId | slice: 0:8 }}
+                  </span>
+                  <span class="font-label-sm text-on-surface-variant">
+                    {{ d.createdAt | date: 'mediumDate' }}
+                  </span>
+                </div>
+
+                <h2 class="m-0 font-title-md text-on-surface font-bold">
+                  {{ typeKey(d.type) | translate }}
+                </h2>
+                <p class="font-body-md text-on-surface-variant m-0 line-clamp-3">
+                  {{ d.description }}
+                </p>
+
+                @if (d.farmName || d.factoryName) {
+                  <div class="flex flex-wrap items-center gap-3 pt-1">
+                    @if (d.factoryName) {
+                      <span class="inline-flex items-center gap-2 text-sm">
+                        <span
+                          class="inline-flex size-8 items-center justify-center rounded-full bg-primary-container text-on-primary-container font-semibold text-xs"
+                          aria-hidden="true"
+                          >{{ initials(d.factoryName) }}</span
+                        >
+                        {{ d.factoryName }}
+                      </span>
+                    }
+                    @if (d.farmName) {
+                      <span class="inline-flex items-center gap-2 text-sm">
+                        <span
+                          class="inline-flex size-8 items-center justify-center rounded-full bg-surface-container-high text-on-surface font-semibold text-xs"
+                          aria-hidden="true"
+                          >{{ initials(d.farmName) }}</span
+                        >
+                        {{ d.farmName }}
+                      </span>
+                    }
+                  </div>
+                }
+              </div>
             </div>
-            <p class="font-body-md text-on-surface">{{ d.description }}</p>
-            <p class="font-label-sm text-on-surface-variant">
-              {{ d.createdAt | date: 'medium' }}
-            </p>
-            <a class="ui-btn-ghost !px-0" [routerLink]="contractLink(d.contractId)">
-              {{ 'dispute.openContract' | translate }}
-            </a>
           </li>
         }
       </ul>

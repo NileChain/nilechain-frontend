@@ -5,6 +5,15 @@
     notificationsLink="/factory/notifications"
   />
 
+  <div class="px-margin-mobile md:px-margin-desktop pt-4 max-w-[1440px] w-full mx-auto">
+    <ui-portal-hero
+      size="compact"
+      imageUrl="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1600&q=70"
+      quoteKey="portalHero.messagesQuote"
+      titleKey="messages.title"
+    />
+  </div>
+
   @if (loading()) {
     <div class="p-8" role="status" [attr.aria-busy]="true">
       <div class="space-y-3">

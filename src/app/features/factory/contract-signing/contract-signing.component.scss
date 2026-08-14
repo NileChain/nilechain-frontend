@@ -1,0 +1,42 @@
+.contract-workspace {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .contract-workspace {
+    /* RTL: first column (document) sits on the right; aside on the left */
+    grid-template-columns: minmax(0, 1fr) 20rem;
+  }
+
+  .contract-workspace__aside {
+    order: 2;
+  }
+
+  .contract-workspace__main {
+    order: 1;
+  }
+}
+
+.contract-workspace__bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  border-block-start: 1px solid
+    color-mix(in srgb, var(--color-outline-variant) 80%, transparent);
+  background: color-mix(in srgb, var(--color-surface-container-lowest) 92%, transparent);
+  backdrop-filter: blur(8px);
+  padding: 0.85rem 1rem;
+}
+
+.contract-workspace__bar-inner {
+  max-width: 72rem;
+  margin-inline: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}

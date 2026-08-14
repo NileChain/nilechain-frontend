@@ -43,6 +43,12 @@ export class SidebarFactoryComponent {
     link: string;
   }> = [
     {
+      key: 'home',
+      icon: 'home',
+      labelKey: 'nav.home',
+      link: '/factory/home',
+    },
+    {
       key: 'dashboard',
       icon: 'dashboard',
       labelKey: 'nav.dashboard',
@@ -95,6 +101,12 @@ export class SidebarFactoryComponent {
       icon: 'description',
       labelKey: 'nav.contracts',
       link: '/factory/contracts',
+    },
+    {
+      key: 'negotiations',
+      icon: 'edit_note',
+      labelKey: 'nav.negotiations',
+      link: '/factory/negotiations',
     },
     {
       key: 'disputes',

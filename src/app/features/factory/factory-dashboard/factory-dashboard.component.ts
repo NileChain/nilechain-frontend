@@ -18,6 +18,10 @@ import {
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
+import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
+import { UiCountUpDirective } from '../../../shared/directives/ui-count-up.directive';
+import { UiRevealDirective } from '../../../shared/directives/ui-reveal.directive';
+import { UiAutoAnimateDirective } from '../../../shared/directives/ui-auto-animate.directive';
 import { MarketPriceTrendsComponent } from '../market-price-trends/market-price-trends.component';
 
 export interface AttentionItem {
@@ -61,7 +65,11 @@ export interface ProcurementRow {
     UiErrorStateComponent,
     UiSkeletonComponent,
     AppTopBarComponent,
+    UiPortalHeroComponent,
     MarketPriceTrendsComponent,
+    UiCountUpDirective,
+    UiRevealDirective,
+    UiAutoAnimateDirective,
   ],
   templateUrl: './factory-dashboard.component.html',
   styleUrl: './factory-dashboard.component.scss',

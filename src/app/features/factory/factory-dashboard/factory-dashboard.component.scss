@@ -115,6 +115,11 @@
   min-width: 0;
   border-block-end: 1px solid
     color-mix(in srgb, var(--color-outline-variant) 55%, transparent);
+  transition: background-color 180ms ease;
+}
+
+.fx-kpi:hover {
+  background: color-mix(in srgb, var(--color-primary) 3.5%, transparent);
 }
 
 @media (min-width: 640px) {

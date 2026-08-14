@@ -13,7 +13,7 @@
     notificationsLink="/farm/notifications"
   />
 
-  <div class="fd-shell">
+  <div class="fd-shell animate-fade-in">
     @if (loading()) {
       <div class="fd-kpi-grid" role="status" [attr.aria-busy]="true">
         @for (i of [1, 2, 3, 4]; track $index) {
@@ -41,8 +41,16 @@
     } @else if (error()) {
       <ui-error-state [message]="error()" (retry)="loadDashboard()" />
     } @else if (dashboard(); as data) {
+      <ui-portal-hero
+        size="tall"
+        imageUrl="https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=1600&q=75"
+        quoteKey="portalHero.farmDashQuote"
+        titleKey="farm.dashboard.atmosphereTitle"
+        bodyKey="farm.dashboard.subtitle"
+      />
+
       <!-- KPIs -->
-      <section class="fd-kpi-grid" aria-label="Farm KPIs">
+      <section class="fd-kpi-grid ui-stagger" aria-label="Farm KPIs">
         <article class="fd-panel fd-kpi fd-kpi--primary">
           <div class="fd-kpi__top">
             <p class="fd-kpi__label">
@@ -53,11 +61,14 @@
             </span>
           </div>
           <p class="fd-kpi__value ui-data">
-            {{
-              data.riskScore != null
-                ? (data.riskScore | number: '1.0-0') + '/100'
-                : '—'
-            }}
+            @if (data.riskScore != null) {
+              <span
+                [uiCountUp]="data.riskScore"
+                uiCountUpSuffix="/100"
+              ></span>
+            } @else {
+              —
+            }
           </p>
           <p class="fd-kpi__hint">{{ reliabilityHint(data.riskScore) }}</p>
         </article>
@@ -71,7 +82,9 @@
               <span class="material-symbols-outlined">dynamic_feed</span>
             </span>
           </div>
-          <p class="fd-kpi__value">{{ data.activeMatchesCount }}</p>
+          <p class="fd-kpi__value">
+            <span [uiCountUp]="data.activeMatchesCount"></span>
+          </p>
           <p class="fd-kpi__hint">{{ activeMatchesHint(data) }}</p>
         </article>
 
@@ -84,7 +97,9 @@
               <span class="material-symbols-outlined">assignment_turned_in</span>
             </span>
           </div>
-          <p class="fd-kpi__value">{{ data.completedContractsCount }}</p>
+          <p class="fd-kpi__value">
+            <span [uiCountUp]="data.completedContractsCount"></span>
+          </p>
           <p class="fd-kpi__hint">
             {{ 'farm.dashboard.completedContractsHint' | translate }}
           </p>
@@ -100,7 +115,11 @@
             </span>
           </div>
           <p class="fd-kpi__value ui-data">
-            {{ (data.averageRating | number: '1.1-1') + '/5.0' }}
+            <span
+              [uiCountUp]="data.averageRating"
+              [uiCountUpDecimals]="1"
+              uiCountUpSuffix="/5.0"
+            ></span>
           </p>
           <p class="fd-kpi__hint">
             {{
@@ -264,6 +283,7 @@
       <!-- Needs attention -->
       <section
         class="fd-panel fd-attention"
+        uiReveal="fadeUp"
         [attr.aria-label]="'farm.dashboard.needsAttention' | translate"
       >
         <header class="fd-section-head fd-section-head--inline">
@@ -290,9 +310,13 @@
             </div>
           </div>
         } @else {
-          <ul class="fd-attention__list">
+          <ul class="fd-attention__list" uiAutoAnimate>
             @for (item of attentionItems(); track item.id) {
-              <li class="fd-attention__item" [attr.data-tone]="item.tone">
+              <li
+                class="fd-attention__item"
+                [attr.data-tone]="item.tone"
+                [class.ui-anim-attention]="item.tone === 'attention'"
+              >
                 <span class="fd-attention__icon" aria-hidden="true">
                   <span class="material-symbols-outlined">{{ item.icon }}</span>
                 </span>

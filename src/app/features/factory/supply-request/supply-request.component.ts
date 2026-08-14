@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { debounceTime, finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
+import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { SupplyRequestService } from '../../../core/services/supply-request.service';
@@ -22,6 +23,7 @@ import { environment } from '../../../../environments/environment';
     ReactiveFormsModule,
     TranslatePipe,
     AppTopBarComponent,
+    UiPortalHeroComponent,
     RouterLink,
     UiLoaderComponent,
     UiErrorStateComponent,

@@ -3,6 +3,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
+import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
@@ -30,6 +31,7 @@ interface RiskFactorRow {
   imports: [
     TranslatePipe,
     AppTopBarComponent,
+    UiPortalHeroComponent,
     UiLoaderComponent,
     UiErrorStateComponent,
     UiEmptyStateComponent,

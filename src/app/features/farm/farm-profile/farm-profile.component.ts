@@ -24,6 +24,7 @@ import {
   isValidEgyptianPhone,
   normalizeEgyptianPhone,
 } from '../../../core/validation/egyptian-phone';
+import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
 
 @Component({
   selector: 'app-farm-profile',
@@ -37,6 +38,7 @@ import {
     UiLoaderComponent,
     UiErrorStateComponent,
     LocationPickerComponent,
+    UiPortalHeroComponent,
   ],
   templateUrl: './farm-profile.component.html',
   styleUrl: './farm-profile.component.scss',

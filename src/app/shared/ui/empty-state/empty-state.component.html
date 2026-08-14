@@ -1,0 +1,39 @@
+<div
+  class="ui-empty"
+  [class.ui-empty--compact]="compact"
+  [class.ui-empty--media]="!!imageUrl"
+  role="status"
+>
+  @if (imageUrl) {
+    <div class="ui-empty__media" aria-hidden="true">
+      <img [src]="imageUrl" alt="" loading="lazy" decoding="async" />
+      <div class="ui-empty__media-fade"></div>
+    </div>
+  } @else {
+    <span class="ui-empty__icon-wrap" aria-hidden="true">
+      <ui-icon [name]="icon" [size]="compact ? 'lg' : 'xl'" />
+    </span>
+  }
+  <p
+    class="ui-empty__title"
+    [class.font-title-md]="!compact"
+    [class.text-title-md]="!compact"
+    [class.text-sm]="compact"
+    [class.font-semibold]="compact"
+  >
+    {{ titleKey | translate }}
+  </p>
+  @if (bodyKey) {
+    <p
+      class="ui-empty__body"
+      [class.font-body-md]="!compact"
+      [class.text-body-md]="!compact"
+      [class.text-xs]="compact"
+    >
+      {{ bodyKey | translate }}
+    </p>
+  }
+  <div class="ui-empty__actions">
+    <ng-content />
+  </div>
+</div>

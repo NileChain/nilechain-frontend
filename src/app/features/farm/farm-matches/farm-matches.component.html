@@ -6,10 +6,13 @@
   />
 
   <div class="mx-page p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto animate-fade-in">
-    <header class="mx-header">
-      <h2 class="mx-header__title">{{ 'farm.matches.pageHeading' | translate }}</h2>
-      <p class="mx-header__sub">{{ 'farm.matches.subtitle' | translate }}</p>
-    </header>
+    <ui-portal-hero
+      size="compact"
+      imageUrl="https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=1600&q=75"
+      quoteKey="portalHero.matchesQuote"
+      titleKey="farm.matches.pageHeading"
+      bodyKey="farm.matches.subtitle"
+    />
 
     <!-- KPI strip -->
     <section class="mx-kpi" [attr.aria-label]="'farm.matches.summary' | translate">
@@ -312,7 +315,7 @@
           <ul class="mx-new__list">
             @for (match of newMatches(); track match.matchId) {
               <li class="mx-new__item">
-                <div class="min-w-0">
+                <div class="min-w-0 flex-1">
                   <div class="mx-new__name">
                     {{ match.factoryName }}
                     <span class="mx-badge-new">{{ 'farm.matches.badgeNew' | translate }}</span>
@@ -335,31 +338,52 @@
                     }
                   </div>
                 </div>
-                <button
-                  type="button"
-                  class="ui-btn-primary !py-1.5 !px-3 text-sm shrink-0"
-                  [disabled]="openingId() === match.matchId"
-                  (click)="viewContract(match)"
-                >
-                  {{ 'farm.matches.view' | translate }}
-                </button>
-                @if (match.canMessage) {
-                  <a
-                    class="ui-btn-ghost !py-1.5 !px-3 text-sm shrink-0"
-                    routerLink="/farm/messages"
-                    [queryParams]="{ matchId: match.matchId }"
+                <div class="mx-actions mx-actions--compact">
+                  <button
+                    type="button"
+                    class="ui-btn-primary !py-1.5 !px-3 text-sm shrink-0"
+                    [disabled]="openingId() === match.matchId"
+                    (click)="viewContract(match)"
                   >
-                    {{ 'farm.matches.message' | translate }}
-                  </a>
-                }
-                @if (match.factoryId) {
-                  <a
-                    class="ui-btn-ghost !py-1.5 !px-3 text-sm shrink-0"
-                    [routerLink]="['/farm/factories', match.factoryId]"
-                  >
-                    {{ 'farm.matches.viewFactory' | translate }}
-                  </a>
-                }
+                    {{ 'farm.matches.view' | translate }}
+                  </button>
+                  <div class="mx-menu">
+                    <button
+                      type="button"
+                      class="ui-icon-btn"
+                      [attr.aria-label]="'common.actions' | translate"
+                      [attr.aria-expanded]="menuOpenId() === 'new-' + match.matchId"
+                      (click)="toggleMenu('new-' + match.matchId, $event)"
+                    >
+                      <span class="material-symbols-outlined" aria-hidden="true">more_vert</span>
+                    </button>
+                    @if (menuOpenId() === 'new-' + match.matchId) {
+                      <div class="mx-menu__panel" role="menu">
+                        @if (match.canMessage) {
+                          <a
+                            class="mx-menu__item"
+                            role="menuitem"
+                            routerLink="/farm/messages"
+                            [queryParams]="{ matchId: match.matchId }"
+                            (click)="menuOpenId.set(null)"
+                          >
+                            {{ 'farm.matches.message' | translate }}
+                          </a>
+                        }
+                        @if (match.factoryId) {
+                          <a
+                            class="mx-menu__item"
+                            role="menuitem"
+                            [routerLink]="['/farm/factories', match.factoryId]"
+                            (click)="menuOpenId.set(null)"
+                          >
+                            {{ 'farm.matches.viewFactory' | translate }}
+                          </a>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
               </li>
             }
           </ul>
@@ -383,6 +407,7 @@
             titleKey="farm.matches.empty"
             bodyKey="farm.matches.emptyBody"
             icon="search_off"
+            imageUrl="https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=1200&q=70"
           />
         } @else if (filteredEmpty()) {
           <ui-empty-state
@@ -402,46 +427,47 @@
               <thead>
                 <tr>
                   <th scope="col">{{ 'farm.matches.colBuyer' | translate }}</th>
-                  <th scope="col">{{ 'farm.matches.crop' | translate }}</th>
-                  <th scope="col">{{ 'farm.matches.quantity' | translate }}</th>
-                  <th scope="col">{{ 'farm.matches.price' | translate }}</th>
+                  <th scope="col">{{ 'farm.matches.colDeal' | translate }}</th>
                   <th scope="col">{{ 'farm.matches.deliveryDate' | translate }}</th>
-                  <th scope="col">{{ 'farm.matches.aiScore' | translate }}</th>
-                  <th scope="col">{{ 'farm.matches.riskLevel' | translate }}</th>
+                  <th scope="col">{{ 'farm.matches.colSignals' | translate }}</th>
                   <th scope="col">{{ 'farm.matches.status' | translate }}</th>
                   <th scope="col">{{ 'farm.matches.createdAt' | translate }}</th>
                   <th scope="col" class="mx-table__actions">
-                    <span class="sr-only">{{ 'common.actions' | translate }}</span>
+                    {{ 'common.actions' | translate }}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 @for (match of matches(); track match.matchId) {
                   <tr>
-                    <td>
+                    <td class="mx-cell-buyer">
                       <div class="mx-primary__name">{{ match.factoryName }}</div>
-                      <div class="mx-secondary">{{ match.factoryLocation || '—' }}</div>
-                    </td>
-                    <td>{{ match.cropName }}</td>
-                    <td class="tabular-nums">{{ displayQty(match) | number: '1.0-0' }} t</td>
-                    <td class="tabular-nums">
-                      @if (displayPrice(match) != null) {
-                        {{ displayPrice(match)! | number: '1.0-0' }}
-                        <span class="mx-muted">EGP/t</span>
-                      } @else {
-                        —
+                      @if (shortLocation(match.factoryLocation); as loc) {
+                        <div class="mx-secondary">{{ loc }}</div>
                       }
+                    </td>
+                    <td class="mx-cell-deal">
+                      <div class="mx-deal__crop">{{ match.cropName }}</div>
+                      <div class="mx-deal__meta" dir="ltr">
+                        <span>{{ displayQty(match) | number: '1.0-0' }} t</span>
+                        <span class="mx-deal__dot" aria-hidden="true">·</span>
+                        @if (displayPrice(match) != null) {
+                          <span>{{ displayPrice(match)! | number: '1.0-0' }} EGP/t</span>
+                        } @else {
+                          <span>—</span>
+                        }
+                      </div>
                     </td>
                     <td>
                       @if (displayDelivery(match); as delivery) {
-                        <div class="mx-date">
+                        <div class="mx-date" dir="ltr">
                           {{ delivery | date: 'mediumDate' }}
                         </div>
                       } @else {
                         —
                       }
                     </td>
-                    <td>
+                    <td class="mx-cell-signals">
                       <span class="mx-score" [class]="scoreClass(match.matchScore)">
                         {{
                           match.matchScore != null
@@ -449,8 +475,6 @@
                             : '—'
                         }}
                       </span>
-                    </td>
-                    <td>
                       <span class="mx-risk" [attr.data-tone]="riskTone(match.riskScore)">
                         {{ riskLabel(match.riskScore) }}
                       </span>
@@ -462,12 +486,16 @@
                     </td>
                     <td>
                       @if (relativeLabel(match.createdAt); as rel) {
-                        <div class="mx-date" [title]="match.createdAt | date: 'medium'">
+                        <div
+                          class="mx-date"
+                          [title]="match.createdAt | date: 'medium'"
+                        >
                           {{ rel }}
                         </div>
-                        <div class="mx-relative">{{ match.createdAt | date: 'mediumDate' }}</div>
                       } @else {
-                        <div class="mx-date">{{ match.createdAt | date: 'mediumDate' }}</div>
+                        <div class="mx-date" dir="ltr">
+                          {{ match.createdAt | date: 'mediumDate' }}
+                        </div>
                       }
                     </td>
                     <td class="mx-table__actions">
@@ -480,36 +508,42 @@
                         >
                           {{ 'farm.matches.view' | translate }}
                         </button>
-                        @if (match.canMessage) {
-                          <a
-                            class="ui-btn-ghost !py-1.5 !px-3 text-sm"
-                            routerLink="/farm/messages"
-                            [queryParams]="{ matchId: match.matchId }"
+                        <div class="mx-menu">
+                          <button
+                            type="button"
+                            class="ui-icon-btn"
+                            [attr.aria-label]="'common.actions' | translate"
+                            [attr.aria-expanded]="menuOpenId() === match.matchId"
+                            (click)="toggleMenu(match.matchId, $event)"
                           >
-                            {{ 'farm.matches.message' | translate }}
-                          </a>
-                        }
-                        @if (match.factoryId) {
-                          <a
-                            class="ui-btn-ghost !py-1.5 !px-3 text-sm"
-                            [routerLink]="['/farm/factories', match.factoryId]"
-                          >
-                            {{ 'farm.matches.viewFactory' | translate }}
-                          </a>
-                        }
-                        @if (statusKey(match.status) === 'proposed') {
-                          <div class="mx-menu">
-                            <button
-                              type="button"
-                              class="ui-icon-btn"
-                              [attr.aria-label]="'common.actions' | translate"
-                              [attr.aria-expanded]="menuOpenId() === match.matchId"
-                              (click)="toggleMenu(match.matchId, $event)"
+                            <span class="material-symbols-outlined" aria-hidden="true"
+                              >more_vert</span
                             >
-                              <span class="material-symbols-outlined" aria-hidden="true">more_vert</span>
-                            </button>
-                            @if (menuOpenId() === match.matchId) {
-                              <div class="mx-menu__panel" role="menu">
+                          </button>
+                          @if (menuOpenId() === match.matchId) {
+                            <div class="mx-menu__panel" role="menu">
+                              @if (match.canMessage) {
+                                <a
+                                  class="mx-menu__item"
+                                  role="menuitem"
+                                  routerLink="/farm/messages"
+                                  [queryParams]="{ matchId: match.matchId }"
+                                  (click)="menuOpenId.set(null)"
+                                >
+                                  {{ 'farm.matches.message' | translate }}
+                                </a>
+                              }
+                              @if (match.factoryId) {
+                                <a
+                                  class="mx-menu__item"
+                                  role="menuitem"
+                                  [routerLink]="['/farm/factories', match.factoryId]"
+                                  (click)="menuOpenId.set(null)"
+                                >
+                                  {{ 'farm.matches.viewFactory' | translate }}
+                                </a>
+                              }
+                              @if (statusKey(match.status) === 'proposed') {
                                 <button
                                   type="button"
                                   class="mx-menu__item"
@@ -527,17 +561,21 @@
                                 >
                                   {{ 'farm.matches.declineOffer' | translate }}
                                 </button>
-                              </div>
-                            }
-                          </div>
-                        }
+                              }
+                            </div>
+                          }
+                        </div>
                       </div>
-                      @if (counterFormMatchId() === match.matchId) {
-                        <div class="mt-3 p-3 rounded-lg border border-outline-variant bg-surface-container space-y-2 text-start">
-                          <p class="font-label-md text-on-surface">
+                    </td>
+                  </tr>
+                  @if (counterFormMatchId() === match.matchId) {
+                    <tr class="mx-counter-row">
+                      <td colspan="7">
+                        <div class="mx-counter">
+                          <p class="mx-counter__title">
                             {{ 'farm.matches.counterOffer' | translate }}
                           </p>
-                          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          <div class="mx-counter__grid">
                             <label class="flex flex-col gap-1">
                               <span class="mx-muted">{{ 'farm.matches.quantity' | translate }}</span>
                               <input
@@ -559,7 +597,9 @@
                               />
                             </label>
                             <label class="flex flex-col gap-1">
-                              <span class="mx-muted">{{ 'farm.matches.deliveryDate' | translate }}</span>
+                              <span class="mx-muted">{{
+                                'farm.matches.deliveryDate' | translate
+                              }}</span>
                               <input
                                 type="date"
                                 class="ui-input"
@@ -595,9 +635,9 @@
                             </button>
                           </div>
                         </div>
-                      }
-                    </td>
-                  </tr>
+                      </td>
+                    </tr>
+                  }
                 }
               </tbody>
             </table>
@@ -639,36 +679,73 @@
                   >
                     {{ 'farm.matches.view' | translate }}
                   </button>
-                  @if (match.canMessage) {
-                    <a
-                      class="ui-btn-ghost !py-2"
-                      routerLink="/farm/messages"
-                      [queryParams]="{ matchId: match.matchId }"
+                  <div class="mx-menu">
+                    <button
+                      type="button"
+                      class="ui-icon-btn"
+                      [attr.aria-label]="'common.actions' | translate"
+                      [attr.aria-expanded]="menuOpenId() === 'm-' + match.matchId"
+                      (click)="toggleMenu('m-' + match.matchId, $event)"
                     >
-                      {{ 'farm.matches.message' | translate }}
-                    </a>
-                  }
-                  @if (match.factoryId) {
-                    <a
-                      class="ui-btn-ghost !py-2"
-                      [routerLink]="['/farm/factories', match.factoryId]"
-                    >
-                      {{ 'farm.matches.viewFactory' | translate }}
-                    </a>
-                  }
-                  <button
-                    type="button"
-                    class="ui-btn-ghost !py-2"
-                    (click)="toggleExpand(match.matchId)"
-                    [attr.aria-expanded]="expandedId() === match.matchId"
-                  >
-                    {{
-                      (expandedId() === match.matchId
-                        ? 'farm.matches.hideDetails'
-                        : 'farm.matches.moreDetails'
-                      ) | translate
-                    }}
-                  </button>
+                      <span class="material-symbols-outlined" aria-hidden="true">more_vert</span>
+                    </button>
+                    @if (menuOpenId() === 'm-' + match.matchId) {
+                      <div class="mx-menu__panel" role="menu">
+                        @if (match.canMessage) {
+                          <a
+                            class="mx-menu__item"
+                            role="menuitem"
+                            routerLink="/farm/messages"
+                            [queryParams]="{ matchId: match.matchId }"
+                            (click)="menuOpenId.set(null)"
+                          >
+                            {{ 'farm.matches.message' | translate }}
+                          </a>
+                        }
+                        @if (match.factoryId) {
+                          <a
+                            class="mx-menu__item"
+                            role="menuitem"
+                            [routerLink]="['/farm/factories', match.factoryId]"
+                            (click)="menuOpenId.set(null)"
+                          >
+                            {{ 'farm.matches.viewFactory' | translate }}
+                          </a>
+                        }
+                        <button
+                          type="button"
+                          class="mx-menu__item"
+                          role="menuitem"
+                          (click)="toggleExpand(match.matchId); menuOpenId.set(null)"
+                        >
+                          {{
+                            (expandedId() === match.matchId
+                              ? 'farm.matches.hideDetails'
+                              : 'farm.matches.moreDetails'
+                            ) | translate
+                          }}
+                        </button>
+                        @if (statusKey(match.status) === 'proposed') {
+                          <button
+                            type="button"
+                            class="mx-menu__item"
+                            role="menuitem"
+                            (click)="openCounterForm(match, $event)"
+                          >
+                            {{ 'farm.matches.counterOffer' | translate }}
+                          </button>
+                          <button
+                            type="button"
+                            class="mx-menu__item mx-menu__item--danger"
+                            role="menuitem"
+                            (click)="rejectOffer(match)"
+                          >
+                            {{ 'farm.matches.declineOffer' | translate }}
+                          </button>
+                        }
+                      </div>
+                    }
+                  </div>
                 </div>
                 @if (expandedId() === match.matchId) {
                   <div class="mx-card__details">

@@ -16,7 +16,7 @@
     </a>
   </app-top-bar>
 
-  <main class="fx-shell flex-1">
+  <main class="fx-shell flex-1 animate-fade-in">
     @if (loading()) {
       <div class="fx-kpi-strip" role="status" [attr.aria-busy]="true">
         @for (i of [1, 2, 3, 4]; track $index) {
@@ -34,9 +34,17 @@
     } @else if (error()) {
       <ui-error-state [message]="error()" (retry)="loadDashboard()" />
     } @else {
+      <ui-portal-hero
+        size="tall"
+        imageUrl="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1600&q=75"
+        quoteKey="portalHero.factoryDashQuote"
+        titleKey="factory.dashboard.atmosphereTitle"
+        bodyKey="factory.dashboard.overviewSubtitle"
+      />
+
       <!-- KPIs -->
       <section
-        class="fx-kpi-strip"
+        class="fx-kpi-strip ui-stagger"
         [attr.aria-label]="'factory.dashboard.kpiAria' | translate"
       >
         <article class="fx-kpi fx-kpi--lead">
@@ -48,7 +56,9 @@
               <span class="material-symbols-outlined">assignment</span>
             </span>
           </div>
-          <p class="fx-kpi__value">{{ openRequestCount() }}</p>
+          <p class="fx-kpi__value">
+            <span [uiCountUp]="openRequestCount()"></span>
+          </p>
           @if (openRequestCount() > 0) {
             <p class="fx-kpi__hint">
               {{ 'factory.dashboard.openRequestsHint' | translate }}
@@ -65,7 +75,9 @@
               <span class="material-symbols-outlined">handshake</span>
             </span>
           </div>
-          <p class="fx-kpi__value">{{ matchesCount() }}</p>
+          <p class="fx-kpi__value">
+            <span [uiCountUp]="matchesCount()"></span>
+          </p>
           @if (matchesCount() > 0) {
             <p class="fx-kpi__hint">
               {{
@@ -85,7 +97,9 @@
               <span class="material-symbols-outlined">description</span>
             </span>
           </div>
-          <p class="fx-kpi__value">{{ activeContractsCount() }}</p>
+          <p class="fx-kpi__value">
+            <span [uiCountUp]="activeContractsCount()"></span>
+          </p>
           @if (activeContractsCount() > 0) {
             <p class="fx-kpi__hint">
               {{ 'factory.dashboard.activeContractsHint' | translate }}
@@ -116,6 +130,7 @@
       <!-- Needs attention -->
       <section
         class="fx-section fx-attention"
+        uiReveal="fadeUp"
         [attr.aria-label]="'factory.dashboard.needsAttention' | translate"
       >
         <header class="fx-section-head">
@@ -139,9 +154,13 @@
             </div>
           </div>
         } @else {
-          <ul class="fx-attention__list">
+          <ul class="fx-attention__list" uiAutoAnimate>
             @for (item of attentionItems(); track item.id) {
-              <li class="fx-attention__item" [attr.data-tone]="item.tone">
+              <li
+                class="fx-attention__item"
+                [attr.data-tone]="item.tone"
+                [class.ui-anim-attention]="item.tone === 'attention'"
+              >
                 <span class="fx-attention__icon" aria-hidden="true">
                   <span class="material-symbols-outlined">{{ item.icon }}</span>
                 </span>

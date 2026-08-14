@@ -1,5 +1,15 @@
-<div class="ui-page">
-  <!-- Navbar -->
+<div class="ui-page lp">
+  <div
+    class="lp-progress"
+    role="progressbar"
+    [attr.aria-valuenow]="scrollProgress() | number: '1.0-0'"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    [attr.aria-label]="'landing.scrollProgress' | translate"
+  >
+    <span class="lp-progress__bar" [style.width.%]="scrollProgress()"></span>
+  </div>
+
   <header
     class="lp-nav"
     [class.lp-nav--scrolled]="navScrolled()"
@@ -13,102 +23,26 @@
           [attr.aria-label]="'app.name' | translate"
           (click)="closeAll()"
         >
-          <ui-brand-mark [size]="36" [decorative]="true" />
-          <span class="lp-brand__name" aria-hidden="true">
-            <span class="lp-brand__name-nile">Nile</span><span class="lp-brand__name-chain">Chain</span>
+          <ui-brand-mark [size]="34" [decorative]="true" />
+          <span class="lp-brand__name" dir="ltr" aria-hidden="true">
+            <span class="lp-brand__name-nile">Nile</span
+            ><span class="lp-brand__name-chain">Chain</span>
           </span>
         </a>
 
         <div class="lp-nav__links">
-          <div class="lp-dd">
-            <button
-              type="button"
-              class="lp-nav__link"
-              [attr.aria-expanded]="openMenu() === 'solutions'"
-              aria-haspopup="true"
-              (click)="toggleMenu('solutions', $event)"
-            >
-              <span class="material-symbols-outlined" aria-hidden="true"
-                >grid_view</span
-              >
-              {{ 'landing.solutions' | translate }}
-              <span
-                class="material-symbols-outlined lp-chev"
-                aria-hidden="true"
-                >expand_more</span
-              >
-            </button>
-            @if (openMenu() === 'solutions') {
-              <div class="lp-dd__panel" role="menu">
-                <a
-                  href="#how-it-works"
-                  class="lp-dd__item"
-                  role="menuitem"
-                  (click)="closeAll()"
-                  >{{ 'landing.howTitle' | translate }}</a
-                >
-                <a
-                  [routerLink]="'/register'"
-                  class="lp-dd__item"
-                  role="menuitem"
-                  (click)="closeAll()"
-                  >{{ 'landing.joinFarm' | translate }}</a
-                >
-                <a
-                  [routerLink]="'/register'"
-                  class="lp-dd__item"
-                  role="menuitem"
-                  (click)="closeAll()"
-                  >{{ 'landing.joinFactory' | translate }}</a
-                >
-              </div>
-            }
-          </div>
-
-          <div class="lp-dd">
-            <button
-              type="button"
-              class="lp-nav__link"
-              [attr.aria-expanded]="openMenu() === 'resources'"
-              aria-haspopup="true"
-              (click)="toggleMenu('resources', $event)"
-            >
-              <span class="material-symbols-outlined" aria-hidden="true"
-                >description</span
-              >
-              {{ 'landing.resources' | translate }}
-              <span
-                class="material-symbols-outlined lp-chev"
-                aria-hidden="true"
-                >expand_more</span
-              >
-            </button>
-            @if (openMenu() === 'resources') {
-              <div class="lp-dd__panel" role="menu">
-                <a
-                  href="#how-it-works"
-                  class="lp-dd__item"
-                  role="menuitem"
-                  (click)="closeAll()"
-                  >{{ 'landing.howTitle' | translate }}</a
-                >
-                <a
-                  href="#footer"
-                  class="lp-dd__item"
-                  role="menuitem"
-                  (click)="closeAll()"
-                  >{{ 'landing.privacy' | translate }}</a
-                >
-                <a
-                  href="#footer"
-                  class="lp-dd__item"
-                  role="menuitem"
-                  (click)="closeAll()"
-                  >{{ 'landing.contact' | translate }}</a
-                >
-              </div>
-            }
-          </div>
+          <a href="#story" class="lp-nav__link" (click)="closeAll()">{{
+            'landing.navStory' | translate
+          }}</a>
+          <a href="#audiences" class="lp-nav__link" (click)="closeAll()">{{
+            'landing.navFarms' | translate
+          }}</a>
+          <a href="#how-it-works" class="lp-nav__link" (click)="closeAll()">{{
+            'landing.navHow' | translate
+          }}</a>
+          <a href="#footer" class="lp-nav__link" (click)="closeAll()">{{
+            'landing.navContact' | translate
+          }}</a>
         </div>
       </div>
 
@@ -127,11 +61,6 @@
                 >language</span
               >
               <span class="lp-tool-btn__label">{{ langCode() }}</span>
-              <span
-                class="material-symbols-outlined lp-chev lp-tool-btn__chev"
-                aria-hidden="true"
-                >expand_more</span
-              >
             </button>
             @if (openMenu() === 'lang') {
               <div class="lp-dd__panel lp-dd__panel--end" role="menu">
@@ -166,11 +95,6 @@
                 ? ('common.themeLight' | translate)
                 : ('common.themeDark' | translate)
             "
-            [attr.title]="
-              theme.isDark()
-                ? ('common.themeLight' | translate)
-                : ('common.themeDark' | translate)
-            "
           >
             <span class="material-symbols-outlined" aria-hidden="true">
               {{ theme.isDark() ? 'light_mode' : 'dark_mode' }}
@@ -191,29 +115,12 @@
           </button>
         </div>
 
-        <span class="lp-sep" aria-hidden="true"></span>
-
         @if (isAuthenticated()) {
           <div class="lp-nav__auth">
-            <span class="lp-nav__avatar" aria-hidden="true">
-              {{
-                (currentUser()?.displayName || currentUser()?.email || '?')
-                  .charAt(0)
-                  .toUpperCase()
-              }}
-            </span>
-            <button
-              type="button"
-              class="lp-btn lp-btn--text"
-              (click)="goToDashboard()"
-            >
+            <button type="button" class="lp-btn lp-btn--text" (click)="goToDashboard()">
               {{ 'nav.dashboard' | translate }}
             </button>
-            <button
-              type="button"
-              class="lp-btn lp-btn--primary"
-              (click)="logout()"
-            >
+            <button type="button" class="lp-btn lp-btn--primary" (click)="logout()">
               {{ 'nav.logout' | translate }}
             </button>
           </div>
@@ -222,14 +129,9 @@
             <a [routerLink]="'/login'" class="lp-btn lp-btn--text">{{
               'landing.login' | translate
             }}</a>
-            <a [routerLink]="'/register'" class="lp-btn lp-btn--primary">
-              {{ 'landing.register' | translate }}
-              <span
-                class="material-symbols-outlined icon-flip"
-                aria-hidden="true"
-                >arrow_forward</span
-              >
-            </a>
+            <a [routerLink]="'/register'" class="lp-btn lp-btn--primary">{{
+              'landing.register' | translate
+            }}</a>
           </div>
         }
       </div>
@@ -244,618 +146,368 @@
         [attr.aria-label]="'common.toggleMenu' | translate"
         (click)="$event.stopPropagation()"
       >
-        <div class="lp-mobile__head">
-          <p class="lp-mobile__title">{{ 'app.name' | translate }}</p>
-          <button
-            type="button"
-            class="lp-tool-btn"
-            (click)="closeAll()"
-            [attr.aria-label]="'common.close' | translate"
-          >
-            <span class="material-symbols-outlined" aria-hidden="true"
-              >close</span
-            >
-          </button>
-        </div>
-
-        <div class="lp-mobile__links">
-          <button
-            type="button"
-            class="lp-mobile__link"
-            [attr.aria-expanded]="openMenu() === 'solutions'"
-            (click)="toggleMenu('solutions', $event)"
-          >
-            <span class="lp-mobile__link-label">
-              <span class="material-symbols-outlined" aria-hidden="true"
-                >grid_view</span
-              >
-              {{ 'landing.solutions' | translate }}
-            </span>
-            <span class="material-symbols-outlined" aria-hidden="true"
-              >chevron_right</span
-            >
-          </button>
-          @if (openMenu() === 'solutions') {
-            <div class="lp-mobile__sub">
-              <a href="#how-it-works" (click)="closeAll()">{{
-                'landing.howTitle' | translate
-              }}</a>
-              <a [routerLink]="'/register'" (click)="closeAll()">{{
-                'landing.joinFarm' | translate
-              }}</a>
-              <a [routerLink]="'/register'" (click)="closeAll()">{{
-                'landing.joinFactory' | translate
-              }}</a>
-            </div>
-          }
-
-          <button
-            type="button"
-            class="lp-mobile__link"
-            [attr.aria-expanded]="openMenu() === 'resources'"
-            (click)="toggleMenu('resources', $event)"
-          >
-            <span class="lp-mobile__link-label">
-              <span class="material-symbols-outlined" aria-hidden="true"
-                >description</span
-              >
-              {{ 'landing.resources' | translate }}
-            </span>
-            <span class="material-symbols-outlined" aria-hidden="true"
-              >chevron_right</span
-            >
-          </button>
-          @if (openMenu() === 'resources') {
-            <div class="lp-mobile__sub">
-              <a href="#how-it-works" (click)="closeAll()">{{
-                'landing.howTitle' | translate
-              }}</a>
-              <a href="#footer" (click)="closeAll()">{{
-                'landing.privacy' | translate
-              }}</a>
-              <a href="#footer" (click)="closeAll()">{{
-                'landing.contact' | translate
-              }}</a>
-            </div>
-          }
-        </div>
-
+        <a href="#story" class="lp-mobile__link" (click)="closeAll()">{{
+          'landing.navStory' | translate
+        }}</a>
+        <a href="#audiences" class="lp-mobile__link" (click)="closeAll()">{{
+          'landing.navFarms' | translate
+        }}</a>
+        <a href="#how-it-works" class="lp-mobile__link" (click)="closeAll()">{{
+          'landing.navHow' | translate
+        }}</a>
+        <a href="#footer" class="lp-mobile__link" (click)="closeAll()">{{
+          'landing.navContact' | translate
+        }}</a>
         <div class="lp-mobile__divider"></div>
-
-        <div class="lp-mobile__prefs">
-          <button
-            type="button"
-            class="lp-mobile__link"
-            [attr.aria-expanded]="openMenu() === 'lang'"
-            (click)="toggleMenu('lang', $event)"
-          >
-            <span class="lp-mobile__link-label">
-              <span class="material-symbols-outlined" aria-hidden="true"
-                >language</span
-              >
-              {{
-                locale() === 'ar'
-                  ? ('common.arabic' | translate)
-                  : ('common.english' | translate)
-              }}
-            </span>
-            <span class="material-symbols-outlined" aria-hidden="true"
-              >chevron_right</span
-            >
-          </button>
-          @if (openMenu() === 'lang') {
-            <div class="lp-mobile__sub">
-              <button type="button" (click)="setLocale('en')">
-                {{ 'common.english' | translate }}
-              </button>
-              <button type="button" (click)="setLocale('ar')">
-                {{ 'common.arabic' | translate }}
-              </button>
-            </div>
-          }
-
-          <button type="button" class="lp-mobile__link" (click)="toggleTheme()">
-            <span class="lp-mobile__link-label">
-              <span class="material-symbols-outlined" aria-hidden="true">
-                {{ theme.isDark() ? 'light_mode' : 'dark_mode' }}
-              </span>
-              {{
-                theme.isDark()
-                  ? ('common.themeLight' | translate)
-                  : ('common.themeDark' | translate)
-              }}
-            </span>
-          </button>
-        </div>
-
-        <div class="lp-mobile__divider"></div>
-
         @if (isAuthenticated()) {
-          <div class="lp-mobile__auth">
-            <p class="lp-mobile__user">
-              {{ currentUser()?.displayName || currentUser()?.email }}
-            </p>
-            <button
-              type="button"
-              class="lp-btn lp-btn--primary lp-btn--block"
-              (click)="goToDashboard(); closeAll()"
-            >
-              {{ 'nav.dashboard' | translate }}
-            </button>
-            <button
-              type="button"
-              class="lp-btn lp-btn--ghost lp-btn--block"
-              (click)="logout()"
-            >
-              {{ 'nav.logout' | translate }}
-            </button>
-          </div>
+          <button type="button" class="lp-btn lp-btn--primary lp-btn--block" (click)="goToDashboard(); closeAll()">
+            {{ 'nav.dashboard' | translate }}
+          </button>
         } @else {
-          <div class="lp-mobile__auth">
-            <a
-              [routerLink]="'/login'"
-              class="lp-btn lp-btn--text lp-btn--block"
-              (click)="closeAll()"
-              >{{ 'landing.login' | translate }}</a
-            >
-            <a
-              [routerLink]="'/register'"
-              class="lp-btn lp-btn--primary lp-btn--block"
-              (click)="closeAll()"
-            >
-              {{ 'landing.register' | translate }}
-              <span
-                class="material-symbols-outlined icon-flip"
-                aria-hidden="true"
-                >arrow_forward</span
-              >
-            </a>
-          </div>
+          <a [routerLink]="'/login'" class="lp-btn lp-btn--text lp-btn--block" (click)="closeAll()">{{
+            'landing.login' | translate
+          }}</a>
+          <a [routerLink]="'/register'" class="lp-btn lp-btn--primary lp-btn--block" (click)="closeAll()">{{
+            'landing.register' | translate
+          }}</a>
         }
       </div>
     }
   </header>
 
-  <!-- Hero -->
-  <header class="lp-hero hero-gradient">
-    <div class="lp-scroll-progress" aria-hidden="true">
-      <span class="lp-scroll-progress__bar" [style.width.%]="scrollProgress()"></span>
-    </div>
+  <!-- Full-bleed cinematic hero -->
+  <section class="lp-stage" aria-labelledby="lp-hero-title">
+    <img
+      class="lp-stage__photo"
+      src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2000&q=80"
+      alt=""
+      fetchpriority="high"
+    />
+    <div class="lp-stage__veil" aria-hidden="true"></div>
+    <div class="lp-stage__grain" aria-hidden="true"></div>
 
-    <div class="lp-hero__orb lp-hero__orb--a" aria-hidden="true"></div>
-    <div class="lp-hero__orb lp-hero__orb--b" aria-hidden="true"></div>
-    <div class="lp-hero__orb lp-hero__orb--c" aria-hidden="true"></div>
-
-    <div class="lp-particles" aria-hidden="true">
-      @for (p of particles; track p.id) {
-        <span
-          class="lp-particle"
-          [style.--x]="p.x"
-          [style.--y]="p.y"
-          [style.--s]="p.s"
-          [style.--d]="p.d"
-        ></span>
-      }
-    </div>
-
-    <span class="lp-hero__float lp-hero__float--farm" aria-hidden="true">
-      <span class="material-symbols-outlined">agriculture</span>
-    </span>
-    <span class="lp-hero__float lp-hero__float--factory" aria-hidden="true">
-      <span class="material-symbols-outlined">factory</span>
-    </span>
-    <span class="lp-hero__float lp-hero__float--leaf" aria-hidden="true">
-      <span class="material-symbols-outlined">eco</span>
-    </span>
-
-    <div class="lp-hero__copy">
-      <div
-        class="lp-badge animate__animated animate__fadeInDown"
-        style="--animate-duration: 0.7s"
-      >
-        <span class="material-symbols-outlined lp-badge__spin" aria-hidden="true"
-          >eco</span
-        >
-        <span>{{ 'landing.badgeEgypt' | translate }}</span>
-      </div>
-
-      <h1
-        class="lp-hero__title animate__animated animate__fadeInUp"
-        style="--animate-duration: 0.85s; --animate-delay: 0.08s"
-      >
-        {{ 'landing.titleLine1' | translate }}
-        <br class="hidden md:block" />
-        <span class="lp-hero__title-accent lp-hero__title-shimmer">{{
-          'landing.titleLine2' | translate
-        }}</span>
-      </h1>
-
-      <p
-        class="lp-hero__subtitle animate__animated animate__fadeInUp"
-        style="--animate-duration: 0.85s; --animate-delay: 0.18s"
-      >
-        {{ 'landing.subtitle' | translate }}
+    <div class="lp-stage__inner lp-reveal is-visible">
+      <p class="lp-stage__brand" dir="ltr">
+        <span class="lp-stage__brand-nile">Nile</span
+        ><span class="lp-stage__brand-chain">Chain</span>
       </p>
-
-      <div
-        class="lp-hero__ctas animate__animated animate__fadeInUp"
-        style="--animate-duration: 0.85s; --animate-delay: 0.28s"
-      >
-        <a
-          [routerLink]="'/register'"
-          class="lp-btn lp-btn--primary lp-btn--lg lp-btn--shine"
-        >
-          <span class="material-symbols-outlined" aria-hidden="true"
-            >agriculture</span
-          >
-          {{ 'landing.joinFarm' | translate }}
-        </a>
-        <a
-          [routerLink]="'/register'"
-          class="lp-btn lp-btn--ghost lp-btn--lg lp-btn--shine"
-        >
-          <span class="material-symbols-outlined" aria-hidden="true"
-            >factory</span
-          >
+      <h1 id="lp-hero-title" class="lp-stage__title">
+        {{ 'landing.titleLine1' | translate }}
+        <span class="lp-stage__accent">{{ 'landing.titleLine2' | translate }}</span>
+      </h1>
+      <p class="lp-stage__subtitle">{{ 'landing.subtitle' | translate }}</p>
+      <div class="lp-stage__ctas">
+        <a [routerLink]="'/register'" class="lp-btn lp-btn--light lp-btn--lg">
           {{ 'landing.joinFactory' | translate }}
         </a>
+        <a [routerLink]="'/register'" class="lp-btn lp-btn--ghost-light lp-btn--lg">
+          {{ 'landing.joinFarm' | translate }}
+        </a>
       </div>
+      <a href="#story" class="lp-stage__scroll" (click)="closeAll()">
+        <span>{{ 'landing.scrollHint' | translate }}</span>
+        <span class="material-symbols-outlined" aria-hidden="true">south</span>
+      </a>
+    </div>
+  </section>
 
-      <div
-        class="lp-flow animate__animated animate__fadeIn"
-        style="--animate-duration: 1s; --animate-delay: 0.45s"
-        aria-hidden="true"
-      >
-        <div class="lp-flow__node">
-          <span class="material-symbols-outlined">agriculture</span>
-          <span>{{ 'landing.flowFarm' | translate }}</span>
-        </div>
-        <div class="lp-flow__wire">
-          <span class="lp-flow__dash"></span>
-          <span class="lp-flow__dot"></span>
-        </div>
-        <div class="lp-flow__node lp-flow__node--ai">
-          <span class="material-symbols-outlined">psychology</span>
-          <span>{{ 'landing.flowAi' | translate }}</span>
-        </div>
-        <div class="lp-flow__wire">
-          <span class="lp-flow__dash"></span>
-          <span class="lp-flow__dot"></span>
-        </div>
-        <div class="lp-flow__node">
-          <span class="material-symbols-outlined">factory</span>
-          <span>{{ 'landing.flowFactory' | translate }}</span>
-        </div>
-      </div>
+  <!-- Trust bar -->
+  <section class="lp-trust" [attr.aria-label]="'landing.trustBarAria' | translate">
+    <ul class="lp-trust__list">
+      <li class="lp-reveal" data-anim="fadeInUp">
+        <span class="material-symbols-outlined" aria-hidden="true">payments</span>
+        {{ 'landing.trustSecure' | translate }}
+      </li>
+      <li class="lp-reveal" style="--delay: 60ms" data-anim="fadeInUp">
+        <span class="material-symbols-outlined" aria-hidden="true">psychology</span>
+        {{ 'landing.trustMatch' | translate }}
+      </li>
+      <li class="lp-reveal" style="--delay: 120ms" data-anim="fadeInUp">
+        <span class="material-symbols-outlined" aria-hidden="true">contract</span>
+        {{ 'landing.trustContract' | translate }}
+      </li>
+      <li class="lp-reveal" style="--delay: 180ms" data-anim="fadeInUp">
+        <span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>
+        {{ 'landing.trustTrack' | translate }}
+      </li>
+    </ul>
+  </section>
+
+  <!-- Heritage / story -->
+  <section id="story" class="lp-heritage" aria-labelledby="lp-heritage-title">
+    <div class="lp-heritage__quote lp-reveal" data-anim="fadeIn">
+      <p class="font-heritage" id="lp-heritage-title">
+        {{ 'landing.heritageQuote' | translate }}
+      </p>
+      <span class="lp-heritage__attr">{{ 'landing.heritageAttr' | translate }}</span>
     </div>
 
-    <div
-      class="lp-preview lp-reveal animate__animated"
-      role="img"
-      [attr.aria-label]="'landing.previewAria' | translate"
-    >
+    <div class="lp-heritage__grid">
+      <article class="lp-heritage__card lp-reveal" data-anim="fadeInUp">
+        <img
+          src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=900&q=75"
+          alt=""
+          loading="lazy"
+        />
+        <div>
+          <h3>{{ 'landing.heritage1Title' | translate }}</h3>
+          <p>{{ 'landing.heritage1Body' | translate }}</p>
+        </div>
+      </article>
+      <article class="lp-heritage__card lp-reveal" style="--delay: 90ms" data-anim="fadeInUp">
+        <img
+          src="https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=900&q=75"
+          alt=""
+          loading="lazy"
+        />
+        <div>
+          <h3>{{ 'landing.heritage2Title' | translate }}</h3>
+          <p>{{ 'landing.heritage2Body' | translate }}</p>
+        </div>
+      </article>
+      <article class="lp-heritage__card lp-reveal" style="--delay: 180ms" data-anim="fadeInUp">
+        <img
+          src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=900&q=75"
+          alt=""
+          loading="lazy"
+        />
+        <div>
+          <h3>{{ 'landing.heritage3Title' | translate }}</h3>
+          <p>{{ 'landing.heritage3Body' | translate }}</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Living product preview -->
+  <section class="lp-product" [attr.aria-label]="'landing.previewAria' | translate">
+    <div class="lp-product__intro lp-reveal">
+      <h2>{{ 'landing.previewSectionTitle' | translate }}</h2>
+      <p>{{ 'landing.previewSectionBody' | translate }}</p>
+    </div>
+    <div class="lp-preview lp-reveal ui-reveal--scale" data-anim="zoomIn">
       <div class="lp-preview__chrome">
-        <span class="lp-preview__dot" aria-hidden="true"></span>
-        <span class="lp-preview__dot" aria-hidden="true"></span>
-        <span class="lp-preview__dot" aria-hidden="true"></span>
-        <span class="lp-preview__chrome-title">{{
-          'landing.previewTitle' | translate
-        }}</span>
-        <span class="lp-preview__live" aria-hidden="true">
-          <i></i> LIVE
-        </span>
+        <span class="lp-preview__dot"></span>
+        <span class="lp-preview__dot"></span>
+        <span class="lp-preview__dot"></span>
+        <span class="lp-preview__chrome-title">{{ 'landing.previewTitle' | translate }}</span>
       </div>
       <div class="lp-preview__body">
-        <div class="lp-preview__row lp-preview__row--a">
+        <div class="lp-preview__row">
           <span class="lp-preview__icon" aria-hidden="true">
             <span class="material-symbols-outlined">handshake</span>
           </span>
           <div class="min-w-0 flex-1">
-            <p class="lp-preview__label">
-              {{ 'landing.previewMatch' | translate }}
-            </p>
-            <p class="lp-preview__meta">
-              {{ 'landing.previewCrop' | translate }}
-            </p>
+            <p class="lp-preview__label">{{ 'landing.previewMatch' | translate }}</p>
+            <p class="lp-preview__meta">{{ 'landing.previewCrop' | translate }}</p>
           </div>
-          <span class="lp-preview__pill lp-preview__pill--pop">{{
-            'landing.previewScore' | translate
-          }}</span>
+          <span class="lp-preview__pill">{{ 'landing.previewScore' | translate }}</span>
         </div>
-        <div class="lp-preview__row lp-preview__row--b">
+        <div class="lp-preview__row">
           <span class="lp-preview__icon" aria-hidden="true">
             <span class="material-symbols-outlined">shield</span>
           </span>
           <div class="min-w-0 flex-1">
-            <p class="lp-preview__label">
-              {{ 'landing.previewRisk' | translate }}
-            </p>
+            <p class="lp-preview__label">{{ 'landing.previewRisk' | translate }}</p>
             <div class="lp-preview__bars" aria-hidden="true">
-              <span style="--w: 92%"></span>
-              <span style="--w: 78%"></span>
-              <span style="--w: 86%"></span>
+              <span style="--w: 88%"></span>
+              <span style="--w: 72%"></span>
+              <span style="--w: 80%"></span>
             </div>
           </div>
         </div>
-        <div class="lp-preview__row lp-preview__row--c">
+        <div class="lp-preview__row">
           <span class="lp-preview__icon" aria-hidden="true">
             <span class="material-symbols-outlined">description</span>
           </span>
           <div class="min-w-0 flex-1">
-            <p class="lp-preview__label">
-              {{ 'landing.previewContract' | translate }}
-            </p>
-            <p class="lp-preview__meta">
-              {{ 'landing.previewStatus' | translate }}
-            </p>
+            <p class="lp-preview__label">{{ 'landing.previewContract' | translate }}</p>
+            <p class="lp-preview__meta">{{ 'landing.previewStatus' | translate }}</p>
           </div>
-          <span class="lp-preview__pulse" aria-hidden="true"></span>
         </div>
       </div>
     </div>
+  </section>
 
-    <a href="#how-it-works" class="lp-scroll-hint" (click)="closeAll()">
-      <span>{{ 'landing.scrollHint' | translate }}</span>
-      <span class="material-symbols-outlined" aria-hidden="true"
-        >keyboard_arrow_down</span
-      >
-    </a>
-  </header>
-
-  <!-- Capability ticker -->
-  <div class="lp-ticker" aria-hidden="true">
-    <div class="lp-ticker__track">
-      @for (pass of [1, 2]; track pass) {
-        <span class="lp-ticker__item"
-          ><span class="material-symbols-outlined">psychology</span
-          >{{ 'landing.tickerMatch' | translate }}</span
-        >
-        <span class="lp-ticker__item"
-          ><span class="material-symbols-outlined">shield</span
-          >{{ 'landing.tickerRisk' | translate }}</span
-        >
-        <span class="lp-ticker__item"
-          ><span class="material-symbols-outlined">description</span
-          >{{ 'landing.tickerContract' | translate }}</span
-        >
-        <span class="lp-ticker__item"
-          ><span class="material-symbols-outlined">verified</span
-          >{{ 'landing.tickerTrust' | translate }}</span
-        >
-        <span class="lp-ticker__item"
-          ><span class="material-symbols-outlined">inventory</span
-          >{{ 'landing.tickerSupply' | translate }}</span
-        >
-        <span class="lp-ticker__item"
-          ><span class="material-symbols-outlined">draw</span
-          >{{ 'landing.tickerSign' | translate }}</span
-        >
-      }
+  <!-- Feature: matching -->
+  <section class="lp-feature">
+    <div class="lp-feature__media lp-reveal">
+      <img
+        class="lp-feature__img"
+        src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1400&q=80"
+        width="640"
+        height="420"
+        alt=""
+        loading="lazy"
+      />
     </div>
-  </div>
+    <div class="lp-feature__copy lp-reveal" style="--delay: 80ms">
+      <span class="lp-kicker">{{ 'landing.featureSmartBadge' | translate }}</span>
+      <h2 class="lp-feature__title">{{ 'landing.featureSmartTitle' | translate }}</h2>
+      <p class="lp-feature__body">{{ 'landing.featureSmartBody' | translate }}</p>
+      <ul class="lp-feature__bullets">
+        <li>
+          <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+          {{ 'landing.featureSmartBullet1' | translate }}
+        </li>
+        <li>
+          <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+          {{ 'landing.featureSmartBullet2' | translate }}
+        </li>
+      </ul>
+    </div>
+  </section>
 
-  <!-- Product value -->
-  <section
-    class="lp-value"
-    [attr.aria-label]="'landing.valueSectionAria' | translate"
-  >
-    <div class="lp-value__grid">
-      <article class="lp-value__item lp-reveal" data-anim="fadeInUp">
-        <span class="lp-value__icon lp-icon-bob" aria-hidden="true">
-          <span class="material-symbols-outlined">agriculture</span>
-        </span>
-        <h2 class="lp-value__title">
-          {{ 'landing.valueFarmsTitle' | translate }}
-        </h2>
-        <p class="lp-value__body">
-          {{ 'landing.valueFarmsBody' | translate }}
-        </p>
-      </article>
-      <article
-        class="lp-value__item lp-reveal"
-        style="--delay: 80ms"
-        data-anim="fadeInUp"
-      >
-        <span class="lp-value__icon lp-icon-bob" style="--bob-delay: 0.4s" aria-hidden="true">
-          <span class="material-symbols-outlined">hub</span>
-        </span>
-        <h2 class="lp-value__title">
-          {{ 'landing.valueMatchTitle' | translate }}
-        </h2>
-        <p class="lp-value__body">
-          {{ 'landing.valueMatchBody' | translate }}
-        </p>
-      </article>
-      <article
-        class="lp-value__item lp-reveal"
-        style="--delay: 160ms"
-        data-anim="fadeInUp"
-      >
-        <span class="lp-value__icon lp-icon-bob" style="--bob-delay: 0.8s" aria-hidden="true">
-          <span class="material-symbols-outlined">description</span>
-        </span>
-        <h2 class="lp-value__title">
-          {{ 'landing.valueContractsTitle' | translate }}
-        </h2>
-        <p class="lp-value__body">
-          {{ 'landing.valueContractsBody' | translate }}
-        </p>
-      </article>
+  <!-- Feature: contracts -->
+  <section class="lp-feature lp-feature--reverse">
+    <div class="lp-feature__media lp-reveal">
+      <img
+        class="lp-feature__img"
+        src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1400&q=80"
+        width="640"
+        height="420"
+        alt=""
+        loading="lazy"
+      />
+    </div>
+    <div class="lp-feature__copy lp-reveal" style="--delay: 80ms">
+      <span class="lp-kicker">{{ 'landing.featureLegalBadge' | translate }}</span>
+      <h2 class="lp-feature__title">{{ 'landing.featureLegalTitle' | translate }}</h2>
+      <p class="lp-feature__body">{{ 'landing.featureLegalBody' | translate }}</p>
+      <div class="lp-note">
+        <span class="material-symbols-outlined" aria-hidden="true">verified</span>
+        <p>{{ 'landing.featureLegalNote' | translate }}</p>
+      </div>
     </div>
   </section>
 
   <!-- How it works -->
   <section id="how-it-works" class="lp-how">
     <div class="lp-how__intro lp-reveal">
-      <h2 class="lp-section-title">{{ 'landing.howTitle' | translate }}</h2>
-      <p class="lp-section-sub">{{ 'landing.howSubtitle' | translate }}</p>
+      <h2 class="lp-how__heading">{{ 'landing.howTitle' | translate }}</h2>
+      <p class="lp-how__sub">{{ 'landing.howSubtitle' | translate }}</p>
     </div>
-
     <ol class="lp-how__steps">
-      <li class="lp-how__step lp-reveal" style="--delay: 0ms" data-anim="zoomIn">
-        <span class="lp-how__num" aria-hidden="true">{{
-          'landing.howStep1Num' | translate
-        }}</span>
-        <span class="lp-how__icon" aria-hidden="true">
-          <span class="material-symbols-outlined">inventory</span>
-        </span>
-        <h3 class="lp-how__title">{{ 'landing.howStep1Title' | translate }}</h3>
-        <p class="lp-how__body">{{ 'landing.howStep1Body' | translate }}</p>
+      <li class="lp-how__step lp-reveal">
+        <span class="lp-how__num" aria-hidden="true">{{ 'landing.howStep1Num' | translate }}</span>
+        <h3>{{ 'landing.howStep1Title' | translate }}</h3>
+        <p>{{ 'landing.howStep1Body' | translate }}</p>
       </li>
-      <li
-        class="lp-how__step lp-reveal"
-        style="--delay: 100ms"
-        data-anim="zoomIn"
-      >
-        <span class="lp-how__num" aria-hidden="true">{{
-          'landing.howStep2Num' | translate
-        }}</span>
-        <span class="lp-how__icon" aria-hidden="true">
-          <span class="material-symbols-outlined">psychology</span>
-        </span>
-        <h3 class="lp-how__title">{{ 'landing.howStep2Title' | translate }}</h3>
-        <p class="lp-how__body">{{ 'landing.howStep2Body' | translate }}</p>
+      <li class="lp-how__step lp-reveal" style="--delay: 100ms">
+        <span class="lp-how__num" aria-hidden="true">{{ 'landing.howStep2Num' | translate }}</span>
+        <h3>{{ 'landing.howStep2Title' | translate }}</h3>
+        <p>{{ 'landing.howStep2Body' | translate }}</p>
       </li>
-      <li
-        class="lp-how__step lp-reveal"
-        style="--delay: 200ms"
-        data-anim="zoomIn"
-      >
-        <span class="lp-how__num" aria-hidden="true">{{
-          'landing.howStep3Num' | translate
-        }}</span>
-        <span class="lp-how__icon" aria-hidden="true">
-          <span class="material-symbols-outlined">contract_edit</span>
-        </span>
-        <h3 class="lp-how__title">{{ 'landing.howStep3Title' | translate }}</h3>
-        <p class="lp-how__body">{{ 'landing.howStep3Body' | translate }}</p>
+      <li class="lp-how__step lp-reveal" style="--delay: 200ms">
+        <span class="lp-how__num" aria-hidden="true">{{ 'landing.howStep3Num' | translate }}</span>
+        <h3>{{ 'landing.howStep3Title' | translate }}</h3>
+        <p>{{ 'landing.howStep3Body' | translate }}</p>
       </li>
     </ol>
   </section>
 
   <!-- Audiences -->
-  <section class="lp-audiences" aria-labelledby="lp-audiences-title">
+  <section id="audiences" class="lp-audiences" aria-labelledby="lp-audiences-title">
     <div class="lp-audiences__intro lp-reveal">
-      <h2 id="lp-audiences-title" class="lp-section-title">
-        {{ 'landing.audiencesTitle' | translate }}
-      </h2>
-      <p class="lp-section-sub">
-        {{ 'landing.audiencesSubtitle' | translate }}
-      </p>
+      <h2 id="lp-audiences-title">{{ 'landing.audiencesTitle' | translate }}</h2>
+      <p>{{ 'landing.audiencesSubtitle' | translate }}</p>
     </div>
     <div class="lp-audiences__grid">
-      <article class="lp-audience lp-reveal" data-anim="fadeInLeft">
-        <span class="lp-audience__icon lp-icon-bob" aria-hidden="true">
-          <span class="material-symbols-outlined">agriculture</span>
-        </span>
-        <h3 class="lp-audience__title">
-          {{ 'landing.audienceFarmTitle' | translate }}
-        </h3>
-        <p class="lp-audience__body">
-          {{ 'landing.audienceFarmBody' | translate }}
-        </p>
-        <a [routerLink]="'/register'" class="lp-btn lp-btn--primary lp-btn--shine">
-          {{ 'landing.audienceFarmCta' | translate }}
-          <span class="material-symbols-outlined icon-flip" aria-hidden="true"
-            >arrow_forward</span
-          >
-        </a>
+      <article class="lp-audience lp-audience--photo lp-reveal">
+        <img
+          src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=1000&q=75"
+          alt=""
+          loading="lazy"
+        />
+        <div class="lp-audience__veil" aria-hidden="true"></div>
+        <div class="lp-audience__body">
+          <h3>{{ 'landing.audienceFarmTitle' | translate }}</h3>
+          <p>{{ 'landing.audienceFarmBody' | translate }}</p>
+          <a [routerLink]="'/register'" class="lp-btn lp-btn--light">
+            {{ 'landing.audienceFarmCta' | translate }}
+          </a>
+        </div>
       </article>
-      <article
-        class="lp-audience lp-reveal"
-        style="--delay: 120ms"
-        data-anim="fadeInRight"
-      >
-        <span class="lp-audience__icon lp-icon-bob" style="--bob-delay: 0.5s" aria-hidden="true">
-          <span class="material-symbols-outlined">factory</span>
-        </span>
-        <h3 class="lp-audience__title">
-          {{ 'landing.audienceFactoryTitle' | translate }}
-        </h3>
-        <p class="lp-audience__body">
-          {{ 'landing.audienceFactoryBody' | translate }}
-        </p>
-        <a [routerLink]="'/register'" class="lp-btn lp-btn--ghost lp-btn--shine">
-          {{ 'landing.audienceFactoryCta' | translate }}
-          <span class="material-symbols-outlined icon-flip" aria-hidden="true"
-            >arrow_forward</span
-          >
-        </a>
+      <article class="lp-audience lp-audience--photo lp-reveal" style="--delay: 120ms">
+        <img
+          src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1000&q=75"
+          alt=""
+          loading="lazy"
+        />
+        <div class="lp-audience__veil" aria-hidden="true"></div>
+        <div class="lp-audience__body">
+          <h3>{{ 'landing.audienceFactoryTitle' | translate }}</h3>
+          <p>{{ 'landing.audienceFactoryBody' | translate }}</p>
+          <a [routerLink]="'/register'" class="lp-btn lp-btn--ghost-light">
+            {{ 'landing.audienceFactoryCta' | translate }}
+          </a>
+        </div>
       </article>
     </div>
   </section>
 
   <!-- Closing CTA -->
-  <section class="lp-cta lp-reveal" aria-labelledby="lp-cta-title" data-anim="pulse">
-    <h2 id="lp-cta-title" class="lp-cta__title">
-      {{ 'landing.ctaTitle' | translate }}
-    </h2>
-    <p class="lp-cta__body">{{ 'landing.ctaBody' | translate }}</p>
-    <a [routerLink]="'/register'" class="lp-btn lp-btn--primary lp-btn--lg lp-btn--shine">
-      {{ 'landing.ctaRegister' | translate }}
-      <span class="material-symbols-outlined icon-flip" aria-hidden="true"
-        >arrow_forward</span
-      >
-    </a>
+  <section class="lp-cta-stage">
+    <img
+      src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=1800&q=75"
+      alt=""
+      loading="lazy"
+    />
+    <div class="lp-cta-stage__veil" aria-hidden="true"></div>
+    <div class="lp-cta-stage__inner lp-reveal" data-anim="fadeInUp">
+      <p class="font-heritage lp-cta-stage__quote">{{ 'landing.ctaHeart' | translate }}</p>
+      <h2>{{ 'landing.ctaTitle' | translate }}</h2>
+      <p>{{ 'landing.ctaBody' | translate }}</p>
+      <a [routerLink]="'/register'" class="lp-btn lp-btn--light lp-btn--lg">
+        {{ 'landing.ctaRegister' | translate }}
+      </a>
+    </div>
   </section>
 
   <!-- Footer -->
-  <footer
-    id="footer"
-    class="bg-surface-container-highest py-16 px-4 md:px-margin-desktop border-t border-outline-variant"
-  >
-    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
+  <footer id="footer" class="lp-footer">
+    <div class="lp-footer__grid">
       <div>
-        <div class="flex items-center gap-2 mb-4">
-          <ui-brand-mark [size]="40" [decorative]="true" />
-          <span class="lp-brand__name">
+        <div class="lp-brand lp-brand--footer">
+          <ui-brand-mark [size]="36" [decorative]="true" />
+          <span class="lp-brand__name" dir="ltr">
             <span class="lp-brand__name-nile">Nile</span
             ><span class="lp-brand__name-chain">Chain</span>
           </span>
         </div>
-        <p class="font-body-md text-body-md text-on-surface-variant">
-          {{ 'landing.footerTagline' | translate }}
-        </p>
+        <p class="lp-footer__tagline">{{ 'landing.footerTagline' | translate }}</p>
       </div>
-
       <div>
-        <h3
-          class="font-label-md text-label-md text-on-surface mb-6 uppercase tracking-wider"
-        >
-          {{ 'landing.footerNewsletter' | translate }}
-        </h3>
-        <p class="font-body-md text-body-md text-on-surface-variant mb-4">
-          {{ 'landing.footerNewsletterHint' | translate }}
-        </p>
-        <form class="flex gap-2" (submit)="$event.preventDefault()">
+        <h3>{{ 'landing.footerCompany' | translate }}</h3>
+        <a href="#story">{{ 'landing.navStory' | translate }}</a>
+        <a href="#how-it-works">{{ 'landing.navHow' | translate }}</a>
+        <a href="#audiences">{{ 'landing.navFarms' | translate }}</a>
+      </div>
+      <div>
+        <h3>{{ 'landing.footerLegal' | translate }}</h3>
+        <a href="#footer">{{ 'landing.privacy' | translate }}</a>
+        <a href="#footer">{{ 'landing.terms' | translate }}</a>
+        <a href="#footer">{{ 'landing.contact' | translate }}</a>
+      </div>
+      <div>
+        <h3>{{ 'landing.footerNewsletter' | translate }}</h3>
+        <p>{{ 'landing.footerNewsletterHint' | translate }}</p>
+        <form class="lp-footer__form" (submit)="$event.preventDefault()">
           <label class="sr-only" for="newsletter-email">{{
             'landing.newsletterEmail' | translate
           }}</label>
           <input
             id="newsletter-email"
             type="email"
+            class="ui-input"
             [attr.placeholder]="'landing.newsletterEmail' | translate"
-            class="ui-input flex-1 !py-2"
           />
-          <button
-            type="submit"
-            class="ui-btn-primary !px-3 !py-2"
-            [attr.aria-label]="'common.submit' | translate"
-          >
-            <span class="material-symbols-outlined icon-flip" aria-hidden="true"
-              >send</span
-            >
+          <button type="submit" class="lp-btn lp-btn--primary" [attr.aria-label]="'common.submit' | translate">
+            <span class="material-symbols-outlined icon-flip" aria-hidden="true">send</span>
           </button>
         </form>
       </div>
     </div>
-
-    <div
-      class="max-w-7xl mx-auto pt-8 border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-4"
-    >
-      <p class="font-label-sm text-label-sm text-on-surface-variant">
-        {{ 'landing.footerRights' | translate }}
-      </p>
-    </div>
+    <p class="lp-footer__copy">{{ 'landing.footerRights' | translate }}</p>
   </footer>
 </div>

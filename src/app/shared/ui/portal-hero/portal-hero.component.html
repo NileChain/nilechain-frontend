@@ -1,0 +1,24 @@
+<section
+  class="ph"
+  [class.ph--tall]="size === 'tall'"
+  [class.ph--compact]="size === 'compact'"
+  aria-hidden="false"
+>
+  <img class="ph__img" [src]="imageUrl" alt="" loading="lazy" decoding="async" />
+  <div class="ph__veil" aria-hidden="true"></div>
+  <div class="ph__grain" aria-hidden="true"></div>
+  <div class="ph__body animate-fade-in">
+    @if (quoteKey) {
+      <p class="ph__quote font-heritage">{{ quoteKey | translate }}</p>
+    }
+    @if (eyebrowKey) {
+      <p class="ph__eyebrow">{{ eyebrowKey | translate }}</p>
+    }
+    @if (titleKey) {
+      <h2 class="ph__title">{{ titleKey | translate }}</h2>
+    }
+    @if (bodyKey) {
+      <p class="ph__text">{{ bodyKey | translate }}</p>
+    }
+  </div>
+</section>
