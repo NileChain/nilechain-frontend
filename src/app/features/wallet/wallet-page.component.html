@@ -1,8 +1,20 @@
-<section class="wallet-page">
-  <app-top-bar [titleKey]="'wallet.pageTitle'" [portal]="portal" [showSearch]="false" />
+<section class="wallet-page md:ms-[280px] min-h-screen bg-surface">
+  <app-top-bar
+    [titleKey]="'wallet.pageTitle'"
+    [portal]="portal"
+    [showSearch]="false"
+  />
 
   <div class="wallet-page__body">
     <p class="wallet-page__lead">{{ 'wallet.lead' | translate }}</p>
+
+    <ui-portal-hero
+      size="compact"
+      imageUrl="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1600&q=75"
+      quoteKey="portalHero.walletQuote"
+      titleKey="wallet.pageTitle"
+      bodyKey="wallet.lead"
+    />
 
     @if (loading() || confirming()) {
       <ui-loader
@@ -17,35 +29,117 @@
         </button>
       </div>
     } @else if (wallet(); as w) {
-      <p class="wallet-page__disclaimer" role="note">{{ w.disclaimer }}</p>
+      <p class="wallet-page__disclaimer" role="note">
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+          >verified_user</span
+        >
+        <span>{{ w.disclaimer }}</span>
+      </p>
 
       <div class="wallet-page__balances">
-        <div>
-          <p class="wallet-page__label">{{ 'wallet.available' | translate }}</p>
-          <p class="wallet-page__amount tabular-nums">
-            {{ w.availableBalanceEgp | number: '1.0-2' }} EGP
+        <div class="ui-metric-tile ui-metric-tile--emphasis">
+          <div class="wallet-page__tile-head">
+            <p class="wallet-page__label">{{ 'wallet.available' | translate }}</p>
+            <span class="material-symbols-outlined text-primary" aria-hidden="true"
+              >trending_up</span
+            >
+          </div>
+          <p class="wallet-page__amount text-primary tabular-nums">
+            <span
+              [uiCountUp]="w.availableBalanceEgp"
+              [uiCountUpDecimals]="2"
+            ></span>
+            <span class="wallet-page__currency">EGP</span>
           </p>
         </div>
-        <div>
-          <p class="wallet-page__label">{{ 'wallet.held' | translate }}</p>
+        <div class="ui-metric-tile">
+          <div class="wallet-page__tile-head">
+            <p class="wallet-page__label">{{ 'wallet.held' | translate }}</p>
+            <span class="material-symbols-outlined text-on-surface-variant" aria-hidden="true"
+              >lock</span
+            >
+          </div>
           <p class="wallet-page__amount tabular-nums">
-            {{ w.heldBalanceEgp | number: '1.0-2' }} EGP
+            <span
+              [uiCountUp]="w.heldBalanceEgp"
+              [uiCountUpDecimals]="2"
+            ></span>
+            <span class="wallet-page__currency">EGP</span>
           </p>
         </div>
       </div>
 
-      <section class="wallet-page__panel">
-        <h2>{{ 'wallet.topUpTitle' | translate }}</h2>
-        <p class="wallet-page__hint">{{ 'wallet.topUpHint' | translate }}</p>
-        @if (w.paymobConfigured) {
-          <p class="wallet-page__hint">{{ 'wallet.paymobHint' | translate }}</p>
-        } @else if (w.simulatorAvailable) {
-          <p class="wallet-page__hint">{{ 'wallet.simulatorHint' | translate }}</p>
-        }
+      <div class="wallet-page__actions">
+        <section class="wallet-page__panel">
+          <h2 class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[22px]" aria-hidden="true"
+              >add_card</span
+            >
+            {{ 'wallet.topUpTitle' | translate }}
+          </h2>
+          <p class="wallet-page__hint">{{ 'wallet.topUpHint' | translate }}</p>
+          @if (w.paymobConfigured) {
+            <p class="wallet-page__hint">{{ 'wallet.paymobHint' | translate }}</p>
+          } @else if (w.simulatorAvailable) {
+            <p class="wallet-page__hint">{{ 'wallet.simulatorHint' | translate }}</p>
+          }
 
-        @if (redirecting()) {
-          <ui-loader size="md" [label]="'wallet.redirecting' | translate" />
-        } @else {
+          @if (redirecting()) {
+            <ui-loader size="md" [label]="'wallet.redirecting' | translate" />
+          } @else {
+            <label class="wallet-page__field">
+              <span>{{ 'wallet.amount' | translate }}</span>
+              <input
+                type="number"
+                class="ui-input"
+                min="50"
+                step="50"
+                [(ngModel)]="topUpAmount"
+                [disabled]="acting()"
+              />
+            </label>
+            <button
+              type="button"
+              class="ui-btn-primary w-full"
+              [disabled]="acting()"
+              (click)="startTopUp()"
+            >
+              {{ 'wallet.topUp' | translate }}
+            </button>
+          }
+
+          @if (!redirecting() && pendingTopUp(); as session) {
+            @if (session.mode === 'Simulator' && w.simulatorAvailable) {
+              <div class="wallet-page__pending">
+                <p>
+                  {{ 'wallet.pendingTopUp' | translate }}:
+                  <span class="tabular-nums">{{ session.amountEgp | number: '1.0-2' }}</span>
+                  EGP
+                </p>
+                @if (session.sandboxHint) {
+                  <p class="wallet-page__hint">{{ session.sandboxHint }}</p>
+                }
+                <button
+                  type="button"
+                  class="ui-btn-primary"
+                  [disabled]="acting()"
+                  (click)="completeSimulator()"
+                >
+                  {{ 'wallet.completeSimulator' | translate }}
+                </button>
+              </div>
+            }
+          }
+        </section>
+
+        <section class="wallet-page__panel">
+          <h2 class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[22px]" aria-hidden="true"
+              >account_balance</span
+            >
+            {{ 'wallet.withdrawTitle' | translate }}
+          </h2>
+          <p class="wallet-page__hint">{{ 'wallet.withdrawHint' | translate }}</p>
           <label class="wallet-page__field">
             <span>{{ 'wallet.amount' | translate }}</span>
             <input
@@ -53,87 +147,46 @@
               class="ui-input"
               min="50"
               step="50"
-              [(ngModel)]="topUpAmount"
+              [(ngModel)]="withdrawAmount"
               [disabled]="acting()"
+            />
+          </label>
+          <label class="wallet-page__field">
+            <span>{{ 'wallet.destination' | translate }}</span>
+            <input
+              type="text"
+              class="ui-input"
+              [(ngModel)]="withdrawDest"
+              [disabled]="acting()"
+              [attr.placeholder]="'wallet.destinationPh' | translate"
             />
           </label>
           <button
             type="button"
-            class="ui-btn-primary"
+            class="ui-btn-secondary w-full"
             [disabled]="acting()"
-            (click)="startTopUp()"
+            (click)="withdraw()"
           >
-            {{ 'wallet.topUp' | translate }}
+            {{ 'wallet.withdraw' | translate }}
           </button>
-        }
-
-        @if (!redirecting() && pendingTopUp(); as session) {
-          @if (session.mode === 'Simulator' && w.simulatorAvailable) {
-            <div class="wallet-page__pending">
-              <p>
-                {{ 'wallet.pendingTopUp' | translate }}:
-                <span class="tabular-nums">{{ session.amountEgp | number: '1.0-2' }}</span>
-                EGP
-              </p>
-              @if (session.sandboxHint) {
-                <p class="wallet-page__hint">{{ session.sandboxHint }}</p>
-              }
-              <button
-                type="button"
-                class="ui-btn-primary"
-                [disabled]="acting()"
-                (click)="completeSimulator()"
-              >
-                {{ 'wallet.completeSimulator' | translate }}
-              </button>
-            </div>
-          }
-        }
-      </section>
-
-      <section class="wallet-page__panel">
-        <h2>{{ 'wallet.withdrawTitle' | translate }}</h2>
-        <p class="wallet-page__hint">{{ 'wallet.withdrawHint' | translate }}</p>
-        <label class="wallet-page__field">
-          <span>{{ 'wallet.amount' | translate }}</span>
-          <input
-            type="number"
-            class="ui-input"
-            min="50"
-            step="50"
-            [(ngModel)]="withdrawAmount"
-            [disabled]="acting()"
-          />
-        </label>
-        <label class="wallet-page__field">
-          <span>{{ 'wallet.destination' | translate }}</span>
-          <input
-            type="text"
-            class="ui-input"
-            [(ngModel)]="withdrawDest"
-            [disabled]="acting()"
-            [attr.placeholder]="'wallet.destinationPh' | translate"
-          />
-        </label>
-        <button
-          type="button"
-          class="ui-btn-primary"
-          [disabled]="acting()"
-          (click)="withdraw()"
-        >
-          {{ 'wallet.withdraw' | translate }}
-        </button>
-      </section>
+        </section>
+      </div>
 
       @if (w.recentLedger.length) {
-        <section class="wallet-page__panel">
+        <section class="wallet-page__panel wallet-page__panel--ledger">
           <h2>{{ 'wallet.ledgerTitle' | translate }}</h2>
-          <ul class="wallet-page__list">
+          <ul class="wallet-page__list" uiAutoAnimate>
             @for (e of w.recentLedger; track e.ledgerEntryId) {
               <li>
-                <span>{{ e.entryType }}</span>
-                <span class="tabular-nums">{{ e.amountEgp | number: '1.0-2' }}</span>
-                <span class="wallet-page__meta">{{ e.createdAt | date: 'short' }}</span>
+                <span class="wallet-page__entry-type">{{ e.entryType }}</span>
+                <span
+                  class="tabular-nums font-semibold"
+                  [class.text-primary]="e.amountEgp > 0"
+                  [class.text-error]="e.amountEgp < 0"
+                >
+                  {{ e.amountEgp > 0 ? '+' : '' }}{{ e.amountEgp | number: '1.0-2' }}
+                </span>
+                <span class="wallet-page__meta">{{ e.createdAt | date: 'medium' }}</span>
               </li>
             }
           </ul>

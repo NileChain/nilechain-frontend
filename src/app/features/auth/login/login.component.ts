@@ -77,12 +77,12 @@ export class LoginComponent {
           }
 
           if (this.authService.hasAnyRole(['Factory'])) {
-            void this.router.navigate(['/factory-dashboard']);
+            void this.router.navigate(['/factory/home']);
             return;
           }
 
           if (this.authService.hasAnyRole(['Farm'])) {
-            void this.router.navigate(['/farm-dashboard']);
+            void this.router.navigate(['/farm/home']);
             return;
           }
 

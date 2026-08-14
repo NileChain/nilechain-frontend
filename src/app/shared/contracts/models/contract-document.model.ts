@@ -24,11 +24,24 @@ export interface ContractDocumentModel {
   factoryName: string;
   farmName: string;
   factoryLocation?: string | null;
+  farmLocation?: string | null;
   cropName: string;
   quantityTons: number;
+  /** Display unit — contracts are stored in metric tons. */
+  unit?: string | null;
   pricePerTon?: number | null;
   deliveryDate?: string | null;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  hasPendingDateAmendment?: boolean;
+  pendingStartsAt?: string | null;
+  pendingEndsAt?: string | null;
+  dateAmendmentProposedByUserId?: string | null;
   deliveryLocation?: string | null;
+  /** Human-readable quality summary from supply request — omit when unknown. */
+  qualityRequirements?: string | null;
+  /** Payment terms extracted from generated text or structured data — never invented. */
+  paymentTerms?: string | null;
   generatedText?: string | null;
   pdfUrl?: string | null;
   version?: string | null;

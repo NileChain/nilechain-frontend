@@ -1,0 +1,478 @@
+<div class="ui-page lp phome" [class.phome--ready]="heroReady()" (click)="closeAll()">
+  <div
+    class="lp-progress"
+    role="progressbar"
+    [attr.aria-valuenow]="scrollProgress() | number: '1.0-0'"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    [attr.aria-label]="key('scrollProgress') | translate"
+  >
+    <span class="lp-progress__bar" [style.width.%]="scrollProgress()"></span>
+  </div>
+
+  <header
+    class="lp-nav"
+    [class.lp-nav--scrolled]="navScrolled()"
+    [class.lp-nav--open]="mobileOpen()"
+  >
+    <nav class="lp-nav__inner" aria-label="Primary" (click)="$event.stopPropagation()">
+      <div class="lp-nav__start">
+        <a
+          [routerLink]="homeLink"
+          class="lp-brand"
+          [attr.aria-label]="'app.name' | translate"
+          (click)="closeAll()"
+        >
+          <ui-brand-mark [size]="34" [decorative]="true" />
+          <span class="lp-brand__name" dir="ltr" aria-hidden="true">
+            <span class="lp-brand__name-nile">Nile</span
+            ><span class="lp-brand__name-chain">Chain</span>
+          </span>
+        </a>
+
+        <div class="lp-nav__links">
+          <a href="#story" class="lp-nav__link" (click)="closeAll()">{{
+            key('navStory') | translate
+          }}</a>
+          <a href="#paths" class="lp-nav__link" (click)="closeAll()">{{
+            key('navPaths') | translate
+          }}</a>
+          <a href="#how" class="lp-nav__link" (click)="closeAll()">{{
+            key('navHow') | translate
+          }}</a>
+        </div>
+      </div>
+
+      <div class="lp-nav__end">
+        <div class="lp-nav__tools">
+          <div class="lp-dd lp-dd--lang">
+            <button
+              type="button"
+              class="lp-tool-btn lp-tool-btn--lang"
+              [attr.aria-expanded]="langOpen()"
+              aria-haspopup="true"
+              [attr.aria-label]="'common.language' | translate"
+              (click)="toggleLang($event)"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">language</span>
+              <span class="lp-tool-btn__label">{{ langCode() }}</span>
+            </button>
+            @if (langOpen()) {
+              <div class="lp-dd__panel lp-dd__panel--end" role="menu">
+                <button
+                  type="button"
+                  class="lp-dd__item"
+                  role="menuitem"
+                  [class.lp-dd__item--active]="locale() === 'en'"
+                  (click)="setLocale('en')"
+                >
+                  {{ 'common.english' | translate }}
+                </button>
+                <button
+                  type="button"
+                  class="lp-dd__item"
+                  role="menuitem"
+                  [class.lp-dd__item--active]="locale() === 'ar'"
+                  (click)="setLocale('ar')"
+                >
+                  {{ 'common.arabic' | translate }}
+                </button>
+              </div>
+            }
+          </div>
+
+          <button
+            type="button"
+            class="lp-tool-btn"
+            (click)="toggleTheme()"
+            [attr.aria-label]="
+              theme.isDark()
+                ? ('common.themeLight' | translate)
+                : ('common.themeDark' | translate)
+            "
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">
+              {{ theme.isDark() ? 'light_mode' : 'dark_mode' }}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="lp-tool-btn lp-menu-btn"
+            (click)="toggleMobile()"
+            [attr.aria-expanded]="mobileOpen()"
+            [attr.aria-controls]="'portal-home-mobile'"
+            [attr.aria-label]="'common.toggleMenu' | translate"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">{{
+              mobileOpen() ? 'close' : 'menu'
+            }}</span>
+          </button>
+        </div>
+
+        <div class="lp-nav__auth">
+          <a [routerLink]="dashboardLink" class="lp-btn lp-btn--text">{{
+            'nav.dashboard' | translate
+          }}</a>
+          <button type="button" class="lp-btn lp-btn--primary" (click)="logout()">
+            {{ 'nav.logout' | translate }}
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    @if (mobileOpen()) {
+      <div
+        id="portal-home-mobile"
+        class="lp-mobile"
+        role="dialog"
+        aria-modal="true"
+        [attr.aria-label]="'common.toggleMenu' | translate"
+        (click)="$event.stopPropagation()"
+      >
+        <a href="#story" class="lp-mobile__link" (click)="closeAll()">{{
+          key('navStory') | translate
+        }}</a>
+        <a href="#paths" class="lp-mobile__link" (click)="closeAll()">{{
+          key('navPaths') | translate
+        }}</a>
+        <a href="#how" class="lp-mobile__link" (click)="closeAll()">{{
+          key('navHow') | translate
+        }}</a>
+        <div class="lp-mobile__divider"></div>
+        <a
+          [routerLink]="dashboardLink"
+          class="lp-btn lp-btn--primary lp-btn--block"
+          (click)="closeAll()"
+          >{{ 'nav.dashboard' | translate }}</a
+        >
+        <button type="button" class="lp-btn lp-btn--text lp-btn--block" (click)="logout()">
+          {{ 'nav.logout' | translate }}
+        </button>
+      </div>
+    }
+  </header>
+
+  <!-- Hero -->
+  <section class="lp-stage phome-stage" aria-labelledby="portal-hero-title">
+    <img class="lp-stage__photo" [src]="heroImage" alt="" fetchpriority="high" />
+    <div class="lp-stage__veil" aria-hidden="true"></div>
+    <div class="lp-stage__grain" aria-hidden="true"></div>
+
+    <div class="lp-stage__inner">
+      <p class="lp-stage__brand phome-hero-item" dir="ltr" style="--hdelay: 0ms">
+        <span class="lp-stage__brand-nile">Nile</span
+        ><span class="lp-stage__brand-chain">Chain</span>
+      </p>
+      @if (greetingName) {
+        <p class="phome-hello phome-hero-item" style="--hdelay: 80ms">
+          {{ key('greeting') | translate: { name: greetingName } }}
+        </p>
+      }
+      <h1 id="portal-hero-title" class="lp-stage__title phome-hero-item" style="--hdelay: 140ms">
+        {{ key('titleLine1') | translate }}
+        <span class="lp-stage__accent">{{ key('titleLine2') | translate }}</span>
+      </h1>
+      <p class="lp-stage__subtitle phome-hero-item" style="--hdelay: 220ms">
+        {{ key('subtitle') | translate }}
+      </p>
+      <div class="lp-stage__ctas phome-hero-item" style="--hdelay: 300ms">
+        @for (cta of primaryCtas; track cta.link + cta.labelKey; let i = $index) {
+          <a
+            [routerLink]="cta.link"
+            [class]="
+              i === 0 ? 'lp-btn lp-btn--light lp-btn--lg' : 'lp-btn lp-btn--ghost-light lp-btn--lg'
+            "
+          >
+            @if (cta.icon) {
+              <span class="material-symbols-outlined" aria-hidden="true">{{ cta.icon }}</span>
+            }
+            {{ cta.labelKey | translate }}
+          </a>
+        }
+      </div>
+      <a
+        href="#story"
+        class="lp-stage__scroll phome-hero-item"
+        style="--hdelay: 400ms"
+        (click)="closeAll()"
+      >
+        <span>{{ key('scrollHint') | translate }}</span>
+        <span class="material-symbols-outlined" aria-hidden="true">south</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Trust -->
+  <section class="lp-trust" [attr.aria-label]="key('trustAria') | translate">
+    <ul class="lp-trust__list">
+      <li class="lp-reveal" data-anim="fadeInUp">
+        <span class="material-symbols-outlined" aria-hidden="true">payments</span>
+        {{ key('trust1') | translate }}
+      </li>
+      <li class="lp-reveal" style="--delay: 60ms" data-anim="fadeInUp">
+        <span class="material-symbols-outlined" aria-hidden="true">handshake</span>
+        {{ key('trust2') | translate }}
+      </li>
+      <li class="lp-reveal" style="--delay: 120ms" data-anim="fadeInUp">
+        <span class="material-symbols-outlined" aria-hidden="true">description</span>
+        {{ key('trust3') | translate }}
+      </li>
+      <li class="lp-reveal" style="--delay: 180ms" data-anim="fadeInUp">
+        <span class="material-symbols-outlined" aria-hidden="true">account_balance_wallet</span>
+        {{ key('trust4') | translate }}
+      </li>
+    </ul>
+  </section>
+
+  <!-- Story -->
+  <section id="story" class="lp-heritage" aria-labelledby="portal-story-title">
+    <div class="lp-heritage__quote lp-reveal" data-anim="fadeIn">
+      <p class="font-heritage" id="portal-story-title">
+        {{ key('heritageQuote') | translate }}
+      </p>
+      <span class="lp-heritage__attr">{{ key('heritageAttr') | translate }}</span>
+    </div>
+    <div class="lp-heritage__grid">
+      <article class="lp-heritage__card lp-reveal" data-anim="fadeInUp">
+        <img
+          src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1000&q=80"
+          alt=""
+          loading="lazy"
+        />
+        <div>
+          <h3>{{ key('pillar1Title') | translate }}</h3>
+          <p>{{ key('pillar1Body') | translate }}</p>
+        </div>
+      </article>
+      <article class="lp-heritage__card lp-reveal" style="--delay: 90ms" data-anim="fadeInUp">
+        <img
+          src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=1000&q=80"
+          alt=""
+          loading="lazy"
+        />
+        <div>
+          <h3>{{ key('pillar2Title') | translate }}</h3>
+          <p>{{ key('pillar2Body') | translate }}</p>
+        </div>
+      </article>
+      <article class="lp-heritage__card lp-reveal" style="--delay: 180ms" data-anim="fadeInUp">
+        <img
+          src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1000&q=80"
+          alt=""
+          loading="lazy"
+        />
+        <div>
+          <h3>{{ key('pillar3Title') | translate }}</h3>
+          <p>{{ key('pillar3Body') | translate }}</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Product glimpse -->
+  <section class="lp-product" [attr.aria-label]="key('previewAria') | translate">
+    <div class="lp-product__intro lp-reveal">
+      <h2>{{ key('previewTitle') | translate }}</h2>
+      <p>{{ key('previewBody') | translate }}</p>
+    </div>
+    <div class="lp-preview lp-reveal" data-anim="zoomIn">
+      <div class="lp-preview__chrome">
+        <span class="lp-preview__dot"></span>
+        <span class="lp-preview__dot"></span>
+        <span class="lp-preview__dot"></span>
+        <span class="lp-preview__chrome-title">{{ key('previewChrome') | translate }}</span>
+      </div>
+      <div class="lp-preview__body">
+        <div class="lp-preview__row">
+          <span class="lp-preview__icon" aria-hidden="true">
+            <span class="material-symbols-outlined">handshake</span>
+          </span>
+          <div class="min-w-0 flex-1">
+            <p class="lp-preview__label">{{ key('previewRow1Label') | translate }}</p>
+            <p class="lp-preview__meta">{{ key('previewRow1Meta') | translate }}</p>
+          </div>
+          <span class="lp-preview__pill">{{ key('previewRow1Pill') | translate }}</span>
+        </div>
+        <div class="lp-preview__row">
+          <span class="lp-preview__icon" aria-hidden="true">
+            <span class="material-symbols-outlined">shield</span>
+          </span>
+          <div class="min-w-0 flex-1">
+            <p class="lp-preview__label">{{ key('previewRow2Label') | translate }}</p>
+            <div class="lp-preview__bars" aria-hidden="true">
+              <span style="--w: 88%"></span>
+              <span style="--w: 72%"></span>
+              <span style="--w: 80%"></span>
+            </div>
+          </div>
+        </div>
+        <div class="lp-preview__row">
+          <span class="lp-preview__icon" aria-hidden="true">
+            <span class="material-symbols-outlined">description</span>
+          </span>
+          <div class="min-w-0 flex-1">
+            <p class="lp-preview__label">{{ key('previewRow3Label') | translate }}</p>
+            <p class="lp-preview__meta">{{ key('previewRow3Meta') | translate }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature 1 -->
+  <section class="lp-feature">
+    <div class="lp-feature__media lp-reveal phome-media">
+      <img
+        class="lp-feature__img"
+        [src]="featureImage"
+        width="640"
+        height="420"
+        alt=""
+        loading="lazy"
+      />
+    </div>
+    <div class="lp-feature__copy lp-reveal" style="--delay: 80ms" data-anim="fadeInUp">
+      <span class="lp-kicker">{{ key('feature1Badge') | translate }}</span>
+      <h2 class="lp-feature__title">{{ key('feature1Title') | translate }}</h2>
+      <p class="lp-feature__body">{{ key('feature1Body') | translate }}</p>
+      <ul class="lp-feature__bullets">
+        <li>
+          <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+          {{ key('feature1Bullet1') | translate }}
+        </li>
+        <li>
+          <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+          {{ key('feature1Bullet2') | translate }}
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Feature 2 -->
+  <section class="lp-feature lp-feature--reverse">
+    <div class="lp-feature__media lp-reveal phome-media">
+      <img
+        class="lp-feature__img"
+        [src]="feature2Image"
+        width="640"
+        height="420"
+        alt=""
+        loading="lazy"
+      />
+    </div>
+    <div class="lp-feature__copy lp-reveal" style="--delay: 80ms" data-anim="fadeInUp">
+      <span class="lp-kicker">{{ key('feature2Badge') | translate }}</span>
+      <h2 class="lp-feature__title">{{ key('feature2Title') | translate }}</h2>
+      <p class="lp-feature__body">{{ key('feature2Body') | translate }}</p>
+      <div class="lp-note">
+        <span class="material-symbols-outlined" aria-hidden="true">verified</span>
+        <p>{{ key('feature2Note') | translate }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How -->
+  <section id="how" class="lp-how">
+    <div class="lp-how__intro lp-reveal">
+      <h2 class="lp-how__heading">{{ key('howTitle') | translate }}</h2>
+      <p class="lp-how__sub">{{ key('howSubtitle') | translate }}</p>
+    </div>
+    <ol class="lp-how__steps">
+      <li class="lp-how__step lp-reveal" data-anim="fadeInUp">
+        <span class="lp-how__num" aria-hidden="true">01</span>
+        <h3>{{ key('how1Title') | translate }}</h3>
+        <p>{{ key('how1Body') | translate }}</p>
+      </li>
+      <li class="lp-how__step lp-reveal" style="--delay: 100ms" data-anim="fadeInUp">
+        <span class="lp-how__num" aria-hidden="true">02</span>
+        <h3>{{ key('how2Title') | translate }}</h3>
+        <p>{{ key('how2Body') | translate }}</p>
+      </li>
+      <li class="lp-how__step lp-reveal" style="--delay: 200ms" data-anim="fadeInUp">
+        <span class="lp-how__num" aria-hidden="true">03</span>
+        <h3>{{ key('how3Title') | translate }}</h3>
+        <p>{{ key('how3Body') | translate }}</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- Paths -->
+  <section id="paths" class="lp-audiences phome-paths-section" aria-labelledby="portal-paths-title">
+    <div class="lp-audiences__intro lp-reveal">
+      <h2 id="portal-paths-title">{{ key('pathsTitle') | translate }}</h2>
+      <p>{{ key('pathsSubtitle') | translate }}</p>
+    </div>
+    <div class="lp-audiences__grid phome-paths">
+      @for (card of pathCards; track card.link + card.labelKey; let i = $index) {
+        <a
+          class="lp-audience lp-audience--photo lp-reveal phome-path"
+          [routerLink]="card.link"
+          [style.--delay]="i * 90 + 'ms'"
+          data-anim="fadeInUp"
+        >
+          @if (card.imageUrl) {
+            <img [src]="card.imageUrl" alt="" loading="lazy" />
+          }
+          <div class="lp-audience__veil" aria-hidden="true"></div>
+          <div class="lp-audience__body">
+            @if (card.icon) {
+              <span class="material-symbols-outlined phome-path__icon" aria-hidden="true">{{
+                card.icon
+              }}</span>
+            }
+            <h3>{{ card.labelKey | translate }}</h3>
+            <p>
+              {{
+                (card.bodyKey ? card.bodyKey : key('pathHint')) | translate
+              }}
+            </p>
+            <span class="lp-btn lp-btn--light">{{ key('pathEnter') | translate }}</span>
+          </div>
+        </a>
+      }
+    </div>
+  </section>
+
+  <!-- Closing CTA -->
+  <section class="lp-cta-stage phome-cta">
+    <img [src]="ctaImage" alt="" loading="lazy" />
+    <div class="lp-cta-stage__veil" aria-hidden="true"></div>
+    <div class="lp-cta-stage__inner lp-reveal" data-anim="fadeInUp">
+      <p class="font-heritage lp-cta-stage__quote">{{ key('ctaHeart') | translate }}</p>
+      <h2>{{ key('ctaTitle') | translate }}</h2>
+      <p>{{ key('ctaBody') | translate }}</p>
+      @if (primaryCtas[0]; as main) {
+        <a [routerLink]="main.link" class="lp-btn lp-btn--light lp-btn--lg">
+          @if (main.icon) {
+            <span class="material-symbols-outlined" aria-hidden="true">{{ main.icon }}</span>
+          }
+          {{ main.labelKey | translate }}
+        </a>
+      }
+    </div>
+  </section>
+
+  <footer class="lp-footer">
+    <div class="lp-footer__grid">
+      <div>
+        <div class="lp-brand lp-brand--footer">
+          <ui-brand-mark [size]="36" [decorative]="true" />
+          <span class="lp-brand__name" dir="ltr">
+            <span class="lp-brand__name-nile">Nile</span
+            ><span class="lp-brand__name-chain">Chain</span>
+          </span>
+        </div>
+        <p class="lp-footer__tagline">{{ key('footerTagline') | translate }}</p>
+      </div>
+      <div>
+        <h3>{{ key('footerNav') | translate }}</h3>
+        <a [routerLink]="dashboardLink">{{ 'nav.dashboard' | translate }}</a>
+        @for (cta of primaryCtas; track cta.link) {
+          <a [routerLink]="cta.link">{{ cta.labelKey | translate }}</a>
+        }
+      </div>
+    </div>
+    <p class="lp-footer__copy">{{ key('footerCopy') | translate }}</p>
+  </footer>
+</div>

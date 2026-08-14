@@ -6,265 +6,305 @@
     notificationsLink="/factory/notifications"
   >
     <span
-      class="hidden sm:inline-flex items-center gap-2 bg-primary-container/10 px-4 py-2 rounded-lg"
+      class="hidden sm:inline-flex items-center gap-2 bg-primary-container px-4 py-2 rounded-lg"
     >
       <span
-        class="material-symbols-outlined text-primary text-xl fill"
+        class="material-symbols-outlined text-on-primary-container text-xl fill"
         aria-hidden="true"
         >auto_awesome</span
       >
-      <span class="font-title-md text-title-md text-primary">{{
+      <span class="font-title-md text-title-md text-on-primary-container">{{
         'factory.supplyRequest.aiPowered' | translate
       }}</span>
     </span>
   </app-top-bar>
 
   <div
-    class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
+    class="p-margin-mobile md:p-margin-desktop max-w-[960px] mx-auto space-y-4 animate-fade-in pb-10"
   >
+    <ui-portal-hero
+      size="compact"
+      imageUrl="https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1600&q=75"
+      quoteKey="portalHero.supplyQuote"
+      titleKey="factory.supplyRequest.title"
+      bodyKey="factory.supplyRequest.subtitle"
+    />
 
     <form
-      class="ui-card p-6 md:p-8 space-y-8 animate-slide-up"
+      class="space-y-4 animate-slide-up"
       [formGroup]="form"
       (ngSubmit)="onSubmit()"
       novalidate
     >
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="space-y-2">
-          <label
-            class="block font-title-md text-title-md text-on-surface"
-            for="crop_type"
+      <!-- Basics -->
+      <section class="ui-card p-5 md:p-6 space-y-5">
+        <h2 class="m-0 font-title-md text-title-md text-on-surface flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[22px]" aria-hidden="true"
+            >info</span
           >
-            {{ 'factory.supplyRequest.crop' | translate }}
-            <span class="text-error" aria-hidden="true">*</span>
-            <span class="sr-only">{{ 'common.required' | translate }}</span>
-          </label>
-          <div class="relative">
-            @if (cropsLoading()) {
-              <div class="flex items-center gap-2 py-2">
-                <ui-loader size="sm" />
-                <span>{{ 'common.loading' | translate }}</span>
-              </div>
-            } @else if (cropsError()) {
-              <ui-error-state [message]="cropsError()" (retry)="loadCrops()" />
-            } @else {
-              <select
-                id="crop_type"
-                formControlName="crop"
-                class="ui-input appearance-none pe-10"
-              >
-                <option disabled value="">
-                  {{ 'factory.supplyRequest.selectCrop' | translate }}
-                </option>
-                @for (crop of cropTypes(); track crop.cropTypeId) {
-                  <option [value]="crop.name">
-                    {{ crop.name }}
+          {{ 'factory.supplyRequest.basicInfo' | translate }}
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="space-y-2">
+            <label class="block font-label-md text-on-surface" for="crop_type">
+              {{ 'factory.supplyRequest.crop' | translate }}
+              <span class="text-error" aria-hidden="true">*</span>
+              <span class="sr-only">{{ 'common.required' | translate }}</span>
+            </label>
+            <div class="relative">
+              @if (cropsLoading()) {
+                <div class="flex items-center gap-2 py-2">
+                  <ui-loader size="sm" />
+                  <span>{{ 'common.loading' | translate }}</span>
+                </div>
+              } @else if (cropsError()) {
+                <ui-error-state [message]="cropsError()" (retry)="loadCrops()" />
+              } @else {
+                <select
+                  id="crop_type"
+                  formControlName="crop"
+                  class="ui-input appearance-none pe-10"
+                >
+                  <option disabled value="">
+                    {{ 'factory.supplyRequest.selectCrop' | translate }}
                   </option>
+                  @for (crop of cropTypes(); track crop.cropTypeId) {
+                    <option [value]="crop.name">{{ crop.name }}</option>
+                  }
+                </select>
+                <span
+                  class="material-symbols-outlined absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none"
+                  aria-hidden="true"
+                  >expand_more</span
+                >
+                @if (cropTypes().length === 0) {
+                  <p class="font-body-md text-on-surface-variant mt-2">
+                    {{ 'factory.supplyRequest.noCrops' | translate }}
+                  </p>
                 }
-              </select>
-              <span
-                class="material-symbols-outlined absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none"
-                aria-hidden="true"
-                >expand_more</span
-              >
-              @if (cropTypes().length === 0) {
-                <p class="font-body-md text-body-md text-on-surface-variant mt-2">
-                  {{ 'factory.supplyRequest.noCrops' | translate }}
-                </p>
+                <a
+                  routerLink="/factory/crop-request"
+                  class="inline-flex mt-2 text-primary font-label-md"
+                >
+                  {{ 'factory.supplyRequest.requestCrop' | translate }}
+                </a>
               }
-              <a
-                routerLink="/factory/crop-request"
-                class="inline-flex mt-2 text-primary font-label-md"
-              >
-                {{ 'factory.supplyRequest.requestCrop' | translate }}
-              </a>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block font-label-md text-on-surface" for="quantity">
+              {{ 'factory.supplyRequest.quantity' | translate }}
+              <span class="text-error" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="quantity"
+              formControlName="quantity"
+              type="number"
+              min="1"
+              class="ui-input"
+              [attr.placeholder]="
+                'factory.supplyRequest.quantityPlaceholder' | translate
+              "
+            />
+          </div>
+
+          <div class="space-y-2">
+            <label class="block font-label-md text-on-surface" for="target_price">
+              {{ 'factory.supplyRequest.targetPrice' | translate }}
+              <span class="text-error" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="target_price"
+              formControlName="price"
+              type="number"
+              min="0"
+              class="ui-input"
+              [attr.placeholder]="
+                'factory.supplyRequest.pricePlaceholder' | translate
+              "
+            />
+            @if (fairHint(); as hint) {
+              <p class="font-body-sm text-on-surface-variant mt-1">{{ hint }}</p>
             }
           </div>
-        </div>
 
-        <div class="space-y-2">
-          <label
-            class="block font-title-md text-title-md text-on-surface"
-            for="quantity"
-          >
-            {{ 'factory.supplyRequest.quantity' | translate }}
-            <span class="text-error" aria-hidden="true">*</span>
-            <span class="sr-only">{{ 'common.required' | translate }}</span>
-          </label>
-          <input
-            id="quantity"
-            formControlName="quantity"
-            type="number"
-            min="1"
-            class="ui-input"
-            [attr.placeholder]="
-              'factory.supplyRequest.quantityPlaceholder' | translate
-            "
-          />
-        </div>
-
-        <div class="space-y-2">
-          <label
-            class="block font-title-md text-title-md text-on-surface"
-            for="target_price"
-          >
-            {{ 'factory.supplyRequest.targetPrice' | translate }}
-            <span class="text-error" aria-hidden="true">*</span>
-            <span class="sr-only">{{ 'common.required' | translate }}</span>
-          </label>
-          <input
-            id="target_price"
-            formControlName="price"
-            type="number"
-            min="0"
-            class="ui-input"
-            [attr.placeholder]="
-              'factory.supplyRequest.pricePlaceholder' | translate
-            "
-          />
-          @if (fairHint(); as hint) {
-            <p class="font-body-sm text-on-surface-variant mt-1">{{ hint }}</p>
-          }
-        </div>
-
-        <div class="space-y-2">
-          <label
-            class="block font-title-md text-title-md text-on-surface"
-            for="delivery_date"
-          >
-            {{ 'factory.supplyRequest.deliveryDate' | translate }}
-            <span class="text-error" aria-hidden="true">*</span>
-            <span class="sr-only">{{ 'common.required' | translate }}</span>
-          </label>
-          <input
-            id="delivery_date"
-            formControlName="deliveryDate"
-            type="date"
-            class="ui-input"
-          />
-        </div>
-
-        <div class="space-y-2 md:col-span-2">
-          <p class="block font-title-md text-title-md text-on-surface">
-            {{ 'factory.supplyRequest.deliveryPoint' | translate }}
-          </p>
-          <p class="font-body-sm text-on-surface-variant">
-            {{ 'factory.supplyRequest.deliveryPointHint' | translate }}
-          </p>
-          <div class="flex flex-wrap gap-3">
-            <label class="inline-flex items-center gap-2 cursor-pointer">
-              <input type="radio" formControlName="deliveryPoint" value="FactoryGate" />
-              <span>{{ 'factory.supplyRequest.factoryGate' | translate }}</span>
+          <div class="space-y-2">
+            <label class="block font-label-md text-on-surface" for="delivery_date">
+              {{ 'factory.supplyRequest.deliveryDate' | translate }}
+              <span class="text-error" aria-hidden="true">*</span>
             </label>
-            <label class="inline-flex items-center gap-2 cursor-pointer">
-              <input type="radio" formControlName="deliveryPoint" value="FarmGate" />
-              <span>{{ 'factory.supplyRequest.farmGate' | translate }}</span>
-            </label>
+            <input
+              id="delivery_date"
+              formControlName="deliveryDate"
+              type="date"
+              class="ui-input"
+            />
           </div>
-          <p class="font-body-sm text-on-surface-variant">
-            @if (form.controls.deliveryPoint.value === 'FarmGate') {
-              {{ 'factory.supplyRequest.farmGateHelper' | translate }}
-            } @else {
-              {{ 'factory.supplyRequest.factoryGateHelper' | translate }}
-            }
-          </p>
         </div>
-      </div>
+      </section>
 
-      <div class="space-y-2">
-        <label
-          class="block font-title-md text-title-md text-on-surface"
-          for="quality_specs"
-        >
-          {{ 'factory.supplyRequest.quality' | translate }}
-          <span class="text-on-surface-variant font-body-md text-body-md"
-            >({{ 'common.optional' | translate }})</span
+      <!-- Delivery point -->
+      <section class="ui-card p-5 md:p-6 space-y-4">
+        <h2 class="m-0 font-title-md text-title-md text-on-surface flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[22px]" aria-hidden="true"
+            >location_on</span
           >
-        </label>
-        <textarea
-          id="quality_specs"
-          formControlName="quality"
-          rows="4"
-          class="ui-input resize-y"
-          [attr.placeholder]="
-            'factory.supplyRequest.qualityPlaceholder' | translate
-          "
-        ></textarea>
-      </div>
-
-      <fieldset class="space-y-4">
-        <legend class="font-title-md text-title-md text-on-surface">
-          {{ 'factory.supplyRequest.structuredQualityTitle' | translate }}
-        </legend>
-        <p class="font-body-md text-body-md text-on-surface-variant">
-          {{ 'factory.supplyRequest.structuredQualityHint' | translate }}
+          {{ 'factory.supplyRequest.deliveryPoint' | translate }}
+        </h2>
+        <p class="m-0 font-body-sm text-on-surface-variant">
+          {{ 'factory.supplyRequest.deliveryPointHint' | translate }}
         </p>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label class="space-y-2">
-            <span class="block font-label-md">{{ 'factory.supplyRequest.moistureMax' | translate }}</span>
-            <input
-              type="number"
-              min="0"
-              max="100"
-              step="0.1"
-              class="ui-input"
-              formControlName="moistureMaxPercent"
-              [attr.placeholder]="'factory.supplyRequest.moistureMaxPlaceholder' | translate"
-            />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label
+            class="ui-choice-chip !items-start !min-h-[5.5rem] !p-4 !rounded-xl flex-col"
+            [class.ui-choice-chip--selected]="
+              form.controls.deliveryPoint.value === 'FactoryGate'
+            "
+          >
+            <span class="flex items-center gap-2 w-full">
+              <input type="radio" formControlName="deliveryPoint" value="FactoryGate" />
+              <span class="material-symbols-outlined text-primary" aria-hidden="true"
+                >factory</span
+              >
+              <span class="font-semibold">{{
+                'factory.supplyRequest.factoryGate' | translate
+              }}</span>
+            </span>
+            <span class="font-body-sm text-on-surface-variant ps-6">{{
+              'factory.supplyRequest.factoryGateHelper' | translate
+            }}</span>
           </label>
-          <label class="space-y-2">
-            <span class="block font-label-md">{{ 'factory.supplyRequest.impuritiesMax' | translate }}</span>
-            <input
-              type="number"
-              min="0"
-              max="100"
-              step="0.1"
-              class="ui-input"
-              formControlName="impuritiesMaxPercent"
-              [attr.placeholder]="'factory.supplyRequest.impuritiesMaxPlaceholder' | translate"
-            />
-          </label>
-          <label class="space-y-2">
-            <span class="block font-label-md">{{ 'factory.supplyRequest.grade' | translate }}</span>
-            <input
-              type="text"
-              class="ui-input"
-              formControlName="grade"
-              [attr.placeholder]="'factory.supplyRequest.gradePlaceholder' | translate"
-            />
-          </label>
-          <label class="inline-flex items-center gap-2 pt-6">
-            <input
-              type="checkbox"
-              class="accent-[var(--color-primary)]"
-              formControlName="labRequired"
-            />
-            <span>{{ 'factory.supplyRequest.labRequired' | translate }}</span>
+          <label
+            class="ui-choice-chip !items-start !min-h-[5.5rem] !p-4 !rounded-xl flex-col"
+            [class.ui-choice-chip--selected]="
+              form.controls.deliveryPoint.value === 'FarmGate'
+            "
+          >
+            <span class="flex items-center gap-2 w-full">
+              <input type="radio" formControlName="deliveryPoint" value="FarmGate" />
+              <span class="material-symbols-outlined text-primary" aria-hidden="true"
+                >agriculture</span
+              >
+              <span class="font-semibold">{{
+                'factory.supplyRequest.farmGate' | translate
+              }}</span>
+            </span>
+            <span class="font-body-sm text-on-surface-variant ps-6">{{
+              'factory.supplyRequest.farmGateHelper' | translate
+            }}</span>
           </label>
         </div>
-      </fieldset>
+      </section>
 
-      <fieldset class="space-y-3">
-        <legend class="font-title-md text-title-md text-on-surface">
+      <!-- Quality -->
+      <section class="ui-card p-5 md:p-6 space-y-5">
+        <h2 class="m-0 font-title-md text-title-md text-on-surface flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[22px]" aria-hidden="true"
+            >verified</span
+          >
+          {{ 'factory.supplyRequest.quality' | translate }}
+        </h2>
+        <div class="space-y-2">
+          <label class="block font-label-md text-on-surface" for="quality_specs">
+            {{ 'factory.supplyRequest.quality' | translate }}
+            <span class="text-on-surface-variant font-body-md"
+              >({{ 'common.optional' | translate }})</span
+            >
+          </label>
+          <textarea
+            id="quality_specs"
+            formControlName="quality"
+            rows="3"
+            class="ui-input resize-y"
+            [attr.placeholder]="
+              'factory.supplyRequest.qualityPlaceholder' | translate
+            "
+          ></textarea>
+        </div>
+
+        <fieldset class="space-y-4 m-0 p-0 border-0">
+          <legend class="font-label-md text-on-surface mb-2">
+            {{ 'factory.supplyRequest.structuredQualityTitle' | translate }}
+          </legend>
+          <p class="m-0 font-body-sm text-on-surface-variant">
+            {{ 'factory.supplyRequest.structuredQualityHint' | translate }}
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label class="space-y-2">
+              <span class="block font-label-md">{{
+                'factory.supplyRequest.moistureMax' | translate
+              }}</span>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                class="ui-input"
+                formControlName="moistureMaxPercent"
+                [attr.placeholder]="
+                  'factory.supplyRequest.moistureMaxPlaceholder' | translate
+                "
+              />
+            </label>
+            <label class="space-y-2">
+              <span class="block font-label-md">{{
+                'factory.supplyRequest.impuritiesMax' | translate
+              }}</span>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                class="ui-input"
+                formControlName="impuritiesMaxPercent"
+                [attr.placeholder]="
+                  'factory.supplyRequest.impuritiesMaxPlaceholder' | translate
+                "
+              />
+            </label>
+            <label class="space-y-2">
+              <span class="block font-label-md">{{
+                'factory.supplyRequest.grade' | translate
+              }}</span>
+              <input
+                type="text"
+                class="ui-input"
+                formControlName="grade"
+                [attr.placeholder]="
+                  'factory.supplyRequest.gradePlaceholder' | translate
+                "
+              />
+            </label>
+            <label class="ui-choice-chip self-end">
+              <input type="checkbox" formControlName="labRequired" />
+              <span>{{ 'factory.supplyRequest.labRequired' | translate }}</span>
+            </label>
+          </div>
+        </fieldset>
+      </section>
+
+      <!-- Geography -->
+      <section class="ui-card p-5 md:p-6 space-y-5">
+        <h2 class="m-0 font-title-md text-title-md text-on-surface flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[22px]" aria-hidden="true"
+            >public</span
+          >
           {{ 'factory.supplyRequest.geographicScope' | translate }}
-        </legend>
-        <p class="font-body-md text-body-md text-on-surface-variant">
+        </h2>
+        <p class="m-0 font-body-sm text-on-surface-variant">
           {{ 'factory.supplyRequest.geographicScopeHint' | translate }}
         </p>
         <div class="flex flex-wrap gap-2">
           @for (scope of geographicScopes; track scope.value) {
             <label
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer"
-              [class.border-primary]="
-                form.controls.geographicScope.value === scope.value
-              "
-              [class.bg-primary-container]="
+              class="ui-choice-chip"
+              [class.ui-choice-chip--selected]="
                 form.controls.geographicScope.value === scope.value
               "
             >
               <input
                 type="radio"
-                class="accent-[var(--color-primary)]"
                 [value]="scope.value"
                 formControlName="geographicScope"
               />
@@ -272,41 +312,34 @@
             </label>
           }
         </div>
-      </fieldset>
 
-      <fieldset class="space-y-3">
-        <legend class="font-title-md text-title-md text-on-surface">
-          {{ 'factory.supplyRequest.governorates' | translate }}
-        </legend>
-        <p class="font-body-md text-body-md text-on-surface-variant">
-          {{ 'factory.supplyRequest.governoratesHint' | translate }}
-        </p>
-        <div class="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
-          @for (gov of governorates; track gov.value) {
-            <button
-              type="button"
-              class="inline-flex items-center justify-center px-4 py-2 rounded-lg border font-title-md text-title-md transition-colors select-none"
-              [class.border-outline-variant]="!isGovSelected(gov.value)"
-              [class.bg-surface-container-lowest]="!isGovSelected(gov.value)"
-              [class.text-on-surface-variant]="!isGovSelected(gov.value)"
-              [class.bg-primary-container]="isGovSelected(gov.value)"
-              [class.text-on-primary-container]="isGovSelected(gov.value)"
-              [class.border-primary-container]="isGovSelected(gov.value)"
-              (click)="toggleGovernorate(gov.value)"
-            >
-              {{ gov.labelEn }}
-              <span class="text-on-surface-variant ms-1 text-sm"
-                >({{ gov.labelAr }})</span
+        <div class="space-y-3 pt-2">
+          <p class="m-0 font-label-md text-on-surface">
+            {{ 'factory.supplyRequest.governorates' | translate }}
+          </p>
+          <p class="m-0 font-body-sm text-on-surface-variant">
+            {{ 'factory.supplyRequest.governoratesHint' | translate }}
+          </p>
+          <div class="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
+            @for (gov of governorates; track gov.value) {
+              <button
+                type="button"
+                class="ui-choice-chip"
+                [class.ui-choice-chip--selected]="isGovSelected(gov.value)"
+                (click)="toggleGovernorate(gov.value)"
               >
-            </button>
-          }
+                {{ gov.labelEn }}
+                <span class="text-on-surface-variant ms-1 text-sm"
+                  >({{ gov.labelAr }})</span
+                >
+              </button>
+            }
+          </div>
         </div>
-      </fieldset>
-
-      <hr class="border-outline-variant" />
+      </section>
 
       <div
-        class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-4"
+        class="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-2"
       >
         <a
           routerLink="/factory/dashboard"
@@ -316,7 +349,7 @@
         </a>
         <button
           type="submit"
-          class="ui-btn-primary w-full sm:w-auto"
+          class="ui-btn-primary w-full sm:w-auto min-w-[12rem]"
           [disabled]="submitting()"
         >
           @if (submitting()) {

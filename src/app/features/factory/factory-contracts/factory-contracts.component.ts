@@ -11,10 +11,12 @@ import {
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslateService } from '../../../core/services/translate.service';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
+import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
 import { contractStatusLabelKey } from '../../../shared/contracts/contract-text.util';
 import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
+import { UiAutoAnimateDirective } from '../../../shared/directives/ui-auto-animate.directive';
 
 type StatusFilter = 'all' | 'pending' | 'signed' | 'cancelled';
 type SortKey = 'newest' | 'oldest' | 'delivery' | 'status' | 'farm';
@@ -27,11 +29,13 @@ type SortKey = 'newest' | 'oldest' | 'delivery' | 'status' | 'farm';
     RouterLink,
     FormsModule,
     AppTopBarComponent,
+    UiPortalHeroComponent,
     UiErrorStateComponent,
     UiEmptyStateComponent,
     UiSkeletonComponent,
     DatePipe,
     DecimalPipe,
+    UiAutoAnimateDirective,
   ],
   templateUrl: './factory-contracts.component.html',
 })

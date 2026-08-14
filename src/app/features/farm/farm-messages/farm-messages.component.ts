@@ -23,6 +23,7 @@ import {
   Conversation,
   Message,
 } from '../../../core/models/farm/farm-message.model';
+import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
 
 interface ConversationGroup {
   key: string;
@@ -43,6 +44,7 @@ interface ConversationGroup {
     AppTopBarComponent,
     FormsModule,
     DatePipe,
+    UiPortalHeroComponent,
   ],
   templateUrl: './farm-messages.component.html',
   styleUrl: './farm-messages.component.scss',

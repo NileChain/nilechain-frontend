@@ -17,12 +17,20 @@ export class CommandPaletteService {
   readonly items: CommandPaletteItem[] = [
     // Farm
     {
+      id: 'farm-home',
+      labelKey: 'nav.home',
+      icon: 'home',
+      link: '/farm/home',
+      roles: ['Farm', 'Admin'],
+      keywords: ['farm', 'home', 'رئيسية'],
+    },
+    {
       id: 'farm-dashboard',
       labelKey: 'nav.dashboard',
       icon: 'dashboard',
       link: '/farm/dashboard',
       roles: ['Farm', 'Admin'],
-      keywords: ['farm', 'home'],
+      keywords: ['farm', 'dashboard'],
     },
     {
       id: 'farm-profile',
@@ -47,6 +55,14 @@ export class CommandPaletteService {
       roles: ['Farm', 'Admin'],
     },
     {
+      id: 'farm-negotiations',
+      labelKey: 'nav.negotiations',
+      icon: 'edit_note',
+      link: '/farm/negotiations',
+      roles: ['Farm', 'Admin'],
+      keywords: ['negotiate', 'draft', 'changes', 'مفاوضات'],
+    },
+    {
       id: 'farm-disputes',
       labelKey: 'nav.disputes',
       icon: 'gavel',
@@ -69,12 +85,20 @@ export class CommandPaletteService {
     },
     // Factory
     {
+      id: 'factory-home',
+      labelKey: 'nav.home',
+      icon: 'home',
+      link: '/factory/home',
+      roles: ['Factory', 'Admin'],
+      keywords: ['factory', 'home', 'رئيسية'],
+    },
+    {
       id: 'factory-dashboard',
       labelKey: 'nav.dashboard',
       icon: 'dashboard',
       link: '/factory/dashboard',
       roles: ['Factory', 'Admin'],
-      keywords: ['factory', 'home'],
+      keywords: ['factory', 'dashboard'],
     },
     {
       id: 'factory-profile',
@@ -117,6 +141,14 @@ export class CommandPaletteService {
       icon: 'description',
       link: '/factory/contracts',
       roles: ['Factory', 'Admin'],
+    },
+    {
+      id: 'factory-negotiations',
+      labelKey: 'nav.negotiations',
+      icon: 'edit_note',
+      link: '/factory/negotiations',
+      roles: ['Factory', 'Admin'],
+      keywords: ['negotiate', 'draft', 'changes', 'مفاوضات'],
     },
     {
       id: 'factory-disputes',

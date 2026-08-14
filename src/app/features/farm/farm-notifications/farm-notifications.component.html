@@ -8,15 +8,13 @@
   <div
     class="p-margin-mobile md:p-margin-desktop max-w-5xl mx-auto space-y-gutter animate-fade-in"
   >
-    <section
-      class="flex flex-col lg:flex-row lg:items-center justify-between gap-4"
-    >
-      <div>
-        <p class="font-body-md text-body-md text-on-surface-variant">
-          {{ 'notifications.subtitle' | translate }}
-        </p>
-      </div>
-    </section>
+    <ui-portal-hero
+      size="compact"
+      imageUrl="https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=1600&q=70"
+      quoteKey="portalHero.notificationsQuote"
+      titleKey="notifications.title"
+      bodyKey="notifications.subtitle"
+    />
 
     <nav
       class="flex items-center gap-2 overflow-x-auto pb-2"
@@ -72,7 +70,7 @@
         icon="notifications_off"
       />
     } @else {
-      <section class="space-y-3">
+      <section class="space-y-3" uiAutoAnimate>
         @for (item of visible(); track item.notificationId) {
           <article
             class="ui-card ui-card-interactive p-4 flex gap-4 items-start"

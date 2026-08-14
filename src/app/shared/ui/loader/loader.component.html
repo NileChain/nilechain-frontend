@@ -1,0 +1,17 @@
+<div
+  class="ui-loader"
+  [class.ui-loader--block]="block"
+  role="status"
+  [attr.aria-label]="ariaLabel || label || 'Loading'"
+>
+  <span class="ui-loader__ring" aria-hidden="true">
+    <span
+      class="material-symbols-outlined animate-spin"
+      [ngClass]="sizeClass"
+      >progress_activity</span
+    >
+  </span>
+  @if (label) {
+    <span class="ui-loader__label">{{ label }}</span>
+  }
+</div>

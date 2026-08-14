@@ -31,6 +31,7 @@ import { TranslateService } from '../../../core/services/translate.service';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
+import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
 import { FarmService } from '../../../core/services/farm/farm.service';
 import {
   FarmDashboard,
@@ -39,6 +40,9 @@ import {
   ReliabilityTrendPoint,
 } from '../../../core/models/farm/farm-dashboard.model';
 import { MarketPriceTrendsComponent } from '../../factory/market-price-trends/market-price-trends.component';
+import { UiCountUpDirective } from '../../../shared/directives/ui-count-up.directive';
+import { UiRevealDirective } from '../../../shared/directives/ui-reveal.directive';
+import { UiAutoAnimateDirective } from '../../../shared/directives/ui-auto-animate.directive';
 
 export interface AttentionItem {
   id: string;
@@ -67,9 +71,13 @@ export interface ActivityItem {
     UiErrorStateComponent,
     UiSkeletonComponent,
     AppTopBarComponent,
+    UiPortalHeroComponent,
     RouterLink,
     DecimalPipe,
     MarketPriceTrendsComponent,
+    UiCountUpDirective,
+    UiRevealDirective,
+    UiAutoAnimateDirective,
   ],
   templateUrl: './farm-dashboard.component.html',
   styleUrl: './farm-dashboard.component.scss',

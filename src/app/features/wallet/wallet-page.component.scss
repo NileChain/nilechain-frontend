@@ -3,59 +3,116 @@
 }
 
 .wallet-page__body {
-  max-width: 42rem;
+  max-width: 56rem;
   margin: 0 auto;
   padding: 1.25rem 1rem 3rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.15rem;
 }
 
 .wallet-page__lead {
-  color: var(--color-on-surface-variant, #5c6b73);
+  margin: 0;
+  color: var(--color-on-surface-variant);
   font-size: 0.95rem;
   line-height: 1.5;
 }
 
 .wallet-page__disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0;
   font-size: 0.85rem;
-  color: var(--color-on-surface-variant, #5c6b73);
-  border-inline-start: 3px solid var(--color-primary, #0f766e);
-  padding-inline-start: 0.75rem;
+  line-height: 1.45;
+  color: var(--color-on-primary-container);
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  background: var(--color-primary-container);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, transparent);
 }
 
 .wallet-page__balances {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1rem;
+}
+
+@media (min-width: 560px) {
+  .wallet-page__balances {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.wallet-page__tile-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
 .wallet-page__label {
   font-size: 0.8rem;
-  color: var(--color-on-surface-variant, #5c6b73);
-  margin-bottom: 0.25rem;
+  font-weight: 650;
+  color: var(--color-on-surface-variant);
+  margin: 0;
 }
 
 .wallet-page__amount {
-  font-size: 1.5rem;
+  margin: 0.35rem 0 0;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-on-surface);
+}
+
+.wallet-page__currency {
+  font-size: 0.85rem;
   font-weight: 650;
+  color: var(--color-on-surface-variant);
+  margin-inline-start: 0.25rem;
+}
+
+.wallet-page__actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 800px) {
+  .wallet-page__actions {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .wallet-page__panel {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  padding-block: 0.5rem;
+  padding: 1.15rem 1.2rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid
+    color-mix(in srgb, var(--color-outline-variant) 80%, transparent);
+  background: var(--color-surface-container-lowest);
+  box-shadow: var(--shadow-sm);
+}
+
+.wallet-page__panel--ledger {
+  grid-column: 1 / -1;
 }
 
 .wallet-page__panel h2 {
-  font-size: 1.1rem;
-  font-weight: 650;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 750;
+  color: var(--color-on-surface);
 }
 
 .wallet-page__hint {
+  margin: 0;
   font-size: 0.85rem;
-  color: var(--color-on-surface-variant, #5c6b73);
+  line-height: 1.45;
+  color: var(--color-on-surface-variant);
 }
 
 .wallet-page__field {
@@ -63,13 +120,19 @@
   flex-direction: column;
   gap: 0.35rem;
   font-size: 0.9rem;
+  font-weight: 550;
+  color: var(--color-on-surface);
 }
 
 .wallet-page__pending {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding: 0.75rem 0;
+  padding: 0.85rem 0.9rem;
+  border-radius: 0.65rem;
+  border: 1px dashed
+    color-mix(in srgb, var(--color-primary) 35%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 5%, transparent);
 }
 
 .wallet-page__list {
@@ -78,7 +141,6 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
 }
 
 .wallet-page__list li {
@@ -86,16 +148,33 @@
   grid-template-columns: 1fr auto;
   gap: 0.25rem 1rem;
   font-size: 0.9rem;
+  padding: 0.85rem 0.15rem;
+  border-block-end: 1px solid
+    color-mix(in srgb, var(--color-outline-variant) 65%, transparent);
+}
+
+.wallet-page__list li:last-child {
+  border-block-end: none;
+}
+
+.wallet-page__entry-type {
+  font-weight: 600;
+  color: var(--color-on-surface);
 }
 
 .wallet-page__meta {
   grid-column: 1 / -1;
   font-size: 0.75rem;
-  color: var(--color-on-surface-variant, #5c6b73);
+  color: var(--color-on-surface-variant);
 }
 
 .wallet-page__error {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid
+    color-mix(in srgb, var(--color-error) 30%, transparent);
+  background: color-mix(in srgb, var(--color-error) 6%, transparent);
 }

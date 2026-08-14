@@ -13,6 +13,8 @@ import {
 } from '../../../core/services/factory/factory.service';
 import { NotificationCenterService } from '../../../core/services/notification-center.service';
 import { TranslateService } from '../../../core/services/translate.service';
+import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
+import { UiAutoAnimateDirective } from '../../../shared/directives/ui-auto-animate.directive';
 
 type NotifTab = 'all' | 'unread' | 'matches' | 'risks';
 
@@ -37,6 +39,8 @@ interface DisplayNotification {
     AppTopBarComponent,
     RouterLink,
     DatePipe,
+    UiPortalHeroComponent,
+    UiAutoAnimateDirective,
   ],
   templateUrl: './factory-notifications.component.html',
 })

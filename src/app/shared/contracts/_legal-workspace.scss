@@ -212,19 +212,40 @@
 
 @media print {
   .legal-workspace {
-    background: #fff;
+    background: #fff !important;
   }
 
-  :host ::ng-deep app-top-bar,
-  .print\:hidden {
+  app-top-bar,
+  app-sidebar-farm,
+  app-sidebar-factory,
+  app-sidebar-admin,
+  .print\:hidden,
+  .lw-toc,
+  .lw-rail,
+  .lw-progress,
+  .lw-actions {
     display: none !important;
   }
 
   main {
     margin: 0 !important;
+    padding: 0 !important;
   }
 
-  .lw-shell {
-    padding: 0;
+  .lw-shell,
+  .lw-workspace,
+  .lw-document {
+    display: block !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #contract-print-root,
+  .deed {
+    box-shadow: none !important;
+    border: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
   }
 }

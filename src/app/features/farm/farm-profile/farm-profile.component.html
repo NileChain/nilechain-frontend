@@ -28,6 +28,15 @@
   <div
     class="fp-page p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto animate-fade-in"
   >
+    <ui-portal-hero
+      class="mb-4 block"
+      size="compact"
+      imageUrl="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1600&q=70"
+      quoteKey="portalHero.profileQuote"
+      titleKey="farm.profile.title"
+      bodyKey="farm.profile.subtitle"
+    />
+
     @if (loading()) {
       <div
         class="flex justify-center py-16"

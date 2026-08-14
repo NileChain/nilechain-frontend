@@ -82,12 +82,23 @@
         </aside>
 
         <div class="lw-document">
+          @if (!isSigned() && lastRevision(); as rev) {
+            <div class="print:hidden mb-4">
+              <app-contract-negotiation-diff
+                [revision]="rev"
+                viewerParty="Factory"
+              />
+            </div>
+          }
           @if (documentReady()) {
             <app-contract-document
               [contract]="c"
               [showSignedBanner]="isSigned()"
               [showWatermark]="isSigned()"
               [documentDir]="documentDir()"
+              [previousText]="
+                isSigned() ? null : lastRevision()?.previousText ?? null
+              "
             />
           } @else {
             <div class="lw-paper-skeleton" aria-hidden="true"></div>
@@ -103,6 +114,14 @@
           }
 
           @if (canDecide()) {
+            <div class="lw-actions print:hidden mb-2">
+              <app-contract-request-changes
+                portal="factory"
+                [contractId]="c.contractId"
+                [enabled]="!acting()"
+                (applied)="load()"
+              />
+            </div>
             @if (signFundsHint(); as hint) {
               <p class="lw-actions print:hidden text-sm text-on-surface-variant mb-2">
                 {{ hint }}
@@ -136,11 +155,45 @@
           @if (c.integrity) {
             <app-contract-integrity-badge [integrity]="c.integrity" />
           }
+          @if (!isSigned()) {
+            <details class="lw-side-panel" open>
+              <summary>{{ 'negotiation.panelTitle' | translate }}</summary>
+              <div class="p-3 space-y-3">
+                <p class="font-label-sm text-label-sm text-on-surface-variant">
+                  {{ 'negotiation.panelHint' | translate }}
+                </p>
+                @if (canDecide()) {
+                  <p class="font-label-sm text-label-sm text-on-surface-variant">
+                    {{ 'negotiation.useActionBar' | translate }}
+                  </p>
+                } @else {
+                  <app-contract-request-changes
+                    portal="factory"
+                    [contractId]="c.contractId"
+                    [enabled]="!acting()"
+                    (applied)="load()"
+                  />
+                }
+              </div>
+            </details>
+          }
           <details class="lw-side-panel" open>
             <summary>{{ 'contractDoc.timeline' | translate }}</summary>
             <app-contract-timeline [steps]="timeline()" [showTitle]="false" />
           </details>
           @if (isSigned()) {
+            <details class="lw-side-panel" open>
+              <summary>{{ 'contractDates.panelTitle' | translate }}</summary>
+              <div class="p-3">
+                <app-contract-date-amendment
+                  portal="factory"
+                  [contractId]="c.contractId"
+                  [signed]="isSigned()"
+                  [state]="dateAmendmentState()"
+                  (changed)="load()"
+                />
+              </div>
+            </details>
             <details class="lw-side-panel" open>
               <summary>{{ 'paymentMilestones.title' | translate }}</summary>
               <app-contract-payment-milestones

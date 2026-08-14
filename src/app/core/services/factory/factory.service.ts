@@ -432,7 +432,14 @@ export interface FactoryContract {
   quantityTons: number;
   pricePerTon: number | null;
   deliveryDate?: string | null;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  hasPendingDateAmendment?: boolean;
+  pendingStartsAt?: string | null;
+  pendingEndsAt?: string | null;
+  dateAmendmentProposedByUserId?: string | null;
   deliveryLocation?: string | null;
+  qualityRequirements?: string | null;
   generatedText: string | null;
   pdfUrl: string | null;
   status: string;
@@ -449,4 +456,5 @@ export interface FactoryContract {
   farmUserId?: string | null;
   factoryUserId?: string | null;
   canUnwindSigned?: boolean;
+  lastRevision?: import('../../../shared/contracts/contract-diff.util').ContractRevisionView | null;
 }

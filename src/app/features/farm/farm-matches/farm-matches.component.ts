@@ -15,6 +15,7 @@ import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-stat
 import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
+import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
 import { FarmService } from '../../../core/services/farm/farm.service';
 import {
   FarmMatchItem,
@@ -43,6 +44,7 @@ interface FilterChip {
   imports: [
     TranslatePipe,
     AppTopBarComponent,
+    UiPortalHeroComponent,
     UiErrorStateComponent,
     UiEmptyStateComponent,
     UiSkeletonComponent,
@@ -414,6 +416,16 @@ export class FarmMatchesComponent implements OnInit {
 
   displayDelivery(match: FarmMatchItem): string | null {
     return match.effectiveDeliveryDate ?? match.deliveryDate;
+  }
+
+  /** Drop GPS coords so the buyer cell stays scannable. */
+  shortLocation(loc: string | null | undefined): string {
+    if (!loc?.trim()) return '';
+    return loc
+      .replace(/\(?\s*-?\d{1,3}\.\d+\s*,\s*-?\d{1,3}\.\d+\s*\)?/g, '')
+      .replace(/\s*[·|/,]\s*$/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
   }
 
   openCounterForm(match: FarmMatchItem, event?: Event): void {

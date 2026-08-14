@@ -8,11 +8,13 @@
   <div
     class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
   >
-    <section class="space-y-1">
-      <p class="font-body-md text-body-md text-on-surface-variant">
-        {{ 'notifications.subtitle' | translate }}
-      </p>
-    </section>
+    <ui-portal-hero
+      size="compact"
+      imageUrl="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=1600&q=70"
+      quoteKey="portalHero.notificationsQuote"
+      titleKey="notifications.title"
+      bodyKey="notifications.subtitle"
+    />
 
     <div
       class="flex items-center gap-2 overflow-x-auto pb-2"
@@ -63,7 +65,7 @@
         icon="notifications"
       />
     } @else {
-      <section class="flex flex-col gap-4 pb-8">
+      <section class="flex flex-col gap-4 pb-8" uiAutoAnimate>
         @for (item of visible(); track item.id) {
           <article
             class="ui-card ui-card-interactive p-4 relative flex items-start gap-4"

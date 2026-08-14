@@ -28,12 +28,20 @@ import { ContractAttachmentsComponent } from '../../../shared/contracts/contract
 import { ContractTocComponent } from '../../../shared/contracts/contract-toc/contract-toc.component';
 import { ContractReadingProgressComponent } from '../../../shared/contracts/contract-reading-progress/contract-reading-progress.component';
 import { ContractIntegrityBadgeComponent } from '../../../shared/contracts/contract-integrity-badge/contract-integrity-badge.component';
+import {
+  ContractDateAmendmentComponent,
+  ContractDateAmendmentState,
+} from '../../../shared/contracts/contract-date-amendment/contract-date-amendment.component';
+import { ContractRequestChangesComponent } from '../../../shared/contracts/contract-request-changes/contract-request-changes.component';
+import { ContractNegotiationDiffComponent } from '../../../shared/contracts/contract-negotiation-diff/contract-negotiation-diff.component';
+import { ContractRevisionView } from '../../../shared/contracts/contract-diff.util';
 import { FarmService } from '../../../core/services/farm/farm.service';
 import { FarmContract } from '../../../core/models/farm/farm-contract.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslateService } from '../../../core/services/translate.service';
+import { resolveApiErrorMessage } from '../../../core/utils/api-error.util';
 import { AiAssistantContextService } from '../../../core/services/ai-assistant-context.service';
 import {
   ContractAttachmentDto,
@@ -43,11 +51,13 @@ import {
 } from '../../../shared/contracts/models/contract-document.model';
 import { buildContractTimeline } from '../../../shared/contracts/contract-timeline.util';
 import {
+  toContractDocumentModel,
+  documentDirForContract,
+} from '../../../shared/contracts/contract-document.mapper';
+import {
   ContractTocItem,
-  buildToc,
+  buildDocumentToc,
   contractStatusLabelKey,
-  detectDocumentDir,
-  displayText,
   parseContractSections,
 } from '../../../shared/contracts/contract-text.util';
 
@@ -72,6 +82,9 @@ import {
     ContractTocComponent,
     ContractReadingProgressComponent,
     ContractIntegrityBadgeComponent,
+    ContractDateAmendmentComponent,
+    ContractRequestChangesComponent,
+    ContractNegotiationDiffComponent,
   ],
   templateUrl: './farm-contract-details.component.html',
   styleUrl: './farm-contract-details.component.scss',
@@ -102,6 +115,7 @@ export class FarmContractDetailsComponent implements OnInit, AfterViewInit {
   readonly fromMatches = signal(false);
   readonly documentDir = signal<'rtl' | 'ltr'>('ltr');
   readonly fulfillmentFulfilled = signal(false);
+  readonly lastRevision = signal<ContractRevisionView | null>(null);
 
   private contractId: string | null = null;
   private viewedAt: string | null = null;
@@ -205,6 +219,20 @@ export class FarmContractDetailsComponent implements OnInit, AfterViewInit {
     return s === 'signed' || s === 'active';
   }
 
+  dateAmendmentState(): ContractDateAmendmentState | null {
+    const c = this.contract();
+    if (!c) return null;
+    return {
+      startsAt: c.startsAt,
+      endsAt: c.endsAt,
+      hasPendingDateAmendment: c.hasPendingDateAmendment,
+      pendingStartsAt: c.pendingStartsAt,
+      pendingEndsAt: c.pendingEndsAt,
+      dateAmendmentProposedByUserId: c.dateAmendmentProposedByUserId,
+      currentUserId: this.auth.currentUser()?.id ?? null,
+    };
+  }
+
   canUnwind(): boolean {
     return !!this.contract()?.canUnwindSigned;
   }
@@ -293,18 +321,18 @@ export class FarmContractDetailsComponent implements OnInit, AfterViewInit {
   }
 
   private resolveApproveError(err: HttpErrorResponse): string {
-    const code = err?.error?.code;
-    if (typeof code === 'string') {
-      if (code.includes('InsufficientBalance')) {
-        return this.i18n.instant('farm.contracts.approveInsufficientBalance');
-      }
-      if (code.includes('DealValueInvalid')) {
-        return this.i18n.instant('farm.contracts.approveDealValueInvalid');
-      }
-    }
-    return (
-      err?.error?.message || this.i18n.instant('farm.contracts.approveFailed')
-    );
+    return resolveApiErrorMessage(err, this.i18n, {
+      fallbackKey: 'farm.contracts.approveFailed',
+      mapCode: (code) => {
+        if (code.includes('InsufficientBalance')) {
+          return this.i18n.instant('farm.contracts.approveInsufficientBalance');
+        }
+        if (code.includes('DealValueInvalid')) {
+          return this.i18n.instant('farm.contracts.approveDealValueInvalid');
+        }
+        return null;
+      },
+    }).message;
   }
 
   async unwind(): Promise<void> {
@@ -399,8 +427,41 @@ export class FarmContractDetailsComponent implements OnInit, AfterViewInit {
       });
   }
 
+  /** Opens the legal-document PDF (not the website print view). */
   print(): void {
-    window.print();
+    if (!this.contractId) {
+      return;
+    }
+    this.acting.set(true);
+    this.farmApi
+      .downloadContractPdf(this.contractId)
+      .pipe(finalize(() => this.acting.set(false)))
+      .subscribe({
+        next: (blob) => {
+          const url = URL.createObjectURL(blob);
+          const win = window.open(url, '_blank');
+          if (win) {
+            win.addEventListener(
+              'load',
+              () => {
+                win.focus();
+                win.print();
+              },
+              { once: true }
+            );
+          } else {
+            // Popup blocked — fall back to download.
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `nilechain-contract-${this.contractId}.pdf`;
+            a.click();
+          }
+          // Revoke later so the print window can still load the blob.
+          setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        },
+        error: () =>
+          this.toast.error(this.i18n.instant('farm.contracts.downloadFailed')),
+      });
   }
 
   async share(): Promise<void> {
@@ -471,47 +532,29 @@ export class FarmContractDetailsComponent implements OnInit, AfterViewInit {
       contractId: c.contractId,
       matchId: c.matchId,
     });
-    const model: ContractDocumentModel = {
-      contractId: c.contractId,
-      matchId: c.matchId,
-      status: c.status,
-      createdAt: c.createdAt,
-      updatedAt: c.updatedAt ?? c.signedAt ?? c.createdAt,
-      signedAt: c.signedAt,
-      factorySigned: c.factorySigned ?? false,
-      farmSigned: c.farmSigned ?? false,
-      factorySignedAt: c.factorySignedAt ?? null,
-      farmSignedAt: c.farmSignedAt ?? null,
-      factoryName: displayText(c.factoryName, '—'),
-      farmName: displayText(c.farmName, '—'),
-      factoryLocation: displayText(c.factoryLocation, ''),
-      cropName: displayText(c.cropName, '—'),
-      quantityTons: c.quantityTons,
-      pricePerTon: c.pricePerTon,
-      deliveryDate: c.deliveryDate,
-      deliveryLocation: displayText(
-        c.deliveryLocation ?? c.factoryLocation,
-        ''
-      ),
-      generatedText: c.generatedText,
-      pdfUrl: c.pdfUrl,
-      version: '1.0',
-      title: undefined,
-      matchScore: c.matchScore,
-      riskScore: c.riskScore,
-      farmUserId: c.farmUserId ?? null,
-      factoryUserId: c.factoryUserId ?? null,
-      canUnwindSigned: !!c.canUnwindSigned,
-      integrity: c.integrity ?? null,
-    };
+    this.lastRevision.set(
+      c.lastRevision
+        ? {
+            ...c.lastRevision,
+            newText: c.lastRevision.newText || c.generatedText || '',
+          }
+        : null
+    );
+    const model = toContractDocumentModel(c);
     const sections = parseContractSections(model.generatedText);
     this.contract.set(model);
-    this.documentDir.set(detectDocumentDir(model.generatedText));
-    this.toc.set(buildToc(sections));
+    this.documentDir.set(documentDirForContract(model));
+    this.toc.set(
+      buildDocumentToc(sections, {
+        parties: this.i18n.instant('contractDoc.parties'),
+        commercial: this.i18n.instant('contractDoc.commercialTerms'),
+        signatures: this.i18n.instant('contractDoc.signatures'),
+      })
+    );
     this.timeline.set(
       buildContractTimeline(model, { viewedAt: this.viewedAt })
     );
-    this.activeSectionId.set(sections[0]?.id ?? null);
+    this.activeSectionId.set('sec-parties');
     this.loadAttachments(c.contractId);
     this.loadFulfillment(c.contractId);
   }

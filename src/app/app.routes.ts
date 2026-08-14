@@ -63,6 +63,17 @@ export const routes: Routes = [
     canActivate: [guestGuard],
   },
 
+  // Farm portal landing (no sidebar — website-style)
+  {
+    path: 'farm/home',
+    loadComponent: () =>
+      import('./features/farm/farm-home/farm-home.component').then(
+        (m) => m.FarmHomeComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Farm'] },
+  },
+
   // Farm (Farm + Admin)
   {
     path: 'farm',
@@ -75,7 +86,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'dashboard',
+        redirectTo: '/farm/home',
         pathMatch: 'full',
       },
       {
@@ -142,6 +153,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'negotiations',
+        loadComponent: () =>
+          import('./shared/negotiations/party-negotiations-page.component').then(
+            (m) => m.PartyNegotiationsPageComponent
+          ),
+      },
+      {
         path: 'disputes',
         loadComponent: () =>
           import('./shared/disputes/party-disputes-page.component').then(
@@ -170,6 +188,17 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
 
+  // Factory portal landing (no sidebar — website-style)
+  {
+    path: 'factory/home',
+    loadComponent: () =>
+      import('./features/factory/factory-home/factory-home.component').then(
+        (m) => m.FactoryHomeComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Factory'] },
+  },
+
   // Factory (Factory + Admin)
   {
     path: 'factory',
@@ -182,7 +211,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'dashboard',
+        redirectTo: '/factory/home',
         pathMatch: 'full',
       },
       {
@@ -302,6 +331,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/factory/factory-notifications/factory-notifications.component').then(
             (m) => m.FactoryNotificationsComponent
+          ),
+      },
+      {
+        path: 'negotiations',
+        loadComponent: () =>
+          import('./shared/negotiations/party-negotiations-page.component').then(
+            (m) => m.PartyNegotiationsPageComponent
           ),
       },
       {

@@ -11,277 +11,320 @@
     </div>
   }
 
-  <!-- 1. Document identity / NileChain header -->
-  <header class="deed__masthead">
+  <div class="deed__topbar" aria-hidden="true"></div>
+
+  <header class="deed__letterhead">
     <div class="deed__brand">
-      <span class="deed__crest" aria-hidden="true">N</span>
+      <div class="deed__logo">
+        <ui-brand-mark [size]="44" [decorative]="true" />
+      </div>
       <div>
-        <p class="deed__brand-name">{{ 'app.name' | translate }}</p>
+        <p class="deed__brand-name" dir="ltr">NileChain</p>
         <p class="deed__brand-tag">
-          {{ 'contractDoc.aiGeneratedLabel' | translate }}
+          {{ 'contractDoc.marketplaceTag' | translate }}
         </p>
       </div>
     </div>
-    <div class="deed__stamp">
-      <span class="deed__status" [attr.data-tone]="statusTone(contract.status)">
-        {{ statusLabelKey(contract.status) | translate }}
-      </span>
+    <div class="deed__contact">
+      <p>{{ 'contractDoc.contactEmail' | translate }}</p>
+      <p>{{ 'contractDoc.contactAddress' | translate }}</p>
+      <p dir="ltr">{{ 'contractDoc.contactWeb' | translate }}</p>
     </div>
   </header>
 
-  @if (showSignedBanner || isFullySigned) {
-    <div class="deed__banner" role="status">
-      <span class="material-symbols-outlined" aria-hidden="true">verified</span>
-      <span>{{ 'contractDoc.fullySignedBanner' | translate }}</span>
-    </div>
-  } @else if (isFactorySigned && !isFarmSigned) {
-    <div class="deed__banner deed__banner--pending" role="status">
-      <span class="material-symbols-outlined" aria-hidden="true">pending</span>
-      <span>{{ 'contractDoc.factorySignedBanner' | translate }}</span>
-    </div>
-  } @else if (isFarmSigned && !isFactorySigned) {
-    <div class="deed__banner deed__banner--pending" role="status">
-      <span class="material-symbols-outlined" aria-hidden="true">pending</span>
-      <span>{{ 'contractDoc.farmSignedBanner' | translate }}</span>
-    </div>
-  }
+  <div class="deed__rules" aria-hidden="true"></div>
 
-  @if (bismillah) {
-    <p class="deed__bismillah">{{ bismillah }}</p>
-  }
+  <div class="deed__sheet">
+    @if (showSignedBanner || isFullySigned) {
+      <div class="deed__banner" role="status">
+        {{ 'contractDoc.fullySignedBanner' | translate }}
+      </div>
+    } @else if (isFactorySigned && !isFarmSigned) {
+      <div class="deed__banner deed__banner--pending" role="status">
+        {{ 'contractDoc.factorySignedBanner' | translate }}
+      </div>
+    } @else if (isFarmSigned && !isFactorySigned) {
+      <div class="deed__banner deed__banner--pending" role="status">
+        {{ 'contractDoc.farmSignedBanner' | translate }}
+      </div>
+    }
 
-  <!-- 2–6. Title + contract identity -->
-  <div class="deed__title-block">
+    @if (bismillah) {
+      <p class="deed__bismillah">{{ bismillah }}</p>
+    }
+
     <h1 class="deed__title">
       {{ contract.title || ('contractDoc.defaultTitle' | translate) }}
     </h1>
-  </div>
 
-  <table class="deed-table deed-table--identity">
-    <tbody>
-      <tr>
-        <th scope="row">{{ 'contractDoc.contractNumber' | translate }}</th>
-        <td class="deed-mono">{{ fullId(contract.contractId) }}</td>
-      </tr>
-      <tr>
-        <th scope="row">{{ 'contractDoc.createdAt' | translate }}</th>
-        <td>{{ contract.createdAt | date: 'mediumDate' }}</td>
-      </tr>
-      <tr>
-        <th scope="row">{{ 'contractDoc.updatedAt' | translate }}</th>
-        <td>
-          {{
-            (contract.updatedAt || contract.signedAt || contract.createdAt)
-              | date: 'mediumDate'
-          }}
-        </td>
-      </tr>
-      <tr>
-        <th scope="row">{{ 'contractDoc.statusLabel' | translate }}</th>
-        <td>{{ statusLabelKey(contract.status) | translate }}</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <!-- 8–9. Parties from API record -->
-  <section class="deed-section" [attr.aria-label]="'contractDoc.parties' | translate">
-    <h2 class="deed-section__title">
-      {{ 'contractDoc.parties' | translate }}
-    </h2>
-    <table class="deed-table">
-      <tbody>
-        <tr>
-          <th scope="row">{{ 'contractDoc.factoryParty' | translate }}</th>
-          <td>
-            <strong>{{ contract.factoryName }}</strong>
-            @if (locationOf(contract.factoryLocation); as loc) {
-              @if (loc) {
-                <div class="deed-sub">{{ loc }}</div>
+    <section class="deed-section" id="sec-intro">
+      <h2 class="deed-section__title">
+        <span class="deed-section__num">I.</span>
+        {{ 'contractDoc.introHeading' | translate }}
+      </h2>
+      @if (introParagraphs.length) {
+        @for (para of introParagraphs; track $index) {
+          <p
+            class="deed-intro"
+            [class.deed-intro--changed]="isChangedIntroPara($index)"
+          >
+            @if (introOps($index); as ops) {
+              @if (isNewParagraph(ops)) {
+                {{ para }}
+              } @else {
+                @for (op of ops; track $index) {
+                  @if (op.kind === 'insert') {
+                    <mark class="deed-mark">{{ op.text }}</mark>
+                  } @else {
+                    <span>{{ op.text }}</span>
+                  }
+                }
               }
-            }
-          </td>
-        </tr>
-        <tr>
-          <th scope="row">{{ 'contractDoc.farmParty' | translate }}</th>
-          <td>
-            <strong>{{ contract.farmName }}</strong>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-
-  <!-- 10. Supply data from API record -->
-  <section
-    class="deed-section"
-    [attr.aria-label]="'contractDoc.supplyData' | translate"
-  >
-    <h2 class="deed-section__title">
-      {{ 'contractDoc.supplyData' | translate }}
-    </h2>
-    <table class="deed-table">
-      <tbody>
-        <tr>
-          <th scope="row">{{ 'contractDoc.cropType' | translate }}</th>
-          <td>{{ displayText(contract.cropName) }}</td>
-        </tr>
-        <tr>
-          <th scope="row">{{ 'contractDoc.quantity' | translate }}</th>
-          <td class="deed-mono">
-            {{ contract.quantityTons | number: '1.0-2' }}
-            {{ 'common.ton' | translate }}
-          </td>
-        </tr>
-        <tr>
-          <th scope="row">{{ 'contractDoc.price' | translate }}</th>
-          <td class="deed-mono">
-            @if (contract.pricePerTon != null) {
-              {{ contract.pricePerTon | number: '1.0-0' }}
-              {{ 'common.egp' | translate }}/{{ 'common.ton' | translate }}
             } @else {
-              —
+              {{ para }}
             }
-          </td>
-        </tr>
-        @if (totalValue != null) {
+          </p>
+        }
+      } @else {
+        <p class="deed-intro" [class.deed-intro--changed]="isChangedIntro()">
+          {{
+            'contractDoc.introFallback'
+              | translate
+                : { factory: contract.factoryName, farm: contract.farmName }
+          }}
+        </p>
+      }
+    </section>
+
+    <section class="deed-section" id="sec-summary">
+      <h2 class="deed-section__title">
+        <span class="deed-section__num">II.</span>
+        {{ 'contractDoc.summaryHeading' | translate }}
+      </h2>
+      <p class="deed-lead">{{ 'contractDoc.summaryLead' | translate }}</p>
+
+      <table class="deed-table">
+        <thead>
           <tr>
-            <th scope="row">{{ 'contractDoc.totalValue' | translate }}</th>
-            <td class="deed-mono">
-              {{ totalValue | number: '1.0-0' }}
-              {{ 'common.egp' | translate }}
+            <th scope="col">{{ 'contractDoc.colDescription' | translate }}</th>
+            <th scope="col">{{ 'contractDoc.colDetails' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">{{ 'contractDoc.factoryParty' | translate }}</th>
+            <td>
+              {{ contract.factoryName }}
+              @if (locationOf(contract.factoryLocation); as loc) {
+                @if (loc) {
+                  <span class="deed-table__meta"> · {{ loc }}</span>
+                }
+              }
             </td>
           </tr>
+          <tr>
+            <th scope="row">{{ 'contractDoc.farmParty' | translate }}</th>
+            <td>
+              {{ contract.farmName }}
+              @if (locationOf(contract.farmLocation); as farmLoc) {
+                @if (farmLoc) {
+                  <span class="deed-table__meta"> · {{ farmLoc }}</span>
+                }
+              }
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">{{ 'contractDoc.cropType' | translate }}</th>
+            <td>{{ displayText(contract.cropName) }}</td>
+          </tr>
+          <tr>
+            <th scope="row">{{ 'contractDoc.quantity' | translate }}</th>
+            <td class="deed-mono">
+              {{ contract.quantityTons | number: '1.0-2' }}
+              {{ 'common.ton' | translate }}
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">{{ 'contractDoc.price' | translate }}</th>
+            <td class="deed-mono">
+              @if (contract.pricePerTon != null) {
+                {{ contract.pricePerTon | number: '1.0-0' }}
+                {{ 'common.egp' | translate }}/{{ 'common.ton' | translate }}
+              } @else {
+                —
+              }
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">{{ 'contractDoc.startsAt' | translate }}</th>
+            <td>
+              @if (contract.startsAt) {
+                {{ contract.startsAt | date: 'mediumDate' }}
+              } @else if (isFullySigned && contract.signedAt) {
+                {{ contract.signedAt | date: 'mediumDate' }}
+              } @else {
+                {{ 'contractDoc.startsAtPending' | translate }}
+              }
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">{{ 'contractDoc.endsAt' | translate }}</th>
+            <td>
+              @if (contract.endsAt) {
+                {{ contract.endsAt | date: 'mediumDate' }}
+              } @else if (contract.deliveryDate) {
+                {{ contract.deliveryDate | date: 'mediumDate' }}
+              } @else {
+                —
+              }
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="deed-lead deed-lead--after">
+        {{ 'contractDoc.summaryClose' | translate }}
+      </p>
+    </section>
+
+    <section
+      class="deed-body"
+      [attr.aria-label]="'contractDoc.fullText' | translate"
+    >
+      @if (!hasGeneratedText && !introParagraphs.length) {
+        <ui-empty-state
+          icon="description"
+          titleKey="contractDoc.emptyBodyTitle"
+          bodyKey="contractDoc.emptyBodyHint"
+        />
+        <p class="deed-missing" role="note">
+          {{ 'contractDoc.missingClausesNote' | translate }}
+        </p>
+      } @else {
+        @for (section of sections; track section.id) {
+          <section
+            class="deed-clause"
+            [class.deed-clause--changed]="isChangedSection(section)"
+            [attr.id]="section.id"
+          >
+            @if (section.title.trim()) {
+              <h3 class="deed-clause__title">
+                {{ section.title }}
+                @if (isChangedSection(section)) {
+                  <span class="deed-changed-label">{{
+                    (isAddedSection(section)
+                      ? 'negotiation.diffKind.added'
+                      : 'negotiation.diffKind.changed'
+                    ) | translate
+                  }}</span>
+                }
+              </h3>
+            }
+            @for (para of section.paragraphs; track $index) {
+              <p
+                class="deed-clause__para"
+                [class.deed-clause__para--changed]="
+                  isChangedParagraph(section, $index)
+                "
+              >
+                @if (paragraphOps(section, $index); as ops) {
+                  @if (isNewParagraph(ops)) {
+                    {{ para }}
+                  } @else {
+                    @for (op of ops; track $index) {
+                      @if (op.kind === 'insert') {
+                        <mark class="deed-mark">{{ op.text }}</mark>
+                      } @else {
+                        <span>{{ op.text }}</span>
+                      }
+                    }
+                  }
+                } @else {
+                  {{ para }}
+                }
+              </p>
+            }
+          </section>
         }
-        <tr>
-          <th scope="row">{{ 'contractDoc.deliveryDate' | translate }}</th>
-          <td>
-            {{
-              contract.deliveryDate
-                ? (contract.deliveryDate | date: 'mediumDate')
-                : '—'
-            }}
-          </td>
-        </tr>
-        <tr>
-          <th scope="row">{{ 'contractDoc.deliveryLocation' | translate }}</th>
-          <td>
-            {{
-              displayText(contract.deliveryLocation) !== '—'
-                ? displayText(contract.deliveryLocation)
-                : displayText(contract.factoryLocation)
-            }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-
-  <hr class="deed-rule" />
-
-  <!-- Full generated legal text — primary content -->
-  <section
-    class="deed-body"
-    [attr.aria-label]="'contractDoc.fullText' | translate"
-  >
-    <h2 class="deed-section__title deed-section__title--body">
-      {{ 'contractDoc.fullText' | translate }}
-    </h2>
-
-    @if (!hasGeneratedText) {
-      <ui-empty-state
-        icon="description"
-        titleKey="contractDoc.emptyBodyTitle"
-        bodyKey="contractDoc.emptyBodyHint"
-      />
-    } @else {
-      @for (section of sections; track section.id; let i = $index) {
-        <section class="deed-clause" [attr.id]="section.id">
-          @if (section.title.trim()) {
-            <h3 class="deed-clause__title">
-              <span class="deed-clause__num" aria-hidden="true">{{
-                i + 1
-              }}</span>
-              <span>{{ section.title }}</span>
-            </h3>
-          }
-          @for (para of section.paragraphs; track $index) {
-            <p
-              class="deed-clause__para"
-              [innerHTML]="htmlFor(section.id, $index)"
-            ></p>
-          }
-        </section>
       }
-    }
-  </section>
+    </section>
 
-  <hr class="deed-rule" />
-
-  <!-- 21. Signatures -->
-  <section
-    class="deed-sign"
-    [attr.aria-label]="'contractDoc.signatures' | translate"
-  >
-    <h2 class="deed-section__title">
-      {{ 'contractDoc.signatures' | translate }}
-    </h2>
-    <div class="deed-sign__grid">
-      <div class="deed-sign__block" [class.deed-sign__block--done]="isFactorySigned">
-        <p class="deed-sign__role">
-          {{ 'contractDoc.signedByFactory' | translate }}
-        </p>
-        <p class="deed-sign__name">{{ contract.factoryName }}</p>
-        <div class="deed-sign__line" aria-hidden="true"></div>
-        @if (isFactorySigned) {
-          <p class="deed-sign__state">
-            {{ 'contractDoc.signed' | translate }}
-            @if (contract.factorySignedAt) {
-              · {{ contract.factorySignedAt | date: 'medium' }}
-            }
+    <section
+      class="deed-sign"
+      id="sec-signatures"
+      [attr.aria-label]="'contractDoc.signatures' | translate"
+    >
+      <h2 class="deed-section__title">
+        {{ 'contractDoc.signatures' | translate }}
+      </h2>
+      <p class="deed-sign__hint">
+        {{ 'contractDoc.signaturesHint' | translate }}
+      </p>
+      <div class="deed-sign__grid">
+        <div
+          class="deed-sign__block"
+          [class.deed-sign__block--done]="isFactorySigned"
+        >
+          <p class="deed-sign__role">
+            {{ 'contractDoc.signedByFactory' | translate }}
           </p>
-        } @else {
-          <p class="deed-sign__pending">
-            {{ 'contractDoc.unsigned' | translate }}
+          <p class="deed-sign__name">{{ contract.factoryName }}</p>
+          <div class="deed-sign__line" aria-hidden="true"></div>
+          @if (isFactorySigned) {
+            <p class="deed-sign__state">
+              {{ 'contractDoc.signed' | translate }}
+              @if (contract.factorySignedAt) {
+                · {{ contract.factorySignedAt | date: 'medium' }}
+              }
+            </p>
+          } @else {
+            <p class="deed-sign__pending">
+              {{ 'contractDoc.unsigned' | translate }}
+            </p>
+          }
+        </div>
+        <div
+          class="deed-sign__block"
+          [class.deed-sign__block--done]="isFarmSigned"
+        >
+          <p class="deed-sign__role">
+            {{ 'contractDoc.signedByFarm' | translate }}
           </p>
-        }
+          <p class="deed-sign__name">{{ contract.farmName }}</p>
+          <div class="deed-sign__line" aria-hidden="true"></div>
+          @if (isFarmSigned) {
+            <p class="deed-sign__state">
+              {{ 'contractDoc.signed' | translate }}
+              @if (contract.farmSignedAt) {
+                · {{ contract.farmSignedAt | date: 'medium' }}
+              }
+            </p>
+          } @else {
+            <p class="deed-sign__pending">
+              {{ 'contractDoc.unsigned' | translate }}
+            </p>
+          }
+        </div>
       </div>
-      <div class="deed-sign__block" [class.deed-sign__block--done]="isFarmSigned">
-        <p class="deed-sign__role">
-          {{ 'contractDoc.signedByFarm' | translate }}
-        </p>
-        <p class="deed-sign__name">{{ contract.farmName }}</p>
-        <div class="deed-sign__line" aria-hidden="true"></div>
-        @if (isFarmSigned) {
-          <p class="deed-sign__state">
-            {{ 'contractDoc.signed' | translate }}
-            @if (contract.farmSignedAt) {
-              · {{ contract.farmSignedAt | date: 'medium' }}
-            }
-          </p>
-        } @else {
-          <p class="deed-sign__pending">
-            {{ 'contractDoc.unsigned' | translate }}
-          </p>
-        }
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- 22–23. Footer -->
-  <footer class="deed__footer">
-    <div>
-      <span>{{ 'contractDoc.createdByAi' | translate }}</span>
-      @if (isFullySigned && contract.signedAt) {
+    <footer class="deed__footer">
+      <div>
+        <span dir="ltr">NileChain</span>
         <span class="deed__footer-sep">·</span>
-        <span>
-          {{ 'contractDoc.signedAtLabel' | translate }}:
-          {{ contract.signedAt | date: 'medium' }}
-        </span>
-      }
-    </div>
-    <div>
-      {{ 'contractDoc.documentVersion' | translate }}:
-      {{ contract.version || '1.0' }}
-    </div>
-  </footer>
+        <span class="deed-mono">{{ contractNumber }}</span>
+        @if (isFullySigned && contract.signedAt) {
+          <span class="deed__footer-sep">·</span>
+          <span>
+            {{ 'contractDoc.signedAtLabel' | translate }}:
+            {{ contract.signedAt | date: 'medium' }}
+          </span>
+        }
+      </div>
+      <div>
+        {{ 'contractDoc.documentVersion' | translate }}:
+        {{ contract.version || '1.0' }}
+      </div>
+    </footer>
+  </div>
 </article>

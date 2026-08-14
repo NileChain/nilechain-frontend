@@ -9,6 +9,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { TranslateService } from '../../core/services/translate.service';
 import { CropRequest } from '../../core/models/crop-request.model';
 import { AppTopBarComponent } from '../../shared/components/app-top-bar/app-top-bar.component';
+import { UiPortalHeroComponent } from '../../shared/ui/portal-hero/portal-hero.component';
 import type { AppTopBarPortal } from '../../shared/components/app-top-bar/app-top-bar.component';
 import { UiLoaderComponent } from '../../shared/ui/loader/loader.component';
 import { UiErrorStateComponent } from '../../shared/ui/error-state/error-state.component';
@@ -23,6 +24,7 @@ import { UiEmptyStateComponent } from '../../shared/ui/empty-state/empty-state.c
     DatePipe,
     TranslatePipe,
     AppTopBarComponent,
+    UiPortalHeroComponent,
     UiLoaderComponent,
     UiErrorStateComponent,
     UiEmptyStateComponent,

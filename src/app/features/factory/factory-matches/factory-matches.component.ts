@@ -17,6 +17,7 @@ import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-stat
 import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
+import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
 import { FarmProfileDrawerComponent } from '../../../shared/ui/farm-profile-drawer/farm-profile-drawer.component';
 import { FactoryService } from '../../../core/services/factory/factory.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -67,6 +68,7 @@ configureLeafletDefaultIcon();
     UiEmptyStateComponent,
     UiSkeletonComponent,
     AppTopBarComponent,
+    UiPortalHeroComponent,
     FarmProfileDrawerComponent,
     RouterLink,
     DatePipe,

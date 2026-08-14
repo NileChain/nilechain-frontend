@@ -7,10 +7,12 @@ import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-stat
 import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
+import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
 import { FarmService } from '../../../core/services/farm/farm.service';
 import { FarmContract } from '../../../core/models/farm/farm-contract.model';
 import { contractStatusLabelKey } from '../../../shared/contracts/contract-text.util';
 import { TranslateService } from '../../../core/services/translate.service';
+import { UiAutoAnimateDirective } from '../../../shared/directives/ui-auto-animate.directive';
 
 @Component({
   selector: 'app-farm-contracts',
@@ -19,11 +21,13 @@ import { TranslateService } from '../../../core/services/translate.service';
     TranslatePipe,
     RouterLink,
     AppTopBarComponent,
+    UiPortalHeroComponent,
     UiErrorStateComponent,
     UiEmptyStateComponent,
     UiSkeletonComponent,
     DatePipe,
     DecimalPipe,
+    UiAutoAnimateDirective,
   ],
   templateUrl: './farm-contracts.component.html',
 })
@@ -82,5 +86,15 @@ export class FarmContractsComponent implements OnInit {
 
   statusLabelKey(status: string): string {
     return contractStatusLabelKey(status);
+  }
+
+  statusPillClass(status: string): string {
+    if (this.isActive(status)) return 'ui-status-pill--success';
+    if (this.isPending(status)) return 'ui-status-pill--warning';
+    const s = status.toLowerCase();
+    if (s.includes('cancel') || s.includes('reject')) {
+      return 'ui-status-pill--error';
+    }
+    return 'ui-status-pill--info';
   }
 }

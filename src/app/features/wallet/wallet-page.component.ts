@@ -14,7 +14,10 @@ import {
   WalletTopUpSession,
 } from '../../core/services/wallet/wallet.service';
 import { AppTopBarComponent } from '../../shared/components/app-top-bar/app-top-bar.component';
+import { UiPortalHeroComponent } from '../../shared/ui/portal-hero/portal-hero.component';
 import { UiLoaderComponent } from '../../shared/ui/loader/loader.component';
+import { UiCountUpDirective } from '../../shared/directives/ui-count-up.directive';
+import { UiAutoAnimateDirective } from '../../shared/directives/ui-auto-animate.directive';
 
 @Component({
   selector: 'app-wallet-page',
@@ -25,7 +28,10 @@ import { UiLoaderComponent } from '../../shared/ui/loader/loader.component';
     DatePipe,
     FormsModule,
     AppTopBarComponent,
+    UiPortalHeroComponent,
     UiLoaderComponent,
+    UiCountUpDirective,
+    UiAutoAnimateDirective,
   ],
   templateUrl: './wallet-page.component.html',
   styleUrl: './wallet-page.component.scss',

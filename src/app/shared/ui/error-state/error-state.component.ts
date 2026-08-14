@@ -16,34 +16,39 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
         >error_outline</span
       >
       <p class="font-title-md text-title-md text-on-surface">
-        {{ 'common.errorTitle' | translate }}
+        {{ titleKey | translate }}
       </p>
       @if (message) {
-        <p class="font-body-md text-body-md text-on-surface-variant max-w-sm">
+        <p class="font-body-md text-body-md text-on-surface-variant max-w-md">
           {{ message }}
         </p>
       } @else {
-        <p class="font-body-md text-body-md text-on-surface-variant max-w-sm">
+        <p class="font-body-md text-body-md text-on-surface-variant max-w-md">
           {{ 'common.errorBody' | translate }}
         </p>
       }
-      @if (showRetry) {
-        <button
-          type="button"
-          class="ui-btn-primary mt-2"
-          (click)="retry.emit()"
-        >
-          <span class="material-symbols-outlined" aria-hidden="true"
-            >refresh</span
+      <div class="flex flex-wrap items-center justify-center gap-2 mt-2">
+        <ng-content />
+        @if (showRetry) {
+          <button
+            type="button"
+            class="ui-btn-primary"
+            (click)="retry.emit()"
           >
-          {{ 'common.retry' | translate }}
-        </button>
-      }
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >refresh</span
+            >
+            {{ 'common.retry' | translate }}
+          </button>
+        }
+      </div>
     </div>
   `,
 })
 export class UiErrorStateComponent {
   @Input() message: string | null | undefined = '';
+  /** Override the default “Something went wrong” heading. */
+  @Input() titleKey = 'common.errorTitle';
   @Input() showRetry = true;
   @Output() retry = new EventEmitter<void>();
 }

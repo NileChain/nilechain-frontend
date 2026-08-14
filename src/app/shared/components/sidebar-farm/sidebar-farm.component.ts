@@ -45,6 +45,12 @@ export class SidebarFarmComponent {
     link: string;
   }> = [
     {
+      key: 'home',
+      icon: 'home',
+      labelKey: 'nav.home',
+      link: '/farm/home',
+    },
+    {
       key: 'dashboard',
       icon: 'dashboard',
       labelKey: 'nav.dashboard',
@@ -67,6 +73,12 @@ export class SidebarFarmComponent {
       icon: 'description',
       labelKey: 'nav.contracts',
       link: '/farm/contracts',
+    },
+    {
+      key: 'negotiations',
+      icon: 'edit_note',
+      labelKey: 'nav.negotiations',
+      link: '/farm/negotiations',
     },
     {
       key: 'disputes',

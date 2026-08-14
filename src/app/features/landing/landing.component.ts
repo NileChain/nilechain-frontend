@@ -8,6 +8,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
@@ -21,7 +22,7 @@ type NavMenu = 'solutions' | 'resources' | 'lang' | null;
 
 @Component({
   selector: 'app-landing',
-  imports: [RouterLink, TranslatePipe, UiBrandMarkComponent],
+  imports: [RouterLink, TranslatePipe, UiBrandMarkComponent, DecimalPipe],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
 })
@@ -46,14 +47,9 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     this.locale() === 'ar' ? 'ع' : 'EN'
   );
 
-  /** Decorative ambient particles for the hero (static layout seeds). */
-  readonly particles = Array.from({ length: 14 }, (_, i) => ({
-    id: i,
-    x: `${8 + ((i * 17) % 84)}%`,
-    y: `${10 + ((i * 23) % 78)}%`,
-    s: `${0.35 + (i % 5) * 0.12}rem`,
-    d: `${(i % 7) * 0.35}s`,
-  }));
+  /** Decorative ambient particles — unused on the Brono-aligned landing. */
+  readonly particles: { id: number; x: string; y: string; s: string; d: string }[] =
+    [];
 
   goToDashboard(): void {
     const roles = this.roles().map((r) => r.toLowerCase());
@@ -61,9 +57,9 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     if (roles.includes('admin')) {
       void this.router.navigate(['/admin-dashboard']);
     } else if (roles.includes('farm')) {
-      void this.router.navigate(['/farm-dashboard']);
+      void this.router.navigate(['/farm/home']);
     } else if (roles.includes('factory')) {
-      void this.router.navigate(['/factory-dashboard']);
+      void this.router.navigate(['/factory/home']);
     } else {
       void this.router.navigate(['/login']);
     }

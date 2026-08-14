@@ -23,6 +23,14 @@
   </app-top-bar>
 
   <div class="fp-shell animate-fade-in">
+    <ui-portal-hero
+      size="compact"
+      imageUrl="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1600&q=70"
+      quoteKey="portalHero.profileQuote"
+      titleKey="factory.profile.title"
+      bodyKey="factory.profile.subtitle"
+    />
+
     @if (loading()) {
       <div class="flex justify-center py-16" role="status" [attr.aria-busy]="true">
         <ui-loader />

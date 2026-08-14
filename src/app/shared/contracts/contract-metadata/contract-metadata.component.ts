@@ -51,7 +51,13 @@ import { displayText } from '../contract-text.util';
         </div>
         <div>
           <dt>{{ 'contractDoc.paymentTerms' | translate }}</dt>
-          <dd>{{ 'contractDoc.summaryPaymentAfter' | translate }}</dd>
+          <dd>
+            {{
+              contract.paymentTerms?.trim()
+                ? contract.paymentTerms
+                : ('contractDoc.summaryPaymentAfter' | translate)
+            }}
+          </dd>
         </div>
         <div class="contract-meta__wide">
           <dt>{{ 'contractDoc.deliveryLocation' | translate }}</dt>

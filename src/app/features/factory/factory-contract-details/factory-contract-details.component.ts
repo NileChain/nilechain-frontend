@@ -25,6 +25,7 @@ import { ConfirmDialogService } from '../../../core/services/confirm-dialog.serv
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslateService } from '../../../core/services/translate.service';
 import { AiAssistantContextService } from '../../../core/services/ai-assistant-context.service';
+import { resolveApiErrorMessage } from '../../../core/utils/api-error.util';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 import { ContractActionBarComponent } from '../../../shared/contracts/contract-action-bar/contract-action-bar.component';
 import { ContractAttachmentsComponent } from '../../../shared/contracts/contract-attachments/contract-attachments.component';
@@ -32,12 +33,14 @@ import { ContractDocumentComponent } from '../../../shared/contracts/contract-do
 import { ContractReadingProgressComponent } from '../../../shared/contracts/contract-reading-progress/contract-reading-progress.component';
 import {
   ContractTocItem,
-  buildToc,
+  buildDocumentToc,
   contractStatusLabelKey,
-  detectDocumentDir,
-  displayText,
   parseContractSections,
 } from '../../../shared/contracts/contract-text.util';
+import {
+  toContractDocumentModel,
+  documentDirForContract,
+} from '../../../shared/contracts/contract-document.mapper';
 import { ContractTimelineComponent } from '../../../shared/contracts/contract-timeline/contract-timeline.component';
 import { ContractFulfillmentTimelineComponent } from '../../../shared/contracts/contract-fulfillment-timeline/contract-fulfillment-timeline.component';
 import { ContractPaymentMilestonesComponent } from '../../../shared/contracts/contract-payment-milestones/contract-payment-milestones.component';
@@ -54,6 +57,13 @@ import {
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
 import { ContractIntegrityBadgeComponent } from '../../../shared/contracts/contract-integrity-badge/contract-integrity-badge.component';
+import {
+  ContractDateAmendmentComponent,
+  ContractDateAmendmentState,
+} from '../../../shared/contracts/contract-date-amendment/contract-date-amendment.component';
+import { ContractRequestChangesComponent } from '../../../shared/contracts/contract-request-changes/contract-request-changes.component';
+import { ContractNegotiationDiffComponent } from '../../../shared/contracts/contract-negotiation-diff/contract-negotiation-diff.component';
+import { ContractRevisionView } from '../../../shared/contracts/contract-diff.util';
 
 @Component({
   selector: 'app-factory-contract-details',
@@ -76,6 +86,9 @@ import { ContractIntegrityBadgeComponent } from '../../../shared/contracts/contr
     ContractTocComponent,
     ContractReadingProgressComponent,
     ContractIntegrityBadgeComponent,
+    ContractDateAmendmentComponent,
+    ContractRequestChangesComponent,
+    ContractNegotiationDiffComponent,
   ],
   templateUrl: './factory-contract-details.component.html',
   styleUrl: './factory-contract-details.component.scss',
@@ -108,6 +121,7 @@ export class FactoryContractDetailsComponent implements OnInit, AfterViewInit {
   readonly documentDir = signal<'rtl' | 'ltr'>('ltr');
   readonly availableBalanceEgp = signal<number | null>(null);
   readonly fulfillmentFulfilled = signal(false);
+  readonly lastRevision = signal<ContractRevisionView | null>(null);
 
   readonly signFundsHint = computed(() => {
     const c = this.contract();
@@ -232,6 +246,20 @@ export class FactoryContractDetailsComponent implements OnInit, AfterViewInit {
     return s === 'signed' || s === 'active';
   }
 
+  dateAmendmentState(): ContractDateAmendmentState | null {
+    const c = this.contract();
+    if (!c) return null;
+    return {
+      startsAt: c.startsAt,
+      endsAt: c.endsAt,
+      hasPendingDateAmendment: c.hasPendingDateAmendment,
+      pendingStartsAt: c.pendingStartsAt,
+      pendingEndsAt: c.pendingEndsAt,
+      dateAmendmentProposedByUserId: c.dateAmendmentProposedByUserId,
+      currentUserId: this.auth.currentUser()?.id ?? null,
+    };
+  }
+
   canUnwind(): boolean {
     return !!this.contract()?.canUnwindSigned;
   }
@@ -319,19 +347,18 @@ export class FactoryContractDetailsComponent implements OnInit, AfterViewInit {
   }
 
   private resolveApproveError(err: HttpErrorResponse): string {
-    const code = err?.error?.code;
-    if (typeof code === 'string') {
-      if (code.includes('InsufficientBalance')) {
-        return this.i18n.instant('factory.contracts.approveInsufficientBalance');
-      }
-      if (code.includes('DealValueInvalid')) {
-        return this.i18n.instant('factory.contracts.approveDealValueInvalid');
-      }
-    }
-    return (
-      err?.error?.message ||
-      this.i18n.instant('factory.contracts.approveFailed')
-    );
+    return resolveApiErrorMessage(err, this.i18n, {
+      fallbackKey: 'factory.contracts.approveFailed',
+      mapCode: (code) => {
+        if (code.includes('InsufficientBalance')) {
+          return this.i18n.instant('factory.contracts.approveInsufficientBalance');
+        }
+        if (code.includes('DealValueInvalid')) {
+          return this.i18n.instant('factory.contracts.approveDealValueInvalid');
+        }
+        return null;
+      },
+    }).message;
   }
 
   private loadWalletBalance(): void {
@@ -437,8 +464,41 @@ export class FactoryContractDetailsComponent implements OnInit, AfterViewInit {
       });
   }
 
+  /** Opens the legal-document PDF (not the website print view). */
   print(): void {
-    window.print();
+    if (!this.contractId) {
+      return;
+    }
+    this.acting.set(true);
+    this.factoryApi
+      .downloadContractPdf(this.contractId)
+      .pipe(finalize(() => this.acting.set(false)))
+      .subscribe({
+        next: (blob) => {
+          const url = URL.createObjectURL(blob);
+          const win = window.open(url, '_blank');
+          if (win) {
+            win.addEventListener(
+              'load',
+              () => {
+                win.focus();
+                win.print();
+              },
+              { once: true }
+            );
+          } else {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `nilechain-contract-${this.contractId}.pdf`;
+            a.click();
+          }
+          setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        },
+        error: () =>
+          this.toast.error(
+            this.i18n.instant('factory.contracts.downloadFailed')
+          ),
+      });
   }
 
   async share(): Promise<void> {
@@ -509,44 +569,33 @@ export class FactoryContractDetailsComponent implements OnInit, AfterViewInit {
       contractId: c.contractId,
       matchId: c.matchId,
     });
-    const model: ContractDocumentModel = {
-      contractId: c.contractId,
-      matchId: c.matchId,
-      status: c.status,
-      createdAt: c.createdAt,
-      updatedAt: c.updatedAt ?? c.signedAt ?? c.createdAt,
-      signedAt: c.signedAt,
-      factorySigned: c.factorySigned ?? false,
-      farmSigned: c.farmSigned ?? false,
-      factorySignedAt: c.factorySignedAt ?? null,
-      farmSignedAt: c.farmSignedAt ?? null,
-      factoryName: displayText(c.factoryName, '—'),
-      farmName: displayText(c.farmName, '—'),
-      factoryLocation: displayText(c.deliveryLocation, ''),
-      cropName: displayText(c.cropName, '—'),
-      quantityTons: c.quantityTons,
-      pricePerTon: c.pricePerTon,
-      deliveryDate: c.deliveryDate,
-      deliveryLocation: displayText(c.deliveryLocation, ''),
-      generatedText: c.generatedText,
-      pdfUrl: c.pdfUrl,
-      version: '1.0',
-      title: undefined,
-      matchScore: c.matchScore,
-      riskScore: c.riskScore,
-      farmUserId: c.farmUserId ?? null,
-      factoryUserId: c.factoryUserId ?? null,
-      canUnwindSigned: !!c.canUnwindSigned,
-      integrity: c.integrity ?? null,
-    };
+    this.lastRevision.set(
+      c.lastRevision
+        ? {
+            ...c.lastRevision,
+            newText: c.lastRevision.newText || c.generatedText || '',
+          }
+        : null
+    );
+    const model = toContractDocumentModel({
+      ...c,
+      factoryLocation: c.deliveryLocation ?? null,
+      farmLocation: c.farmLocation ?? null,
+    });
     const sections = parseContractSections(model.generatedText);
     this.contract.set(model);
-    this.documentDir.set(detectDocumentDir(model.generatedText));
-    this.toc.set(buildToc(sections));
+    this.documentDir.set(documentDirForContract(model));
+    this.toc.set(
+      buildDocumentToc(sections, {
+        parties: this.i18n.instant('contractDoc.parties'),
+        commercial: this.i18n.instant('contractDoc.commercialTerms'),
+        signatures: this.i18n.instant('contractDoc.signatures'),
+      })
+    );
     this.timeline.set(
       buildContractTimeline(model, { viewedAt: this.viewedAt })
     );
-    this.activeSectionId.set(sections[0]?.id ?? null);
+    this.activeSectionId.set('sec-parties');
     this.loadAttachments(c.contractId);
     this.loadFulfillment(c.contractId);
   }

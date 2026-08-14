@@ -9,6 +9,8 @@ import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-t
 import { FarmService } from '../../../core/services/farm/farm.service';
 import { FarmNotification } from '../../../core/models/farm/farm-notification.model';
 import { TranslateService } from '../../../core/services/translate.service';
+import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
+import { UiAutoAnimateDirective } from '../../../shared/directives/ui-auto-animate.directive';
 
 @Component({
   selector: 'app-farm-notifications',
@@ -20,6 +22,8 @@ import { TranslateService } from '../../../core/services/translate.service';
     UiSkeletonComponent,
     AppTopBarComponent,
     DatePipe,
+    UiPortalHeroComponent,
+    UiAutoAnimateDirective,
   ],
   templateUrl: './farm-notifications.component.html',
 })
