@@ -1,18 +1,24 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { Title } from '@angular/platform-browser';
-import { finalize } from 'rxjs';
+import { PageTitleService } from '../../../core/services/page-title.service';
+import { catchError, finalize, forkJoin, map, of, switchMap } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { RegisterRequest } from '../../../core/models/user.model';
+import { FarmService } from '../../../core/services/farm/farm.service';
+import { FactoryService } from '../../../core/services/factory/factory.service';
+import { KybKind } from '../../../core/models/farm/farm-profile.model';
 import {
   isValidEgyptianPhone,
   normalizeEgyptianPhone,
 } from '../../../core/validation/egyptian-phone';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { GovLabelPipe } from '../../../core/pipes/gov-label.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 import { UiBrandMarkComponent } from '../../../shared/ui/brand-mark/brand-mark.component';
+import { UiAuthWordmarkComponent } from '../../../shared/ui/auth-wordmark/auth-wordmark.component';
+import { EGYPT_GOVERNORATES } from '../../../shared/geo/egypt-governorates';
 
 /** Matches ASP.NET Identity default password rules (+ RequiredLength = 8). */
 const PASSWORD_RULES = {
@@ -29,15 +35,19 @@ const PASSWORD_RULES = {
     CommonModule,
     RouterLink,
     TranslatePipe,
+    GovLabelPipe,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
     UiBrandMarkComponent,
+    UiAuthWordmarkComponent,
   ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
 })
 export class RegisterComponent {
   private readonly authService = inject(AuthService);
+  private readonly farmService = inject(FarmService);
+  private readonly factoryService = inject(FactoryService);
   private readonly router = inject(Router);
 
   readonly selectedRole = signal<'' | 'farm' | 'factory'>('');
@@ -61,36 +71,14 @@ export class RegisterComponent {
 
   readonly factoryName = signal('');
   readonly factoryGovernorate = signal('');
+  readonly requiredKybKinds: KybKind[] = [
+    'CommercialRegister',
+    'TaxCard',
+    'NationalId',
+  ];
+  readonly kybFiles = signal<Partial<Record<KybKind, File | null>>>({});
 
-  readonly governorates = [
-    'Alexandria',
-    'Aswan',
-    'Asyut',
-    'Beheira',
-    'Beni Suef',
-    'Cairo',
-    'Dakahlia',
-    'Damietta',
-    'Faiyum',
-    'Gharbia',
-    'Giza',
-    'Ismailia',
-    'Kafr El Sheikh',
-    'Luxor',
-    'Matrouh',
-    'Minya',
-    'Monufia',
-    'New Valley',
-    'North Sinai',
-    'Port Said',
-    'Qalyubia',
-    'Qena',
-    'Red Sea',
-    'Sharqia',
-    'Sohag',
-    'South Sinai',
-    'Suez',
-  ] as const;
+  readonly governorates = EGYPT_GOVERNORATES;
 
   onFarmSizeInput(value: string): void {
     const trimmed = value.trim();
@@ -195,19 +183,39 @@ export class RegisterComponent {
     if (role === 'factory' && this.factoryDetailsInvalid()) {
       return false;
     }
+    if (!this.hasRequiredKybDocuments()) {
+      return false;
+    }
     return true;
   });
+
+  readonly hasRequiredKybDocuments = computed(() =>
+    this.requiredKybKinds.every((kind) => Boolean(this.kybFiles()[kind]))
+  );
 
   phoneValid(): boolean {
     return isValidEgyptianPhone(this.phoneValue());
   }
 
-  constructor(title: Title) {
-    title.setTitle('NileChain - Register');
+  constructor(pageTitle: PageTitleService) {
+    pageTitle.setKey('app.page.register');
   }
 
   selectRole(role: 'farm' | 'factory'): void {
     this.selectedRole.set(role);
+  }
+
+  onKybFileSelected(kind: KybKind, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.kybFiles.update((current) => ({
+      ...current,
+      [kind]: file,
+    }));
+  }
+
+  selectedKybFileName(kind: KybKind): string {
+    return this.kybFiles()[kind]?.name ?? '';
   }
 
   togglePassword(field: 'password' | 'confirm'): void {
@@ -295,6 +303,11 @@ export class RegisterComponent {
       }
     }
 
+    if (!this.hasRequiredKybDocuments()) {
+      this.errorMessage.set('register.kyb.required');
+      return;
+    }
+
     if (!this.canSubmit()) {
       this.errorMessage.set('register.errors.required');
       return;
@@ -326,9 +339,17 @@ export class RegisterComponent {
 
     this.authService
       .register(registerPayload)
-      .pipe(finalize(() => this.isSubmitting.set(false)))
+      .pipe(
+        switchMap(() =>
+          this.uploadRegistrationDocuments(role).pipe(
+            map(() => ({ uploadComplete: true })),
+            catchError(() => of({ uploadComplete: false }))
+          )
+        ),
+        finalize(() => this.isSubmitting.set(false))
+      )
       .subscribe({
-        next: () => {
+        next: ({ uploadComplete }) => {
           this.showToast.set(true);
 
           if (this.authService.hasAnyRole(['Admin'])) {
@@ -336,17 +357,31 @@ export class RegisterComponent {
             return;
           }
 
-          if (this.authService.hasAnyRole(['Factory'])) {
-            void this.router.navigate(['/factory/home']);
+          if (!uploadComplete) {
+            this.errorMessage.set('register.kyb.uploadAfterRegisterFailed');
+            void this.router.navigate(['/verification-pending'], {
+              queryParams: { documents: 'incomplete' },
+            });
             return;
           }
 
-          if (this.authService.hasAnyRole(['Farm'])) {
-            void this.router.navigate(['/farm/home']);
+          const isVerified = this.authService.currentUser()?.isVerified;
+          if (isVerified) {
+            if (this.authService.hasAnyRole(['Factory'])) {
+              void this.router.navigate(['/factory/home']);
+              return;
+            }
+
+            if (this.authService.hasAnyRole(['Farm'])) {
+              void this.router.navigate(['/farm/home']);
+              return;
+            }
+
+            void this.router.navigate(['/landing']);
             return;
           }
 
-          void this.router.navigate(['/landing']);
+          void this.router.navigate(['/verification-pending']);
         },
         error: (err: unknown) => {
           const httpErr = err as {
@@ -367,5 +402,26 @@ export class RegisterComponent {
           this.errorMessage.set(message);
         },
       });
+  }
+
+  private uploadRegistrationDocuments(role: 'farm' | 'factory') {
+    const uploads = this.requiredKybKinds
+      .map((kind) => {
+        const file = this.kybFiles()[kind];
+        if (!file) {
+          return null;
+        }
+
+        return role === 'farm'
+          ? this.farmService.addDocument(file, kind)
+          : this.factoryService.addDocument(file, kind);
+      })
+      .filter((upload): upload is NonNullable<typeof upload> => upload !== null);
+
+    if (uploads.length === 0) {
+      return of([]);
+    }
+
+    return forkJoin(uploads);
   }
 }

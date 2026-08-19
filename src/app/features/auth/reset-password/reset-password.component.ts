@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Title } from '@angular/platform-browser';
+import { PageTitleService } from '../../../core/services/page-title.service';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { TranslateService } from '../../../core/services/translate.service';
@@ -34,8 +34,8 @@ export class ResetPasswordComponent implements OnInit {
   readonly errorMessage = signal('');
   readonly tokenValid = signal(true);
 
-  constructor(title: Title) {
-    title.setTitle('NileChain - Reset Password');
+  constructor(pageTitle: PageTitleService) {
+    pageTitle.setKey('app.page.resetPassword');
   }
 
   ngOnInit(): void {

@@ -52,8 +52,19 @@
 
 @media (min-width: 1024px) {
   .fp-layout {
-    grid-template-columns: minmax(15.5rem, 19rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(15.5rem, 19rem);
+    grid-template-areas: 'main rail';
     gap: 1.35rem;
+  }
+
+  .fp-main {
+    grid-area: main;
+  }
+
+  .fp-rail {
+    grid-area: rail;
+    position: sticky;
+    top: 5.25rem;
   }
 }
 
@@ -347,4 +358,80 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem;
+}
+
+.fp-dropzone {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  gap: 0.35rem;
+  padding: 1rem;
+  border: 1px dashed color-mix(in srgb, var(--color-outline) 55%, transparent);
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--color-surface-container-low) 80%, transparent);
+  cursor: pointer;
+}
+
+.fp-dropzone__icon {
+  width: 3rem;
+  height: 3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+}
+
+.fp-dropzone__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-on-surface);
+}
+
+.fp-dropzone__hint,
+.fp-empty,
+.fp-list__meta {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--color-on-surface-variant);
+}
+
+.fp-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fp-list__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.85rem 0.95rem;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--color-outline-variant) 60%, transparent);
+  background: color-mix(in srgb, var(--color-surface-container-low) 70%, transparent);
+}
+
+.fp-list__title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-on-surface);
+}
+
+.fp-list__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.fp-doc-icon {
+  color: var(--color-primary);
 }

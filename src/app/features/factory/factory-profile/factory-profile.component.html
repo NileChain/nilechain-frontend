@@ -26,7 +26,7 @@
     <ui-portal-hero
       size="compact"
       imageUrl="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1600&q=70"
-      quoteKey="portalHero.profileQuote"
+      quoteKey="portalHero.factoryProfileQuote"
       titleKey="factory.profile.title"
       bodyKey="factory.profile.subtitle"
     />
@@ -40,6 +40,9 @@
     } @else if (profile(); as data) {
       @if (error()) {
         <p class="fp-alert fp-alert--error" role="alert">{{ error() }}</p>
+      }
+      @if (mutationError()) {
+        <p class="fp-alert fp-alert--error" role="alert">{{ mutationError() }}</p>
       }
       @if (saveSuccess()) {
         <p class="fp-alert fp-alert--success" role="status">
@@ -280,7 +283,7 @@
                   'factory.profile.governorate' | translate
                 }}</span>
                 <p class="fp-field__readonly">
-                  {{ form.controls.governorate.value || '—' }}
+                  {{ (form.controls.governorate.value | govLabel) || '—' }}
                 </p>
                 <p class="fp-field__hint">
                   {{ 'factory.profile.governorateFromMap' | translate }}
@@ -310,6 +313,121 @@
               <p class="fp-field-error">
                 {{ 'locationPicker.required' | translate }}
               </p>
+            }
+          </section>
+
+          <section class="fp-panel" aria-labelledby="fp-docs-title">
+            <header class="fp-panel__head">
+              <div>
+                <h2 id="fp-docs-title" class="fp-panel__title">
+                  {{ 'factory.profile.documentsTitle' | translate }}
+                </h2>
+                <p class="fp-panel__sub">
+                  {{ 'factory.profile.documentsHint' | translate }}
+                </p>
+              </div>
+            </header>
+
+            <label class="fp-field__label block mb-2" for="factory-kyb-kind">
+              {{ 'factory.profile.kybKind' | translate }}
+            </label>
+            <select
+              id="factory-kyb-kind"
+              class="ui-input mb-3"
+              [value]="selectedKybKind()"
+              (change)="selectedKybKind.set($any($event.target).value)"
+            >
+              @for (kind of kybKinds; track kind) {
+                <option [value]="kind">
+                  {{ 'farm.profile.kyb.' + kind | translate }}
+                </option>
+              }
+            </select>
+
+            <div
+              class="fp-dropzone"
+              role="button"
+              tabindex="0"
+              [attr.aria-label]="'factory.profile.dropzone' | translate"
+              (click)="fileInput.click()"
+              (keydown.enter)="fileInput.click()"
+              (keydown.space)="$event.preventDefault(); fileInput.click()"
+            >
+              <div class="fp-dropzone__icon" aria-hidden="true">
+                <span class="material-symbols-outlined">upload_file</span>
+              </div>
+              <h3 class="fp-dropzone__title">
+                {{ 'factory.profile.dropzone' | translate }}
+              </h3>
+              <p class="fp-dropzone__hint">
+                {{ 'factory.profile.browseFiles' | translate }}
+              </p>
+              <p class="fp-dropzone__hint">
+                {{ 'factory.profile.supportedFormats' | translate }}
+              </p>
+              <input
+                #fileInput
+                type="file"
+                class="hidden"
+                accept=".pdf,.jpg,.jpeg,.png"
+                (change)="onDocumentSelected($event)"
+              />
+              @if (uploadingDocument()) {
+                <ui-loader size="sm" class="mt-2" />
+              }
+            </div>
+
+            @if (data.documents.length > 0) {
+              <ul class="fp-list">
+                @for (doc of data.documents; track doc.documentId) {
+                  <li class="fp-list__item">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <span class="material-symbols-outlined fp-doc-icon" aria-hidden="true">
+                        {{ documentIcon(doc) }}
+                      </span>
+                      <div class="min-w-0">
+                        <p class="fp-list__title truncate">{{ doc.name }}</p>
+                        <p class="fp-list__meta">
+                          {{ 'farm.profile.kyb.' + (doc.kybKind || 'Other') | translate }}
+                          · {{ doc.size }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="fp-list__actions">
+                      @if (doc.fileUrl) {
+                        <a
+                          [href]="doc.fileUrl"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="ui-icon-btn"
+                          [attr.aria-label]="'common.download' | translate"
+                        >
+                          <span class="material-symbols-outlined text-sm text-primary" aria-hidden="true">
+                            download
+                          </span>
+                        </a>
+                      }
+                      <button
+                        type="button"
+                        class="ui-icon-btn"
+                        [disabled]="deletingDocumentId() === doc.documentId"
+                        [attr.aria-label]="'common.remove' | translate"
+                        (click)="deleteDocument(doc.documentId)"
+                      >
+                        @if (deletingDocumentId() === doc.documentId) {
+                          <ui-loader size="sm" />
+                        } @else {
+                          <span class="material-symbols-outlined text-sm text-error" aria-hidden="true">
+                            delete
+                          </span>
+                        }
+                      </button>
+                    </div>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="fp-empty">{{ 'common.empty' | translate }}</p>
             }
           </section>
         </div>

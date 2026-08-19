@@ -25,7 +25,6 @@ import { ContractDisputesPanelComponent } from '../../../shared/contracts/contra
 import { ContractReviewPanelComponent } from '../../../shared/contracts/contract-review-panel/contract-review-panel.component';
 import { ContractActionBarComponent } from '../../../shared/contracts/contract-action-bar/contract-action-bar.component';
 import { ContractAttachmentsComponent } from '../../../shared/contracts/contract-attachments/contract-attachments.component';
-import { ContractTocComponent } from '../../../shared/contracts/contract-toc/contract-toc.component';
 import { ContractReadingProgressComponent } from '../../../shared/contracts/contract-reading-progress/contract-reading-progress.component';
 import { ContractIntegrityBadgeComponent } from '../../../shared/contracts/contract-integrity-badge/contract-integrity-badge.component';
 import {
@@ -39,6 +38,7 @@ import { FarmService } from '../../../core/services/farm/farm.service';
 import { FarmContract } from '../../../core/models/farm/farm-contract.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
+import { SigningOtpDialogService } from '../../../core/services/signing-otp-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslateService } from '../../../core/services/translate.service';
 import { resolveApiErrorMessage } from '../../../core/utils/api-error.util';
@@ -79,7 +79,6 @@ import {
     ContractReviewPanelComponent,
     ContractActionBarComponent,
     ContractAttachmentsComponent,
-    ContractTocComponent,
     ContractReadingProgressComponent,
     ContractIntegrityBadgeComponent,
     ContractDateAmendmentComponent,
@@ -95,6 +94,7 @@ export class FarmContractDetailsComponent implements OnInit, AfterViewInit {
   private readonly farmApi = inject(FarmService);
   private readonly auth = inject(AuthService);
   private readonly confirm = inject(ConfirmDialogService);
+  private readonly signingOtp = inject(SigningOtpDialogService);
   private readonly toast = inject(ToastService);
   private readonly i18n = inject(TranslateService);
   private readonly assistantCtx = inject(AiAssistantContextService);
@@ -274,7 +274,8 @@ export class FarmContractDetailsComponent implements OnInit, AfterViewInit {
   }
 
   async approve(): Promise<void> {
-    if (!this.contractId || !this.canDecide()) {
+    const contractId = this.contractId;
+    if (!contractId || !this.canDecide()) {
       return;
     }
     if (!this.hasReviewedEnough()) {
@@ -290,34 +291,38 @@ export class FarmContractDetailsComponent implements OnInit, AfterViewInit {
     if (!ok) {
       return;
     }
-    this.acting.set(true);
-    this.farmApi
-      .approveContract(this.contractId)
-      .pipe(finalize(() => this.acting.set(false)))
-      .subscribe({
-        next: (c) => {
-          this.applyContract(c);
-          const fullySigned =
-            c.status?.toLowerCase() === 'signed' ||
-            (!!c.factorySigned && !!c.farmSigned);
-          this.toast.success(
-            this.i18n.instant(
-              fullySigned
-                ? 'farm.contracts.approveSuccessFullySigned'
-                : 'farm.contracts.approveSuccess'
-            )
-          );
-          if (this.fromMatches()) {
-            // Soft nudge back to matches after signing.
-            setTimeout(() => {
-              void this.router.navigate(['/farm/matches']);
-            }, 900);
-          }
-        },
-        error: (err: HttpErrorResponse) => {
-          this.toast.error(this.resolveApproveError(err));
-        },
+    const consentText = this.i18n.instant('farm.contracts.confirmApproveBody');
+    try {
+      const signed = await this.signingOtp.prompt({
+        requestOtp: () => this.farmApi.requestSigningOtp(contractId),
+        sign: (otpCode) =>
+          this.farmApi.approveContract(contractId, {
+            otpCode,
+            consentText,
+          }),
       });
+      if (!signed) {
+        return;
+      }
+      this.applyContract(signed);
+      const fullySigned =
+        signed.status?.toLowerCase() === 'signed' ||
+        (!!signed.factorySigned && !!signed.farmSigned);
+      this.toast.success(
+        this.i18n.instant(
+          fullySigned
+            ? 'farm.contracts.approveSuccessFullySigned'
+            : 'farm.contracts.approveSuccess'
+        )
+      );
+      if (this.fromMatches()) {
+        setTimeout(() => {
+          void this.router.navigate(['/farm/matches']);
+        }, 900);
+      }
+    } catch (err) {
+      this.toast.error(this.resolveApproveError(err as HttpErrorResponse));
+    }
   }
 
   private resolveApproveError(err: HttpErrorResponse): string {

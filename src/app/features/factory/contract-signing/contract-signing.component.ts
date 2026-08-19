@@ -9,6 +9,8 @@ import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-stat
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 import { AgentService } from '../../../core/services/agent/agent.service';
 import { FactoryService } from '../../../core/services/factory/factory.service';
+import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
+import { SigningOtpDialogService } from '../../../core/services/signing-otp-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslateService } from '../../../core/services/translate.service';
 import {
@@ -50,6 +52,8 @@ type ErrorAction = 'generate' | 'approve' | 'reject';
 export class ContractSigningComponent implements OnInit {
   private readonly agentService = inject(AgentService);
   private readonly factoryService = inject(FactoryService);
+  private readonly confirm = inject(ConfirmDialogService);
+  private readonly signingOtp = inject(SigningOtpDialogService);
   private readonly route = inject(ActivatedRoute);
   private readonly toast = inject(ToastService);
   private readonly i18n = inject(TranslateService);
@@ -105,8 +109,8 @@ export class ContractSigningComponent implements OnInit {
     const terms: string[] = [];
     if (this.agentRequest) {
       terms.push(this.agentRequest.cropType);
-      terms.push(`${this.agentRequest.quantityTons} t`);
-      terms.push(`${this.agentRequest.pricePerTon} EGP/t`);
+      terms.push(`${this.agentRequest.quantityTons} ${this.i18n.instant('common.ton')}`);
+      terms.push(`${this.agentRequest.pricePerTon} ${this.i18n.instant('common.egpPerTon')}`);
     }
     if (this.farmName) {
       terms.push(this.farmName);
@@ -279,26 +283,40 @@ export class ContractSigningComponent implements OnInit {
       });
   }
 
-  approve(): void {
+  async approve(): Promise<void> {
     const id = this.contractId();
     if (!id) {
       this.status.set('approved');
       this.toast.success(this.i18n.instant('contractSign.approveSuccess'));
       return;
     }
-    this.loading.set(true);
+    const ok = await this.confirm.confirm({
+      titleKey: 'factory.contracts.confirmApproveTitle',
+      bodyKey: 'factory.contracts.confirmApproveBody',
+      confirmKey: 'contractDoc.acceptContract',
+      cancelKey: 'common.cancel',
+    });
+    if (!ok) {
+      return;
+    }
     this.clearError();
-    this.factoryService
-      .approveContract(id)
-      .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({
-        next: () => {
-          this.status.set('approved');
-          this.toast.success(this.i18n.instant('contractSign.approveSuccess'));
-        },
-        error: (err) =>
-          this.applyHttpError(err, 'approve', 'contractSign.approveFailed'),
+    const consentText = this.i18n.instant(
+      'factory.contracts.confirmApproveBody'
+    );
+    try {
+      const signed = await this.signingOtp.prompt({
+        requestOtp: () => this.factoryService.requestSigningOtp(id),
+        sign: (otpCode) =>
+          this.factoryService.approveContract(id, { otpCode, consentText }),
       });
+      if (!signed) {
+        return;
+      }
+      this.status.set('approved');
+      this.toast.success(this.i18n.instant('contractSign.approveSuccess'));
+    } catch (err) {
+      this.applyHttpError(err, 'approve', 'contractSign.approveFailed');
+    }
   }
 
   onChangesApplied(result: ContractChangesApplied): void {

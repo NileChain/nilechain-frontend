@@ -1,4 +1,4 @@
-<main class="md:ms-[280px] min-h-screen bg-surface">
+<main class="md:ms-[280px] min-h-screen bg-surface animate-fade-in">
   <app-top-bar
     titleKey="factory.progress.title"
     subtitleKey="factory.progress.subtitle"
@@ -59,7 +59,7 @@
                   <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
                     >payments</span
                   >
-                  {{ pricePerTon }} EGP
+                  {{ pricePerTon }} {{ 'common.egp' | translate }}
                 </span>
               }
               @if (factoryGovernorate) {
@@ -232,15 +232,33 @@
           </div>
         </header>
 
-        <!-- Desktop / tablet horizontal stepper; stacks on small screens via CSS -->
+        <!-- Current thinking: station sidebar follows the live step -->
+        <div class="ai-command__body">
         <ol
           class="ai-command__stepper"
           [attr.aria-label]="'factory.progress.title' | translate"
         >
           @for (step of steps(); track step.id; let i = $index; let last = $last) {
-            <li class="ai-command__step" [attr.data-status]="step.status">
-              <div class="ai-command__step-node">
-                <span class="ai-command__step-circle" aria-hidden="true">
+            <li
+              class="ai-command__step animate-fade-in"
+              [id]="'agent-step-' + step.id"
+              [style.animation-delay.ms]="i * 80"
+              [style.animation-fill-mode]="'both'"
+              [attr.data-status]="step.status"
+              [attr.aria-current]="focusedStep()?.id === step.id ? 'step' : null"
+            >
+              <button
+                type="button"
+                class="ai-command__step-node"
+                [class.ai-command__step-node--focus]="focusedStep()?.id === step.id"
+                [disabled]="loading() && step.status === 'pending'"
+                (click)="selectStep(step.id)"
+              >
+                <span
+                  class="ai-command__step-circle"
+                  [class.animate-soft-pulse]="step.status === 'active'"
+                  aria-hidden="true"
+                >
                   @if (step.status === 'done') {
                     <span class="material-symbols-outlined" data-fill="1"
                       >check</span
@@ -257,14 +275,17 @@
                 <span class="ai-command__step-label">{{
                   step.labelKey | translate
                 }}</span>
-              </div>
+              </button>
             </li>
             @if (!last) {
               <li
                 class="ai-command__rail"
                 [class.ai-command__rail--filled]="connectorFilled(i)"
+                [class.connected]="connectorFilled(i)"
                 aria-hidden="true"
-              ></li>
+              >
+                <span class="ai-command__rail-fill"></span>
+              </li>
             }
           }
         </ol>
@@ -350,6 +371,7 @@
             </ul>
           </div>
         }
+        </div>
       </section>
     }
 
@@ -452,14 +474,14 @@
                     aria-hidden="true"
                     >location_on</span
                   >
-                  {{ top.governorate }}
+                  {{ top.governorate | govLabel }}
                 </p>
                 <div class="flex flex-wrap gap-2">
                   <span
                     class="inline-flex items-center rounded-full border border-outline-variant bg-surface px-2.5 py-1 text-xs font-semibold text-on-surface"
                   >
                     {{ 'factory.progress.riskLabel' | translate }}:
-                    {{ top.riskLevel }}
+                    {{ riskLevelLabelKey(top.riskLevel) | translate }}
                   </span>
                   @if (top.cropTypes.length) {
                     <span
@@ -492,15 +514,52 @@
               {{ 'factory.progress.results' | translate }}
             </h2>
             @if (isTruncated(result)) {
-              <span
-                class="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-semibold bg-surface-container-high text-on-surface-variant"
-                [attr.title]="'factory.progress.truncatedHelp' | translate"
-                role="status"
-              >
-                {{ truncatedLabel(result) }}
-              </span>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span
+                  class="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-semibold bg-surface-container-high text-on-surface-variant"
+                  [attr.title]="'factory.progress.truncatedHelp' | translate"
+                  role="status"
+                >
+                  {{ truncatedLabel(result) }}
+                </span>
+                <button
+                  type="button"
+                  class="ui-btn-ghost text-sm"
+                  [disabled]="loading() || flexActing()"
+                  (click)="showMoreEligible()"
+                >
+                  {{ 'factory.progress.showMore' | translate }}
+                </button>
+              </div>
             }
           </div>
+
+          @if (peekHint(result); as peek) {
+            <div
+              class="rounded-xl border border-primary/30 bg-primary-container/40 p-4 space-y-3"
+              role="status"
+            >
+              <p class="m-0 font-title-md text-on-surface">
+                {{ 'factory.progress.peekTitle' | translate }}
+              </p>
+              <p class="m-0 text-sm text-on-surface-variant">
+                {{ peekReasonKey(peek.reason) | translate: { farm: peek.farmName, governorate: peek.governorate } }}
+              </p>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  class="ui-btn-primary"
+                  [disabled]="loading() || flexActing()"
+                  (click)="includePeekFarms()"
+                >
+                  {{ 'factory.progress.peekInclude' | translate }}
+                </button>
+                <p class="m-0 self-center text-xs text-on-surface-variant">
+                  {{ 'factory.progress.peekKeep' | translate }}
+                </p>
+              </div>
+            </div>
+          }
 
           @if (result.comparisonReport) {
             <details class="rounded-lg border border-outline-variant p-4 group">
@@ -559,11 +618,18 @@
                     <div>
                       <p class="font-title-md text-on-surface font-bold">
                         {{ match.farmName }}
+                        @if (match.isGeographicExpansion) {
+                          <span
+                            class="ms-2 inline-flex items-center rounded-full bg-secondary-container px-2 py-0.5 text-xs font-semibold text-on-secondary-container"
+                          >
+                            {{ 'factory.progress.expandedBadge' | translate }}
+                          </span>
+                        }
                       </p>
                       <p class="text-on-surface-variant text-sm">
-                        {{ match.governorate }} ·
+                        {{ match.governorate | govLabel }} ·
                         {{ 'factory.progress.riskLabel' | translate }}
-                        {{ match.riskLevel }} (<span class="ui-data-sm">{{
+                        {{ riskLevelLabelKey(match.riskLevel) | translate }} (<span class="ui-data-sm">{{
                           match.riskScore | number: '1.0-0'
                         }}</span>)
                       </p>

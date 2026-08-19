@@ -1,10 +1,11 @@
-import { Component, Input } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { Component, Input } from '@angular/core';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
   selector: 'ui-loader',
   standalone: true,
-  imports: [NgClass],
+  imports: [NgClass, TranslatePipe],
   templateUrl: './loader.component.html',
   styleUrl: './loader.component.scss',
 })

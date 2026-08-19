@@ -39,11 +39,17 @@
 
 @media (min-width: 1024px) {
   .fp-layout {
-    grid-template-columns: minmax(15rem, 20rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 20rem);
+    grid-template-areas: 'main rail';
     gap: 1.35rem;
   }
 
+  .fp-main {
+    grid-area: main;
+  }
+
   .fp-rail {
+    grid-area: rail;
     position: sticky;
     top: 5.25rem;
   }

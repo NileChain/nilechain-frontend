@@ -35,14 +35,12 @@
       <ui-error-state [message]="error()" (retry)="loadDashboard()" />
     } @else {
       <ui-portal-hero
-        size="tall"
+        size="compact"
         imageUrl="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1600&q=75"
-        quoteKey="portalHero.factoryDashQuote"
         titleKey="factory.dashboard.atmosphereTitle"
         bodyKey="factory.dashboard.overviewSubtitle"
       />
 
-      <!-- KPIs -->
       <section
         class="fx-kpi-strip ui-stagger"
         [attr.aria-label]="'factory.dashboard.kpiAria' | translate"
@@ -133,10 +131,13 @@
         uiReveal="fadeUp"
         [attr.aria-label]="'factory.dashboard.needsAttention' | translate"
       >
-        <header class="fx-section-head">
+        <header class="fx-section-head fx-section-head--row">
           <h2 class="fx-section-title">
             {{ 'factory.dashboard.needsAttention' | translate }}
           </h2>
+          @if (attentionItems().length > 0) {
+            <span class="fx-count-pill">{{ attentionItems().length }}</span>
+          }
         </header>
 
         @if (attentionItems().length === 0) {
@@ -186,13 +187,7 @@
         }
       </section>
 
-      <!-- Market -->
-      <app-market-price-trends class="block" />
-
-      <!-- Lower procurement workspace -->
-      <div class="fx-workspace">
-        <!-- Recent procurement requests (primary) -->
-        <section class="fx-section fx-requests">
+      <section class="fx-section fx-requests">
           <header class="fx-section-head fx-section-head--row">
             <h2 class="fx-section-title">
               {{ 'factory.dashboard.recentProcurementRequests' | translate }}
@@ -307,7 +302,7 @@
                       </td>
                       <td class="fx-muted">
                         {{
-                          row.date ? (row.date | date: 'mediumDate') : '—'
+                          row.date ? (row.date | uiDate: 'mediumDate') : '—'
                         }}
                       </td>
                       <td
@@ -375,7 +370,7 @@
                       }
                       @if (row.budgetEgp != null) {
                         <span class="ui-data"
-                          >EGP {{ row.budgetEgp | number: '1.0-0' }}</span
+                          >{{ 'common.egp' | translate }} {{ row.budgetEgp | number: '1.0-0' }}</span
                         >
                       }
                       <span
@@ -392,9 +387,7 @@
           }
         </section>
 
-        <!-- Closing workspace: supply / help / actions / activity -->
-        <div class="fx-closing">
-          <div class="fx-closing__pair">
+        <div class="fx-secondary">
             <section
               class="fx-surface fx-supply"
               [attr.aria-label]="'factory.dashboard.supplyHealth' | translate"
@@ -464,30 +457,6 @@
               </a>
             </section>
 
-            <section
-              class="fx-surface fx-help"
-              [attr.aria-label]="'factory.dashboard.needHelp' | translate"
-            >
-              <div class="fx-help__top">
-                <span class="fx-help__icon" aria-hidden="true">
-                  <span class="material-symbols-outlined">support_agent</span>
-                </span>
-                <div class="min-w-0">
-                  <h2 class="fx-surface__title">
-                    {{ 'factory.dashboard.needHelp' | translate }}
-                  </h2>
-                  <p class="fx-help__body">
-                    {{ 'factory.dashboard.needHelpBody' | translate }}
-                  </p>
-                </div>
-              </div>
-              <a routerLink="/factory/messages" class="fx-help__cta">
-                {{ 'factory.dashboard.contactManager' | translate }}
-              </a>
-            </section>
-          </div>
-
-          <div class="fx-closing__ops">
             <section
               class="fx-surface fx-actions"
               [attr.aria-label]="'common.quickActions' | translate"
@@ -602,9 +571,14 @@
                 </ul>
               }
             </section>
-          </div>
         </div>
-      </div>
+
+        <section
+          class="fx-market"
+          [attr.aria-label]="'factory.dashboard.marketPriceTrends' | translate"
+        >
+          <app-market-price-trends />
+        </section>
     }
   </main>
 

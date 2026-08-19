@@ -1,4 +1,5 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
+import { DecimalPipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -18,14 +19,13 @@ import { UiAutoAnimateDirective } from '../../../shared/directives/ui-auto-anima
   selector: 'app-farm-contracts',
   standalone: true,
   imports: [
-    TranslatePipe,
+    UiDatePipe, TranslatePipe,
     RouterLink,
     AppTopBarComponent,
     UiPortalHeroComponent,
     UiErrorStateComponent,
     UiEmptyStateComponent,
     UiSkeletonComponent,
-    DatePipe,
     DecimalPipe,
     UiAutoAnimateDirective,
   ],

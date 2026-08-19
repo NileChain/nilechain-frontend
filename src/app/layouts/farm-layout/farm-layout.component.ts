@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { Title } from '@angular/platform-browser';
 import { RouterOutlet } from '@angular/router';
+import { PageTitleService } from '../../core/services/page-title.service';
 import { SidebarFarmComponent } from '../../shared/components/sidebar-farm/sidebar-farm.component';
 
 @Component({
@@ -11,7 +11,7 @@ import { SidebarFarmComponent } from '../../shared/components/sidebar-farm/sideb
   styleUrl: './farm-layout.component.scss',
 })
 export class FarmLayoutComponent {
-  constructor(title: Title) {
-    title.setTitle('NileChain - Farm');
+  constructor(pageTitle: PageTitleService) {
+    pageTitle.setKey('app.page.farm');
   }
 }

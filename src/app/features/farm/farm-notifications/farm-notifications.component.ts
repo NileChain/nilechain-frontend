@@ -1,5 +1,6 @@
-import { DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
+import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
@@ -11,17 +12,21 @@ import { FarmNotification } from '../../../core/models/farm/farm-notification.mo
 import { TranslateService } from '../../../core/services/translate.service';
 import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
 import { UiAutoAnimateDirective } from '../../../shared/directives/ui-auto-animate.directive';
+import {
+  navigateNotificationLink,
+  notificationTargetUrl,
+  stripNotificationMarker,
+} from '../../../core/utils/notification-target';
 
 @Component({
   selector: 'app-farm-notifications',
   standalone: true,
   imports: [
-    TranslatePipe,
+    UiDatePipe, TranslatePipe,
     UiErrorStateComponent,
     UiEmptyStateComponent,
     UiSkeletonComponent,
     AppTopBarComponent,
-    DatePipe,
     UiPortalHeroComponent,
     UiAutoAnimateDirective,
   ],
@@ -30,6 +35,7 @@ import { UiAutoAnimateDirective } from '../../../shared/directives/ui-auto-anima
 export class FarmNotificationsComponent implements OnInit {
   private readonly farmService = inject(FarmService);
   private readonly i18n = inject(TranslateService);
+  private readonly router = inject(Router);
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
@@ -64,6 +70,21 @@ export class FarmNotificationsComponent implements OnInit {
 
   setFilter(value: 'all' | 'unread'): void {
     this.filter.set(value);
+  }
+
+  open(notification: FarmNotification): void {
+    this.markRead(notification);
+    const url = notificationTargetUrl(
+      {
+        link: notification.link,
+        type: notification.type,
+        relatedEntityType: notification.relatedEntityType,
+        relatedEntityId: notification.relatedEntityId,
+        message: notification.message,
+      },
+      'farm'
+    );
+    navigateNotificationLink(this.router, url);
   }
 
   markRead(notification: FarmNotification): void {
@@ -116,7 +137,7 @@ export class FarmNotificationsComponent implements OnInit {
     if (notification.message?.startsWith('notifications.')) {
       return this.i18n.instant(notification.message);
     }
-    return notification.message;
+    return stripNotificationMarker(notification.message);
   }
 
   private typeI18n(

@@ -19,6 +19,10 @@ export interface FactoryMatchItem {
   contractId?: string | null;
   contractFullySigned?: boolean;
   canMessage?: boolean;
+  isGeographicExpansion?: boolean;
+  /** Deterministic score breakdown from the backend — codes are i18n keys. */
+  whyMatched?: MatchFactor[];
+  negotiationRounds?: MatchNegotiationRound[];
   requestQuantityTons?: number | null;
   requestPricePerTon?: number | null;
   requestDeliveryDate?: string | null;
@@ -30,6 +34,27 @@ export interface FactoryMatchItem {
   effectiveQuantityTons?: number;
   effectivePricePerTon?: number | null;
   effectiveDeliveryDate?: string | null;
+}
+
+export type MatchFactorState = 'Earned' | 'Missed' | 'Info' | 'Caution';
+
+export interface MatchFactor {
+  code: string;
+  state: MatchFactorState;
+  points?: number | null;
+  maxPoints?: number | null;
+  detail?: string | null;
+}
+
+export interface MatchNegotiationRound {
+  roundId: string;
+  offeredBy: string;
+  quantityTons?: number | null;
+  pricePerTon?: number | null;
+  deliveryDate?: string | null;
+  grade?: string | null;
+  note?: string | null;
+  createdAt: string;
 }
 
 export interface FarmListing {

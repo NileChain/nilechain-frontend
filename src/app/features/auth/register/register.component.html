@@ -1,88 +1,67 @@
-<div class="min-h-screen flex flex-col overflow-x-hidden bg-surface">
-  <header
-    class="fixed top-0 inset-x-0 z-50 flex justify-end items-center gap-1 px-margin-mobile md:px-margin-desktop h-16"
-  >
-    <ui-language-toggle />
-    <ui-theme-toggle />
+<div class="ui-page auth-shell flex flex-col min-h-screen overflow-x-hidden">
+  <header class="auth-bar">
+    <a
+      [routerLink]="'/landing'"
+      class="auth-bar__brand"
+      [attr.aria-label]="'app.name' | translate"
+    >
+      <ui-brand-mark [size]="32" [decorative]="true" />
+      <span class="auth-bar__name">{{ 'app.name' | translate }}</span>
+    </a>
+    <div class="auth-bar__tools">
+      <ui-language-toggle />
+      <ui-theme-toggle />
+    </div>
   </header>
 
-  <div class="flex-grow pt-16">
-    <div class="auth-split animate-fade-in">
-      <aside class="auth-aside" aria-hidden="true">
-        <img
-          src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=1400&q=75"
-          alt=""
-        />
-        <div class="auth-aside__veil"></div>
-        <div class="auth-aside__copy">
-          <p class="font-heritage">{{ 'portalHero.registerQuote' | translate }}</p>
-          <span>NileChain</span>
-        </div>
-      </aside>
-      <div
-        class="flex flex-col items-center justify-center p-margin-mobile md:p-margin-desktop"
-      >
-        <!-- Registration Container -->
-        <main class="w-full max-w-[480px] z-10">
-    <!-- Brand Header -->
-    <div class="flex flex-col items-center mb-xl">
-      <a [routerLink]="'/landing'" class="flex flex-col items-center mb-md">
-        <ui-brand-mark [size]="64" />
-      </a>
-      <h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">
-        {{ 'register.title' | translate }}
-      </h1>
-      <p class="font-body-md text-body-md text-on-surface-variant mt-xs">
-        {{ 'register.visualTrust' | translate }}
-      </p>
-    </div>
+  <div class="flex-grow">
+    <div class="auth-split">
+      <ui-auth-wordmark />
+      <div class="auth-panel">
+        <main class="auth-panel__inner">
+          <h1 class="auth-panel__title">
+            {{ 'register.title' | translate }}
+          </h1>
+          <p class="auth-panel__lede">
+            {{ 'register.subtitle' | translate }}
+          </p>
 
-    <!-- Form Card -->
-    <div class="ui-card rounded-xl p-lg md:p-xl">
-      <form
-        action="#"
-        method="POST"
-        class="space-y-lg"
-        id="registerForm"
-        (submit)="onSubmit($event)"
-      >
+          <form
+            action="#"
+            method="POST"
+            class="space-y-5"
+            id="registerForm"
+            (submit)="onSubmit($event)"
+          >
         <!-- Role Selector -->
-        <div class="space-y-md">
-          <label class="font-label-md text-label-md text-on-surface block">{{
+        <div class="space-y-2">
+          <label class="font-label-md text-label-md text-on-surface-variant block">{{
             'register.businessType' | translate
           }}</label>
-          <div class="grid grid-cols-2 gap-md">
+          <div class="auth-role">
             <button
               type="button"
               (click)="selectRole('farm')"
               id="role-farm"
               [class.role-card-active]="selectedRole() === 'farm'"
-              class="flex flex-col items-center justify-center p-md border border-outline-variant rounded-lg transition-all duration-200 hover:bg-surface-container-low group"
+              class="auth-role__btn"
             >
-              <span
-                class="material-symbols-outlined text-[32px] mb-base text-primary group-hover:scale-110 transition-transform"
-                aria-hidden="true"
+              <span class="material-symbols-outlined" aria-hidden="true"
                 >agriculture</span
               >
-              <span class="font-label-md text-label-md text-on-surface">{{
-                'register.imFarm' | translate
-              }}</span>
+              <span>{{ 'register.imFarm' | translate }}</span>
             </button>
             <button
               type="button"
               (click)="selectRole('factory')"
               id="role-factory"
               [class.role-card-active]="selectedRole() === 'factory'"
-              class="flex flex-col items-center justify-center p-md border border-outline-variant rounded-lg transition-all duration-200 hover:bg-surface-container-low group"
+              class="auth-role__btn"
             >
-              <span
-                class="material-symbols-outlined text-[32px] mb-base text-primary group-hover:scale-110 transition-transform"
-                aria-hidden="true"
+              <span class="material-symbols-outlined" aria-hidden="true"
                 >factory</span
               >
-              <span class="font-label-md text-label-md text-on-surface">{{
-                'register.imFactory' | translate
-              }}</span>
+              <span>{{ 'register.imFactory' | translate }}</span>
             </button>
           </div>
           <input
@@ -136,8 +115,8 @@
                 class="ui-input"
               >
                 <option value="">{{ 'common.select' | translate }}</option>
-                @for (gov of governorates; track gov) {
-                  <option [value]="gov">{{ gov }}</option>
+                @for (gov of governorates; track gov.name) {
+                  <option [value]="gov.name">{{ gov.name | govLabel }}</option>
                 }
               </select>
               @if (submitted() && !farmGovernorate().trim()) {
@@ -217,8 +196,8 @@
                 class="ui-input"
               >
                 <option value="">{{ 'common.select' | translate }}</option>
-                @for (gov of governorates; track gov) {
-                  <option [value]="gov">{{ gov }}</option>
+                @for (gov of governorates; track gov.name) {
+                  <option [value]="gov.name">{{ gov.name | govLabel }}</option>
                 }
               </select>
               @if (submitted() && !factoryGovernorate().trim()) {
@@ -227,6 +206,65 @@
                 </p>
               }
             </div>
+          </div>
+        }
+
+        @if (selectedRole()) {
+          <div
+            class="register-kyb space-y-md p-md bg-surface-container-low rounded-lg border border-outline-variant"
+          >
+            <p class="font-label-md text-label-md text-primary">
+              {{ 'register.kyb.title' | translate }}
+            </p>
+            <p class="text-sm text-on-surface-variant">
+              {{ 'register.kyb.hint' | translate }}
+            </p>
+
+            <div class="register-kyb__grid">
+              @for (kind of requiredKybKinds; track kind) {
+                <label class="register-kyb__item" [for]="'kyb-' + kind">
+                  <div class="register-kyb__header">
+                    <span class="register-kyb__name">{{
+                      'register.kyb.' + kind | translate
+                    }}</span>
+                    @if (selectedKybFileName(kind)) {
+                      <span class="register-kyb__chip register-kyb__chip--ok">
+                        {{ 'register.kyb.selected' | translate }}
+                      </span>
+                    } @else {
+                      <span class="register-kyb__chip">
+                        {{ 'register.kyb.requiredLabel' | translate }}
+                      </span>
+                    }
+                  </div>
+
+                  <div class="register-kyb__drop">
+                    <span class="material-symbols-outlined" aria-hidden="true">upload_file</span>
+                    <span>{{ 'register.kyb.pickFile' | translate }}</span>
+                  </div>
+
+                  <input
+                    type="file"
+                    [id]="'kyb-' + kind"
+                    class="register-kyb__input"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    (change)="onKybFileSelected(kind, $event)"
+                  />
+
+                  @if (selectedKybFileName(kind)) {
+                    <p class="register-kyb__filename" [title]="selectedKybFileName(kind)">
+                      {{ selectedKybFileName(kind) }}
+                    </p>
+                  }
+                </label>
+              }
+            </div>
+
+            @if (submitted() && !hasRequiredKybDocuments()) {
+              <p class="text-error font-label-sm text-label-sm" role="alert">
+                {{ 'register.kyb.required' | translate }}
+              </p>
+            }
           </div>
         }
 
@@ -479,47 +517,32 @@
               ? ('register.creatingAccount' | translate)
               : ('register.completeRegistration' | translate)
           }}</span>
-          <span
-            class="material-symbols-outlined text-[18px] icon-flip"
-            aria-hidden="true"
-            >arrow_forward</span
-          >
         </button>
       </form>
 
-      <!-- Footer Links -->
-      <div
-        class="mt-lg pt-lg border-t border-outline-variant flex flex-col items-center gap-md"
-      >
-        <p class="font-body-md text-body-md text-on-surface-variant">
-          {{ 'register.hasAccount' | translate }}
-          <a
-            [routerLink]="'/login'"
-            class="text-primary font-bold hover:underline ms-xs"
-            >{{ 'register.login' | translate }}</a
-          >
-        </p>
-      </div>
-    </div>
-
-    <!-- System Footer -->
-    <footer class="mt-xl text-center">
-      <p class="font-label-sm text-label-sm text-outline">
-        {{ 'landing.footerRights' | translate }}
+      <p class="mt-5 mb-0 text-center font-body-md text-on-surface-variant">
+        {{ 'register.hasAccount' | translate }}
+        <a
+          [routerLink]="'/login'"
+          class="text-primary font-semibold hover:underline"
+          >{{ 'register.login' | translate }}</a
+        >
       </p>
-      <div class="flex justify-center gap-gutter mt-sm">
-        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
-          'landing.compliance' | translate
-        }}</span>
-        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
-          'common.support' | translate
-        }}</span>
-      </div>
-    </footer>
         </main>
       </div>
     </div>
   </div>
+
+  <footer class="auth-footer">
+    <p class="m-0">
+      <span dir="ltr">{{ 'app.name' | translate }}</span>
+      · {{ 'landing.footerRights' | translate }}
+    </p>
+    <nav [attr.aria-label]="'common.legalNav' | translate">
+      <span>{{ 'landing.compliance' | translate }}</span>
+      <span>{{ 'common.support' | translate }}</span>
+    </nav>
+  </footer>
 
   <!-- Success Toast -->
   <div

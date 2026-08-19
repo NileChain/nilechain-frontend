@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
@@ -19,8 +19,7 @@ type StatusFilter = '' | 'Pending' | 'Approved' | 'Rejected';
   selector: 'app-admin-crop-requests',
   standalone: true,
   imports: [
-    FormsModule,
-    DatePipe,
+    UiDatePipe, FormsModule,
     TranslatePipe,
     AppTopBarComponent,
     UiLoaderComponent,

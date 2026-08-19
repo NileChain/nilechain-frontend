@@ -2,7 +2,7 @@
   class="ui-loader"
   [class.ui-loader--block]="block"
   role="status"
-  [attr.aria-label]="ariaLabel || label || 'Loading'"
+  [attr.aria-label]="ariaLabel || label || ('common.loading' | translate)"
 >
   <span class="ui-loader__ring" aria-hidden="true">
     <span

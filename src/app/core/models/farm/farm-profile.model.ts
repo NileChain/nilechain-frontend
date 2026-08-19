@@ -52,6 +52,7 @@ export interface FarmCertification {
   issuedAt: string;
   expiresAt: string | null;
   isExpired: boolean;
+  adminGranted?: boolean;
 }
 
 export interface CertificationCatalogItem {
@@ -59,12 +60,20 @@ export interface CertificationCatalogItem {
   name: string;
 }
 
+export type KybKind =
+  | 'CommercialRegister'
+  | 'TaxCard'
+  | 'NationalId'
+  | 'LandLease'
+  | 'Other';
+
 export interface FarmDocument {
   documentId: string;
   name: string;
   fileUrl: string;
   size: string;
   fileType: string;
+  kybKind?: KybKind | string;
 }
 
 export interface FarmImage {

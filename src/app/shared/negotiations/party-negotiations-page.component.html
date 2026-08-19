@@ -1,15 +1,19 @@
-<main class="md:ms-[280px] min-h-screen bg-surface">
+<main class="md:ms-[280px] neg-page bg-background text-on-background">
   <app-top-bar titleKey="negotiation.inboxTitle" [portal]="portal" />
 
-  <div
-    class="p-margin-mobile md:p-margin-desktop max-w-5xl mx-auto space-y-gutter animate-fade-in"
-  >
-    <p class="font-body-md text-on-surface-variant">
-      {{ 'negotiation.inboxSubtitle' | translate }}
-    </p>
+  <div class="neg-shell animate-fade-in">
+    <!-- Atmospheric header banner -->
+    <header class="neg-hero">
+      <h1 class="neg-hero__title">
+        {{ 'negotiation.inboxTitle' | translate }}
+      </h1>
+      <p class="neg-hero__sub">
+        {{ 'negotiation.inboxSubtitle' | translate }}
+      </p>
+    </header>
 
     @if (loading()) {
-      <div class="flex items-center gap-2 py-16">
+      <div class="flex items-center justify-center gap-3 py-20">
         <ui-loader />
         <span class="font-body-md text-on-surface-variant">{{
           'common.loading' | translate
@@ -24,16 +28,55 @@
         icon="edit_note"
       />
     } @else {
-      <ul class="ui-card divide-y divide-outline-variant" role="list">
+      <div class="neg-grid ui-stagger" role="list">
         @for (row of items(); track row.contractId) {
-          <li class="p-5 space-y-2">
-            <div class="flex flex-wrap items-center gap-2">
+          <article
+            class="neg-card"
+            [class.neg-card--action-required]="row.awaitingYou"
+          >
+            <div class="neg-card__top">
+              <div class="neg-card__party-wrap">
+                <div class="neg-card__avatar">
+                  <span class="material-symbols-outlined" aria-hidden="true">
+                    {{ portal === 'farm' ? 'factory' : 'agriculture' }}
+                  </span>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="neg-card__party-name truncate">
+                    {{ row.counterparty }}
+                  </h3>
+                  <p class="neg-card__crop-meta">
+                    <span>{{ row.cropName || '—' }}</span>
+                    @if (row.quantityTons) {
+                      <span>·</span>
+                      <span class="ui-data-sm text-on-surface">
+                        {{ row.quantityTons | number: '1.0-2' }}
+                      </span>
+                      <span>{{ 'common.ton' | translate }}</span>
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="neg-card__pills">
               <span
-                class="inline-flex items-center px-3 py-1 rounded-full border border-outline-variant font-label-sm"
+                class="ui-status-pill"
+                [attr.data-tone]="row.awaitingYou ? 'warning' : 'pending'"
               >
                 {{ statusLabelKey(row.status) | translate }}
               </span>
-              <span class="font-label-sm text-on-surface-variant">
+
+              <span
+                class="neg-card__turn-badge"
+                [attr.data-turn]="row.awaitingYou ? 'you' : 'other'"
+              >
+                <span
+                  class="material-symbols-outlined text-[14px]"
+                  aria-hidden="true"
+                >
+                  {{ row.awaitingYou ? 'error_med' : 'schedule' }}
+                </span>
                 {{
                   (row.awaitingYou
                     ? 'negotiation.awaitingYou'
@@ -42,21 +85,27 @@
                 }}
               </span>
             </div>
-            <p class="font-body-md text-on-surface">{{ row.counterparty }}</p>
-            <p class="font-label-sm text-on-surface-variant">
-              {{ row.cropName || '—' }}
-              @if (row.quantityTons) {
-                · {{ row.quantityTons | number: '1.0-2' }}
-                {{ 'common.ton' | translate }}
-              }
-              · {{ row.createdAt | date: 'medium' }}
-            </p>
-            <a class="ui-btn-ghost !px-0" [routerLink]="contractLink(row.contractId)">
-              {{ 'negotiation.openDraft' | translate }}
-            </a>
-          </li>
+
+            <footer class="neg-card__footer">
+              <span class="neg-card__date">
+                #{{ row.contractId.slice(0, 8) }} · {{ row.createdAt | uiDate: 'mediumDate' }}
+              </span>
+              <a
+                class="ui-btn-primary !py-2 !px-4 !text-xs"
+                [routerLink]="contractLink(row.contractId)"
+              >
+                <span>{{ 'negotiation.openDraft' | translate }}</span>
+                <span
+                  class="material-symbols-outlined text-[15px] icon-flip"
+                  aria-hidden="true"
+                >
+                  arrow_forward
+                </span>
+              </a>
+            </footer>
+          </article>
         }
-      </ul>
+      </div>
     }
   </div>
 </main>

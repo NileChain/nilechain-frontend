@@ -9,7 +9,11 @@ import { ContractIntegrity } from '../../../core/models/integrity/contract-integ
   imports: [RouterLink, TranslatePipe],
   template: `
     @if (integrity; as a) {
-      <div class="integrity-badge" data-tone="verified">
+      <div
+        class="integrity-badge"
+        data-tone="verified"
+        [class.ui-pop]="!!integrity"
+      >
         <span class="material-symbols-outlined" aria-hidden="true">verified</span>
         <div class="integrity-badge__body">
           <p class="integrity-badge__title">

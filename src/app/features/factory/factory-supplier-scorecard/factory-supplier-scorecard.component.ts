@@ -1,9 +1,11 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
+import { DecimalPipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { GovLabelPipe } from '../../../core/pipes/gov-label.pipe';
 import { FactorySupplierScorecard } from '../../../core/models/factory/factory-dashboard.model';
 import { FactoryService } from '../../../core/services/factory/factory.service';
 import { ReviewService } from '../../../core/services/review/review.service';
@@ -14,19 +16,23 @@ import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-stat
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
 import { UiRiskScoreBadgeComponent } from '../../../shared/ui/risk-score-badge/risk-score-badge.component';
+import {
+  contractStatusLabelKey,
+} from '../../../shared/contracts/contract-text.util';
+import { fulfillmentStatusLabelKey } from '../../../core/i18n/status-i18n.util';
 
 @Component({
   selector: 'app-factory-supplier-scorecard',
   standalone: true,
   imports: [
-    TranslatePipe,
+    UiDatePipe, TranslatePipe,
+    GovLabelPipe,
     AppTopBarComponent,
     UiEmptyStateComponent,
     UiErrorStateComponent,
     UiSkeletonComponent,
     UiRiskScoreBadgeComponent,
     RouterLink,
-    DatePipe,
     DecimalPipe,
   ],
   templateUrl: './factory-supplier-scorecard.component.html',
@@ -120,5 +126,13 @@ export class FactorySupplierScorecardComponent implements OnInit {
     if (score >= 70) return 'low';
     if (score >= 40) return 'medium';
     return 'high';
+  }
+
+  contractStatusKey(status: string): string {
+    return contractStatusLabelKey(status);
+  }
+
+  fulfillmentStatusKey(status: string): string {
+    return fulfillmentStatusLabelKey(status);
   }
 }

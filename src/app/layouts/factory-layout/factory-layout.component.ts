@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { Title } from '@angular/platform-browser';
 import { RouterLink, RouterOutlet } from '@angular/router';
+import { PageTitleService } from '../../core/services/page-title.service';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { SidebarFactoryComponent } from '../../shared/components/sidebar-factory/sidebar-factory.component';
 
@@ -12,7 +12,7 @@ import { SidebarFactoryComponent } from '../../shared/components/sidebar-factory
   styleUrl: './factory-layout.component.scss',
 })
 export class FactoryLayoutComponent {
-  constructor(title: Title) {
-    title.setTitle('NileChain - Factory');
+  constructor(pageTitle: PageTitleService) {
+    pageTitle.setKey('app.page.factory');
   }
 }

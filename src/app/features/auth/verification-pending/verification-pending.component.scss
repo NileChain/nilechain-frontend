@@ -1,0 +1,29 @@
+:host {
+  display: block;
+}
+
+.pending-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.pending-card__icon {
+  font-size: 3rem;
+  color: var(--color-primary);
+}
+
+.pending-card__alert {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--color-tertiary) 12%, transparent);
+  color: var(--color-on-surface);
+}
+
+.pending-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}

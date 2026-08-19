@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
 import {
   Component,
   Input,
@@ -46,7 +46,8 @@ const FLOW: FulfillmentStatus[] = [
 @Component({
   selector: 'app-contract-fulfillment-timeline',
   standalone: true,
-  imports: [TranslatePipe, DatePipe, FormsModule, UiLoaderComponent],
+  imports: [
+    UiDatePipe, TranslatePipe, FormsModule, UiLoaderComponent],
   templateUrl: './contract-fulfillment-timeline.component.html',
   styleUrl: './contract-fulfillment-timeline.component.scss',
 })

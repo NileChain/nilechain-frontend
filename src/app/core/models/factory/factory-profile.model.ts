@@ -1,3 +1,5 @@
+import { KybKind } from '../farm/farm-profile.model';
+
 export interface FactoryProfile {
   factoryId: string;
   name: string;
@@ -11,6 +13,7 @@ export interface FactoryProfile {
   averageRating: number;
   ratingCount: number;
   completionPercent: number;
+  documents: FactoryDocument[];
 }
 
 export interface UpdateFactoryProfileRequest {
@@ -20,4 +23,13 @@ export interface UpdateFactoryProfileRequest {
   latitude?: number | null;
   longitude?: number | null;
   industryType?: string | null;
+}
+
+export interface FactoryDocument {
+  documentId: string;
+  name: string;
+  fileUrl: string;
+  size: string;
+  fileType: string;
+  kybKind?: KybKind | string;
 }

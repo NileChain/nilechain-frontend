@@ -1,4 +1,5 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { UiDatePipe } from '../../core/pipes/ui-date.pipe';
+import { DecimalPipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -34,8 +35,7 @@ interface NegotiationRow {
   selector: 'app-party-negotiations-page',
   standalone: true,
   imports: [
-    DatePipe,
-    DecimalPipe,
+    UiDatePipe, DecimalPipe,
     RouterLink,
     TranslatePipe,
     AppTopBarComponent,
@@ -44,6 +44,7 @@ interface NegotiationRow {
     UiEmptyStateComponent,
   ],
   templateUrl: './party-negotiations-page.component.html',
+  styleUrl: './party-negotiations-page.component.scss',
 })
 export class PartyNegotiationsPageComponent implements OnInit {
   private readonly farmApi = inject(FarmService);

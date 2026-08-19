@@ -4,9 +4,11 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import {
+  FactoryDocument,
   FactoryProfile,
   UpdateFactoryProfileRequest,
 } from '../../models/factory/factory-profile.model';
+import { KybKind } from '../../models/farm/farm-profile.model';
 import { FactoryMatchItem, FarmListing } from '../../models/factory/factory-match.model';
 import {
   Fulfillment,
@@ -76,6 +78,23 @@ export class FactoryService {
     return this.http.put<void>(`${this.api}/profile`, payload);
   }
 
+  getDocuments(): Observable<FactoryDocument[]> {
+    return this.http.get<FactoryDocument[]>(`${this.api}/documents`);
+  }
+
+  addDocument(file: File, kybKind?: KybKind): Observable<FactoryDocument> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (kybKind) {
+      formData.append('kybKind', kybKind);
+    }
+    return this.http.post<FactoryDocument>(`${this.api}/documents`, formData);
+  }
+
+  deleteDocument(documentId: string): Observable<void> {
+    return this.http.delete<void>(`${this.api}/documents/${documentId}`);
+  }
+
   getRequestMatches(
     requestId: string,
     sort?: string | null
@@ -105,6 +124,46 @@ export class FactoryService {
     return this.http.post<void>(
       `${this.api}/matches/${matchId}/reject-counter`,
       {}
+    );
+  }
+
+  counterOffer(
+    matchId: string,
+    payload: {
+      quantityTons?: number | null;
+      pricePerTon?: number | null;
+      deliveryDate?: string | null;
+      note?: string | null;
+      grade?: string | null;
+    }
+  ): Observable<void> {
+    return this.http.post<void>(
+      `${this.api}/matches/${matchId}/counter-offer`,
+      payload
+    );
+  }
+
+  expandGeo(requestId: string): Observable<FactorySupplyRequestDetail> {
+    return this.http.post<FactorySupplyRequestDetail>(
+      `${this.api}/requests/${requestId}/expand-geo`,
+      {}
+    );
+  }
+
+  showMoreMatches(requestId: string): Observable<FactorySupplyRequestDetail> {
+    return this.http.post<FactorySupplyRequestDetail>(
+      `${this.api}/requests/${requestId}/show-more`,
+      {}
+    );
+  }
+
+  updateGeoScope(
+    requestId: string,
+    payload: { geographicScope: string; selectedGovernorates?: string[] }
+  ): Observable<FactorySupplyRequestDetail> {
+    return this.http.put<FactorySupplyRequestDetail>(
+      `${this.api}/requests/${requestId}/geo-scope`,
+      payload
     );
   }
 
@@ -166,9 +225,19 @@ export class FactoryService {
     });
   }
 
-  approveContract(contractId: string): Observable<FactoryContract> {
+  approveContract(
+    contractId: string,
+    body: { otpCode: string; consentText: string }
+  ): Observable<FactoryContract> {
     return this.http.put<FactoryContract>(
       `${this.api}/contracts/${contractId}/approve`,
+      body
+    );
+  }
+
+  requestSigningOtp(contractId: string): Observable<{ expiresAt: string }> {
+    return this.http.post<{ expiresAt: string }>(
+      `${this.api}/contracts/${contractId}/signing-otp`,
       {}
     );
   }
@@ -305,6 +374,28 @@ export class FactoryService {
     );
   }
 
+  createPaymobPaymentSession(
+    contractId: string,
+    transactionId: string,
+    idempotencyKey?: string
+  ): Observable<MockEscrowSession> {
+    return this.createMockPaymentSession(
+      contractId,
+      transactionId,
+      idempotencyKey
+    );
+  }
+
+  completePaymobSimulator(
+    contractId: string,
+    escrowId: string
+  ): Observable<PaymentMilestoneSchedule> {
+    return this.http.post<PaymentMilestoneSchedule>(
+      `${this.api}/contracts/${contractId}/payments/paymob/${escrowId}/complete-simulator`,
+      {}
+    );
+  }
+
   confirmMockPayment(
     contractId: string,
     escrowId: string
@@ -364,7 +455,9 @@ export interface FactoryNotification {
   type: string | null;
   isRead: boolean;
   createdAt: string;
-  link?: string;
+  link?: string | null;
+  relatedEntityType?: string | null;
+  relatedEntityId?: string | null;
 }
 
 export interface FactoryConversation {

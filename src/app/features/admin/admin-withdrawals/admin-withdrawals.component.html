@@ -1,0 +1,109 @@
+<main class="md:ms-[280px] min-h-screen bg-surface">
+  <app-top-bar titleKey="admin.withdrawals.title" portal="admin" />
+
+  <div
+    class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
+  >
+    <section class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {{ 'admin.withdrawals.subtitle' | translate }}
+      </p>
+      <div class="flex flex-wrap gap-2">
+        @for (f of statusFilters; track f.value) {
+          <button
+            type="button"
+            class="ui-btn-secondary !px-3 !py-1.5"
+            [class.!bg-primary]="statusFilter === f.value"
+            [class.!text-on-primary]="statusFilter === f.value"
+            [class.!border-primary]="statusFilter === f.value"
+            (click)="setStatusFilter(f.value)"
+          >
+            {{ f.labelKey | translate }}
+          </button>
+        }
+      </div>
+    </section>
+
+    <section class="ui-card overflow-hidden">
+      <div
+        class="p-6 border-b border-outline-variant flex justify-between items-center gap-3 bg-surface-container-lowest"
+      >
+        <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+          {{ 'admin.withdrawals.listTitle' | translate }}
+        </h2>
+        <button
+          type="button"
+          class="ui-btn-ghost"
+          (click)="load()"
+          [disabled]="loading()"
+        >
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+            >refresh</span
+          >
+          {{ 'common.refresh' | translate }}
+        </button>
+      </div>
+
+      @if (loading()) {
+        <div class="flex items-center justify-center gap-2 py-16">
+          <ui-loader />
+        </div>
+      } @else if (error()) {
+        <div class="p-6">
+          <ui-error-state [message]="error()" (retry)="load()" />
+        </div>
+      } @else if (items().length === 0) {
+        <div class="p-6">
+          <ui-empty-state
+            titleKey="admin.withdrawals.emptyTitle"
+            bodyKey="admin.withdrawals.emptyBody"
+            icon="account_balance"
+          />
+        </div>
+      } @else {
+        <ul class="divide-y divide-outline-variant" role="list">
+          @for (row of items(); track row.withdrawalId) {
+            <li class="p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div class="space-y-1 min-w-0">
+                <p class="font-title-md text-title-md">
+                  <span class="tabular-nums">{{ row.amountEgp }}</span>
+                  {{ 'common.egp' | translate }}
+                  · {{ statusLabelKey(row.status) | translate }}
+                </p>
+                <p class="font-label-sm text-label-sm text-on-surface-variant">
+                  {{ methodLabelKey(row.method) | translate }}
+                  @if (row.destinationSummary) {
+                    · {{ row.destinationSummary }}
+                  }
+                </p>
+                <p class="font-label-sm text-label-sm text-on-surface-variant">
+                  {{ row.createdAt | uiDate: 'medium' }}
+                </p>
+              </div>
+              @if (canAct(row)) {
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    class="ui-btn-primary"
+                    [disabled]="acting() === row.withdrawalId"
+                    (click)="complete(row)"
+                  >
+                    {{ 'admin.withdrawals.complete' | translate }}
+                  </button>
+                  <button
+                    type="button"
+                    class="ui-btn-ghost"
+                    [disabled]="acting() === row.withdrawalId"
+                    (click)="reject(row)"
+                  >
+                    {{ 'admin.withdrawals.reject' | translate }}
+                  </button>
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+</main>

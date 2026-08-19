@@ -17,6 +17,7 @@ export interface FarmMatchItem {
   contractId?: string | null;
   contractFullySigned?: boolean;
   canMessage?: boolean;
+  negotiationRounds?: import('../factory/factory-match.model').MatchNegotiationRound[];
   counterQuantityTons?: number | null;
   counterPricePerTon?: number | null;
   counterDeliveryDate?: string | null;

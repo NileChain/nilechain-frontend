@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
@@ -22,11 +22,10 @@ interface KbDoc {
   selector: 'app-knowledge-base',
   standalone: true,
   imports: [
-    TranslatePipe,
+    UiDatePipe, TranslatePipe,
     AppTopBarComponent,
     UiErrorStateComponent,
     FormsModule,
-    DatePipe,
   ],
   templateUrl: './knowledge-base.component.html',
 })

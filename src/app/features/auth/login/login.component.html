@@ -1,224 +1,158 @@
-﻿<div class="ui-page flex flex-col">
-  <header
-    class="bg-surface border-b border-outline-variant flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-16 fixed top-0 z-50"
-  >
+﻿<div class="ui-page auth-shell flex flex-col min-h-screen">
+  <header class="auth-bar">
     <a
       [routerLink]="'/landing'"
-      class="flex items-center gap-2"
+      class="auth-bar__brand"
       [attr.aria-label]="'app.name' | translate"
     >
       <ui-brand-mark [size]="32" [decorative]="true" />
-      <span class="font-headline-sm text-headline-sm font-bold text-primary" dir="ltr">{{
-        'app.name' | translate
-      }}</span>
+      <span class="auth-bar__name">{{ 'app.name' | translate }}</span>
     </a>
-    <div class="flex items-center gap-1 sm:gap-3">
-      <span
-        class="hidden md:inline font-label-md text-label-md text-primary font-bold border-b-2 border-primary"
-        >{{ 'landing.login' | translate }}</span
-      >
+    <div class="auth-bar__tools">
       <ui-language-toggle />
       <ui-theme-toggle />
     </div>
   </header>
 
-  <main
-    class="flex-grow flex items-stretch justify-center pt-16 min-h-screen"
-  >
-    <div class="auth-split animate-fade-in">
-      <aside class="auth-aside" aria-hidden="true">
-        <img
-          src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=75"
-          alt=""
-        />
-        <div class="auth-aside__veil"></div>
-        <div class="auth-aside__copy">
-          <p class="font-heritage">{{ 'login.asideQuote' | translate }}</p>
-          <span>{{ 'login.asideAttr' | translate }}</span>
-        </div>
-      </aside>
+  <main class="flex-grow">
+    <div class="auth-split">
+      <ui-auth-wordmark />
+      <div class="auth-panel">
+        <div class="auth-panel__inner">
+          <h1 class="auth-panel__title">{{ 'login.title' | translate }}</h1>
+          <p class="auth-panel__lede">{{ 'login.subtitle' | translate }}</p>
 
-      <div class="flex items-center justify-center px-margin-mobile py-12">
-    <div
-      class="w-full max-w-[440px] bg-surface-container-lowest border border-outline-variant rounded-xl login-card-shadow overflow-hidden animate-scale-in"
-    >
-      <div
-        class="p-8 text-center border-b border-outline-variant bg-surface-bright"
-      >
-        <div class="mb-4 flex justify-center">
-          <ui-brand-mark [size]="48" />
-        </div>
-        <h1 class="font-headline-md text-headline-md text-on-surface font-bold">
-          {{ 'login.title' | translate }}
-        </h1>
-        <p class="font-body-md text-body-md text-on-surface-variant mt-2">
-          {{ 'login.subtitle' | translate }}
-        </p>
-      </div>
+          <form class="space-y-5" (submit)="onSubmit($event)" novalidate>
+            <div class="space-y-2">
+              <label
+                for="email"
+                class="font-label-md text-label-md text-on-surface-variant block"
+                >{{ 'login.email' | translate }}</label
+              >
+              <div class="relative group">
+                <span
+                  class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors"
+                  aria-hidden="true"
+                  >mail</span
+                >
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  autocomplete="email"
+                  [attr.placeholder]="'login.emailPlaceholder' | translate"
+                  required
+                  class="ui-input !ps-10 !pe-4"
+                />
+              </div>
+            </div>
 
-      <form class="p-8 space-y-6" (submit)="onSubmit($event)" novalidate>
-        <div class="space-y-2">
-          <label
-            for="email"
-            class="font-label-md text-label-md text-on-surface-variant block"
-            >{{ 'login.email' | translate }}</label
-          >
-          <div class="relative group">
-            <span
-              class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors"
-              aria-hidden="true"
-              >mail</span
-            >
-            <input
-              type="email"
-              id="email"
-              name="email"
-              autocomplete="email"
-              [attr.placeholder]="'login.emailPlaceholder' | translate"
-              required
-              class="ui-input !ps-10 !pe-4"
-            />
-          </div>
-        </div>
+            <div class="space-y-2">
+              <div class="flex justify-between items-center gap-2">
+                <label
+                  for="password"
+                  class="font-label-md text-label-md text-on-surface-variant"
+                  >{{ 'login.password' | translate }}</label
+                >
+                <a
+                  [routerLink]="'/forgot-password'"
+                  class="font-label-sm text-label-sm text-primary hover:underline"
+                  >{{ 'login.forgot' | translate }}</a
+                >
+              </div>
+              <div class="relative group">
+                <span
+                  class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors"
+                  aria-hidden="true"
+                  >lock</span
+                >
+                <input
+                  [type]="passwordFieldType()"
+                  id="password"
+                  name="password"
+                  autocomplete="current-password"
+                  [attr.placeholder]="'login.passwordPlaceholder' | translate"
+                  required
+                  class="ui-input !ps-10 !pe-12"
+                />
+                <button
+                  type="button"
+                  (click)="togglePassword()"
+                  class="absolute end-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface-variant"
+                  [attr.aria-label]="
+                    passwordFieldType() === 'password'
+                      ? ('login.showPassword' | translate)
+                      : ('login.hidePassword' | translate)
+                  "
+                >
+                  <span class="material-symbols-outlined" aria-hidden="true">{{
+                    passwordVisibilityIcon()
+                  }}</span>
+                </button>
+              </div>
+            </div>
 
-        <div class="space-y-2">
-          <div class="flex justify-between items-center gap-2">
-            <label
-              for="password"
-              class="font-label-md text-label-md text-on-surface-variant"
-              >{{ 'login.password' | translate }}</label
-            >
-            <a
-              [routerLink]="'/forgot-password'"
-              class="font-label-sm text-label-sm text-primary hover:underline"
-              >{{ 'login.forgot' | translate }}</a
-            >
-          </div>
-          <div class="relative group">
-            <span
-              class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors"
-              aria-hidden="true"
-              >lock</span
-            >
-            <input
-              [type]="passwordFieldType()"
-              id="password"
-              name="password"
-              autocomplete="current-password"
-              [attr.placeholder]="'login.passwordPlaceholder' | translate"
-              required
-              class="ui-input !ps-10 !pe-12"
-            />
+            <div class="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="remember"
+                name="rememberMe"
+                class="w-4 h-4 text-primary border-outline-variant rounded focus:ring-primary-container"
+              />
+              <label
+                for="remember"
+                class="font-label-sm text-label-sm text-on-surface-variant select-none"
+                >{{ 'login.rememberMe' | translate }}</label
+              >
+            </div>
+
+            @if (errorMessage()) {
+              <p
+                class="font-label-sm text-label-sm text-error ui-anim-shake"
+                role="alert"
+              >
+                {{ errorMessage() | translate }}
+              </p>
+            }
+
             <button
-              type="button"
-              (click)="togglePassword()"
-              class="absolute end-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface-variant"
-              [attr.aria-label]="
-                passwordFieldType() === 'password'
-                  ? ('login.showPassword' | translate)
-                  : ('login.hidePassword' | translate)
-              "
+              type="submit"
+              [disabled]="isSubmitting()"
+              class="ui-btn-primary w-full"
             >
-              <span class="material-symbols-outlined" aria-hidden="true">{{
-                passwordVisibilityIcon()
-              }}</span>
+              {{
+                isSubmitting()
+                  ? ('login.signingIn' | translate)
+                  : ('login.loginCta' | translate)
+              }}
             </button>
-          </div>
-        </div>
 
-        <div class="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="remember"
-            name="rememberMe"
-            class="w-4 h-4 text-primary border-outline-variant rounded focus:ring-primary-container"
-          />
-          <label
-            for="remember"
-            class="font-label-sm text-label-sm text-on-surface-variant select-none"
-            >{{ 'login.rememberMe' | translate }}</label
-          >
-        </div>
-
-        @if (errorMessage()) {
-          <p
-            class="font-label-sm text-label-sm text-error ui-anim-shake"
-            role="alert"
-          >
-            {{ errorMessage() | translate }}
-          </p>
-        }
-
-        <button
-          type="submit"
-          [disabled]="isSubmitting()"
-          class="ui-btn-primary w-full !py-4"
-        >
-          {{
-            isSubmitting()
-              ? ('login.signingIn' | translate)
-              : ('login.loginCta' | translate)
-          }}
-          <span class="material-symbols-outlined icon-flip" aria-hidden="true"
-            >arrow_forward</span
-          >
-        </button>
-
-        <div class="relative py-2">
-          <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-outline-variant"></div>
-          </div>
-          <div class="relative flex justify-center text-xs uppercase">
-            <span
-              class="bg-surface-container-lowest px-2 text-outline font-label-sm"
-              >{{ 'login.newToNileChain' | translate }}</span
+            <p
+              class="text-center font-body-md text-on-surface-variant m-0 pt-1"
             >
-          </div>
+              {{ 'login.newToNileChain' | translate }}
+              <a
+                [routerLink]="'/register'"
+                class="text-primary font-semibold hover:underline"
+                >{{ 'login.registerBusiness' | translate }}</a
+              >
+            </p>
+          </form>
         </div>
-
-        <div class="text-center">
-          <a
-            [routerLink]="'/register'"
-            class="inline-flex items-center gap-2 font-label-md text-label-md text-primary font-bold hover:bg-surface-container-low px-4 py-2 rounded-lg transition-colors"
-          >
-            {{ 'login.registerBusiness' | translate }}
-            <span
-              class="material-symbols-outlined text-[20px]"
-              aria-hidden="true"
-              >corporate_fare</span
-            >
-          </a>
-        </div>
-      </form>
-    </div>
       </div>
     </div>
   </main>
 
-  <footer class="bg-surface-container-highest text-on-surface w-full mt-auto">
-    <div
-      class="flex flex-col md:flex-row justify-between items-center px-margin-mobile md:px-margin-desktop py-lg w-full max-w-7xl mx-auto gap-4"
-    >
-      <div class="flex flex-col md:flex-row items-center gap-4">
-        <span class="font-bold text-primary" dir="ltr">{{ 'app.name' | translate }}</span>
-        <p class="font-label-sm text-label-sm text-on-surface-variant">
-          {{ 'landing.footerRights' | translate }}
-        </p>
-      </div>
-      <nav class="flex flex-wrap justify-center gap-6" aria-label="Legal">
-        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
-          'landing.privacy' | translate
-        }}</span>
-        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
-          'landing.terms' | translate
-        }}</span>
-        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
-          'landing.compliance' | translate
-        }}</span>
-        <span class="font-label-sm text-label-sm text-on-surface-variant">{{
-          'landing.contact' | translate
-        }}</span>
-      </nav>
-    </div>
+  <footer class="auth-footer">
+    <p class="m-0">
+      <span dir="ltr">{{ 'app.name' | translate }}</span>
+      · {{ 'landing.footerRights' | translate }}
+    </p>
+    <nav [attr.aria-label]="'common.legalNav' | translate">
+      <span>{{ 'landing.privacy' | translate }}</span>
+      <span>{{ 'landing.terms' | translate }}</span>
+      <span>{{ 'landing.compliance' | translate }}</span>
+      <span>{{ 'landing.contact' | translate }}</span>
+    </nav>
   </footer>
 </div>

@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { debounceTime, finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { GovLabelPipe } from '../../../core/pipes/gov-label.pipe';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
@@ -22,6 +23,7 @@ import { environment } from '../../../../environments/environment';
   imports: [
     ReactiveFormsModule,
     TranslatePipe,
+    GovLabelPipe,
     AppTopBarComponent,
     UiPortalHeroComponent,
     RouterLink,

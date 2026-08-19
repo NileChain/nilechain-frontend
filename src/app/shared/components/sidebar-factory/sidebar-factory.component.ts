@@ -36,7 +36,46 @@ export class SidebarFactoryComponent {
   readonly drawerPanel = viewChild<ElementRef<HTMLElement>>('drawerPanel');
   readonly drawerClose = viewChild<ElementRef<HTMLButtonElement>>('drawerClose');
 
-  readonly items: Array<{
+  /** Supply-request loop — keep in demo order so the sidebar follows each stage. */
+  readonly flowItems: Array<{
+    key: string;
+    icon: string;
+    labelKey: string;
+    link: string;
+  }> = [
+    {
+      key: 'supplyRequest',
+      icon: 'add_box',
+      labelKey: 'nav.supplyRequest',
+      link: '/factory/supply-request',
+    },
+    {
+      key: 'agentProgress',
+      icon: 'smart_toy',
+      labelKey: 'nav.agentProgress',
+      link: '/factory/agent-progress',
+    },
+    {
+      key: 'matches',
+      icon: 'handshake',
+      labelKey: 'nav.matches',
+      link: '/factory/matches',
+    },
+    {
+      key: 'riskReport',
+      icon: 'health_and_safety',
+      labelKey: 'nav.riskReport',
+      link: '/factory/risk-report',
+    },
+    {
+      key: 'contracts',
+      icon: 'description',
+      labelKey: 'nav.contracts',
+      link: '/factory/contracts',
+    },
+  ];
+
+  readonly moreItems: Array<{
     key: string;
     icon: string;
     labelKey: string;
@@ -61,46 +100,16 @@ export class SidebarFactoryComponent {
       link: '/factory/profile',
     },
     {
-      key: 'supplyRequest',
-      icon: 'add_box',
-      labelKey: 'nav.supplyRequest',
-      link: '/factory/supply-request',
-    },
-    {
       key: 'requests',
       icon: 'list_alt',
       labelKey: 'nav.requests',
       link: '/factory/requests',
     },
     {
-      key: 'matches',
-      icon: 'handshake',
-      labelKey: 'nav.matches',
-      link: '/factory/matches',
-    },
-    {
       key: 'listings',
       icon: 'storefront',
       labelKey: 'nav.listings',
       link: '/factory/listings',
-    },
-    {
-      key: 'agentProgress',
-      icon: 'smart_toy',
-      labelKey: 'nav.agentProgress',
-      link: '/factory/agent-progress',
-    },
-    {
-      key: 'riskReport',
-      icon: 'health_and_safety',
-      labelKey: 'nav.riskReport',
-      link: '/factory/risk-report',
-    },
-    {
-      key: 'contracts',
-      icon: 'description',
-      labelKey: 'nav.contracts',
-      link: '/factory/contracts',
     },
     {
       key: 'negotiations',
@@ -121,6 +130,12 @@ export class SidebarFactoryComponent {
       link: '/factory/wallet',
     },
     {
+      key: 'billing',
+      icon: 'workspace_premium',
+      labelKey: 'nav.billing',
+      link: '/factory/billing',
+    },
+    {
       key: 'messages',
       icon: 'forum',
       labelKey: 'nav.messages',
@@ -132,6 +147,11 @@ export class SidebarFactoryComponent {
       labelKey: 'nav.notifications',
       link: '/factory/notifications',
     },
+  ];
+
+  private readonly routeAliases: Array<{ prefix: string; key: string }> = [
+    { prefix: '/factory/contract-signing', key: 'contracts' },
+    { prefix: '/factory/suppliers', key: 'matches' },
   ];
 
   readonly active = signal(this.resolveActive(this.router.url));
@@ -161,9 +181,7 @@ export class SidebarFactoryComponent {
           (e as NavigationEnd).urlAfterRedirects || (e as NavigationEnd).url;
         this.active.set(this.resolveActive(url));
         this.mobileNav.closeMenu();
-        const match = [...this.items]
-          .sort((a, b) => b.link.length - a.link.length)
-          .find((item) => url.startsWith(item.link));
+        const match = this.findNavItem(this.active());
         if (match) {
           this.personalization.trackRecent({
             id: `factory-${match.key}`,
@@ -172,7 +190,10 @@ export class SidebarFactoryComponent {
             icon: match.icon,
           });
         }
+        this.scrollActiveIntoView();
       });
+
+    queueMicrotask(() => this.scrollActiveIntoView());
   }
 
   @HostListener('window:keydown.escape')
@@ -198,11 +219,60 @@ export class SidebarFactoryComponent {
     this.mobileNav.toggleMenu();
   }
 
+  private navItems() {
+    return [...this.flowItems, ...this.moreItems];
+  }
+
+  private findNavItem(key: string) {
+    return this.navItems().find((item) => item.key === key);
+  }
+
+  private pathOf(url: string): string {
+    const bare = url.split('?')[0].split('#')[0];
+    const outlet = bare.indexOf('(');
+    const path = (outlet >= 0 ? bare.slice(0, outlet) : bare).replace(/\/+$/, '');
+    return path || '/';
+  }
+
+  private pathMatches(path: string, prefix: string): boolean {
+    return path === prefix || path.startsWith(`${prefix}/`);
+  }
+
   private resolveActive(url: string): string {
-    const match = [...this.items]
+    const path = this.pathOf(url);
+    const alias = [...this.routeAliases]
+      .sort((a, b) => b.prefix.length - a.prefix.length)
+      .find((item) => this.pathMatches(path, item.prefix));
+    if (alias) {
+      return alias.key;
+    }
+    const match = this.navItems()
       .sort((a, b) => b.link.length - a.link.length)
-      .find((item) => url.startsWith(item.link));
+      .find((item) => this.pathMatches(path, item.link));
     return match?.key ?? 'dashboard';
+  }
+
+  private scrollActiveIntoView(): void {
+    const key = this.active();
+    queueMicrotask(() => {
+      document
+        .querySelectorAll<HTMLElement>(
+          `.app-sidebar__scroll [data-nav-key="${key}"]`
+        )
+        .forEach((el) => {
+          const scroller = el.closest('.app-sidebar__scroll');
+          if (!(scroller instanceof HTMLElement)) {
+            return;
+          }
+          const elRect = el.getBoundingClientRect();
+          const box = scroller.getBoundingClientRect();
+          if (elRect.top < box.top) {
+            scroller.scrollTop += elRect.top - box.top;
+          } else if (elRect.bottom > box.bottom) {
+            scroller.scrollTop += elRect.bottom - box.bottom;
+          }
+        });
+    });
   }
 
   logout(): void {

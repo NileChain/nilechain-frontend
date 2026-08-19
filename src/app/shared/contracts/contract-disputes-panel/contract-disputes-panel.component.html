@@ -40,7 +40,7 @@
                 {{ typeKey(d.type) | translate }}
               </span>
               <span class="font-label-sm text-label-sm text-on-surface-variant ms-auto">
-                {{ d.createdAt | date: 'mediumDate' }}
+                {{ d.createdAt | uiDate: 'mediumDate' }}
               </span>
             </div>
             <p class="font-body-md text-body-md text-on-surface">
@@ -73,7 +73,7 @@
               <ol class="space-y-1 border-t border-outline-variant pt-2">
                 @for (ev of d.events; track ev.eventId) {
                   <li class="font-label-sm text-label-sm text-on-surface-variant">
-                    {{ ev.createdAt | date: 'short' }} —
+                    {{ ev.createdAt | uiDate: 'short' }} —
                     {{ statusKey(ev.toStatus) | translate }}
                     @if (ev.note) {
                       <span>: {{ ev.note }}</span>

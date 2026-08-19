@@ -1,9 +1,11 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
+import { DecimalPipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { GovLabelPipe } from '../../../core/pipes/gov-label.pipe';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
@@ -20,14 +22,14 @@ import { EGYPT_GOVERNORATES } from '../../../shared/geo/egypt-governorates';
   selector: 'app-factory-listings',
   standalone: true,
   imports: [
-    TranslatePipe,
+    UiDatePipe, TranslatePipe,
+    GovLabelPipe,
     AppTopBarComponent,
     UiEmptyStateComponent,
     UiErrorStateComponent,
     UiSkeletonComponent,
     FarmProfileDrawerComponent,
     FormsModule,
-    DatePipe,
     DecimalPipe,
     RouterLink,
   ],

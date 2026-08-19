@@ -97,6 +97,13 @@
                     >
                       {{ statusKey(d.status) | translate }}
                     </span>
+                    @if (d.isOverdue) {
+                      <span
+                        class="inline-flex items-center px-3 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm"
+                      >
+                        {{ 'admin.disputes.overdue' | translate }}
+                      </span>
+                    }
                     <span
                       class="inline-flex items-center px-3 py-1 rounded-full border border-outline-variant font-label-sm text-label-sm text-on-surface-variant"
                     >
@@ -106,7 +113,11 @@
                   <p class="font-label-sm text-label-sm text-on-surface-variant">
                     {{ 'admin.disputes.raisedBy' | translate }}:
                     {{ d.raisedByParty }} ·
-                    {{ d.createdAt | date: 'medium' }}
+                    {{ d.createdAt | uiDate: 'medium' }}
+                    @if (d.slaDueAt) {
+                      · {{ 'admin.disputes.slaDue' | translate }}:
+                      {{ d.slaDueAt | uiDate: 'medium' }}
+                    }
                   </p>
                   <p class="font-body-md text-body-md text-on-surface-variant">
                     {{ d.description }}
@@ -156,7 +167,7 @@
                       <ol class="space-y-1">
                         @for (ev of d.events; track ev.eventId) {
                           <li class="font-label-sm text-label-sm text-on-surface-variant">
-                            {{ ev.createdAt | date: 'short' }} —
+                            {{ ev.createdAt | uiDate: 'short' }} —
                             {{ statusKey(ev.toStatus) | translate }}
                             @if (ev.note) {
                               <span>: {{ ev.note }}</span>

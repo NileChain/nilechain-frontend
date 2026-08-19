@@ -7,7 +7,6 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { AuthService } from '../../../core/services/auth.service';
 import { MobileNavService } from '../../../core/services/mobile-nav.service';
@@ -23,7 +22,6 @@ export type AppTopBarPortal = 'farm' | 'factory' | 'admin';
   selector: 'app-top-bar',
   standalone: true,
   imports: [
-    RouterLink,
     TranslatePipe,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,

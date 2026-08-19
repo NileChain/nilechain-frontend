@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import {
   AfterViewChecked,
   Component,
@@ -9,10 +9,12 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import * as L from 'leaflet';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { GovLabelPipe } from '../../../core/pipes/gov-label.pipe';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
@@ -24,7 +26,10 @@ import { ToastService } from '../../../core/services/toast.service';
 import { TranslateService } from '../../../core/services/translate.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { AiAssistantContextService } from '../../../core/services/ai-assistant-context.service';
-import { FactoryMatchItem } from '../../../core/models/factory/factory-match.model';
+import {
+  FactoryMatchItem,
+  MatchFactor,
+} from '../../../core/models/factory/factory-match.model';
 import { readAgentSession } from '../../../core/utils/agent-session';
 import {
   ListSortMode,
@@ -37,6 +42,9 @@ import {
   EGYPT_MAP_CENTER,
   resolveMapCoords,
 } from '../../../shared/geo/egypt-governorates';
+import {
+  factoryMatchStatusLabelKey,
+} from '../../../core/i18n/status-i18n.util';
 
 /**
  * Leaflet's default Icon.Default URLs break under Angular/Vite bundling
@@ -63,7 +71,8 @@ configureLeafletDefaultIcon();
   selector: 'app-factory-matches',
   standalone: true,
   imports: [
-    TranslatePipe,
+    UiDatePipe, TranslatePipe,
+    GovLabelPipe,
     UiErrorStateComponent,
     UiEmptyStateComponent,
     UiSkeletonComponent,
@@ -71,7 +80,6 @@ configureLeafletDefaultIcon();
     UiPortalHeroComponent,
     FarmProfileDrawerComponent,
     RouterLink,
-    DatePipe,
     DecimalPipe,
     FormsModule,
   ],
@@ -84,6 +92,7 @@ export class FactoryMatchesComponent
 
   private readonly factoryService = inject(FactoryService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
   private readonly i18n = inject(TranslateService);
   private readonly confirmDialog = inject(ConfirmDialogService);
@@ -102,6 +111,12 @@ export class FactoryMatchesComponent
   readonly sortMode = signal<ListSortMode>('newest');
   readonly excludingId = signal<string | null>(null);
   readonly counterActionId = signal<string | null>(null);
+  readonly counterFormMatchId = signal<string | null>(null);
+  readonly counterQty = signal<number | null>(null);
+  readonly counterPrice = signal<number | null>(null);
+  readonly counterDelivery = signal('');
+  readonly counterNote = signal('');
+  readonly focusMatchId = signal<string | null>(null);
 
   private map?: L.Map;
   private markerLayer?: L.LayerGroup;
@@ -113,10 +128,14 @@ export class FactoryMatchesComponent
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
       const id = params.get('requestId');
+      const matchId = params.get('matchId');
       this.requestId.set(id);
-      this.assistantCtx.set({ requestId: id, matchId: null, farmId: null });
+      this.focusMatchId.set(matchId);
+      this.assistantCtx.set({ requestId: id, matchId: matchId, farmId: null });
       if (id) {
-        this.loadMatches(id);
+        this.loadMatches(id, matchId);
+      } else if (matchId) {
+        this.resolveMatchThenLoad(matchId);
       } else {
         this.destroyMap();
         this.matches.set([]);
@@ -157,7 +176,7 @@ export class FactoryMatchesComponent
     this.destroyMap();
   }
 
-  loadMatches(requestId: string): void {
+  loadMatches(requestId: string, matchId?: string | null): void {
     this.loading.set(true);
     this.error.set(null);
     this.destroyMap();
@@ -167,10 +186,14 @@ export class FactoryMatchesComponent
       .subscribe({
         next: (items) => {
           this.matches.set(items);
-          this.selected.set(items[0] ?? null);
-          this.syncAssistantContext(items[0] ?? null);
+          const focused =
+            (matchId && items.find((m) => m.matchId === matchId)) ||
+            items[0] ||
+            null;
+          this.selected.set(focused);
+          this.syncAssistantContext(focused);
           this.mapInitAttempts = 0;
-          if (items[0]) {
+          if (focused) {
             this.scheduleMapInit();
           } else {
             this.mapNeedsInit = false;
@@ -181,11 +204,33 @@ export class FactoryMatchesComponent
       });
   }
 
+  private resolveMatchThenLoad(matchId: string): void {
+    this.loading.set(true);
+    this.factoryService
+      .getMatchedFarms()
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (farms) => {
+          const found = farms.find((f) => f.matchId === matchId);
+          if (found?.requestId) {
+            void this.router.navigate(['/factory/matches'], {
+              queryParams: { requestId: found.requestId, matchId },
+              replaceUrl: true,
+            });
+            return;
+          }
+          this.error.set(this.i18n.instant('factory.matches.loadFailed'));
+        },
+        error: () =>
+          this.error.set(this.i18n.instant('factory.matches.loadFailed')),
+      });
+  }
+
   onSortChange(value: string): void {
     this.sortMode.set(normalizeListSort(value));
     const id = this.requestId();
     if (id) {
-      this.loadMatches(id);
+      this.loadMatches(id, this.selected()?.matchId ?? this.focusMatchId());
     }
   }
 
@@ -257,6 +302,31 @@ export class FactoryMatchesComponent
     return `factory.riskReport.${this.riskLevel(score)}Risk`;
   }
 
+  statusLabelKey(status: string): string {
+    return factoryMatchStatusLabelKey(status);
+  }
+
+  factorKey(factor: MatchFactor): string {
+    return `factory.matches.why.${factor.code}`;
+  }
+
+  factorParams(factor: MatchFactor): Record<string, string> {
+    return { detail: factor.detail ?? '' };
+  }
+
+  factorIcon(factor: MatchFactor): string {
+    switch (factor.state) {
+      case 'Earned':
+        return 'check_circle';
+      case 'Missed':
+        return 'remove_circle_outline';
+      case 'Caution':
+        return 'warning';
+      default:
+        return 'info';
+    }
+  }
+
   riskColor(score: number | null): string {
     switch (this.riskLevel(score)) {
       case 'low':
@@ -319,6 +389,70 @@ export class FactoryMatchesComponent
     return (match.status || '').toLowerCase() === 'countered';
   }
 
+  canNegotiate(match: FactoryMatchItem): boolean {
+    const status = (match.status || '').toLowerCase();
+    return status === 'proposed' || status === 'countered';
+  }
+
+  lastOfferedBy(match: FactoryMatchItem): string {
+    const rounds = match.negotiationRounds ?? [];
+    if (!rounds.length) return '';
+    return (rounds[rounds.length - 1].offeredBy || '').toLowerCase();
+  }
+
+  isIncomingFarmCounter(match: FactoryMatchItem): boolean {
+    if (!this.isCountered(match)) return false;
+    const last = this.lastOfferedBy(match);
+    return last === 'farm' || last === '';
+  }
+
+  offeredByKey(offeredBy: string | undefined): string {
+    return (offeredBy || '').toLowerCase() === 'factory'
+      ? 'factory.matches.offeredByFactory'
+      : 'factory.matches.offeredByFarm';
+  }
+
+  openCounterForm(match: FactoryMatchItem): void {
+    this.counterFormMatchId.set(match.matchId);
+    this.counterQty.set(match.effectiveQuantityTons ?? match.requestQuantityTons ?? null);
+    this.counterPrice.set(match.effectivePricePerTon ?? match.requestPricePerTon ?? null);
+    this.counterDelivery.set((match.effectiveDeliveryDate ?? match.requestDeliveryDate ?? '').slice(0, 10));
+    this.counterNote.set('');
+  }
+
+  closeCounterForm(): void {
+    this.counterFormMatchId.set(null);
+  }
+
+  submitFactoryCounter(match: FactoryMatchItem): void {
+    if (this.counterActionId()) return;
+    this.counterActionId.set(match.matchId);
+    this.factoryService
+      .counterOffer(match.matchId, {
+        quantityTons: this.counterQty(),
+        pricePerTon: this.counterPrice(),
+        deliveryDate: this.counterDelivery().trim() || null,
+        note: this.counterNote().trim() || null,
+      })
+      .pipe(finalize(() => this.counterActionId.set(null)))
+      .subscribe({
+        next: () => {
+          this.toast.info(this.i18n.instant('factory.matches.counterSent'));
+          this.closeCounterForm();
+          const requestId = this.requestId();
+          if (requestId) {
+            this.loadMatches(requestId, match.matchId);
+          }
+        },
+        error: (err) =>
+          this.toast.error(
+            err?.error?.detail ||
+              err?.error?.message ||
+              this.i18n.instant('factory.matches.counterFailed')
+          ),
+      });
+  }
+
   async acceptCounter(match: FactoryMatchItem): Promise<void> {
     if (this.counterActionId()) return;
     const confirmed = await this.confirmDialog.confirm({
@@ -336,7 +470,7 @@ export class FactoryMatchesComponent
         next: () => {
           this.toast.info(this.i18n.instant('factory.matches.acceptCounterToast'));
           const id = this.requestId();
-          if (id) this.loadMatches(id);
+          if (id) this.loadMatches(id, this.selected()?.matchId ?? this.focusMatchId());
         },
         error: () =>
           this.toast.error(
@@ -363,7 +497,7 @@ export class FactoryMatchesComponent
         next: () => {
           this.toast.info(this.i18n.instant('factory.matches.rejectCounterToast'));
           const id = this.requestId();
-          if (id) this.loadMatches(id);
+          if (id) this.loadMatches(id, this.selected()?.matchId ?? this.focusMatchId());
         },
         error: () =>
           this.toast.error(

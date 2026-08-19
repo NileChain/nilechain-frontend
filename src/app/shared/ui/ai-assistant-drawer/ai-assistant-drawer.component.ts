@@ -26,11 +26,16 @@ import {
     @if (showFab && canUseAssistant()) {
       <button
         type="button"
-        class="fixed bottom-24 end-6 z-[70] h-14 w-14 rounded-full bg-primary-container text-on-primary-container shadow-lg hover:opacity-90 active:scale-95 flex items-center justify-center"
+        class="fixed bottom-24 end-6 z-[70] h-14 w-14 rounded-full bg-primary-container text-on-primary-container shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-200 active:scale-95 flex items-center justify-center"
         (click)="ai.toggle()"
         [attr.aria-label]="'common.aiAssistant' | translate"
       >
-        <span class="material-symbols-outlined" aria-hidden="true">smart_toy</span>
+        <span
+          class="material-symbols-outlined transition-transform duration-200"
+          [class.rotate-45]="ai.open()"
+          aria-hidden="true"
+          >smart_toy</span
+        >
       </button>
     }
 
@@ -52,7 +57,7 @@ import {
         <aside
           #panel
           tabindex="-1"
-          class="absolute inset-y-0 end-0 w-full max-w-md bg-surface shadow-xl border-s border-outline-variant flex flex-col outline-none"
+          class="absolute inset-y-0 end-0 w-full max-w-md bg-surface shadow-xl border-s border-outline-variant flex flex-col outline-none animate-slide-in-end"
         >
           <header
             class="h-auto min-h-16 px-4 py-3 flex items-start justify-between gap-3 border-b border-outline-variant shrink-0"
@@ -113,22 +118,77 @@ import {
                 {{ 'common.aiDrawerEmpty' | translate }}
               </p>
             }
-            @for (msg of ai.messages(); track msg.id) {
+            @for (msg of ai.messages(); track msg.id; let i = $index) {
               <div
-                class="rounded-lg px-3 py-2 max-w-[90%] whitespace-pre-wrap font-body-sm text-body-sm"
+                class="max-w-[90%] space-y-2 animate-fade-in"
+                [style.animation-delay.ms]="i * 60"
+                [style.animation-fill-mode]="'both'"
                 [class.ms-auto]="msg.role === 'user'"
-                [class.bg-primary-container]="msg.role === 'user'"
-                [class.text-on-primary-container]="msg.role === 'user'"
-                [class.bg-surface-container-low]="msg.role === 'assistant'"
-                [class.text-on-surface]="msg.role === 'assistant'"
               >
-                {{ msg.text }}
+                <div
+                  class="rounded-lg px-3 py-2 whitespace-pre-wrap font-body-sm text-body-sm"
+                  [class.bg-primary-container]="msg.role === 'user'"
+                  [class.text-on-primary-container]="msg.role === 'user'"
+                  [class.bg-surface-container-low]="msg.role === 'assistant'"
+                  [class.text-on-surface]="msg.role === 'assistant'"
+                >
+                  {{ msg.text }}
+                </div>
+
+                @if (msg.citations?.length) {
+                  <div class="ps-1 space-y-1">
+                    <p class="text-label-sm text-on-surface-variant">
+                      {{ 'common.aiSources' | translate }}
+                    </p>
+                    @for (c of msg.citations; track c.index) {
+                      <details
+                        class="rounded-lg border border-outline-variant px-2 py-1"
+                      >
+                        <summary
+                          class="cursor-pointer text-label-sm text-on-surface"
+                        >
+                          [{{ c.index }}] {{ c.title }}
+                          <span class="text-on-surface-variant"
+                            >· {{ c.section }}</span
+                          >
+                        </summary>
+                        <p
+                          class="mt-1 font-body-sm text-body-sm text-on-surface-variant whitespace-pre-wrap"
+                        >
+                          {{ c.excerpt }}
+                        </p>
+                      </details>
+                    }
+                  </div>
+                } @else if (msg.role === 'assistant' && msg.knowledgeUnavailable) {
+                  <p class="ps-1 text-label-sm text-on-surface-variant">
+                    {{ 'common.aiNoSources' | translate }}
+                  </p>
+                }
               </div>
             }
             @if (ai.thinking()) {
-              <p class="text-label-sm text-on-surface-variant">
-                {{ 'common.aiDrawerThinking' | translate }}…
-              </p>
+              <div
+                class="flex items-center gap-1 px-3 py-2 max-w-[90%] rounded-lg bg-surface-container-low"
+                role="status"
+                [attr.aria-label]="'common.aiDrawerThinking' | translate"
+              >
+                <span
+                  class="bg-primary/60 rounded-full w-2 h-2 animate-soft-pulse"
+                  [style.animation-delay.ms]="0"
+                ></span>
+                <span
+                  class="bg-primary/60 rounded-full w-2 h-2 animate-soft-pulse"
+                  [style.animation-delay.ms]="150"
+                ></span>
+                <span
+                  class="bg-primary/60 rounded-full w-2 h-2 animate-soft-pulse"
+                  [style.animation-delay.ms]="300"
+                ></span>
+                <span class="ms-2 text-label-sm text-on-surface-variant">
+                  {{ 'common.aiDrawerThinking' | translate }}…
+                </span>
+              </div>
             }
           </div>
 

@@ -7,6 +7,7 @@ import {
   inject,
   input,
 } from '@angular/core';
+import { LocaleService } from '../../core/services/locale.service';
 
 /**
  * Animates a numeric value from 0 → target when the element enters the viewport.
@@ -20,6 +21,7 @@ import {
 })
 export class UiCountUpDirective implements AfterViewInit, OnDestroy {
   private readonly el = inject(ElementRef<HTMLElement>);
+  private readonly locale = inject(LocaleService);
   private observer?: IntersectionObserver;
   private raf = 0;
   private started = false;
@@ -32,6 +34,7 @@ export class UiCountUpDirective implements AfterViewInit, OnDestroy {
 
   constructor() {
     effect(() => {
+      this.locale.locale();
       const v = this.value();
       if (this.started) {
         this.write(v);
@@ -73,7 +76,6 @@ export class UiCountUpDirective implements AfterViewInit, OnDestroy {
 
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / dur);
-      // easeOutCubic — feels premium on counters
       const eased = 1 - Math.pow(1 - t, 3);
       this.write(from + (target - from) * eased);
       if (t < 1) {
@@ -88,7 +90,9 @@ export class UiCountUpDirective implements AfterViewInit, OnDestroy {
   private write(n: number): void {
     const d = this.decimals();
     const formatted =
-      d > 0 ? n.toFixed(d) : Math.round(n).toLocaleString('en-US');
+      d > 0
+        ? n.toFixed(d)
+        : Math.round(n).toLocaleString(this.locale.numberLocale());
     this.el.nativeElement.textContent = `${this.prefix()}${formatted}${this.suffix()}`;
   }
 

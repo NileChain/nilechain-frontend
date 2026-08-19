@@ -11,7 +11,7 @@
     <ui-portal-hero
       size="compact"
       imageUrl="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=75"
-      quoteKey="portalHero.contractsQuote"
+      quoteKey="portalHero.factoryContractsQuote"
       titleKey="factory.contracts.title"
       bodyKey="factory.contracts.subtitle"
     />
@@ -147,221 +147,162 @@
     </section>
 
     @if (loading()) {
-      <div class="space-y-3" role="status" [attr.aria-busy]="true">
-        @for (i of [1, 2, 3, 4, 5]; track $index) {
-          <div
-            class="bg-surface-container-lowest rounded-xl p-4 flex items-center gap-4 border border-outline-variant"
-          >
-            <div class="flex-1 space-y-2">
-              <ui-skeleton height="1rem" width="30%" />
-              <ui-skeleton height="0.875rem" width="55%" />
-            </div>
-            <ui-skeleton width="6rem" height="1.5rem" />
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 gap-4"
+        role="status"
+        [attr.aria-busy]="true"
+      >
+        @for (i of [1, 2, 3, 4]; track $index) {
+          <div class="ui-card p-5 space-y-3">
+            <ui-skeleton height="0.85rem" width="40%" />
+            <ui-skeleton height="1.15rem" width="55%" />
+            <ui-skeleton height="2.5rem" width="100%" />
           </div>
         }
       </div>
     } @else if (error()) {
       <ui-error-state [message]="error()" (retry)="loadContracts()" />
-    } @else {
-      <section
-        class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-outline-variant"
+    } @else if (contracts().length === 0) {
+      <ui-empty-state
+        titleKey="factory.contracts.empty"
+        bodyKey="factory.contracts.emptyBody"
+        icon="description"
       >
-        <div class="overflow-x-auto">
-          @if (contracts().length === 0) {
-            <ui-empty-state
-              titleKey="factory.contracts.empty"
-              bodyKey="factory.contracts.emptyBody"
-              icon="description"
-            >
-              <a
-                class="ui-btn-primary mt-2"
-                routerLink="/factory/contract-signing"
-              >
-                {{ 'factory.contracts.generateNew' | translate }}
-              </a>
-            </ui-empty-state>
-          } @else if (filteredContracts().length === 0) {
-            <ui-empty-state
-              titleKey="factory.contracts.noResults"
-              bodyKey="factory.contracts.noResultsBody"
-              icon="search_off"
-            />
-          } @else {
-            <table class="w-full min-w-[980px] text-start">
-              <caption class="sr-only">
-                {{ 'factory.contracts.title' | translate }}
-              </caption>
-              <thead
-                class="bg-surface-container-low border-b border-outline-variant"
-              >
-                <tr>
-                  <th
-                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
-                  >
-                    {{ 'factory.contracts.contractId' | translate }}
-                  </th>
-                  <th
-                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
-                  >
-                    {{ 'factory.contracts.farm' | translate }}
-                  </th>
-                  <th
-                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
-                  >
-                    {{ 'factory.contracts.crop' | translate }}
-                  </th>
-                  <th
-                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
-                  >
-                    {{ 'factory.contracts.quantity' | translate }}
-                  </th>
-                  <th
-                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
-                  >
-                    {{ 'factory.contracts.price' | translate }}
-                  </th>
-                  <th
-                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
-                  >
-                    {{ 'factory.contracts.deliveryDate' | translate }}
-                  </th>
-                  <th
-                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
-                  >
-                    {{ 'common.status' | translate }}
-                  </th>
-                  <th
-                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
-                  >
-                    {{ 'factory.contracts.created' | translate }}
-                  </th>
-                  <th
-                    class="px-6 py-4 font-label-lg text-label-lg text-on-surface-variant font-semibold text-start"
-                  >
-                    {{ 'common.actions' | translate }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-outline-variant" uiAutoAnimate>
-                @for (row of filteredContracts(); track row.contractId) {
-                  <tr
-                    class="hover:bg-surface-container-low transition-colors cursor-pointer"
-                    (click)="openContract(row)"
-                  >
-                    <td
-                      class="px-6 py-4 font-body-md text-body-md text-on-surface font-medium ui-data-sm"
-                    >
-                      {{ shortId(row.contractId) }}
-                    </td>
-                    <td
-                      class="px-6 py-4 font-body-md text-body-md text-on-surface"
-                    >
-                      {{ row.farmName || '—' }}
-                    </td>
-                    <td
-                      class="px-6 py-4 font-body-md text-body-md text-on-surface"
-                    >
-                      {{ row.cropName || '—' }}
-                    </td>
-                    <td
-                      class="px-6 py-4 font-body-md text-body-md text-on-surface"
-                    >
-                      {{ row.quantityTons | number: '1.0-2' }}
-                    </td>
-                    <td
-                      class="px-6 py-4 font-body-md text-body-md text-on-surface font-semibold"
-                    >
-                      @if (row.pricePerTon != null) {
-                        {{ row.pricePerTon | number: '1.0-0' }}
-                      } @else {
-                        —
-                      }
-                    </td>
-                    <td
-                      class="px-6 py-4 font-body-md text-body-md text-on-surface"
-                    >
-                      {{
-                        row.deliveryDate
-                          ? (row.deliveryDate | date: 'mediumDate')
-                          : '—'
-                      }}
-                    </td>
-                    <td class="px-6 py-4">
-                      @if (isActive(row.status)) {
-                        <span class="ui-status-pill ui-status-pill--success">
-                          {{ statusLabelKey(row.status) | translate }}
-                        </span>
-                      } @else if (isPending(row.status)) {
-                        <span class="ui-status-pill ui-status-pill--warning">
-                          {{ statusLabelKey(row.status) | translate }}
-                        </span>
-                      } @else if (isCancelled(row.status)) {
-                        <span class="ui-status-pill ui-status-pill--error">
-                          {{ statusLabelKey(row.status) | translate }}
-                        </span>
-                      } @else {
-                        <span class="ui-status-pill ui-status-pill--info">
-                          {{ statusLabelKey(row.status) | translate }}
-                        </span>
-                      }
-                    </td>
-                    <td
-                      class="px-6 py-4 font-body-md text-body-md text-on-surface"
-                    >
-                      {{ row.createdAt | date: 'mediumDate' }}
-                    </td>
-                    <td class="px-6 py-4" (click)="$event.stopPropagation()">
-                      <div class="flex items-center gap-3">
-                        <a
-                          class="text-primary hover:opacity-80 font-label-lg text-label-lg font-bold inline-flex items-center gap-1"
-                          [routerLink]="['/factory/contracts', row.contractId]"
-                        >
-                          {{ 'factory.contracts.viewContract' | translate }}
-                          <span
-                            class="material-symbols-outlined text-[18px]"
-                            aria-hidden="true"
-                            >visibility</span
-                          >
-                        </a>
-                        <button
-                          type="button"
-                          class="text-on-surface-variant hover:text-primary font-label-lg text-label-lg inline-flex items-center gap-1 disabled:opacity-50"
-                          [disabled]="downloadingId() === row.contractId"
-                          (click)="downloadPdf(row, $event)"
-                          [attr.aria-label]="
-                            'contractDoc.downloadPdf' | translate
-                          "
-                        >
-                          <span
-                            class="material-symbols-outlined text-[18px]"
-                            aria-hidden="true"
-                            >download</span
-                          >
-                          {{ 'common.download' | translate }}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+        <a class="ui-btn-primary mt-2" routerLink="/factory/contract-signing">
+          {{ 'factory.contracts.generateNew' | translate }}
+        </a>
+      </ui-empty-state>
+    } @else if (filteredContracts().length === 0) {
+      <ui-empty-state
+        titleKey="factory.contracts.noResults"
+        bodyKey="factory.contracts.noResultsBody"
+        icon="search_off"
+      />
+    } @else {
+      <ul
+        class="grid grid-cols-1 md:grid-cols-2 gap-4 ui-stagger"
+        role="list"
+        uiAutoAnimate
+      >
+        @for (row of filteredContracts(); track row.contractId) {
+          <li
+            class="ui-card ui-card--lift p-5 cursor-pointer h-full"
+            (click)="openContract(row)"
+            (keyup.enter)="openContract(row)"
+            tabindex="0"
+            role="link"
+          >
+            <div class="flex flex-col h-full gap-4">
+              <div class="flex flex-wrap items-center gap-2">
+                @if (isActive(row.status)) {
+                  <span class="ui-status-pill ui-status-pill--success">
+                    {{ statusLabelKey(row.status) | translate }}
+                  </span>
+                } @else if (isPending(row.status)) {
+                  <span class="ui-status-pill ui-status-pill--warning">
+                    {{ statusLabelKey(row.status) | translate }}
+                  </span>
+                } @else if (isCancelled(row.status)) {
+                  <span class="ui-status-pill ui-status-pill--error">
+                    {{ statusLabelKey(row.status) | translate }}
+                  </span>
+                } @else {
+                  <span class="ui-status-pill ui-status-pill--info">
+                    {{ statusLabelKey(row.status) | translate }}
+                  </span>
                 }
-              </tbody>
-            </table>
-          }
-        </div>
-        <div
-          class="px-6 py-4 border-t border-outline-variant flex flex-col sm:flex-row items-center justify-between gap-3"
-        >
-          <span class="font-body-md text-body-md text-on-surface-variant">
-            {{ filteredContracts().length }}
-            {{ 'factory.contracts.countLabel' | translate }}
-            @if (filteredContracts().length !== contracts().length) {
-              <span>
-                ({{ contracts().length }}
-                {{ 'factory.contracts.totalLabel' | translate }})
-              </span>
-            }
+                <span class="font-label-sm text-on-surface-variant ui-data-sm">
+                  {{ shortId(row.contractId) }}
+                </span>
+                <span class="font-label-sm text-on-surface-variant ms-auto">
+                  {{ row.createdAt | uiDate: 'mediumDate' }}
+                </span>
+              </div>
+
+              <div class="min-w-0 space-y-1">
+                <h2 class="m-0 font-title-md text-on-surface font-bold">
+                  {{ row.cropName || '—' }}
+                </h2>
+                <p class="m-0 font-body-md text-on-surface-variant">
+                  {{ row.farmName || '—' }}
+                </p>
+              </div>
+
+              <dl class="grid grid-cols-3 gap-3 m-0 text-sm">
+                <div>
+                  <dt class="text-on-surface-variant font-label-sm">
+                    {{ 'factory.contracts.quantity' | translate }}
+                  </dt>
+                  <dd class="m-0 mt-0.5 tabular-nums font-medium">
+                    {{ row.quantityTons | number: '1.0-2' }}
+                  </dd>
+                </div>
+                <div>
+                  <dt class="text-on-surface-variant font-label-sm">
+                    {{ 'factory.contracts.price' | translate }}
+                  </dt>
+                  <dd class="m-0 mt-0.5 tabular-nums font-medium">
+                    @if (row.pricePerTon != null) {
+                      {{ row.pricePerTon | number: '1.0-0' }}
+                    } @else {
+                      —
+                    }
+                  </dd>
+                </div>
+                <div>
+                  <dt class="text-on-surface-variant font-label-sm">
+                    {{ 'factory.contracts.deliveryDate' | translate }}
+                  </dt>
+                  <dd class="m-0 mt-0.5 font-medium">
+                    {{
+                      row.deliveryDate
+                        ? (row.deliveryDate | uiDate: 'mediumDate')
+                        : '—'
+                    }}
+                  </dd>
+                </div>
+              </dl>
+
+              <div
+                class="flex flex-wrap gap-2 mt-auto pt-1"
+                (click)="$event.stopPropagation()"
+              >
+                <a
+                  class="ui-btn-primary !py-1.5 !px-3 text-sm inline-flex items-center gap-1"
+                  [routerLink]="['/factory/contracts', row.contractId]"
+                >
+                  <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
+                    >visibility</span
+                  >
+                  {{ 'factory.contracts.viewContract' | translate }}
+                </a>
+                <button
+                  type="button"
+                  class="ui-btn-ghost !py-1.5 !px-3 text-sm inline-flex items-center gap-1"
+                  [disabled]="downloadingId() === row.contractId"
+                  (click)="downloadPdf(row, $event)"
+                >
+                  <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
+                    >download</span
+                  >
+                  {{ 'common.download' | translate }}
+                </button>
+              </div>
+            </div>
+          </li>
+        }
+      </ul>
+
+      <p class="font-body-md text-on-surface-variant m-0">
+        {{ filteredContracts().length }}
+        {{ 'factory.contracts.countLabel' | translate }}
+        @if (filteredContracts().length !== contracts().length) {
+          <span>
+            ({{ contracts().length }}
+            {{ 'factory.contracts.totalLabel' | translate }})
           </span>
-        </div>
-      </section>
+        }
+      </p>
     }
   </div>
 </main>

@@ -93,6 +93,12 @@ export class SidebarFarmComponent {
       link: '/farm/wallet',
     },
     {
+      key: 'billing',
+      icon: 'workspace_premium',
+      labelKey: 'nav.billing',
+      link: '/farm/billing',
+    },
+    {
       key: 'messages',
       icon: 'forum',
       labelKey: 'nav.messages',

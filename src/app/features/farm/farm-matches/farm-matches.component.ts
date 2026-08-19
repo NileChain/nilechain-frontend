@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import {
   Component,
   HostListener,
@@ -7,8 +7,9 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
@@ -16,6 +17,8 @@ import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-stat
 import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.component';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
+import { UiAutoAnimateDirective } from '../../../shared/directives/ui-auto-animate.directive';
+import { UiCountUpDirective } from '../../../shared/directives/ui-count-up.directive';
 import { FarmService } from '../../../core/services/farm/farm.service';
 import {
   FarmMatchItem,
@@ -42,7 +45,7 @@ interface FilterChip {
   selector: 'app-farm-matches',
   standalone: true,
   imports: [
-    TranslatePipe,
+    UiDatePipe, TranslatePipe,
     AppTopBarComponent,
     UiPortalHeroComponent,
     UiErrorStateComponent,
@@ -50,8 +53,9 @@ interface FilterChip {
     UiSkeletonComponent,
     FormsModule,
     RouterLink,
-    DatePipe,
     DecimalPipe,
+    UiAutoAnimateDirective,
+    UiCountUpDirective,
   ],
   templateUrl: './farm-matches.component.html',
   styleUrl: './farm-matches.component.scss',
@@ -59,6 +63,7 @@ interface FilterChip {
 export class FarmMatchesComponent implements OnInit {
   private readonly farmService = inject(FarmService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly confirm = inject(ConfirmDialogService);
   private readonly toast = inject(ToastService);
   private readonly i18n = inject(TranslateService);
@@ -78,7 +83,7 @@ export class FarmMatchesComponent implements OnInit {
   readonly counterNote = signal('');
   readonly filtersOpen = signal(false);
   readonly menuOpenId = signal<string | null>(null);
-  readonly expandedId = signal<string | null>(null);
+  readonly focusMatchId = signal<string | null>(null);
 
   readonly summary = signal<FarmMatchSummary>({
     total: 0,
@@ -205,6 +210,10 @@ export class FarmMatchesComponent implements OnInit {
     this.farmService.getCropTypes().subscribe({
       next: (crops) => this.cropTypes.set(crops),
     });
+    this.route.queryParamMap.subscribe((params) => {
+      this.focusMatchId.set(params.get('matchId'));
+      this.scrollToFocus();
+    });
     this.loadMatches();
   }
 
@@ -280,10 +289,23 @@ export class FarmMatchesComponent implements OnInit {
           this.totalPages.set(Math.max(1, page.totalPages ?? 1));
           this.page.set(page.page ?? this.page());
           this.pageSize.set(page.pageSize ?? this.pageSize());
+          this.scrollToFocus();
         },
         error: () =>
           this.error.set(this.i18n.instant('farm.matches.loadFailed')),
       });
+  }
+
+  private scrollToFocus(): void {
+    const id = this.focusMatchId();
+    if (!id) {
+      return;
+    }
+    setTimeout(() => {
+      document
+        .getElementById(`match-${id}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
   }
 
   applySearch(): void {
@@ -382,10 +404,6 @@ export class FarmMatchesComponent implements OnInit {
     this.menuOpenId.update((id) => (id === matchId ? null : matchId));
   }
 
-  toggleExpand(matchId: string): void {
-    this.expandedId.update((id) => (id === matchId ? null : matchId));
-  }
-
   statusKey(status: string | null | undefined): string {
     return (status || '').toLowerCase();
   }
@@ -404,6 +422,22 @@ export class FarmMatchesComponent implements OnInit {
     if (s === 'rejected') return 'danger';
     if (s === 'proposed' || s === 'countered') return 'pending';
     return 'neutral';
+  }
+
+  lastOfferedBy(match: FarmMatchItem): string {
+    const rounds = match.negotiationRounds ?? [];
+    if (!rounds.length) return '';
+    return (rounds[rounds.length - 1].offeredBy || '').toLowerCase();
+  }
+
+  isIncomingFactoryCounter(match: FarmMatchItem): boolean {
+    return this.statusKey(match.status) === 'countered' && this.lastOfferedBy(match) === 'factory';
+  }
+
+  offeredByKey(offeredBy: string | undefined): string {
+    return (offeredBy || '').toLowerCase() === 'factory'
+      ? 'farm.matches.offeredByFactory'
+      : 'farm.matches.offeredByFarm';
   }
 
   displayQty(match: FarmMatchItem): number {
@@ -529,6 +563,27 @@ export class FarmMatchesComponent implements OnInit {
               this.i18n.instant('farm.matches.openContractFailed')
           );
         },
+      });
+  }
+
+  acceptFactoryCounter(match: FarmMatchItem): void {
+    this.menuOpenId.set(null);
+    if (this.respondingId()) return;
+    this.respondingId.set(match.matchId);
+    this.farmService
+      .acceptCounterOffer(match.matchId)
+      .pipe(finalize(() => this.respondingId.set(null)))
+      .subscribe({
+        next: () => {
+          this.toast.info(this.i18n.instant('farm.matches.acceptCounterSuccess'));
+          this.loadMatches();
+        },
+        error: (err) =>
+          this.toast.error(
+            err?.error?.detail ||
+              err?.error?.message ||
+              this.i18n.instant('farm.matches.acceptCounterFailed')
+          ),
       });
   }
 

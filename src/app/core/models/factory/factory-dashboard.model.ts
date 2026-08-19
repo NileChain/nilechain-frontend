@@ -62,6 +62,11 @@ export interface FactorySupplyRequestDetail extends FactorySupplyRequestListItem
   canCancel: boolean;
   canRerunAgent: boolean;
   canUpdateDeliveryTerms?: boolean;
+  factoryApprovedOneRingExpansion?: boolean;
+  shortlistTakeLimit?: number | null;
+  canExpandGeo?: boolean;
+  canShowMoreMatches?: boolean;
+  canUpdateGeoScope?: boolean;
   deliveryPoint?: string;
   freightPayer?: string;
   transitRisk?: string;

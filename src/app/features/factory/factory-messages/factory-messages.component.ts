@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
 import {
   Component,
   OnInit,
@@ -36,14 +36,13 @@ interface ConversationGroup {
   selector: 'app-factory-messages',
   standalone: true,
   imports: [
-    TranslatePipe,
+    UiDatePipe, TranslatePipe,
     UiLoaderComponent,
     UiErrorStateComponent,
     UiEmptyStateComponent,
     UiSkeletonComponent,
     AppTopBarComponent,
     FormsModule,
-    DatePipe,
     UiPortalHeroComponent,
   ],
   templateUrl: './factory-messages.component.html',
@@ -187,7 +186,9 @@ export class FactoryMessagesComponent implements OnInit {
       return this.i18n.instant('messages.dealMetaWithPrice', {
         crop,
         qty: qty.toString(),
-        price: price.toLocaleString(),
+        price: price.toLocaleString(
+          this.i18n.currentLang() === 'ar' ? 'ar-EG' : 'en-US'
+        ),
       });
     }
     if (qty != null) {
@@ -199,7 +200,9 @@ export class FactoryMessagesComponent implements OnInit {
     if (price != null) {
       return this.i18n.instant('messages.dealMetaPriceOnly', {
         crop,
-        price: price.toLocaleString(),
+        price: price.toLocaleString(
+          this.i18n.currentLang() === 'ar' ? 'ar-EG' : 'en-US'
+        ),
       });
     }
     return crop;

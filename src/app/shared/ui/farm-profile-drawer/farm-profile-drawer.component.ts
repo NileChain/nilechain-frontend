@@ -1,4 +1,5 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
+import { DecimalPipe } from '@angular/common';
 import {
   AfterViewChecked,
   Component,
@@ -18,6 +19,7 @@ import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import * as L from 'leaflet';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { GovLabelPipe } from '../../../core/pipes/gov-label.pipe';
 import { FarmPublicProfileService } from '../../../core/services/factory/farm-public-profile.service';
 import { TranslateService } from '../../../core/services/translate.service';
 import { FarmPublicProfileDto } from '../../../core/models/factory/farm-public-profile.model';
@@ -55,8 +57,8 @@ configureLeafletDefaultIcon();
   selector: 'app-farm-profile-drawer',
   standalone: true,
   imports: [
-    TranslatePipe,
-    DatePipe,
+    UiDatePipe, TranslatePipe,
+    GovLabelPipe,
     DecimalPipe,
     RouterLink,
     UiSkeletonComponent,

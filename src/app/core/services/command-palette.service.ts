@@ -70,6 +70,14 @@ export class CommandPaletteService {
       roles: ['Farm', 'Admin'],
     },
     {
+      id: 'farm-billing',
+      labelKey: 'nav.billing',
+      icon: 'workspace_premium',
+      link: '/farm/billing',
+      roles: ['Farm', 'Admin'],
+      keywords: ['plan', 'quota', 'subscribe', 'اشتراك', 'باقة'],
+    },
+    {
       id: 'farm-messages',
       labelKey: 'nav.messages',
       icon: 'forum',
@@ -158,6 +166,14 @@ export class CommandPaletteService {
       roles: ['Factory', 'Admin'],
     },
     {
+      id: 'factory-billing',
+      labelKey: 'nav.billing',
+      icon: 'workspace_premium',
+      link: '/factory/billing',
+      roles: ['Factory', 'Admin'],
+      keywords: ['plan', 'quota', 'subscribe', 'اشتراك', 'باقة'],
+    },
+    {
       id: 'factory-messages',
       labelKey: 'nav.messages',
       icon: 'forum',
@@ -198,6 +214,27 @@ export class CommandPaletteService {
       labelKey: 'nav.disputes',
       icon: 'gavel',
       link: '/admin/disputes',
+      roles: ['Admin'],
+    },
+    {
+      id: 'admin-withdrawals',
+      labelKey: 'nav.withdrawals',
+      icon: 'account_balance_wallet',
+      link: '/admin/withdrawals',
+      roles: ['Admin'],
+    },
+    {
+      id: 'admin-channel-messages',
+      labelKey: 'nav.channelMessages',
+      icon: 'chat',
+      link: '/admin/channel-messages',
+      roles: ['Admin'],
+    },
+    {
+      id: 'admin-ai-runs',
+      labelKey: 'nav.aiRuns',
+      icon: 'smart_toy',
+      link: '/admin/ai-runs',
       roles: ['Admin'],
     },
     {

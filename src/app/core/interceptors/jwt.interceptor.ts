@@ -12,8 +12,13 @@ import {
 import { environment } from '../../../environments/environment';
 import { AuthResponse } from '../models/user.model';
 import { AuthService } from '../services/auth.service';
+import { BillingPaywallService } from '../services/billing-paywall.service';
 import { ToastService } from '../services/toast.service';
 import { TranslateService } from '../services/translate.service';
+import {
+  isSubscriptionPaywallError,
+  readApiErrorCode,
+} from '../utils/api-error.util';
 
 /** Single-flight refresh so parallel 401s share one refresh call. */
 let refreshInFlight$: Observable<AuthResponse> | null = null;
@@ -23,6 +28,7 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const toast = inject(ToastService);
   const i18n = inject(TranslateService);
+  const paywall = inject(BillingPaywallService);
 
   let headers = req.headers;
   const token = authService.accessToken();
@@ -46,6 +52,10 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       if (error.status === 403) {
+        if (isSubscriptionPaywallError(error)) {
+          paywall.show(readApiErrorCode(error));
+          return throwError(() => error);
+        }
         toast.error(i18n.instant('errors.forbidden'));
         return throwError(() => error);
       }

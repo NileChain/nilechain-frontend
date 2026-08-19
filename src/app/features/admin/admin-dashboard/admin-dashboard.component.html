@@ -27,12 +27,18 @@
           </button>
         </div>
       } @else if (summary(); as s) {
-        <ui-stat-card
-          [label]="'admin.dashboard.pendingVerifications' | translate"
-          [value]="'' + s.pendingVerifications"
-          icon="verified_user"
-          [hint]="'admin.dashboard.liveHint' | translate"
-        />
+        <a
+          class="block no-underline text-inherit"
+          routerLink="/admin/users"
+          [queryParams]="{ isVerified: false }"
+        >
+          <ui-stat-card
+            [label]="'admin.dashboard.pendingVerifications' | translate"
+            [value]="'' + s.pendingVerifications"
+            icon="verified_user"
+            [hint]="'admin.dashboard.pendingVerificationsHint' | translate"
+          />
+        </a>
         <ui-stat-card
           [label]="'admin.dashboard.openDisputes' | translate"
           [value]="'' + s.openDisputes"
@@ -165,7 +171,7 @@
                   </td>
                   <td class="px-6 py-4 text-on-surface">
                     @if (item.plannedShipDate) {
-                      {{ item.plannedShipDate | date: 'mediumDate' }}
+                      {{ item.plannedShipDate | uiDate: 'mediumDate' }}
                     } @else {
                       —
                     }
@@ -174,7 +180,7 @@
                     <span
                       class="inline-flex items-center px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-label-md text-label-md"
                     >
-                      {{ item.status }}
+                      {{ fulfillmentStatusKey(item.status) | translate }}
                     </span>
                   </td>
                   <td class="px-6 py-4 text-end text-on-surface-variant ui-data-sm">
@@ -441,7 +447,7 @@
                 <div>
                   <p class="font-label-md text-on-surface">{{ item.message }}</p>
                   <p class="text-label-sm text-on-surface-variant">
-                    {{ item.occurredAt | date: 'medium' }}
+                    {{ item.occurredAt | uiDate: 'medium' }}
                   </p>
                 </div>
               </li>

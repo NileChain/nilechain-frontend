@@ -11,6 +11,7 @@ import {
   FarmDocument,
   FarmImage,
   FarmProfile,
+  KybKind,
 } from '../../models/farm/farm-profile.model';
 import { UpdateFarmProfileRequest } from '../../models/farm/update-farm-profile-request.model';
 import { FarmDashboard } from '../../models/farm/farm-dashboard.model';
@@ -106,9 +107,12 @@ export class FarmService {
     );
   }
 
-  addDocument(file: File): Observable<FarmDocument> {
+  addDocument(file: File, kybKind?: KybKind): Observable<FarmDocument> {
     const formData = new FormData();
     formData.append('file', file);
+    if (kybKind) {
+      formData.append('kybKind', kybKind);
+    }
     return this.http.post<FarmDocument>(`${this.api}/documents`, formData);
   }
 
@@ -157,6 +161,13 @@ export class FarmService {
     return this.http.post<void>(
       `${this.api}/matches/${matchId}/counter-offer`,
       payload
+    );
+  }
+
+  acceptCounterOffer(matchId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.api}/matches/${matchId}/accept-counter`,
+      {}
     );
   }
 
@@ -226,9 +237,19 @@ export class FarmService {
     return this.http.get<FarmContract>(`${this.api}/contracts/${contractId}`);
   }
 
-  approveContract(contractId: string): Observable<FarmContract> {
+  approveContract(
+    contractId: string,
+    body: { otpCode: string; consentText: string }
+  ): Observable<FarmContract> {
     return this.http.put<FarmContract>(
       `${this.api}/contracts/${contractId}/approve`,
+      body
+    );
+  }
+
+  requestSigningOtp(contractId: string): Observable<{ expiresAt: string }> {
+    return this.http.post<{ expiresAt: string }>(
+      `${this.api}/contracts/${contractId}/signing-otp`,
       {}
     );
   }

@@ -1,5 +1,6 @@
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiBrandMarkComponent } from '../../ui/brand-mark/brand-mark.component';
 import { UiEmptyStateComponent } from '../../ui/empty-state/empty-state.component';
@@ -31,8 +32,7 @@ import {
   selector: 'app-contract-document',
   standalone: true,
   imports: [
-    TranslatePipe,
-    DatePipe,
+    UiDatePipe, TranslatePipe,
     DecimalPipe,
     UiEmptyStateComponent,
     UiBrandMarkComponent,

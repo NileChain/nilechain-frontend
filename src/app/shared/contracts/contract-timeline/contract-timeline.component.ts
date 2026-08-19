@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
 import { Component, Input } from '@angular/core';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { ContractTimelineStep } from '../models/contract-document.model';
@@ -6,7 +6,8 @@ import { ContractTimelineStep } from '../models/contract-document.model';
 @Component({
   selector: 'app-contract-timeline',
   standalone: true,
-  imports: [TranslatePipe, DatePipe],
+  imports: [
+    UiDatePipe, TranslatePipe],
   template: `
     <section
       class="timeline-card"
@@ -33,9 +34,9 @@ import { ContractTimelineStep } from '../models/contract-document.model';
               <p class="timeline__label">{{ step.labelKey | translate }}</p>
               <p class="timeline__time">
                 @if (step.at) {
-                  <span>{{ step.at | date: 'mediumDate' }}</span>
+                  <span>{{ step.at | uiDate: 'mediumDate' }}</span>
                   <span class="timeline__dot">·</span>
-                  <span>{{ step.at | date: 'shortTime' }}</span>
+                  <span>{{ step.at | uiDate: 'shortTime' }}</span>
                 } @else if (step.state === 'upcoming') {
                   {{ 'contractDoc.pendingStep' | translate }}
                 } @else if (step.state === 'current') {

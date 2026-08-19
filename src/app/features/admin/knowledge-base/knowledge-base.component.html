@@ -269,7 +269,7 @@
                 <td
                   class="p-4 font-body-md text-body-md text-on-surface-variant"
                 >
-                  {{ doc.date | date: 'mediumDate' }}
+                  {{ doc.date | uiDate: 'mediumDate' }}
                 </td>
                 <td class="p-4">
                   @if (doc.status === 'indexed') {

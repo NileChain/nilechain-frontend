@@ -1,0 +1,107 @@
+<section class="billing-page md:ms-[280px] min-h-screen bg-surface">
+  <app-top-bar
+    [titleKey]="'billing.pageTitle'"
+    [portal]="portal"
+    [showSearch]="false"
+  />
+
+  <div class="billing-page__body">
+    <p class="billing-page__lead">{{ 'billing.lead' | translate }}</p>
+
+    <ui-portal-hero
+      size="compact"
+      imageUrl="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1600&q=75"
+      quoteKey="portalHero.walletQuote"
+      titleKey="billing.pageTitle"
+      bodyKey="billing.lead"
+    />
+
+    @if (loading()) {
+      <ui-loader size="md" [label]="'billing.loading' | translate" />
+    } @else if (loadError()) {
+      <div class="billing-page__error" role="alert">
+        <p>{{ loadError() }}</p>
+        <button type="button" class="ui-btn-ghost" (click)="load()">
+          {{ 'common.retry' | translate }}
+        </button>
+      </div>
+    } @else if (billingMe(); as me) {
+      <p class="billing-page__disclaimer" role="note">
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+          >verified_user</span
+        >
+        <span>{{ me.honestyNote }}</span>
+      </p>
+
+      <div class="ui-metric-tile ui-metric-tile--emphasis">
+        <p class="billing-page__label">{{ 'billing.currentPlan' | translate }}</p>
+        <p class="billing-page__plan">
+          {{ (me.isPro ? 'billing.pro' : 'billing.free') | translate }}
+        </p>
+        <p class="billing-page__hint">
+          {{ me.planCode }}
+          @if (me.isPro) {
+            · {{ me.periodEnd | uiDate }}
+          }
+        </p>
+      </div>
+
+      <div class="billing-page__meters">
+        @if (portal === 'factory') {
+          <article class="ui-card p-4 space-y-1">
+            <h2 class="font-title-md">{{ 'billing.rfqs' | translate }}</h2>
+            <p>{{ meterLabel(me.factoryRfqs) }}</p>
+          </article>
+          <article class="ui-card p-4 space-y-1">
+            <h2 class="font-title-md">{{ 'billing.agentRuns' | translate }}</h2>
+            <p>{{ meterLabel(me.agentRuns) }}</p>
+          </article>
+          <article class="ui-card p-4 space-y-1">
+            <h2 class="font-title-md">{{ 'billing.features' | translate }}</h2>
+            <p>
+              {{ 'billing.copilot' | translate }}:
+              {{ (me.copilot ? 'billing.on' : 'billing.off') | translate }}
+            </p>
+            <p>
+              {{ 'billing.showMore' | translate }}:
+              {{ (me.showMore ? 'billing.on' : 'billing.off') | translate }}
+            </p>
+            <p>
+              {{ 'billing.expandGeo' | translate }}:
+              {{ (me.expandGeo ? 'billing.on' : 'billing.off') | translate }}
+            </p>
+          </article>
+        } @else {
+          <article class="ui-card p-4 space-y-1">
+            <h2 class="font-title-md">{{ 'billing.accepts' | translate }}</h2>
+            <p>{{ meterLabel(me.farmAccepts) }}</p>
+            <p class="billing-page__hint">{{ 'billing.acceptsHint' | translate }}</p>
+          </article>
+        }
+      </div>
+
+      @if (!me.isPro) {
+        <section class="ui-card p-5 space-y-3">
+          <h2 class="font-title-lg">{{ 'billing.upgrade' | translate }}</h2>
+          <p>
+            {{ 'billing.proPrice' | translate: { amount: me.proPriceEgp } }}
+          </p>
+          <p class="billing-page__hint">{{ 'billing.needWalletHint' | translate }}</p>
+          <div class="flex flex-wrap gap-2">
+            <button
+              type="button"
+              class="ui-btn-primary"
+              [disabled]="acting()"
+              (click)="upgrade()"
+            >
+              {{ 'billing.payFromWallet' | translate }}
+            </button>
+            <a class="ui-btn-secondary" [routerLink]="walletLink">
+              {{ 'billing.goWallet' | translate }}
+            </a>
+          </div>
+        </section>
+      }
+    }
+  </div>
+</section>

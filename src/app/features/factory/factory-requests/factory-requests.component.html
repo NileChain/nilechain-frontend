@@ -44,9 +44,13 @@
     </section>
 
     @if (loading()) {
-      <div class="ui-card p-4 space-y-3">
-        @for (i of [1, 2, 3, 4, 5]; track $index) {
-          <ui-skeleton height="3rem" width="100%" />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4" role="status" [attr.aria-busy]="true">
+        @for (i of [1, 2, 3, 4]; track $index) {
+          <div class="ui-card p-5 space-y-3">
+            <ui-skeleton height="0.85rem" width="40%" />
+            <ui-skeleton height="1.15rem" width="55%" />
+            <ui-skeleton height="2.5rem" width="100%" />
+          </div>
         }
       </div>
     } @else if (error()) {
@@ -62,105 +66,88 @@
         </a>
       </ui-empty-state>
     } @else {
-      <div class="ui-card overflow-hidden">
-        <div class="hidden md:block overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="bg-surface-container-low">
-              <tr class="text-start text-on-surface-variant">
-                <th scope="col" class="p-3 font-label-sm">{{ 'factory.dashboard.requestId' | translate }}</th>
-                <th scope="col" class="p-3 font-label-sm">{{ 'factory.dashboard.commodity' | translate }}</th>
-                <th scope="col" class="p-3 font-label-sm text-end">{{ 'factory.dashboard.quantityTons' | translate }}</th>
-                <th scope="col" class="p-3 font-label-sm text-end">{{ 'factory.dashboard.budgetEgp' | translate }}</th>
-                <th scope="col" class="p-3 font-label-sm">{{ 'common.status' | translate }}</th>
-                <th scope="col" class="p-3 font-label-sm">{{ 'factory.dashboard.date' | translate }}</th>
-                <th scope="col" class="p-3 font-label-sm">{{ 'factory.requests.matches' | translate }}</th>
-                <th scope="col" class="p-3"><span class="sr-only">{{ 'common.actions' | translate }}</span></th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-outline-variant">
-              @for (row of items(); track row.requestId) {
-                <tr class="hover:bg-surface-container-low/50">
-                  <td class="p-3">
-                    <a
-                      [routerLink]="['/factory/requests', row.requestId]"
-                      class="font-mono text-primary hover:underline"
-                    >{{ shortId(row.requestId) }}</a>
-                  </td>
-                  <td class="p-3 font-label-md">{{ row.crop }}</td>
-                  <td class="p-3 text-end tabular-nums">{{ row.quantityTons | number: '1.0-0' }}</td>
-                  <td class="p-3 text-end tabular-nums">
-                    @if (budget(row); as b) {
-                      {{ b | number: '1.0-0' }}
-                    } @else {
-                      —
-                    }
-                  </td>
-                  <td class="p-3">
-                    <span
-                      class="inline-flex px-2 py-0.5 rounded-full text-xs font-label-sm"
-                      [class.bg-primary-container]="statusTone(row.status) === 'success'"
-                      [class.bg-surface-container]="statusTone(row.status) === 'muted'"
-                      [class.bg-error-container]="statusTone(row.status) === 'attention'"
-                    >
-                      {{ statusKey(row.status) | translate }}
-                    </span>
-                  </td>
-                  <td class="p-3 text-on-surface-variant">
-                    {{ row.createdAt | date: 'mediumDate' }}
-                  </td>
-                  <td class="p-3 tabular-nums">{{ row.matchCount }}</td>
-                  <td class="p-3">
-                    <div class="flex flex-wrap gap-2">
-                      <a
-                        [routerLink]="['/factory/requests', row.requestId]"
-                        class="ui-btn-ghost !py-1 !px-2 text-sm"
-                      >{{ 'common.view' | translate }}</a>
-                      @if (row.matchCount > 0) {
-                        <a
-                          routerLink="/factory/matches"
-                          [queryParams]="{ requestId: row.requestId }"
-                          class="ui-btn-ghost !py-1 !px-2 text-sm"
-                        >{{ 'factory.requests.viewMatches' | translate }}</a>
-                      }
-                      <a
-                        routerLink="/factory/agent-progress"
-                        [queryParams]="{ requestId: row.requestId }"
-                        class="ui-btn-ghost !py-1 !px-2 text-sm"
-                      >{{ 'nav.agentProgress' | translate }}</a>
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+      <ul class="grid grid-cols-1 md:grid-cols-2 gap-4" role="list">
+        @for (row of items(); track row.requestId) {
+          <li class="ui-card p-5 flex flex-col gap-4 h-full">
+            <div class="flex flex-wrap items-center gap-2">
+              <span
+                class="inline-flex px-2 py-0.5 rounded-full text-xs font-label-sm"
+                [class.bg-primary-container]="statusTone(row.status) === 'success'"
+                [class.bg-surface-container]="statusTone(row.status) === 'muted'"
+                [class.bg-error-container]="statusTone(row.status) === 'attention'"
+              >
+                {{ statusKey(row.status) | translate }}
+              </span>
+              <span class="font-mono text-sm text-on-surface-variant">{{
+                shortId(row.requestId)
+              }}</span>
+              <span class="font-label-sm text-on-surface-variant ms-auto">{{
+                row.createdAt | uiDate: 'mediumDate'
+              }}</span>
+            </div>
 
-        <ul class="md:hidden divide-y divide-outline-variant">
-          @for (row of items(); track row.requestId) {
-            <li>
-              <a [routerLink]="['/factory/requests', row.requestId]" class="block p-4 hover:bg-surface-container-low/50">
-                <div class="flex gap-2">
-                  <span class="font-mono text-sm">{{ shortId(row.requestId) }}</span>
-                  <span class="font-label-md">{{ row.crop }}</span>
-                </div>
-                <div class="flex flex-wrap gap-2 mt-1 text-sm text-on-surface-variant">
-                  <span>{{ row.quantityTons | number: '1.0-0' }} t</span>
+            <h2 class="m-0 font-title-md text-on-surface font-bold">
+              {{ row.crop }}
+            </h2>
+
+            <dl class="grid grid-cols-3 gap-3 m-0 text-sm">
+              <div>
+                <dt class="text-on-surface-variant font-label-sm">
+                  {{ 'factory.dashboard.quantityTons' | translate }}
+                </dt>
+                <dd class="m-0 mt-0.5 tabular-nums font-medium">
+                  {{ row.quantityTons | number: '1.0-0' }}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-on-surface-variant font-label-sm">
+                  {{ 'factory.dashboard.budgetEgp' | translate }}
+                </dt>
+                <dd class="m-0 mt-0.5 tabular-nums font-medium ui-data">
                   @if (budget(row); as b) {
-                    <span class="ui-data">EGP {{ b | number: '1.0-0' }}</span>
+                    {{ b | number: '1.0-0' }}
+                  } @else {
+                    —
                   }
-                  <span
-                    class="inline-flex px-2 py-0.5 rounded-full text-xs"
-                    [class.bg-primary-container]="statusTone(row.status) === 'success'"
-                    [class.bg-surface-container]="statusTone(row.status) === 'muted'"
-                  >
-                    {{ statusKey(row.status) | translate }}
-                  </span>
-                </div>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-on-surface-variant font-label-sm">
+                  {{ 'factory.requests.matches' | translate }}
+                </dt>
+                <dd class="m-0 mt-0.5 tabular-nums font-medium">
+                  {{ row.matchCount }}
+                </dd>
+              </div>
+            </dl>
+
+            <div class="flex flex-wrap gap-2 mt-auto pt-1">
+              <a
+                [routerLink]="['/factory/requests', row.requestId]"
+                class="ui-btn-primary !py-1.5 !px-3 text-sm"
+              >
+                {{ 'common.view' | translate }}
               </a>
-            </li>
-          }
-        </ul>
-      </div>
+              @if (row.matchCount > 0) {
+                <a
+                  routerLink="/factory/matches"
+                  [queryParams]="{ requestId: row.requestId }"
+                  class="ui-btn-ghost !py-1.5 !px-3 text-sm"
+                >
+                  {{ 'factory.requests.viewMatches' | translate }}
+                </a>
+              }
+              <a
+                routerLink="/factory/agent-progress"
+                [queryParams]="{ requestId: row.requestId }"
+                class="ui-btn-ghost !py-1.5 !px-3 text-sm"
+              >
+                {{ 'nav.agentProgress' | translate }}
+              </a>
+            </div>
+          </li>
+        }
+      </ul>
 
       <nav
         class="flex items-center justify-between gap-4"

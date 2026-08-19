@@ -103,7 +103,7 @@ export function resolveApiErrorMessage(
   };
 }
 
-export function isInsufficientBalanceError(err: unknown): boolean {
+export function isSubscriptionPaywallError(err: unknown): boolean {
   const code = readApiErrorCode(err) ?? '';
-  return code.includes('InsufficientBalance');
+  return code === 'Subscription.QuotaExceeded' || code === 'Subscription.PlanRequired';
 }

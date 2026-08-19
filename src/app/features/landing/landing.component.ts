@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { Title } from '@angular/platform-browser';
+import { PageTitleService } from '../../core/services/page-title.service';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { AuthService } from '../../core/services/auth.service';
 import { LocaleService } from '../../core/services/locale.service';
@@ -128,8 +128,8 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
 
   private observer?: IntersectionObserver;
 
-  constructor(title: Title) {
-    title.setTitle('NileChain - Home');
+  constructor(pageTitle: PageTitleService) {
+    pageTitle.setKey('app.page.landing');
   }
 
   ngAfterViewInit(): void {

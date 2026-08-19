@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
 import {
   Component,
   Input,
@@ -21,7 +21,8 @@ import { UiLoaderComponent } from '../../ui/loader/loader.component';
 @Component({
   selector: 'app-contract-review-panel',
   standalone: true,
-  imports: [TranslatePipe, DatePipe, FormsModule, UiLoaderComponent],
+  imports: [
+    UiDatePipe, TranslatePipe, FormsModule, UiLoaderComponent],
   templateUrl: './contract-review-panel.component.html',
 })
 export class ContractReviewPanelComponent implements OnChanges {

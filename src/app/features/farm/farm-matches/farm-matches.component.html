@@ -221,12 +221,12 @@
     <!-- Mobile filter bottom sheet (same drafts as popover) -->
     @if (filtersOpen()) {
       <div
-        class="mx-sheet-backdrop"
+        class="mx-sheet-backdrop animate-backdrop-in"
         (click)="closeFilters()"
         aria-hidden="true"
       ></div>
       <aside
-        class="mx-sheet"
+        class="mx-sheet animate-slide-in-end"
         role="dialog"
         aria-modal="true"
         [attr.aria-labelledby]="'farm-match-sheet-title'"
@@ -312,9 +312,14 @@
             <h3 class="mx-section-title">{{ 'farm.matches.newSection' | translate }}</h3>
             <span class="mx-new__count">{{ summary().newCount }}</span>
           </div>
-          <ul class="mx-new__list">
+          <ul class="mx-new__list" uiAutoAnimate>
             @for (match of newMatches(); track match.matchId) {
-              <li class="mx-new__item">
+              <li
+                class="mx-new__item transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary/40"
+                [id]="'match-' + match.matchId"
+                [class.ring-2]="focusMatchId() === match.matchId"
+                [class.ring-primary]="focusMatchId() === match.matchId"
+              >
                 <div class="min-w-0 flex-1">
                   <div class="mx-new__name">
                     {{ match.factoryName }}
@@ -324,17 +329,17 @@
                     {{ match.cropName }}
                     ·
                     <span [class]="scoreClass(match.matchScore)">
-                      {{
-                        match.matchScore != null
-                          ? (match.matchScore | number: '1.0-0') + '%'
-                          : '—'
-                      }}
+                      @if (match.matchScore != null) {
+                        <span [uiCountUp]="match.matchScore" uiCountUpSuffix="%"></span>
+                      } @else {
+                        —
+                      }
                     </span>
                     ·
                     @if (relativeLabel(match.createdAt); as rel) {
-                      <span [title]="match.createdAt | date: 'medium'">{{ rel }}</span>
+                      <span [title]="match.createdAt | uiDate: 'medium'">{{ rel }}</span>
                     } @else {
-                      {{ match.createdAt | date: 'mediumDate' }}
+                      {{ match.createdAt | uiDate: 'mediumDate' }}
                     }
                   </div>
                 </div>
@@ -402,14 +407,17 @@
         </div>
 
         @if (globallyEmpty()) {
-          <ui-empty-state
-            [compact]="true"
-            titleKey="farm.matches.empty"
-            bodyKey="farm.matches.emptyBody"
-            icon="search_off"
-            imageUrl="https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=1200&q=70"
-          />
+          <div class="animate-fade-in">
+            <ui-empty-state
+              [compact]="true"
+              titleKey="farm.matches.empty"
+              bodyKey="farm.matches.emptyBody"
+              icon="search_off"
+              imageUrl="https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=1200&q=70"
+            />
+          </div>
         } @else if (filteredEmpty()) {
+          <div class="animate-fade-in">
           <ui-empty-state
             [compact]="true"
             titleKey="farm.matches.filteredEmpty"
@@ -420,438 +428,213 @@
               {{ 'farm.matches.resetFiltersCta' | translate }}
             </button>
           </ui-empty-state>
+          </div>
         } @else {
-          <!-- Desktop table -->
-          <div class="mx-table-wrap hidden md:block">
-            <table class="mx-table">
-              <thead>
-                <tr>
-                  <th scope="col">{{ 'farm.matches.colBuyer' | translate }}</th>
-                  <th scope="col">{{ 'farm.matches.colDeal' | translate }}</th>
-                  <th scope="col">{{ 'farm.matches.deliveryDate' | translate }}</th>
-                  <th scope="col">{{ 'farm.matches.colSignals' | translate }}</th>
-                  <th scope="col">{{ 'farm.matches.status' | translate }}</th>
-                  <th scope="col">{{ 'farm.matches.createdAt' | translate }}</th>
-                  <th scope="col" class="mx-table__actions">
-                    {{ 'common.actions' | translate }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (match of matches(); track match.matchId) {
-                  <tr>
-                    <td class="mx-cell-buyer">
-                      <div class="mx-primary__name">{{ match.factoryName }}</div>
-                      @if (shortLocation(match.factoryLocation); as loc) {
-                        <div class="mx-secondary">{{ loc }}</div>
-                      }
-                    </td>
-                    <td class="mx-cell-deal">
-                      <div class="mx-deal__crop">{{ match.cropName }}</div>
-                      <div class="mx-deal__meta" dir="ltr">
-                        <span>{{ displayQty(match) | number: '1.0-0' }} t</span>
-                        <span class="mx-deal__dot" aria-hidden="true">·</span>
-                        @if (displayPrice(match) != null) {
-                          <span>{{ displayPrice(match)! | number: '1.0-0' }} EGP/t</span>
-                        } @else {
-                          <span>—</span>
-                        }
-                      </div>
-                    </td>
-                    <td>
-                      @if (displayDelivery(match); as delivery) {
-                        <div class="mx-date" dir="ltr">
-                          {{ delivery | date: 'mediumDate' }}
-                        </div>
-                      } @else {
-                        —
-                      }
-                    </td>
-                    <td class="mx-cell-signals">
-                      <span class="mx-score" [class]="scoreClass(match.matchScore)">
-                        {{
-                          match.matchScore != null
-                            ? (match.matchScore | number: '1.0-0') + '%'
-                            : '—'
-                        }}
-                      </span>
-                      <span class="mx-risk" [attr.data-tone]="riskTone(match.riskScore)">
-                        {{ riskLabel(match.riskScore) }}
-                      </span>
-                    </td>
-                    <td>
+          <ul class="mx-feed" uiAutoAnimate>
+            @for (match of matches(); track match.matchId) {
+              <li [id]="'match-' + match.matchId">
+                <article
+                  class="mx-row"
+                  [class.ring-2]="focusMatchId() === match.matchId"
+                  [class.ring-primary]="focusMatchId() === match.matchId"
+                >
+                  <div class="mx-row__body">
+                    <div class="mx-row__top">
+                      <h4 class="mx-row__title">{{ match.factoryName }}</h4>
                       <span class="mx-status" [attr.data-tone]="statusTone(match.status)">
                         {{ statusLabelKey(match.status) | translate }}
                       </span>
-                    </td>
-                    <td>
-                      @if (relativeLabel(match.createdAt); as rel) {
-                        <div
-                          class="mx-date"
-                          [title]="match.createdAt | date: 'medium'"
-                        >
-                          {{ rel }}
-                        </div>
+                    </div>
+                    <p class="mx-row__deal">
+                      {{ match.cropName }}
+                      <span class="mx-deal__dot" aria-hidden="true">·</span>
+                      {{ displayQty(match) | number: '1.0-0' }} t
+                      <span class="mx-deal__dot" aria-hidden="true">·</span>
+                      @if (displayPrice(match) != null) {
+                        {{ displayPrice(match)! | number: '1.0-0' }} {{ 'common.egpPerTon' | translate }}
                       } @else {
-                        <div class="mx-date" dir="ltr">
-                          {{ match.createdAt | date: 'mediumDate' }}
-                        </div>
+                        —
                       }
-                    </td>
-                    <td class="mx-table__actions">
-                      <div class="mx-actions">
-                        <button
-                          type="button"
-                          class="ui-btn-primary !py-1.5 !px-3 text-sm"
-                          [disabled]="openingId() === match.matchId"
-                          (click)="viewContract(match)"
-                        >
-                          {{ 'farm.matches.view' | translate }}
-                        </button>
-                        <div class="mx-menu">
-                          <button
-                            type="button"
-                            class="ui-icon-btn"
-                            [attr.aria-label]="'common.actions' | translate"
-                            [attr.aria-expanded]="menuOpenId() === match.matchId"
-                            (click)="toggleMenu(match.matchId, $event)"
-                          >
-                            <span class="material-symbols-outlined" aria-hidden="true"
-                              >more_vert</span
-                            >
-                          </button>
-                          @if (menuOpenId() === match.matchId) {
-                            <div class="mx-menu__panel" role="menu">
-                              @if (match.canMessage) {
-                                <a
-                                  class="mx-menu__item"
-                                  role="menuitem"
-                                  routerLink="/farm/messages"
-                                  [queryParams]="{ matchId: match.matchId }"
-                                  (click)="menuOpenId.set(null)"
-                                >
-                                  {{ 'farm.matches.message' | translate }}
-                                </a>
-                              }
-                              @if (match.factoryId) {
-                                <a
-                                  class="mx-menu__item"
-                                  role="menuitem"
-                                  [routerLink]="['/farm/factories', match.factoryId]"
-                                  (click)="menuOpenId.set(null)"
-                                >
-                                  {{ 'farm.matches.viewFactory' | translate }}
-                                </a>
-                              }
-                              @if (statusKey(match.status) === 'proposed') {
-                                <button
-                                  type="button"
-                                  class="mx-menu__item"
-                                  role="menuitem"
-                                  (click)="openCounterForm(match, $event)"
-                                >
-                                  {{ 'farm.matches.counterOffer' | translate }}
-                                </button>
-                                <button
-                                  type="button"
-                                  class="mx-menu__item mx-menu__item--danger"
-                                  role="menuitem"
-                                  [disabled]="respondingId() === match.matchId"
-                                  (click)="rejectOffer(match)"
-                                >
-                                  {{ 'farm.matches.declineOffer' | translate }}
-                                </button>
-                              }
-                            </div>
-                          }
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                  @if (counterFormMatchId() === match.matchId) {
-                    <tr class="mx-counter-row">
-                      <td colspan="7">
-                        <div class="mx-counter">
-                          <p class="mx-counter__title">
-                            {{ 'farm.matches.counterOffer' | translate }}
-                          </p>
-                          <div class="mx-counter__grid">
-                            <label class="flex flex-col gap-1">
-                              <span class="mx-muted">{{ 'farm.matches.quantity' | translate }}</span>
-                              <input
-                                type="number"
-                                min="0"
-                                class="ui-input"
-                                [ngModel]="counterQty()"
-                                (ngModelChange)="counterQty.set($event)"
-                              />
-                            </label>
-                            <label class="flex flex-col gap-1">
-                              <span class="mx-muted">{{ 'farm.matches.price' | translate }}</span>
-                              <input
-                                type="number"
-                                min="0"
-                                class="ui-input"
-                                [ngModel]="counterPrice()"
-                                (ngModelChange)="counterPrice.set($event)"
-                              />
-                            </label>
-                            <label class="flex flex-col gap-1">
-                              <span class="mx-muted">{{
-                                'farm.matches.deliveryDate' | translate
-                              }}</span>
-                              <input
-                                type="date"
-                                class="ui-input"
-                                [ngModel]="counterDelivery()"
-                                (ngModelChange)="counterDelivery.set($event)"
-                              />
-                            </label>
-                          </div>
-                          <label class="flex flex-col gap-1">
-                            <span class="mx-muted">{{ 'farm.matches.counterNote' | translate }}</span>
-                            <input
-                              type="text"
-                              class="ui-input"
-                              [ngModel]="counterNote()"
-                              (ngModelChange)="counterNote.set($event)"
-                            />
-                          </label>
-                          <div class="flex flex-wrap gap-2">
-                            <button
-                              type="button"
-                              class="ui-btn-primary !py-1.5 !px-3 text-sm"
-                              [disabled]="counteringId() === match.matchId"
-                              (click)="submitCounterOffer(match)"
-                            >
-                              {{ 'farm.matches.submitCounter' | translate }}
-                            </button>
-                            <button
-                              type="button"
-                              class="ui-btn-ghost !py-1.5 !px-3 text-sm"
-                              (click)="closeCounterForm()"
-                            >
-                              {{ 'common.cancel' | translate }}
-                            </button>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  }
-                }
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Mobile cards -->
-          <div class="md:hidden space-y-2.5">
-            @for (match of matches(); track match.matchId) {
-              <article class="mx-card">
-                <div class="mx-card__top">
-                  <div class="min-w-0">
-                    <h4 class="mx-primary__name truncate">{{ match.factoryName }}</h4>
-                    <p class="mx-secondary">{{ match.cropName }}</p>
+                    </p>
+                    <p class="mx-row__meta">
+                      @if (displayDelivery(match); as delivery) {
+                        <span>{{ delivery | uiDate: 'mediumDate' }}</span>
+                        <span class="mx-deal__dot" aria-hidden="true">·</span>
+                      }
+                      <span class="mx-score" [class]="scoreClass(match.matchScore)">
+                        @if (match.matchScore != null) {
+                          {{ match.matchScore | number: '1.0-0' }}%
+                        } @else {
+                          —
+                        }
+                      </span>
+                      @if (shortLocation(match.factoryLocation); as loc) {
+                        <span class="mx-deal__dot" aria-hidden="true">·</span>
+                        <span>{{ loc }}</span>
+                      }
+                    </p>
                   </div>
-                  <span class="mx-status" [attr.data-tone]="statusTone(match.status)">
-                    {{ statusLabelKey(match.status) | translate }}
-                  </span>
-                </div>
-                <div class="mx-card__meta">
-                  <span class="mx-score" [class]="scoreClass(match.matchScore)">
-                    {{
-                      match.matchScore != null
-                        ? (match.matchScore | number: '1.0-0') + '%'
-                        : '—'
-                    }}
-                  </span>
-                  @if (relativeLabel(match.createdAt); as rel) {
-                    <span [title]="match.createdAt | date: 'medium'">{{ rel }}</span>
-                  } @else {
-                    <span>{{ match.createdAt | date: 'mediumDate' }}</span>
-                  }
-                </div>
-                <div class="mx-actions">
-                  <button
-                    type="button"
-                    class="ui-btn-primary flex-1 !py-2"
-                    [disabled]="openingId() === match.matchId"
-                    (click)="viewContract(match)"
-                  >
-                    {{ 'farm.matches.view' | translate }}
-                  </button>
-                  <div class="mx-menu">
+                  <div class="mx-row__actions">
                     <button
                       type="button"
-                      class="ui-icon-btn"
-                      [attr.aria-label]="'common.actions' | translate"
-                      [attr.aria-expanded]="menuOpenId() === 'm-' + match.matchId"
-                      (click)="toggleMenu('m-' + match.matchId, $event)"
+                      class="ui-btn-primary mx-row__cta"
+                      [disabled]="openingId() === match.matchId"
+                      (click)="viewContract(match)"
                     >
-                      <span class="material-symbols-outlined" aria-hidden="true">more_vert</span>
+                      {{ 'farm.matches.view' | translate }}
                     </button>
-                    @if (menuOpenId() === 'm-' + match.matchId) {
-                      <div class="mx-menu__panel" role="menu">
-                        @if (match.canMessage) {
-                          <a
-                            class="mx-menu__item"
-                            role="menuitem"
-                            routerLink="/farm/messages"
-                            [queryParams]="{ matchId: match.matchId }"
-                            (click)="menuOpenId.set(null)"
-                          >
-                            {{ 'farm.matches.message' | translate }}
-                          </a>
-                        }
-                        @if (match.factoryId) {
-                          <a
-                            class="mx-menu__item"
-                            role="menuitem"
-                            [routerLink]="['/farm/factories', match.factoryId]"
-                            (click)="menuOpenId.set(null)"
-                          >
-                            {{ 'farm.matches.viewFactory' | translate }}
-                          </a>
-                        }
-                        <button
-                          type="button"
-                          class="mx-menu__item"
-                          role="menuitem"
-                          (click)="toggleExpand(match.matchId); menuOpenId.set(null)"
+                    <div class="mx-menu">
+                      <button
+                        type="button"
+                        class="ui-icon-btn"
+                        [attr.aria-label]="'common.actions' | translate"
+                        [attr.aria-expanded]="menuOpenId() === match.matchId"
+                        (click)="toggleMenu(match.matchId, $event)"
+                      >
+                        <span class="material-symbols-outlined" aria-hidden="true"
+                          >more_vert</span
                         >
-                          {{
-                            (expandedId() === match.matchId
-                              ? 'farm.matches.hideDetails'
-                              : 'farm.matches.moreDetails'
-                            ) | translate
-                          }}
-                        </button>
-                        @if (statusKey(match.status) === 'proposed') {
-                          <button
-                            type="button"
-                            class="mx-menu__item"
-                            role="menuitem"
-                            (click)="openCounterForm(match, $event)"
-                          >
-                            {{ 'farm.matches.counterOffer' | translate }}
-                          </button>
-                          <button
-                            type="button"
-                            class="mx-menu__item mx-menu__item--danger"
-                            role="menuitem"
-                            (click)="rejectOffer(match)"
-                          >
-                            {{ 'farm.matches.declineOffer' | translate }}
-                          </button>
-                        }
-                      </div>
-                    }
-                  </div>
-                </div>
-                @if (expandedId() === match.matchId) {
-                  <div class="mx-card__details">
-                    <div>
-                      <span class="mx-muted">{{ 'farm.matches.quantity' | translate }}</span>
-                      {{ displayQty(match) | number: '1.0-0' }} t
-                    </div>
-                    <div>
-                      <span class="mx-muted">{{ 'farm.matches.price' | translate }}</span>
-                      @if (displayPrice(match) != null) {
-                        {{ displayPrice(match)! | number: '1.0-0' }} EGP/t
-                      } @else {
-                        —
-                      }
-                    </div>
-                    <div>
-                      <span class="mx-muted">{{ 'farm.matches.deliveryDate' | translate }}</span>
-                      @if (displayDelivery(match); as delivery) {
-                        {{ delivery | date: 'mediumDate' }}
-                      } @else {
-                        —
-                      }
-                    </div>
-                    @if (truncateQuality(match.qualitySpecs); as quality) {
-                      <div class="sm:col-span-2">
-                        <span class="mx-muted">{{ 'farm.matches.qualitySpecs' | translate }}</span>
-                        {{ quality }}
-                      </div>
-                    }
-                    <div>
-                      <span class="mx-muted">{{ 'farm.matches.riskLevel' | translate }}</span>
-                      {{ riskLabel(match.riskScore) }}
-                    </div>
-                    <div>
-                      <span class="mx-muted">{{ 'farm.matches.createdAt' | translate }}</span>
-                      {{ match.createdAt | date: 'mediumDate' }}
-                    </div>
-                    @if (statusKey(match.status) === 'proposed') {
-                      <button
-                        type="button"
-                        class="ui-btn-secondary !py-1.5 text-sm self-start"
-                        (click)="openCounterForm(match)"
-                      >
-                        {{ 'farm.matches.counterOffer' | translate }}
                       </button>
-                      <button
-                        type="button"
-                        class="ui-btn-ghost !py-1.5 text-sm self-start"
-                        (click)="rejectOffer(match)"
-                      >
-                        {{ 'farm.matches.declineOffer' | translate }}
-                      </button>
-                    }
-                    @if (counterFormMatchId() === match.matchId) {
-                      <div class="sm:col-span-2 space-y-2">
-                        <label class="flex flex-col gap-1">
-                          <span class="mx-muted">{{ 'farm.matches.quantity' | translate }}</span>
-                          <input
-                            type="number"
-                            class="ui-input"
-                            [ngModel]="counterQty()"
-                            (ngModelChange)="counterQty.set($event)"
-                          />
-                        </label>
-                        <label class="flex flex-col gap-1">
-                          <span class="mx-muted">{{ 'farm.matches.price' | translate }}</span>
-                          <input
-                            type="number"
-                            class="ui-input"
-                            [ngModel]="counterPrice()"
-                            (ngModelChange)="counterPrice.set($event)"
-                          />
-                        </label>
-                        <label class="flex flex-col gap-1">
-                          <span class="mx-muted">{{ 'farm.matches.deliveryDate' | translate }}</span>
-                          <input
-                            type="date"
-                            class="ui-input"
-                            [ngModel]="counterDelivery()"
-                            (ngModelChange)="counterDelivery.set($event)"
-                          />
-                        </label>
-                        <div class="flex gap-2">
-                          <button
-                            type="button"
-                            class="ui-btn-primary !py-1.5 text-sm"
-                            [disabled]="counteringId() === match.matchId"
-                            (click)="submitCounterOffer(match)"
-                          >
-                            {{ 'farm.matches.submitCounter' | translate }}
-                          </button>
-                          <button
-                            type="button"
-                            class="ui-btn-ghost !py-1.5 text-sm"
-                            (click)="closeCounterForm()"
-                          >
-                            {{ 'common.cancel' | translate }}
-                          </button>
+                      @if (menuOpenId() === match.matchId) {
+                        <div class="mx-menu__panel" role="menu">
+                          @if (match.canMessage) {
+                            <a
+                              class="mx-menu__item"
+                              role="menuitem"
+                              routerLink="/farm/messages"
+                              [queryParams]="{ matchId: match.matchId }"
+                              (click)="menuOpenId.set(null)"
+                            >
+                              {{ 'farm.matches.message' | translate }}
+                            </a>
+                          }
+                          @if (match.factoryId) {
+                            <a
+                              class="mx-menu__item"
+                              role="menuitem"
+                              [routerLink]="['/farm/factories', match.factoryId]"
+                              (click)="menuOpenId.set(null)"
+                            >
+                              {{ 'farm.matches.viewFactory' | translate }}
+                            </a>
+                          }
+                          @if (statusKey(match.status) === 'proposed' || statusKey(match.status) === 'countered') {
+                            <button
+                              type="button"
+                              class="mx-menu__item"
+                              role="menuitem"
+                              (click)="openCounterForm(match, $event)"
+                            >
+                              {{ 'farm.matches.counterOffer' | translate }}
+                            </button>
+                            @if (isIncomingFactoryCounter(match)) {
+                              <button
+                                type="button"
+                                class="mx-menu__item"
+                                role="menuitem"
+                                [disabled]="respondingId() === match.matchId"
+                                (click)="acceptFactoryCounter(match)"
+                              >
+                                {{ 'farm.matches.acceptFactoryCounter' | translate }}
+                              </button>
+                            }
+                            <button
+                              type="button"
+                              class="mx-menu__item mx-menu__item--danger"
+                              role="menuitem"
+                              [disabled]="respondingId() === match.matchId"
+                              (click)="rejectOffer(match)"
+                            >
+                              {{ 'farm.matches.declineOffer' | translate }}
+                            </button>
+                          }
                         </div>
-                      </div>
+                      }
+                    </div>
+                  </div>
+                </article>
+                @if (match.negotiationRounds?.length) {
+                  <ol class="mx-counter mx-counter--card text-sm space-y-1">
+                    <li class="mx-counter__title">{{ 'farm.matches.roundHistory' | translate }}</li>
+                    @for (round of match.negotiationRounds; track round.roundId) {
+                      <li>
+                        {{ offeredByKey(round.offeredBy) | translate }}
+                        @if (round.quantityTons != null) { · {{ round.quantityTons }} t }
+                        @if (round.pricePerTon != null) { · {{ round.pricePerTon }} }
+                      </li>
                     }
+                  </ol>
+                }
+                @if (counterFormMatchId() === match.matchId) {
+                  <div class="mx-counter mx-counter--card">
+                    <p class="mx-counter__title">
+                      {{ 'farm.matches.counterOffer' | translate }}
+                    </p>
+                    <div class="mx-counter__grid">
+                      <label class="flex flex-col gap-1">
+                        <span class="mx-muted">{{ 'farm.matches.quantity' | translate }}</span>
+                        <input
+                          type="number"
+                          min="0"
+                          class="ui-input"
+                          [ngModel]="counterQty()"
+                          (ngModelChange)="counterQty.set($event)"
+                        />
+                      </label>
+                      <label class="flex flex-col gap-1">
+                        <span class="mx-muted">{{ 'farm.matches.price' | translate }}</span>
+                        <input
+                          type="number"
+                          min="0"
+                          class="ui-input"
+                          [ngModel]="counterPrice()"
+                          (ngModelChange)="counterPrice.set($event)"
+                        />
+                      </label>
+                      <label class="flex flex-col gap-1">
+                        <span class="mx-muted">{{
+                          'farm.matches.deliveryDate' | translate
+                        }}</span>
+                        <input
+                          type="date"
+                          class="ui-input"
+                          [ngModel]="counterDelivery()"
+                          (ngModelChange)="counterDelivery.set($event)"
+                        />
+                      </label>
+                    </div>
+                    <label class="flex flex-col gap-1">
+                      <span class="mx-muted">{{ 'farm.matches.counterNote' | translate }}</span>
+                      <input
+                        type="text"
+                        class="ui-input"
+                        [ngModel]="counterNote()"
+                        (ngModelChange)="counterNote.set($event)"
+                      />
+                    </label>
+                    <div class="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        class="ui-btn-primary !py-1.5 !px-3 text-sm"
+                        [disabled]="counteringId() === match.matchId"
+                        (click)="submitCounterOffer(match)"
+                      >
+                        {{ 'farm.matches.submitCounter' | translate }}
+                      </button>
+                      <button
+                        type="button"
+                        class="ui-btn-ghost !py-1.5 !px-3 text-sm"
+                        (click)="closeCounterForm()"
+                      >
+                        {{ 'common.cancel' | translate }}
+                      </button>
+                    </div>
                   </div>
                 }
-              </article>
+              </li>
             }
-          </div>
+          </ul>
+
 
           <nav class="mx-pager" [attr.aria-label]="'farm.matches.pagination' | translate">
             <div class="mx-pager__size">

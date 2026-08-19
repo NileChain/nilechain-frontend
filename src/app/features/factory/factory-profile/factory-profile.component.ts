@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { GovLabelPipe } from '../../../core/pipes/gov-label.pipe';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
@@ -13,12 +14,15 @@ import { FarmService } from '../../../core/services/farm/farm.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslateService } from '../../../core/services/translate.service';
+import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import {
+  FactoryDocument,
   FactoryProfile,
   UpdateFactoryProfileRequest,
 } from '../../../core/models/factory/factory-profile.model';
-import { CropType } from '../../../core/models/farm/farm-profile.model';
-import { PickedLocation } from '../../../shared/geo/egypt-governorates';
+import { CropType, KybKind } from '../../../core/models/farm/farm-profile.model';
+import { PickedLocation, governorateLabel } from '../../../shared/geo/egypt-governorates';
+import { LocaleService } from '../../../core/services/locale.service';
 import {
   EGYPTIAN_PHONE_ERROR_KEY,
   isValidEgyptianPhone,
@@ -31,6 +35,7 @@ import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-her
   standalone: true,
   imports: [
     TranslatePipe,
+    GovLabelPipe,
     UiLoaderComponent,
     UiErrorStateComponent,
     AppTopBarComponent,
@@ -47,9 +52,11 @@ export class FactoryProfileComponent implements OnInit {
   private readonly factoryService = inject(FactoryService);
   private readonly farmService = inject(FarmService);
   private readonly authService = inject(AuthService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly fb = inject(FormBuilder);
   private readonly toast = inject(ToastService);
   private readonly i18n = inject(TranslateService);
+  private readonly locale = inject(LocaleService);
 
   readonly loading = signal(true);
   readonly saving = signal(false);
@@ -57,6 +64,7 @@ export class FactoryProfileComponent implements OnInit {
   readonly cropsLoading = signal(true);
   readonly cropsError = signal<string | null>(null);
   readonly error = signal<string | null>(null);
+  readonly mutationError = signal<string | null>(null);
   readonly saveSuccess = signal(false);
   readonly phoneError = signal<string | null>(null);
   readonly profile = signal<FactoryProfile | null>(null);
@@ -67,6 +75,16 @@ export class FactoryProfileComponent implements OnInit {
     longitude?: number | null;
     governorate?: string | null;
   } | null>(null);
+  readonly kybKinds: KybKind[] = [
+    'CommercialRegister',
+    'TaxCard',
+    'NationalId',
+    'LandLease',
+    'Other',
+  ];
+  readonly selectedKybKind = signal<KybKind>('CommercialRegister');
+  readonly uploadingDocument = signal(false);
+  readonly deletingDocumentId = signal<string | null>(null);
 
   readonly form = this.fb.nonNullable.group({
     name: this.fb.nonNullable.control('', Validators.required),
@@ -85,6 +103,7 @@ export class FactoryProfileComponent implements OnInit {
   loadProfile(): void {
     this.loading.set(true);
     this.error.set(null);
+    this.mutationError.set(null);
     this.factoryService
       .getProfile()
       .pipe(finalize(() => this.loading.set(false)))
@@ -138,11 +157,12 @@ export class FactoryProfileComponent implements OnInit {
 
   onLocationPicked(loc: PickedLocation): void {
     const coords = `${loc.latitude.toFixed(5)}, ${loc.longitude.toFixed(5)}`;
+    const label = governorateLabel(loc.governorate, this.locale.locale());
     this.form.patchValue({
       latitude: loc.latitude,
       longitude: loc.longitude,
       governorate: loc.governorate,
-      location: `${loc.governorateAr} (${loc.governorate}) · ${coords}`,
+      location: `${label} · ${coords}`,
     });
     this.form.controls.governorate.markAsDirty();
     this.form.controls.location.markAsDirty();
@@ -223,5 +243,58 @@ export class FactoryProfileComponent implements OnInit {
           this.error.set(this.i18n.instant('factory.profile.saveFailed'));
         },
       });
+  }
+
+  onDocumentSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.uploadingDocument.set(true);
+    this.mutationError.set(null);
+    this.factoryService
+      .addDocument(file, this.selectedKybKind())
+      .pipe(
+        finalize(() => {
+          this.uploadingDocument.set(false);
+          input.value = '';
+        })
+      )
+      .subscribe({
+        next: () => this.loadProfile(),
+        error: () =>
+          this.mutationError.set(
+            this.i18n.instant('factory.profile.uploadDocumentFailed')
+          ),
+      });
+  }
+
+  async deleteDocument(documentId: string): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      titleKey: 'common.confirmTitle',
+      bodyKey: 'common.confirmBody',
+      confirmKey: 'common.delete',
+      danger: true,
+    });
+    if (!confirmed) return;
+
+    this.deletingDocumentId.set(documentId);
+    this.mutationError.set(null);
+    this.factoryService
+      .deleteDocument(documentId)
+      .pipe(finalize(() => this.deletingDocumentId.set(null)))
+      .subscribe({
+        next: () => this.loadProfile(),
+        error: () =>
+          this.mutationError.set(
+            this.i18n.instant('factory.profile.deleteDocumentFailed')
+          ),
+      });
+  }
+
+  documentIcon(document: FactoryDocument): string {
+    return document.fileType?.toLowerCase().includes('pdf')
+      ? 'picture_as_pdf'
+      : 'description';
   }
 }

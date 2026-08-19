@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
 import { Component, EventEmitter, Input, Output, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -22,33 +22,37 @@ export interface ContractDateAmendmentState {
 @Component({
   selector: 'app-contract-date-amendment',
   standalone: true,
-  imports: [TranslatePipe, FormsModule, DatePipe],
+  imports: [
+    UiDatePipe, TranslatePipe, FormsModule],
   template: `
     <div class="space-y-3 text-sm">
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <p class="text-xs text-on-surface-variant">
-            {{ 'contractDates.startsAt' | translate }}
-          </p>
-          <p class="font-semibold">
-            {{
-              state?.startsAt
-                ? (state!.startsAt | date: 'mediumDate')
-                : ('contractDates.pendingSign' | translate)
-            }}
-          </p>
+      <div class="cda-dates">
+        <div class="cda-date-row">
+          <span class="cda-date-icon material-symbols-outlined" aria-hidden="true">event</span>
+          <div class="cda-date-body">
+            <span class="cda-date-label">{{ 'contractDates.startsAt' | translate }}</span>
+            <span class="cda-date-value">
+              {{
+                state?.startsAt
+                  ? (state!.startsAt | uiDate: 'mediumDate')
+                  : ('contractDates.pendingSign' | translate)
+              }}
+            </span>
+          </div>
         </div>
-        <div>
-          <p class="text-xs text-on-surface-variant">
-            {{ 'contractDates.endsAt' | translate }}
-          </p>
-          <p class="font-semibold">
-            {{
-              state?.endsAt
-                ? (state!.endsAt | date: 'mediumDate')
-                : '—'
-            }}
-          </p>
+        <div class="cda-divider"></div>
+        <div class="cda-date-row">
+          <span class="cda-date-icon material-symbols-outlined" aria-hidden="true">event_busy</span>
+          <div class="cda-date-body">
+            <span class="cda-date-label">{{ 'contractDates.endsAt' | translate }}</span>
+            <span class="cda-date-value">
+              {{
+                state?.endsAt
+                  ? (state!.endsAt | uiDate: 'mediumDate')
+                  : '—'
+              }}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -59,11 +63,11 @@ export interface ContractDateAmendmentState {
             {{ 'contractDates.pendingBody' | translate }}
             @if (state?.pendingStartsAt) {
               · {{ 'contractDates.startsAt' | translate }}:
-              {{ state!.pendingStartsAt | date: 'mediumDate' }}
+              {{ state!.pendingStartsAt | uiDate: 'mediumDate' }}
             }
             @if (state?.pendingEndsAt) {
               · {{ 'contractDates.endsAt' | translate }}:
-              {{ state!.pendingEndsAt | date: 'mediumDate' }}
+              {{ state!.pendingEndsAt | uiDate: 'mediumDate' }}
             }
           </p>
           @if (canRespond) {

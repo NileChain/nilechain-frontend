@@ -159,9 +159,9 @@
             <th scope="row">{{ 'contractDoc.startsAt' | translate }}</th>
             <td>
               @if (contract.startsAt) {
-                {{ contract.startsAt | date: 'mediumDate' }}
+                {{ contract.startsAt | uiDate: 'mediumDate' }}
               } @else if (isFullySigned && contract.signedAt) {
-                {{ contract.signedAt | date: 'mediumDate' }}
+                {{ contract.signedAt | uiDate: 'mediumDate' }}
               } @else {
                 {{ 'contractDoc.startsAtPending' | translate }}
               }
@@ -171,9 +171,9 @@
             <th scope="row">{{ 'contractDoc.endsAt' | translate }}</th>
             <td>
               @if (contract.endsAt) {
-                {{ contract.endsAt | date: 'mediumDate' }}
+                {{ contract.endsAt | uiDate: 'mediumDate' }}
               } @else if (contract.deliveryDate) {
-                {{ contract.deliveryDate | date: 'mediumDate' }}
+                {{ contract.deliveryDate | uiDate: 'mediumDate' }}
               } @else {
                 —
               }
@@ -274,7 +274,7 @@
             <p class="deed-sign__state">
               {{ 'contractDoc.signed' | translate }}
               @if (contract.factorySignedAt) {
-                · {{ contract.factorySignedAt | date: 'medium' }}
+                · {{ contract.factorySignedAt | uiDate: 'medium' }}
               }
             </p>
           } @else {
@@ -296,7 +296,7 @@
             <p class="deed-sign__state">
               {{ 'contractDoc.signed' | translate }}
               @if (contract.farmSignedAt) {
-                · {{ contract.farmSignedAt | date: 'medium' }}
+                · {{ contract.farmSignedAt | uiDate: 'medium' }}
               }
             </p>
           } @else {
@@ -317,7 +317,7 @@
           <span class="deed__footer-sep">·</span>
           <span>
             {{ 'contractDoc.signedAtLabel' | translate }}:
-            {{ contract.signedAt | date: 'medium' }}
+            {{ contract.signedAt | uiDate: 'medium' }}
           </span>
         }
       </div>

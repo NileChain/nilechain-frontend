@@ -35,6 +35,11 @@
         >
         <span>{{ w.disclaimer }}</span>
       </p>
+      <p class="wallet-page__lead">
+        <a class="underline" [routerLink]="billingLink">{{
+          'nav.billing' | translate
+        }}</a>
+      </p>
 
       <div class="wallet-page__balances">
         <div class="ui-metric-tile ui-metric-tile--emphasis">
@@ -49,7 +54,7 @@
               [uiCountUp]="w.availableBalanceEgp"
               [uiCountUpDecimals]="2"
             ></span>
-            <span class="wallet-page__currency">EGP</span>
+            <span class="wallet-page__currency">{{ 'common.egp' | translate }}</span>
           </p>
         </div>
         <div class="ui-metric-tile">
@@ -64,7 +69,7 @@
               [uiCountUp]="w.heldBalanceEgp"
               [uiCountUpDecimals]="2"
             ></span>
-            <span class="wallet-page__currency">EGP</span>
+            <span class="wallet-page__currency">{{ 'common.egp' | translate }}</span>
           </p>
         </div>
       </div>
@@ -114,7 +119,7 @@
                 <p>
                   {{ 'wallet.pendingTopUp' | translate }}:
                   <span class="tabular-nums">{{ session.amountEgp | number: '1.0-2' }}</span>
-                  EGP
+                  {{ 'common.egp' | translate }}
                 </p>
                 @if (session.sandboxHint) {
                   <p class="wallet-page__hint">{{ session.sandboxHint }}</p>
@@ -140,6 +145,7 @@
             {{ 'wallet.withdrawTitle' | translate }}
           </h2>
           <p class="wallet-page__hint">{{ 'wallet.withdrawHint' | translate }}</p>
+          <p class="wallet-page__hint">{{ 'wallet.feeHint' | translate }}</p>
           <label class="wallet-page__field">
             <span>{{ 'wallet.amount' | translate }}</span>
             <input
@@ -172,13 +178,40 @@
         </section>
       </div>
 
+      @if (w.recentWithdrawals?.length) {
+        <section class="wallet-page__panel wallet-page__panel--ledger">
+          <h2>{{ 'wallet.withdrawalsTitle' | translate }}</h2>
+          <ul class="wallet-page__list" uiAutoAnimate>
+            @for (wd of w.recentWithdrawals; track wd.withdrawalId) {
+              <li>
+                <span class="wallet-page__entry-type">{{
+                  withdrawalStatusKey(wd.status) | translate
+                }}</span>
+                <span class="tabular-nums font-semibold">
+                  {{ wd.amountEgp | number: '1.0-2' }}
+                  {{ 'common.egp' | translate }}
+                </span>
+                <span class="wallet-page__meta">
+                  @if (wd.destinationSummary) {
+                    {{ wd.destinationSummary }} ·
+                  }
+                  {{ wd.createdAt | uiDate: 'medium' }}
+                </span>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
       @if (w.recentLedger.length) {
         <section class="wallet-page__panel wallet-page__panel--ledger">
           <h2>{{ 'wallet.ledgerTitle' | translate }}</h2>
           <ul class="wallet-page__list" uiAutoAnimate>
             @for (e of w.recentLedger; track e.ledgerEntryId) {
               <li>
-                <span class="wallet-page__entry-type">{{ e.entryType }}</span>
+                <span class="wallet-page__entry-type">{{
+                  ledgerTypeKey(e.entryType) | translate
+                }}</span>
                 <span
                   class="tabular-nums font-semibold"
                   [class.text-primary]="e.amountEgp > 0"
@@ -186,7 +219,7 @@
                 >
                   {{ e.amountEgp > 0 ? '+' : '' }}{{ e.amountEgp | number: '1.0-2' }}
                 </span>
-                <span class="wallet-page__meta">{{ e.createdAt | date: 'medium' }}</span>
+                <span class="wallet-page__meta">{{ e.createdAt | uiDate: 'medium' }}</span>
               </li>
             }
           </ul>

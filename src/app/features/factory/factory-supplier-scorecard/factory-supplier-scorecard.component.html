@@ -49,7 +49,7 @@
           <div class="sc-hero__meta">
             <span class="sc-hero__chip">
               <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
-              {{ s.governorate || '—' }}
+              {{ (s.governorate | govLabel) || '—' }}
             </span>
             @if (s.isVerified) {
               <span class="sc-hero__chip sc-hero__chip--ok">
@@ -183,15 +183,19 @@
                     >
                   </p>
                   <p class="sc-deal__meta">
-                    <span class="sc-deal__status">{{ deal.contractStatus }}</span>
+                    <span class="sc-deal__status">{{
+                      contractStatusKey(deal.contractStatus) | translate
+                    }}</span>
                     @if (deal.fulfillmentStatus) {
                       <span aria-hidden="true">·</span>
-                      <span>{{ deal.fulfillmentStatus }}</span>
+                      <span>{{
+                        fulfillmentStatusKey(deal.fulfillmentStatus) | translate
+                      }}</span>
                     }
                     @if (deal.signedAt) {
                       <span aria-hidden="true">·</span>
                       <time [attr.datetime]="deal.signedAt">{{
-                        deal.signedAt | date: 'mediumDate'
+                        deal.signedAt | uiDate: 'mediumDate'
                       }}</time>
                     }
                   </p>
@@ -234,7 +238,7 @@
                   <p class="sc-deal__title tabular-nums">{{ r.rating }}/5</p>
                   <p class="sc-deal__meta">
                     <time [attr.datetime]="r.createdAt">{{
-                      r.createdAt | date: 'mediumDate'
+                      r.createdAt | uiDate: 'mediumDate'
                     }}</time>
                     @if (r.comment) {
                       <span aria-hidden="true">·</span>

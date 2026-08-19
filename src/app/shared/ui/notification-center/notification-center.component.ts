@@ -12,6 +12,7 @@ import { NotificationCenterService } from '../../../core/services/notification-c
 import { AuthService } from '../../../core/services/auth.service';
 import { UiEmptyStateComponent } from '../empty-state/empty-state.component';
 import { UiLoaderComponent } from '../loader/loader.component';
+import { UiAutoAnimateDirective } from '../../directives/ui-auto-animate.directive';
 import {
   captureFocus,
   restoreFocus,
@@ -26,6 +27,7 @@ import {
     RouterLink,
     UiEmptyStateComponent,
     UiLoaderComponent,
+    UiAutoAnimateDirective,
   ],
   template: `
     @if (center.open()) {
@@ -37,7 +39,7 @@ import {
       >
         <button
           type="button"
-          class="absolute inset-0 bg-black/40"
+          class="absolute inset-0 bg-on-surface/40 animate-backdrop-in"
           (click)="center.closeDrawer()"
           [attr.aria-label]="'common.close' | translate"
           tabindex="-1"
@@ -46,7 +48,8 @@ import {
         <aside
           #panel
           tabindex="-1"
-          class="absolute inset-y-0 end-0 w-full max-w-md bg-surface shadow-xl border-s border-outline-variant flex flex-col animate-fade-in outline-none"
+          class="absolute inset-y-0 end-0 z-10 w-full max-w-md bg-surface shadow-xl border-s border-outline-variant flex flex-col animate-slide-in-end outline-none"
+          (click)="$event.stopPropagation()"
         >
           <header
             class="h-16 px-4 flex items-center justify-between border-b border-outline-variant shrink-0"
@@ -95,17 +98,23 @@ import {
                 <ui-loader />
               </div>
             } @else if (center.notifications().length === 0) {
-              <ui-empty-state
-                titleKey="notifications.empty"
-                bodyKey="notifications.emptyBody"
-                icon="notifications_off"
-              />
+              <div class="animate-fade-in">
+                <ui-empty-state
+                  titleKey="notifications.empty"
+                  bodyKey="notifications.emptyBody"
+                  icon="notifications_off"
+                />
+              </div>
             } @else {
+              <div class="space-y-2" uiAutoAnimate>
               @for (item of center.notifications(); track item.id) {
-                <article
-                  class="rounded-lg border border-outline-variant p-3 transition-colors"
+                <button
+                  type="button"
+                  class="w-full text-start rounded-lg border border-outline-variant p-3 hover:bg-surface-container-low transition-all duration-300"
                   [class.bg-surface-container-low]="!item.read"
                   [class.bg-surface]="item.read"
+                  [class.opacity-70]="item.read"
+                  (click)="center.openItem(item)"
                 >
                   <div class="flex items-start gap-3">
                     <span
@@ -140,30 +149,14 @@ import {
                           {{ item.timeKey | translate }}
                         }
                       </p>
-                      <div class="flex items-center gap-2 mt-3">
-                        @if (!item.read) {
-                          <button
-                            type="button"
-                            class="text-label-sm text-primary hover:underline"
-                            (click)="center.markRead(item.id)"
-                          >
-                            {{ 'notifications.markRead' | translate }}
-                          </button>
-                        }
-                        @if (item.link) {
-                          <a
-                            [routerLink]="item.link"
-                            class="text-label-sm text-primary hover:underline"
-                            (click)="center.closeDrawer()"
-                          >
-                            {{ 'notifications.viewDetails' | translate }}
-                          </a>
-                        }
-                      </div>
+                      <p class="text-label-sm text-primary mt-2">
+                        {{ 'notifications.viewDetails' | translate }}
+                      </p>
                     </div>
                   </div>
-                </article>
+                </button>
               }
+              </div>
             }
           </div>
 

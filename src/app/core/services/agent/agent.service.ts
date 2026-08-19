@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import {
   AgentRequest,
   AgentResponse,
+  AgentRunPage,
   GenerateContractRequest,
   GenerateContractResponse,
 } from '../../models/agent/agent.model';
@@ -81,5 +82,14 @@ export class AgentService {
       `${this.api}/generate-contract`,
       payload
     );
+  }
+
+  /** Admins see every run; a factory only ever gets its own. */
+  listRuns(page = 1, pageSize = 20): Observable<AgentRunPage> {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('pageSize', pageSize);
+
+    return this.http.get<AgentRunPage>(`${this.api}/runs`, { params });
   }
 }

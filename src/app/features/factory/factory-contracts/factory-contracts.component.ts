@@ -1,4 +1,5 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
+import { DecimalPipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -25,7 +26,7 @@ type SortKey = 'newest' | 'oldest' | 'delivery' | 'status' | 'farm';
   selector: 'app-factory-contracts',
   standalone: true,
   imports: [
-    TranslatePipe,
+    UiDatePipe, TranslatePipe,
     RouterLink,
     FormsModule,
     AppTopBarComponent,
@@ -33,7 +34,6 @@ type SortKey = 'newest' | 'oldest' | 'delivery' | 'status' | 'farm';
     UiErrorStateComponent,
     UiEmptyStateComponent,
     UiSkeletonComponent,
-    DatePipe,
     DecimalPipe,
     UiAutoAnimateDirective,
   ],

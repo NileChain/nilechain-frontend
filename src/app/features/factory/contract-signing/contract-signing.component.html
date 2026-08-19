@@ -19,7 +19,7 @@
     <ui-portal-hero
       size="compact"
       imageUrl="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1600&q=75"
-      quoteKey="portalHero.contractsQuote"
+      quoteKey="portalHero.factoryContractsQuote"
       titleKey="contractSign.title"
       bodyKey="contractSign.subtitle"
     />
@@ -168,6 +168,36 @@
       </aside>
 
       <div class="contract-workspace__main min-w-0 space-y-4">
+        @if (status() === 'approved') {
+          <section
+            class="ui-card p-6 text-center space-y-3 animate-scale-in"
+            role="status"
+          >
+            <span
+              class="material-symbols-outlined text-primary text-5xl ui-pop"
+              aria-hidden="true"
+              >verified</span
+            >
+            <h2 class="m-0 font-title-lg text-on-surface">
+              {{ 'contractSign.statusApproved' | translate }}
+            </h2>
+            <p class="m-0 font-body-md text-on-surface-variant">
+              {{ 'contractSign.approveSuccess' | translate }}
+            </p>
+            <div
+              class="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary-container/40 px-4 py-2 text-primary"
+              [class.ui-pop]="status() === 'approved'"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true"
+                >verified_user</span
+              >
+              <span class="font-label-md">{{
+                'integrity.badgeTitle' | translate
+              }}</span>
+            </div>
+          </section>
+        }
+
         @if (loading()) {
           <div class="flex justify-center py-8"><ui-loader /></div>
         }
@@ -232,7 +262,7 @@
           </button>
           <button
             type="button"
-            class="ui-btn-primary"
+            class="ui-btn-primary hover:shadow-lg hover:brightness-105 transition-all duration-200"
             [disabled]="status() === 'approved' || isWalletError"
             (click)="approve()"
           >

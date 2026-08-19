@@ -693,50 +693,6 @@
                 </div>
               </header>
 
-              <div class="fp-actions flex-col sm:flex-row items-stretch">
-                <select
-                  class="ui-input flex-1"
-                  [value]="selectedCertificationId()"
-                  (change)="
-                    selectedCertificationId.set($any($event.target).value)
-                  "
-                >
-                  <option value="">{{ 'common.select' | translate }}</option>
-                  @for (
-                    cert of certificationCatalog();
-                    track cert.certificationId
-                  ) {
-                    <option
-                      [value]="cert.certificationId"
-                      [disabled]="isCertificationAdded(cert.certificationId)"
-                    >
-                      {{ cert.name }}
-                    </option>
-                  }
-                </select>
-                <input
-                  type="date"
-                  class="ui-input"
-                  [value]="certExpiresAt()"
-                  (input)="certExpiresAt.set($any($event.target).value)"
-                  [attr.aria-label]="'farm.profile.certExpiresAt' | translate"
-                />
-                <button
-                  type="button"
-                  (click)="addCertification()"
-                  [disabled]="
-                    addingCertification() || !selectedCertificationId()
-                  "
-                  class="ui-btn-primary shrink-0"
-                >
-                  @if (addingCertification()) {
-                    <ui-loader size="sm" />
-                  } @else {
-                    {{ 'common.add' | translate }}
-                  }
-                </button>
-              </div>
-
               @if (p.certifications.length > 0) {
                 <ul class="fp-list">
                   @for (cert of p.certifications; track cert.certificationId) {
@@ -757,27 +713,6 @@
                           }
                         </p>
                       </div>
-                      <button
-                        type="button"
-                        (click)="deleteCertification(cert.certificationId)"
-                        [disabled]="
-                          deletingCertificationId() === cert.certificationId
-                        "
-                        class="ui-icon-btn shrink-0"
-                        [attr.aria-label]="'common.remove' | translate"
-                      >
-                        @if (
-                          deletingCertificationId() === cert.certificationId
-                        ) {
-                          <ui-loader size="sm" />
-                        } @else {
-                          <span
-                            class="material-symbols-outlined text-sm text-error"
-                            aria-hidden="true"
-                            >delete</span
-                          >
-                        }
-                      </button>
                     </li>
                   }
                 </ul>
@@ -795,8 +730,27 @@
                   <h2 id="farm-docs-title" class="fp-section-title">
                     {{ 'farm.profile.documentsTitle' | translate }}
                   </h2>
+                  <p class="fp-section-sub">
+                    {{ 'farm.profile.documentsHint' | translate }}
+                  </p>
                 </div>
               </header>
+
+              <label class="block font-label-md text-label-md mb-2" for="kyb-kind">
+                {{ 'farm.profile.kybKind' | translate }}
+              </label>
+              <select
+                id="kyb-kind"
+                class="ui-input mb-3"
+                [value]="selectedKybKind()"
+                (change)="selectedKybKind.set($any($event.target).value)"
+              >
+                @for (kind of kybKinds; track kind) {
+                  <option [value]="kind">
+                    {{ 'farm.profile.kyb.' + kind | translate }}
+                  </option>
+                }
+              </select>
 
               <div
                 class="fp-dropzone"
@@ -848,7 +802,13 @@
                         </span>
                         <div class="min-w-0">
                           <p class="fp-list__title truncate">{{ doc.name }}</p>
-                          <p class="fp-list__meta">{{ doc.size }}</p>
+                          <p class="fp-list__meta">
+                            {{
+                              'farm.profile.kyb.' + (doc.kybKind || 'Other')
+                                | translate
+                            }}
+                            · {{ doc.size }}
+                          </p>
                         </div>
                       </div>
                       <div class="fp-list__actions">

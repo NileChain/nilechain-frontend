@@ -13,13 +13,14 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { TranslateService } from '../../../core/services/translate.service';
 import {
-  CertificationCatalogItem,
   CropType,
   FarmCropListing,
   FarmProfile,
+  KybKind,
 } from '../../../core/models/farm/farm-profile.model';
 import { UpdateFarmProfileRequest } from '../../../core/models/farm/update-farm-profile-request.model';
-import { PickedLocation } from '../../../shared/geo/egypt-governorates';
+import { PickedLocation, governorateLabel } from '../../../shared/geo/egypt-governorates';
+import { LocaleService } from '../../../core/services/locale.service';
 import {
   isValidEgyptianPhone,
   normalizeEgyptianPhone,
@@ -48,6 +49,7 @@ export class FarmProfileComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly i18n = inject(TranslateService);
+  private readonly locale = inject(LocaleService);
   private readonly fb = inject(FormBuilder);
 
   private readonly SOIL_TYPE_MAP: Record<string, number> = {
@@ -103,12 +105,14 @@ export class FarmProfileComponent implements OnInit {
   readonly savingCrop = signal(false);
   readonly deletingCropId = signal<string | null>(null);
 
-  readonly certificationCatalog = signal<CertificationCatalogItem[]>([]);
-  readonly selectedCertificationId = signal('');
-  readonly certExpiresAt = signal('');
-  readonly addingCertification = signal(false);
-  readonly deletingCertificationId = signal<string | null>(null);
-
+  readonly kybKinds: KybKind[] = [
+    'CommercialRegister',
+    'TaxCard',
+    'NationalId',
+    'LandLease',
+    'Other',
+  ];
+  readonly selectedKybKind = signal<KybKind>('CommercialRegister');
   readonly uploadingDocument = signal(false);
   readonly deletingDocumentId = signal<string | null>(null);
   readonly uploadingImage = signal(false);
@@ -119,7 +123,6 @@ export class FarmProfileComponent implements OnInit {
   ngOnInit(): void {
     this.loadProfile();
     this.loadCropTypes();
-    this.loadCertificationCatalog();
   }
 
   loadProfile(): void {
@@ -166,13 +169,13 @@ export class FarmProfileComponent implements OnInit {
   }
 
   onLocationPicked(loc: PickedLocation): void {
+    const label = governorateLabel(loc.governorate, this.locale.locale());
     this.form.patchValue({
       latitude: loc.latitude,
       longitude: loc.longitude,
       governorate: loc.governorate,
       location:
-        this.form.controls.location.value?.trim() ||
-        `${loc.governorateAr} (${loc.governorate})`,
+        this.form.controls.location.value?.trim() || label,
     });
     this.form.controls.governorate.markAsDirty();
   }
@@ -182,16 +185,6 @@ export class FarmProfileComponent implements OnInit {
       next: (types) => this.cropTypes.set(types),
       error: () =>
         this.mutationError.set(this.i18n.instant('farm.profile.cropsLoadFailed')),
-    });
-  }
-
-  loadCertificationCatalog(): void {
-    this.farmService.getCertificationCatalog().subscribe({
-      next: (items) => this.certificationCatalog.set(items),
-      error: () =>
-        this.mutationError.set(
-          this.i18n.instant('farm.profile.certsLoadFailed')
-        ),
     });
   }
 
@@ -361,55 +354,6 @@ export class FarmProfileComponent implements OnInit {
       });
   }
 
-  addCertification(): void {
-    const certificationId = this.selectedCertificationId();
-    if (!certificationId) return;
-
-    this.addingCertification.set(true);
-    this.mutationError.set(null);
-    this.farmService
-      .addCertification({
-        certificationId,
-        expiresAt: this.certExpiresAt()?.trim() || null,
-      })
-      .pipe(finalize(() => this.addingCertification.set(false)))
-      .subscribe({
-        next: () => {
-          this.selectedCertificationId.set('');
-          this.certExpiresAt.set('');
-          this.loadProfile();
-        },
-        error: (err) =>
-          this.mutationError.set(
-            err?.error?.detail ||
-              err?.error?.title ||
-              this.i18n.instant('farm.profile.addCertFailed')
-          ),
-      });
-  }
-
-  async deleteCertification(certificationId: string): Promise<void> {
-    const confirmed = await this.confirmDialog.confirm({
-      titleKey: 'common.confirmTitle',
-      bodyKey: 'common.confirmBody',
-      confirmKey: 'common.remove',
-      danger: true,
-    });
-    if (!confirmed) return;
-    this.deletingCertificationId.set(certificationId);
-    this.mutationError.set(null);
-    this.farmService
-      .deleteCertification(certificationId)
-      .pipe(finalize(() => this.deletingCertificationId.set(null)))
-      .subscribe({
-        next: () => this.loadProfile(),
-        error: () =>
-          this.mutationError.set(
-            this.i18n.instant('farm.profile.deleteCertFailed')
-          ),
-      });
-  }
-
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -418,7 +362,7 @@ export class FarmProfileComponent implements OnInit {
     this.uploadingDocument.set(true);
     this.mutationError.set(null);
     this.farmService
-      .addDocument(file)
+      .addDocument(file, this.selectedKybKind())
       .pipe(
         finalize(() => {
           this.uploadingDocument.set(false);
@@ -537,21 +481,13 @@ export class FarmProfileComponent implements OnInit {
     );
   }
 
-  isCertificationAdded(certificationId: string): boolean {
-    return (
-      this.profile()?.certifications.some(
-        (c) => c.certificationId === certificationId
-      ) ?? false
-    );
-  }
-
   formatCropMeta(crop: FarmCropListing): string {
     const parts: string[] = [];
     if (crop.availableQuantityTons != null) {
-      parts.push(`${crop.availableQuantityTons} t`);
+      parts.push(`${crop.availableQuantityTons} ${this.i18n.instant('common.ton')}`);
     }
     if (crop.minPricePerTon != null) {
-      parts.push(`≥ ${crop.minPricePerTon} EGP/t`);
+      parts.push(`≥ ${crop.minPricePerTon} ${this.i18n.instant('common.egpPerTon')}`);
     }
     if (crop.availableFrom || crop.availableTo) {
       const from = crop.availableFrom?.slice(0, 10) ?? '…';

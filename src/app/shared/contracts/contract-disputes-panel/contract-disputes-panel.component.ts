@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
 import {
   Component,
   Input,
@@ -26,7 +26,8 @@ export type DisputePortal = 'farm' | 'factory';
 @Component({
   selector: 'app-contract-disputes-panel',
   standalone: true,
-  imports: [TranslatePipe, DatePipe, FormsModule, UiLoaderComponent],
+  imports: [
+    UiDatePipe, TranslatePipe, FormsModule, UiLoaderComponent],
   templateUrl: './contract-disputes-panel.component.html',
 })
 export class ContractDisputesPanelComponent implements OnChanges {

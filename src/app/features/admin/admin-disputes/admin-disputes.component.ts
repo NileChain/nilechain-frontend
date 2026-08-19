@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -26,8 +26,7 @@ type TypeFilter =
   selector: 'app-admin-disputes',
   standalone: true,
   imports: [
-    FormsModule,
-    DatePipe,
+    UiDatePipe, FormsModule,
     TranslatePipe,
     AppTopBarComponent,
     UiLoaderComponent,

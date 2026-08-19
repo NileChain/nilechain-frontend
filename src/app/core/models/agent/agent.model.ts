@@ -19,6 +19,20 @@ export interface MatchResult {
   riskLevel: string;
   isVerified: boolean;
   cropTypes: string[];
+  distanceKm?: number | null;
+  usedGovernorateFallback?: boolean;
+  isGeographicExpansion?: boolean;
+}
+
+export interface PeekHint {
+  farmId: string;
+  farmName: string;
+  governorate: string;
+  matchScore: number;
+  riskScore: number;
+  isVerified: boolean;
+  distanceKm?: number | null;
+  reason: string;
 }
 
 export interface ToolCallTrailEntry {
@@ -57,6 +71,7 @@ export interface AgentResponse {
   contractIncomplete?: boolean;
   contractValidationError?: string | null;
   toolCallTrail?: ToolCallTrailEntry[];
+  peekHint?: PeekHint | null;
 }
 
 export interface GenerateContractRequest {
@@ -70,4 +85,36 @@ export interface GenerateContractResponse {
   contractText: string;
   contractId?: string | null;
   matchId?: string | null;
+}
+
+/**
+ * One recorded orchestration, including what the LLM cost.
+ * Token and cost fields are null when the provider reported no usage or the
+ * model has no configured rate — the run says "unknown" instead of guessing.
+ */
+export interface AgentRunRecord {
+  runId: string;
+  requestId: string;
+  factoryId: string;
+  startedAt: string;
+  completedAt?: string | null;
+  success: boolean;
+  errorCode?: string | null;
+  truncatedCount?: number | null;
+  orchestratorMode?: string | null;
+  durationMs?: number | null;
+  llmProviders?: string | null;
+  llmModels?: string | null;
+  llmCalls?: number | null;
+  llmLatencyMs?: number | null;
+  promptTokens?: number | null;
+  completionTokens?: number | null;
+  estimatedCostUsd?: number | null;
+}
+
+export interface AgentRunPage {
+  items: AgentRunRecord[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
 }

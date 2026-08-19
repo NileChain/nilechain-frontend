@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject } from '@angular/core';
-import { Title } from '@angular/platform-browser';
+import { PageTitleService } from '../../../core/services/page-title.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { TranslateService } from '../../../core/services/translate.service';
 import {
@@ -16,7 +16,7 @@ import {
 export class FactoryHomeComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly i18n = inject(TranslateService);
-  private readonly title = inject(Title);
+  private readonly pageTitle = inject(PageTitleService);
 
   readonly displayName = computed(
     () =>
@@ -73,6 +73,6 @@ export class FactoryHomeComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.title.setTitle(`${this.i18n.instant('factory.home.title')} · NileChain`);
+    this.pageTitle.setKey('app.page.factoryHome');
   }
 }

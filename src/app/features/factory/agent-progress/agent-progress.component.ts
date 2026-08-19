@@ -1,18 +1,29 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { GovLabelPipe } from '../../../core/pipes/gov-label.pipe';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
 import { UiErrorStateComponent } from '../../../shared/ui/error-state/error-state.component';
 import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-top-bar.component';
 import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
 import { AgentService } from '../../../core/services/agent/agent.service';
+import { FactoryService } from '../../../core/services/factory/factory.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslateService } from '../../../core/services/translate.service';
+import { factoryProgressRiskLabelKey } from '../../../core/i18n/status-i18n.util';
 import {
   AgentRequest,
   AgentResponse,
@@ -137,6 +148,7 @@ const STEP_ACTIVITIES: Record<string, StepActivity[]> = {
   standalone: true,
   imports: [
     TranslatePipe,
+    GovLabelPipe,
     UiLoaderComponent,
     UiErrorStateComponent,
     UiEmptyStateComponent,
@@ -151,10 +163,14 @@ const STEP_ACTIVITIES: Record<string, StepActivity[]> = {
 })
 export class AgentProgressComponent implements OnInit, OnDestroy {
   private readonly agentService = inject(AgentService);
+  private readonly factoryService = inject(FactoryService);
   private readonly route = inject(ActivatedRoute);
   private readonly toast = inject(ToastService);
   private readonly i18n = inject(TranslateService);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly host = inject(ElementRef<HTMLElement>);
+  /** Inspect a finished station; cleared while the run animation is following live. */
+  private readonly pinnedStepId = signal<string | null>(null);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -209,6 +225,33 @@ export class AgentProgressComponent implements OnInit, OnDestroy {
   /** Last requestId we auto-handled in this component instance (cache hydrate or first run). */
   private handledRequestId: string | null = null;
 
+  constructor() {
+    effect(() => {
+      const id = this.focusedStep()?.id;
+      if (!id) {
+        return;
+      }
+      queueMicrotask(() => {
+        const el = this.host.nativeElement.querySelector(
+          `#agent-step-${id}`
+        ) as HTMLElement | null;
+        const scroller = this.host.nativeElement.querySelector(
+          '.ai-command__stepper'
+        ) as HTMLElement | null;
+        if (!el || !scroller) {
+          return;
+        }
+        const elRect = el.getBoundingClientRect();
+        const box = scroller.getBoundingClientRect();
+        if (elRect.top < box.top) {
+          scroller.scrollTop += elRect.top - box.top;
+        } else if (elRect.bottom > box.bottom) {
+          scroller.scrollTop += elRect.bottom - box.bottom;
+        }
+      });
+    });
+  }
+
   ngOnInit(): void {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 30);
@@ -244,6 +287,10 @@ export class AgentProgressComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.clearStepTimer();
     this.stopElapsedClock();
+  }
+
+  riskLevelLabelKey(level: string): string {
+    return factoryProgressRiskLabelKey(level);
   }
 
   /** Explicit fresh run — clears cache for this requestId then POSTs again. */
@@ -337,6 +384,69 @@ export class AgentProgressComponent implements OnInit, OnDestroy {
     });
   }
 
+  peekHint(result: AgentResponse) {
+    return result.peekHint ?? null;
+  }
+
+  peekReasonKey(reason: string | undefined): string {
+    switch ((reason ?? '').toLowerCase()) {
+      case 'emptyprimary':
+        return 'factory.progress.peekEmptyPrimary';
+      case 'verified':
+        return 'factory.progress.peekVerified';
+      case 'higherscore':
+        return 'factory.progress.peekHigherScore';
+      case 'highertrust':
+        return 'factory.progress.peekHigherTrust';
+      default:
+        return 'factory.progress.peekDefault';
+    }
+  }
+
+  readonly flexActing = signal(false);
+
+  includePeekFarms(): void {
+    const id = this.requestId();
+    if (!id || this.flexActing()) return;
+    this.flexActing.set(true);
+    this.factoryService
+      .expandGeo(id)
+      .pipe(finalize(() => this.flexActing.set(false)))
+      .subscribe({
+        next: () => {
+          this.toast.info(this.i18n.instant('factory.progress.peekAccepted'));
+          this.rerunAgent();
+        },
+        error: (err) =>
+          this.toast.error(
+            err?.error?.detail ||
+              err?.error?.message ||
+              this.i18n.instant('factory.progress.peekFailed')
+          ),
+      });
+  }
+
+  showMoreEligible(): void {
+    const id = this.requestId();
+    if (!id || this.flexActing()) return;
+    this.flexActing.set(true);
+    this.factoryService
+      .showMoreMatches(id)
+      .pipe(finalize(() => this.flexActing.set(false)))
+      .subscribe({
+        next: () => {
+          this.toast.info(this.i18n.instant('factory.progress.showMoreAccepted'));
+          this.rerunAgent();
+        },
+        error: (err) =>
+          this.toast.error(
+            err?.error?.detail ||
+              err?.error?.message ||
+              this.i18n.instant('factory.progress.showMoreFailed')
+          ),
+      });
+  }
+
   topMatches(): MatchResult[] {
     return this.response()?.topMatches ?? [];
   }
@@ -396,12 +506,26 @@ export class AgentProgressComponent implements OnInit, OnDestroy {
 
   focusedStep(): PipelineStep | null {
     const list = this.steps();
+    const pinned = this.pinnedStepId();
+    if (pinned && !this.loading()) {
+      const found = list.find((s) => s.id === pinned);
+      if (found) {
+        return found;
+      }
+    }
     return (
       list.find((s) => s.status === 'active') ??
       (this.workflowPhase() === 'completed'
         ? list[list.length - 1] ?? null
         : list.find((s) => s.status === 'pending') ?? list[0] ?? null)
     );
+  }
+
+  selectStep(id: string): void {
+    if (this.loading()) {
+      return;
+    }
+    this.pinnedStepId.set(id);
   }
 
   focusedStepDetailKey(): string {
@@ -556,6 +680,7 @@ export class AgentProgressComponent implements OnInit, OnDestroy {
   }
 
   private startStepAnimation(): void {
+    this.pinnedStepId.set(null);
     this.resetSteps();
     this.startElapsedClock();
     let index = 0;

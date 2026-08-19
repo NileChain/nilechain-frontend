@@ -1,5 +1,6 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
-import { catchError, finalize, forkJoin, of } from 'rxjs';
+import { Router } from '@angular/router';
+import { Observable, catchError, finalize, forkJoin, of } from 'rxjs';
 import { AuthService } from './auth.service';
 import {
   FactoryNotification,
@@ -8,7 +9,13 @@ import {
 import { FarmService } from './farm/farm.service';
 import { FarmNotification } from '../models/farm/farm-notification.model';
 import { TranslateService } from './translate.service';
+import { LocaleService } from './locale.service';
 import { ToastService } from './toast.service';
+import {
+  navigateNotificationLink,
+  notificationTargetUrl,
+  stripNotificationMarker,
+} from '../utils/notification-target';
 
 export interface AppNotification {
   id: string;
@@ -32,7 +39,9 @@ export class NotificationCenterService {
   private readonly factoryService = inject(FactoryService);
   private readonly farmService = inject(FarmService);
   private readonly i18n = inject(TranslateService);
+  private readonly locale = inject(LocaleService);
   private readonly toast = inject(ToastService);
+  private readonly router = inject(Router);
 
   readonly open = signal(false);
   readonly loading = signal(false);
@@ -83,17 +92,18 @@ export class NotificationCenterService {
     this.loading.set(true);
     this.loadError.set(null);
 
-    const source$ = this.auth.hasAnyRole(['Factory'])
-      ? this.factoryService.getNotifications()
-      : this.auth.hasAnyRole(['Farm'])
-        ? this.farmService.getNotifications()
-        : of([] as FactoryNotification[]);
+    const source$: Observable<Array<FactoryNotification | FarmNotification>> =
+      this.auth.hasAnyRole(['Factory'])
+        ? this.factoryService.getNotifications()
+        : this.auth.hasAnyRole(['Farm'])
+          ? this.farmService.getNotifications()
+          : of([]);
 
     source$
       .pipe(
         catchError(() => {
           this.loadError.set('load_failed');
-          return of([] as FactoryNotification[] | FarmNotification[]);
+          return of([] as Array<FactoryNotification | FarmNotification>);
         }),
         finalize(() => this.loading.set(false))
       )
@@ -107,6 +117,12 @@ export class NotificationCenterService {
           )
         );
       });
+  }
+
+  openItem(item: AppNotification): void {
+    this.markRead(item.id);
+    this.closeDrawer();
+    navigateNotificationLink(this.router, item.link);
   }
 
   markRead(id: string): void {
@@ -176,15 +192,21 @@ export class NotificationCenterService {
     n: FactoryNotification | FarmNotification,
     role: 'factory' | 'farm'
   ): AppNotification {
-    const link =
-      'link' in n && n.link
-        ? n.link
-        : this.defaultLink(n.type, role);
+    const link = notificationTargetUrl(
+      {
+        link: 'link' in n ? n.link : undefined,
+        type: n.type,
+        relatedEntityType: 'relatedEntityType' in n ? n.relatedEntityType : null,
+        relatedEntityId: 'relatedEntityId' in n ? n.relatedEntityId : null,
+        message: n.message,
+      },
+      role
+    );
 
     return {
       id: n.notificationId,
       title: this.titleForType(n.type, n.title),
-      body: n.message,
+      body: stripNotificationMarker(n.message),
       timeLabel: this.formatTime(n.createdAt),
       read: n.isRead,
       link,
@@ -201,29 +223,11 @@ export class NotificationCenterService {
     return translated === key ? fallback : translated;
   }
 
-  private defaultLink(
-    type: string | null,
-    role: 'factory' | 'farm'
-  ): string | undefined {
-    const t = (type || '').toLowerCase();
-    if (role === 'factory') {
-      if (t.includes('match')) return '/factory/matches';
-      if (t.includes('contract')) return '/factory/contracts';
-      if (t.includes('risk')) return '/factory/risk-report';
-      if (t.includes('message')) return '/factory/messages';
-      return '/factory/notifications';
-    }
-    if (t.includes('match')) return '/farm/matches';
-    if (t.includes('contract')) return '/farm/contracts';
-    if (t.includes('message')) return '/farm/messages';
-    return '/farm/notifications';
-  }
-
   private formatTime(iso: string): string {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) {
       return iso;
     }
-    return d.toLocaleString();
+    return d.toLocaleString(this.locale.numberLocale());
   }
 }

@@ -72,15 +72,6 @@
       }
 
       <div class="lw-workspace">
-        <aside class="lw-toc print:hidden">
-          <app-contract-toc
-            [items]="toc()"
-            [activeId]="activeSectionId()"
-            [collapsible]="true"
-            (navigate)="scrollToSection($event)"
-          />
-        </aside>
-
         <div class="lw-document">
           @if (!isSigned() && lastRevision(); as rev) {
             <div class="print:hidden mb-4">

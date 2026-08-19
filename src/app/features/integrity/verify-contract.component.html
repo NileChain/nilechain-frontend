@@ -85,7 +85,7 @@
           @if (r.signedAt) {
             <div>
               <dt class="text-on-surface-variant">{{ 'contractDoc.signedAtLabel' | translate }}</dt>
-              <dd>{{ r.signedAt | date: 'medium' }}</dd>
+              <dd>{{ r.signedAt | uiDate: 'medium' }}</dd>
             </div>
           }
         </dl>

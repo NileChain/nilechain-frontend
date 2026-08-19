@@ -7,8 +7,17 @@ export interface AdminUser {
   isBlocked: boolean;
   isActive: boolean;
   createdAt: string;
+  farmId?: string | null;
+  factoryId?: string | null;
   farmName: string | null;
   factoryName: string | null;
+  kybReviewStatus?: string | null;
+  kybAdminNote?: string | null;
+  lastTrustScore?: number | null;
+  lastRecommendation?: string | null;
+  planCode?: string | null;
+  subscriptionStatus?: string | null;
+  subscriptionPeriodEnd?: string | null;
 }
 
 export interface PagedResult<T> {

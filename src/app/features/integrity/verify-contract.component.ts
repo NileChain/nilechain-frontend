@@ -1,7 +1,7 @@
-import { DatePipe } from '@angular/common';
+import { UiDatePipe } from '../../core/pipes/ui-date.pipe';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Title } from '@angular/platform-browser';
+import { PageTitleService } from '../../core/services/page-title.service';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { TranslateService } from '../../core/services/translate.service';
 import { IntegrityService } from '../../core/services/integrity/integrity.service';
@@ -14,8 +14,7 @@ import { UiBrandMarkComponent } from '../../shared/ui/brand-mark/brand-mark.comp
   selector: 'app-verify-contract',
   standalone: true,
   imports: [
-    DatePipe,
-    RouterLink,
+    UiDatePipe, RouterLink,
     TranslatePipe,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
@@ -31,8 +30,8 @@ export class VerifyContractComponent implements OnInit {
   readonly loading = signal(true);
   readonly result = signal<ContractIntegrityVerify | null>(null);
 
-  constructor(title: Title) {
-    title.setTitle('NileChain - Verify contract');
+  constructor(pageTitle: PageTitleService) {
+    pageTitle.setKey('app.page.verify');
   }
 
   ngOnInit(): void {

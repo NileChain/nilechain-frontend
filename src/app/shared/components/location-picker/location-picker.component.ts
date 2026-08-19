@@ -14,10 +14,12 @@ import {
 import { DecimalPipe } from '@angular/common';
 import * as L from 'leaflet';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { GovLabelPipe } from '../../../core/pipes/gov-label.pipe';
 import {
   EGYPT_MAP_CENTER,
   EGYPT_MAP_ZOOM,
   PickedLocation,
+  findGovernorateByName,
   nearestGovernorate,
   resolveMapCoords,
 } from '../../geo/egypt-governorates';
@@ -52,7 +54,7 @@ export interface LocationPickerInitial {
 @Component({
   selector: 'app-location-picker',
   standalone: true,
-  imports: [TranslatePipe, DecimalPipe],
+  imports: [TranslatePipe, DecimalPipe, GovLabelPipe],
   template: `
     <div class="location-picker">
       <div class="location-picker__head">
@@ -106,11 +108,8 @@ export interface LocationPickerInitial {
             <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
               >location_on</span
             >
-            <span class="location-picker__gov-ar">{{
-              resolvedGovernorateAr()
-            }}</span>
-            <span class="location-picker__gov-en">{{
-              resolvedGovernorate()
+            <span class="location-picker__gov">{{
+              resolvedGovernorate() | govLabel
             }}</span>
           </span>
           @if (resolvedLat() != null && resolvedLng() != null) {
@@ -431,8 +430,9 @@ export class LocationPickerComponent
       this.resolvedGovernorate.set(near.name);
       this.resolvedGovernorateAr.set(near.nameAr);
     } else if (init?.governorate) {
-      this.resolvedGovernorate.set(init.governorate);
-      this.resolvedGovernorateAr.set(init.governorate);
+      const found = findGovernorateByName(init.governorate);
+      this.resolvedGovernorate.set(found?.name ?? init.governorate);
+      this.resolvedGovernorateAr.set(found?.nameAr ?? init.governorate);
     } else {
       this.resolvedGovernorate.set(null);
       this.resolvedGovernorateAr.set(null);

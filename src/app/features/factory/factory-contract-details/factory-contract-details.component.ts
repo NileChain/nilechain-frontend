@@ -22,6 +22,7 @@ import {
 import { WalletService } from '../../../core/services/wallet/wallet.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
+import { SigningOtpDialogService } from '../../../core/services/signing-otp-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslateService } from '../../../core/services/translate.service';
 import { AiAssistantContextService } from '../../../core/services/ai-assistant-context.service';
@@ -47,7 +48,6 @@ import { ContractPaymentMilestonesComponent } from '../../../shared/contracts/co
 import { ContractDisputesPanelComponent } from '../../../shared/contracts/contract-disputes-panel/contract-disputes-panel.component';
 import { ContractReviewPanelComponent } from '../../../shared/contracts/contract-review-panel/contract-review-panel.component';
 import { buildContractTimeline } from '../../../shared/contracts/contract-timeline.util';
-import { ContractTocComponent } from '../../../shared/contracts/contract-toc/contract-toc.component';
 import {
   ContractAttachmentDto,
   ContractAttachmentItem,
@@ -83,7 +83,6 @@ import { ContractRevisionView } from '../../../shared/contracts/contract-diff.ut
     ContractReviewPanelComponent,
     ContractActionBarComponent,
     ContractAttachmentsComponent,
-    ContractTocComponent,
     ContractReadingProgressComponent,
     ContractIntegrityBadgeComponent,
     ContractDateAmendmentComponent,
@@ -100,6 +99,7 @@ export class FactoryContractDetailsComponent implements OnInit, AfterViewInit {
   private readonly walletApi = inject(WalletService);
   private readonly auth = inject(AuthService);
   private readonly confirm = inject(ConfirmDialogService);
+  private readonly signingOtp = inject(SigningOtpDialogService);
   private readonly toast = inject(ToastService);
   private readonly i18n = inject(TranslateService);
   private readonly assistantCtx = inject(AiAssistantContextService);
@@ -134,8 +134,12 @@ export class FactoryContractDetailsComponent implements OnInit, AfterViewInit {
     const available = this.availableBalanceEgp();
     if (deal != null && available != null) {
       return this.i18n.instant('factory.contracts.signFundsHint', {
-        deal: Math.round(deal).toLocaleString(),
-        available: Math.round(available).toLocaleString(),
+        deal: Math.round(deal).toLocaleString(
+          this.i18n.currentLang() === 'ar' ? 'ar-EG' : 'en-US'
+        ),
+        available: Math.round(available).toLocaleString(
+          this.i18n.currentLang() === 'ar' ? 'ar-EG' : 'en-US'
+        ),
       });
     }
     return this.i18n.instant('factory.contracts.signFundsHintNoWallet');
@@ -301,7 +305,8 @@ export class FactoryContractDetailsComponent implements OnInit, AfterViewInit {
   }
 
   async approve(): Promise<void> {
-    if (!this.contractId || !this.canDecide()) {
+    const contractId = this.contractId;
+    if (!contractId || !this.canDecide()) {
       return;
     }
     if (!this.hasReviewedEnough()) {
@@ -319,31 +324,38 @@ export class FactoryContractDetailsComponent implements OnInit, AfterViewInit {
     if (!ok) {
       return;
     }
-    this.acting.set(true);
-    this.factoryApi
-      .approveContract(this.contractId)
-      .pipe(finalize(() => this.acting.set(false)))
-      .subscribe({
-        next: (c) => {
-          this.applyContract(c);
-          this.toast.success(
-            this.i18n.instant(
-              c.status?.toLowerCase() === 'signed' ||
-                (c.factorySigned && c.farmSigned)
-                ? 'factory.contracts.approveSuccessFullySigned'
-                : 'factory.contracts.approveSuccess'
-            )
-          );
-          if (this.fromMatches()) {
-            setTimeout(() => {
-              void this.router.navigate(['/factory/matches']);
-            }, 900);
-          }
-        },
-        error: (err: HttpErrorResponse) => {
-          this.toast.error(this.resolveApproveError(err));
-        },
+    const consentText = this.i18n.instant(
+      'factory.contracts.confirmApproveBody'
+    );
+    try {
+      const signed = await this.signingOtp.prompt({
+        requestOtp: () => this.factoryApi.requestSigningOtp(contractId),
+        sign: (otpCode) =>
+          this.factoryApi.approveContract(contractId, {
+            otpCode,
+            consentText,
+          }),
       });
+      if (!signed) {
+        return;
+      }
+      this.applyContract(signed);
+      this.toast.success(
+        this.i18n.instant(
+          signed.status?.toLowerCase() === 'signed' ||
+            (signed.factorySigned && signed.farmSigned)
+            ? 'factory.contracts.approveSuccessFullySigned'
+            : 'factory.contracts.approveSuccess'
+        )
+      );
+      if (this.fromMatches()) {
+        setTimeout(() => {
+          void this.router.navigate(['/factory/matches']);
+        }, 900);
+      }
+    } catch (err) {
+      this.toast.error(this.resolveApproveError(err as HttpErrorResponse));
+    }
   }
 
   private resolveApproveError(err: HttpErrorResponse): string {

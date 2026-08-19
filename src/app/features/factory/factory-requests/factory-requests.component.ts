@@ -1,4 +1,5 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
+import { DecimalPipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -16,14 +17,13 @@ import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.compon
   selector: 'app-factory-requests',
   standalone: true,
   imports: [
-    TranslatePipe,
+    UiDatePipe, TranslatePipe,
     AppTopBarComponent,
     UiEmptyStateComponent,
     UiErrorStateComponent,
     UiSkeletonComponent,
     FormsModule,
     RouterLink,
-    DatePipe,
     DecimalPipe,
   ],
   templateUrl: './factory-requests.component.html',

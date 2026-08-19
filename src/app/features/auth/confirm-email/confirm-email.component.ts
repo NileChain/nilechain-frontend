@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Title } from '@angular/platform-browser';
+import { PageTitleService } from '../../../core/services/page-title.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { TranslateService } from '../../../core/services/translate.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
@@ -25,8 +25,8 @@ export class ConfirmEmailComponent implements OnInit {
   readonly status = signal<'loading' | 'success' | 'error'>('loading');
   readonly errorMessage = signal('');
 
-  constructor(title: Title) {
-    title.setTitle('NileChain - Confirm Email');
+  constructor(pageTitle: PageTitleService) {
+    pageTitle.setKey('app.page.confirmEmail');
   }
 
   ngOnInit(): void {

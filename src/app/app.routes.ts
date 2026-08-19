@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { kybVerifiedGuard } from './core/guards/kyb-verified.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'landing', pathMatch: 'full' },
@@ -62,6 +63,15 @@ export const routes: Routes = [
       ),
     canActivate: [guestGuard],
   },
+  {
+    path: 'verification-pending',
+    loadComponent: () =>
+      import('./features/auth/verification-pending/verification-pending.component').then(
+        (m) => m.VerificationPendingComponent
+      ),
+    canActivate: [authGuard],
+    data: { allowUnverified: true },
+  },
 
   // Farm portal landing (no sidebar — website-style)
   {
@@ -70,7 +80,7 @@ export const routes: Routes = [
       import('./features/farm/farm-home/farm-home.component').then(
         (m) => m.FarmHomeComponent
       ),
-    canActivate: [authGuard, roleGuard],
+    canActivate: [authGuard, roleGuard, kybVerifiedGuard],
     data: { roles: ['Farm'] },
   },
 
@@ -91,6 +101,7 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/farm/farm-dashboard/farm-dashboard.component').then(
             (m) => m.FarmDashboardComponent
@@ -98,6 +109,7 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
+        data: { allowUnverified: true },
         loadComponent: () =>
           import('./features/farm/farm-profile/farm-profile.component').then(
             (m) => m.FarmProfileComponent
@@ -105,6 +117,7 @@ export const routes: Routes = [
       },
       {
         path: 'matches',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/farm/farm-matches/farm-matches.component').then(
             (m) => m.FarmMatchesComponent
@@ -112,6 +125,7 @@ export const routes: Routes = [
       },
       {
         path: 'factories/:factoryId',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import(
             './features/farm/farm-factory-public-profile/farm-factory-public-profile.component'
@@ -119,6 +133,7 @@ export const routes: Routes = [
       },
       {
         path: 'contracts',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/farm/farm-contracts/farm-contracts.component').then(
             (m) => m.FarmContractsComponent
@@ -126,6 +141,7 @@ export const routes: Routes = [
       },
       {
         path: 'contracts/:contractId',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import(
             './features/farm/farm-contract-details/farm-contract-details.component'
@@ -133,13 +149,23 @@ export const routes: Routes = [
       },
       {
         path: 'wallet',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/wallet/wallet-page.component').then(
             (m) => m.WalletPageComponent
           ),
       },
       {
+        path: 'billing',
+        canActivate: [kybVerifiedGuard],
+        loadComponent: () =>
+          import('./features/billing/billing-page.component').then(
+            (m) => m.BillingPageComponent
+          ),
+      },
+      {
         path: 'messages',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/farm/farm-messages/farm-messages.component').then(
             (m) => m.FarmMessagesComponent
@@ -147,6 +173,7 @@ export const routes: Routes = [
       },
       {
         path: 'notifications',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/farm/farm-notifications/farm-notifications.component').then(
             (m) => m.FarmNotificationsComponent
@@ -154,6 +181,7 @@ export const routes: Routes = [
       },
       {
         path: 'negotiations',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./shared/negotiations/party-negotiations-page.component').then(
             (m) => m.PartyNegotiationsPageComponent
@@ -161,6 +189,7 @@ export const routes: Routes = [
       },
       {
         path: 'disputes',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./shared/disputes/party-disputes-page.component').then(
             (m) => m.PartyDisputesPageComponent
@@ -168,6 +197,7 @@ export const routes: Routes = [
       },
       {
         path: 'crop-request',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/crop-request/crop-request.component').then(
             (m) => m.CropRequestComponent
@@ -195,7 +225,7 @@ export const routes: Routes = [
       import('./features/factory/factory-home/factory-home.component').then(
         (m) => m.FactoryHomeComponent
       ),
-    canActivate: [authGuard, roleGuard],
+    canActivate: [authGuard, roleGuard, kybVerifiedGuard],
     data: { roles: ['Factory'] },
   },
 
@@ -216,6 +246,7 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/factory/factory-dashboard/factory-dashboard.component').then(
             (m) => m.FactoryDashboardComponent
@@ -223,6 +254,7 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
+        data: { allowUnverified: true },
         loadComponent: () =>
           import('./features/factory/factory-profile/factory-profile.component').then(
             (m) => m.FactoryProfileComponent
@@ -230,6 +262,7 @@ export const routes: Routes = [
       },
       {
         path: 'supply-request',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/factory/supply-request/supply-request.component').then(
             (m) => m.SupplyRequestComponent
@@ -237,6 +270,7 @@ export const routes: Routes = [
       },
       {
         path: 'requests',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/factory/factory-requests/factory-requests.component').then(
             (m) => m.FactoryRequestsComponent
@@ -244,6 +278,7 @@ export const routes: Routes = [
       },
       {
         path: 'requests/:requestId',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import(
             './features/factory/factory-request-details/factory-request-details.component'
@@ -251,6 +286,7 @@ export const routes: Routes = [
       },
       {
         path: 'suppliers/:farmId/scorecard',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import(
             './features/factory/factory-supplier-scorecard/factory-supplier-scorecard.component'
@@ -258,6 +294,7 @@ export const routes: Routes = [
       },
       {
         path: 'crop-request',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/crop-request/crop-request.component').then(
             (m) => m.CropRequestComponent
@@ -265,6 +302,7 @@ export const routes: Routes = [
       },
       {
         path: 'matches',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/factory/factory-matches/factory-matches.component').then(
             (m) => m.FactoryMatchesComponent
@@ -272,6 +310,7 @@ export const routes: Routes = [
       },
       {
         path: 'listings',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/factory/factory-listings/factory-listings.component').then(
             (m) => m.FactoryListingsComponent
@@ -279,6 +318,7 @@ export const routes: Routes = [
       },
       {
         path: 'agent-progress',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/factory/agent-progress/agent-progress.component').then(
             (m) => m.AgentProgressComponent
@@ -286,6 +326,7 @@ export const routes: Routes = [
       },
       {
         path: 'risk-report',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/factory/risk-report/risk-report.component').then(
             (m) => m.RiskReportComponent
@@ -293,6 +334,7 @@ export const routes: Routes = [
       },
       {
         path: 'contracts',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import(
             './features/factory/factory-contracts/factory-contracts.component'
@@ -300,6 +342,7 @@ export const routes: Routes = [
       },
       {
         path: 'contracts/:contractId',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import(
             './features/factory/factory-contract-details/factory-contract-details.component'
@@ -307,13 +350,23 @@ export const routes: Routes = [
       },
       {
         path: 'wallet',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/wallet/wallet-page.component').then(
             (m) => m.WalletPageComponent
           ),
       },
       {
+        path: 'billing',
+        canActivate: [kybVerifiedGuard],
+        loadComponent: () =>
+          import('./features/billing/billing-page.component').then(
+            (m) => m.BillingPageComponent
+          ),
+      },
+      {
         path: 'contract-signing',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/factory/contract-signing/contract-signing.component').then(
             (m) => m.ContractSigningComponent
@@ -321,6 +374,7 @@ export const routes: Routes = [
       },
       {
         path: 'messages',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/factory/factory-messages/factory-messages.component').then(
             (m) => m.FactoryMessagesComponent
@@ -328,6 +382,7 @@ export const routes: Routes = [
       },
       {
         path: 'notifications',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./features/factory/factory-notifications/factory-notifications.component').then(
             (m) => m.FactoryNotificationsComponent
@@ -335,6 +390,7 @@ export const routes: Routes = [
       },
       {
         path: 'negotiations',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./shared/negotiations/party-negotiations-page.component').then(
             (m) => m.PartyNegotiationsPageComponent
@@ -342,6 +398,7 @@ export const routes: Routes = [
       },
       {
         path: 'disputes',
+        canActivate: [kybVerifiedGuard],
         loadComponent: () =>
           import('./shared/disputes/party-disputes-page.component').then(
             (m) => m.PartyDisputesPageComponent
@@ -440,6 +497,27 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/admin/admin-disputes/admin-disputes.component').then(
             (m) => m.AdminDisputesComponent
+          ),
+      },
+      {
+        path: 'withdrawals',
+        loadComponent: () =>
+          import('./features/admin/admin-withdrawals/admin-withdrawals.component').then(
+            (m) => m.AdminWithdrawalsComponent
+          ),
+      },
+      {
+        path: 'channel-messages',
+        loadComponent: () =>
+          import(
+            './features/admin/admin-channel-messages/admin-channel-messages.component'
+          ).then((m) => m.AdminChannelMessagesComponent),
+      },
+      {
+        path: 'ai-runs',
+        loadComponent: () =>
+          import('./features/admin/admin-ai-runs/admin-ai-runs.component').then(
+            (m) => m.AdminAiRunsComponent
           ),
       },
     ],

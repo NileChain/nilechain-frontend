@@ -30,7 +30,9 @@
                 >location_on</span
               >
               <span class="truncate">{{
-                p.governorate || p.location || ('factory.matches.location' | translate)
+                (p.governorate | govLabel) ||
+                  p.location ||
+                  ('factory.matches.location' | translate)
               }}</span>
             </p>
           } @else {
@@ -205,7 +207,7 @@
                       <p class="farm-drawer__doc-name">{{ doc.fileName }}</p>
                       <p class="farm-drawer__doc-meta">
                         {{ doc.fileType || '—' }} ·
-                        {{ doc.uploadedAt | date: 'mediumDate' }}
+                        {{ doc.uploadedAt | uiDate: 'mediumDate' }}
                       </p>
                     </div>
                   </li>

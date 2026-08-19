@@ -197,7 +197,7 @@
                   </p>
                 }
                 <p class="font-label-sm text-label-sm text-outline">
-                  {{ req.createdAt | date: 'medium' }}
+                  {{ req.createdAt | uiDate: 'medium' }}
                 </p>
                 @if (req.adminNotes) {
                   <p

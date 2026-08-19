@@ -9,19 +9,20 @@
   --deed-line: #d8d8d8;
   --deed-accent: #1b5e20;
   --deed-paper: #ffffff;
-  --deed-charcoal: #2c2c2c;
-  --deed-header: #f3f3f3;
-  --deed-soft: #f7f7f7;
+  --deed-charcoal: #1c3b20;
+  --deed-header: #f3f7f3;
+  --deed-soft: #f7faf7;
 
   position: relative;
-  width: min(100%, 210mm);
-  margin-inline: auto;
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
   background: var(--deed-paper);
   color: var(--deed-ink);
-  border: 1px solid rgb(26 28 25 / 10%);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, rgba(0, 0, 0, 0.12));
   box-shadow:
-    0 1px 2px rgb(16 24 40 / 4%),
-    0 12px 32px rgb(16 24 40 / 6%);
+    0 4px 14px rgb(13 59 18 / 0.07),
+    0 18px 48px rgb(13 59 18 / 0.15);
   padding: 0;
   overflow: hidden;
   font-family: 'IBM Plex Sans Arabic', 'Segoe UI', sans-serif;

@@ -17,7 +17,7 @@
       @for (r of items(); track r.reviewId) {
         <li class="rounded-lg border border-outline-variant p-3 space-y-1">
           <p class="font-label-sm text-label-sm tabular-nums">
-            {{ r.rating }}/5 · {{ r.createdAt | date: 'mediumDate' }}
+            {{ r.rating }}/5 · {{ r.createdAt | uiDate: 'mediumDate' }}
           </p>
           @if (r.comment) {
             <p class="font-body-sm text-on-surface">{{ r.comment }}</p>

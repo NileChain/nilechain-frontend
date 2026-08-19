@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -17,14 +17,14 @@ import { AppTopBarComponent } from '../../../shared/components/app-top-bar/app-t
 import { UiStatCardComponent } from '../../../shared/ui/stat-card/stat-card.component';
 import { UiLoaderComponent } from '../../../shared/ui/loader/loader.component';
 import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
+import { fulfillmentStatusLabelKey } from '../../../core/i18n/status-i18n.util';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
   imports: [
-    TranslatePipe,
+    UiDatePipe, TranslatePipe,
     RouterLink,
-    DatePipe,
     AppTopBarComponent,
     UiStatCardComponent,
     UiLoaderComponent,
@@ -134,12 +134,20 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   formatTons(n: number): string {
-    return n.toLocaleString(undefined, { maximumFractionDigits: 1 });
+    return n.toLocaleString(this.i18n.currentLang() === 'ar' ? 'ar-EG' : 'en-US', {
+      maximumFractionDigits: 1,
+    });
   }
 
   formatPrice(n: number | null): string {
     if (n == null) return '—';
-    return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    return n.toLocaleString(this.i18n.currentLang() === 'ar' ? 'ar-EG' : 'en-US', {
+      maximumFractionDigits: 0,
+    });
+  }
+
+  fulfillmentStatusKey(status: string): string {
+    return fulfillmentStatusLabelKey(status);
   }
 
   runMonitoring(): void {

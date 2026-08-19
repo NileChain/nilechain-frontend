@@ -3,17 +3,21 @@
 .legal-workspace {
   background:
     radial-gradient(
-      100% 48% at 50% 0%,
-      color-mix(in srgb, var(--color-primary) 3.5%, transparent),
-      transparent 58%
+      120% 55% at 50% 0%,
+      color-mix(in srgb, var(--color-primary) 8%, transparent) 0%,
+      color-mix(in srgb, var(--color-nile-deep) 4%, transparent) 45%,
+      transparent 75%
     ),
     var(--color-background);
 }
 
 .lw-shell {
-  max-width: 1440px;
-  margin-inline: auto;
-  padding: 0.85rem clamp(0.75rem, 2.2vw, 1.5rem) 2.25rem;
+  /* Hug the portal sidebar so RTL does not leave a grey band next to the nav. */
+  max-width: 1280px;
+  margin-inline-start: 0;
+  margin-inline-end: auto;
+  width: 100%;
+  padding: 0.75rem 0.85rem 2rem;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
@@ -81,12 +85,10 @@
 
 @media (min-width: 1100px) {
   .lw-workspace {
-    /* Document-dominant: light TOC | wide deed | quiet rail */
-    grid-template-columns: minmax(8.5rem, 11%) minmax(0, 1fr) minmax(11rem, 16%);
-    gap: 1.35rem;
+    grid-template-columns: minmax(0, 1fr) minmax(16.5rem, 19.5rem);
+    gap: 1rem;
   }
 
-  .lw-toc,
   .lw-rail {
     position: sticky;
     top: 5.25rem;
@@ -105,6 +107,58 @@
   flex-direction: column;
   gap: 0.35rem;
   min-width: 0;
+}
+
+/* ── Contract date amendment ── */
+.cda-dates {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid color-mix(in srgb, var(--color-outline-variant) 55%, transparent);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.cda-date-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.85rem 0.75rem;
+}
+
+.cda-divider {
+  height: 1px;
+  background: color-mix(in srgb, var(--color-outline-variant) 45%, transparent);
+}
+
+.cda-date-icon {
+  font-size: 1rem;
+  color: var(--color-primary);
+  opacity: 0.75;
+  flex-shrink: 0;
+}
+
+.cda-date-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.cda-date-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-on-surface-variant);
+}
+
+.cda-date-value {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .lw-side-panel {
@@ -179,8 +233,8 @@
 }
 
 .lw-paper-skeleton {
-  width: min(100%, 52rem);
-  margin-inline: auto;
+  width: 100%;
+  margin-inline: 0;
   height: 75vh;
   border-radius: 0.15rem;
   background: linear-gradient(90deg, #f3f0e8, #fffcf5, #f3f0e8);

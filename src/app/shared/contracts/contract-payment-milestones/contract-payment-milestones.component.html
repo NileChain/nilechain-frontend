@@ -95,17 +95,38 @@
       @if (s.contractTotal != null) {
         <p class="pm-total">
           {{ 'paymentMilestones.contractTotal' | translate }}:
-          <span class="tabular-nums">{{
-            s.contractTotal | number: '1.0-2'
-          }}</span>
+          <span
+            class="tabular-nums"
+            [uiCountUp]="s.contractTotal"
+            [uiCountUpDecimals]="2"
+          ></span>
         </p>
       }
 
-      <ul class="pm-list">
+      <ul class="pm-list" uiAutoAnimate>
         @for (m of s.milestones; track m.transactionId) {
-          <li class="pm-item" [attr.data-status]="m.status">
+          <li
+            class="pm-item hover:bg-surface-container transition-colors duration-150"
+            [attr.data-status]="m.status"
+          >
             <div class="pm-item__head">
-              <p class="pm-item__label">{{ m.label }}</p>
+              <p class="pm-item__label inline-flex items-center gap-1">
+                @if (m.paidAt || m.status === 'Completed' || m.status === 'MarkedPaid' || m.status === 'paid') {
+                  <span
+                    class="material-symbols-outlined text-[18px] text-success-green"
+                    [class.ui-pop]="
+                      m.paidAt ||
+                      m.status === 'Completed' ||
+                      m.status === 'MarkedPaid' ||
+                      m.status === 'paid'
+                    "
+                    data-fill="1"
+                    aria-hidden="true"
+                    >check</span
+                  >
+                }
+                {{ m.label }}
+              </p>
               <span class="pm-item__status">{{
                 statusKey(m.status) | translate
               }}</span>
@@ -113,12 +134,19 @@
             <p class="pm-item__meta">
               <span class="tabular-nums">{{ m.percent | number: '1.0-0' }}%</span>
               <span class="pm-dot">·</span>
-              <span class="tabular-nums">{{ m.amount | number: '1.0-2' }}</span>
+              <span
+                class="tabular-nums"
+                [uiCountUp]="m.amount"
+                [uiCountUpDecimals]="2"
+              ></span>
             </p>
             @if (m.escrowStatus) {
               <p class="pm-item__time">
                 {{ 'paymentMilestones.escrowStatus' | translate }}:
                 <strong>{{ m.escrowStatus }}</strong>
+                @if (portal === 'farm' && (m.escrowStatus === 'Held' || m.status === 'EscrowHeld')) {
+                  <span class="ms-2">{{ 'paymentMilestones.fundsHeld' | translate }}</span>
+                }
                 @if (m.platformFeeEgp != null) {
                   <span class="ms-2">
                     {{ 'paymentMilestones.feeLine' | translate }}:
@@ -139,7 +167,7 @@
                 [class.text-error]="m.isOverdue && m.status === 'Pending'"
               >
                 {{ 'paymentMilestones.dueDate' | translate }}:
-                {{ m.dueDate | date: 'mediumDate' }}
+                {{ m.dueDate | uiDate: 'mediumDate' }}
                 @if (m.isOverdue && m.status === 'Pending') {
                   <span class="ms-1 font-label-sm">{{
                     'paymentMilestones.overdue' | translate
@@ -150,13 +178,13 @@
             @if (m.paidAt) {
               <p class="pm-item__time">
                 {{ 'paymentMilestones.markedPaidAt' | translate }}:
-                {{ m.paidAt | date: 'medium' }}
+                {{ m.paidAt | uiDate: 'medium' }}
               </p>
             }
             @if (m.receivedAt) {
               <p class="pm-item__time">
                 {{ 'paymentMilestones.receivedAt' | translate }}:
-                {{ m.receivedAt | date: 'medium' }}
+                {{ m.receivedAt | uiDate: 'medium' }}
               </p>
             }
             @if (m.receiptUrl) {
@@ -180,9 +208,20 @@
               (canMarkPaid(m) ||
                 canConfirmReceived(m) ||
                 canMockPay(m) ||
+                canPaymobPay(m) ||
                 canReleaseEscrow(m))
             ) {
               <div class="pm-actions print:hidden">
+                @if (canPaymobPay(m)) {
+                  <button
+                    type="button"
+                    class="ui-btn-primary w-full"
+                    [disabled]="acting()"
+                    (click)="openMockPay(m)"
+                  >
+                    {{ 'paymentMilestones.paySecurely' | translate }}
+                  </button>
+                }
                 @if (canMockPay(m)) {
                   <button
                     type="button"
@@ -281,7 +320,14 @@
             {{ 'common.cancel' | translate }}
           </button>
           <button type="button" class="ui-btn-primary" [disabled]="acting()" (click)="confirmMockPay()">
-            {{ 'paymentMilestones.mockPayConfirm' | translate }}
+            {{
+              (session.simulatorAvailable
+                ? 'paymentMilestones.paymobSimConfirm'
+                : schedule()?.gatewayEnabled
+                  ? 'paymentMilestones.paymobIPaid'
+                  : 'paymentMilestones.mockPayConfirm'
+              ) | translate
+            }}
           </button>
         </div>
       </div>

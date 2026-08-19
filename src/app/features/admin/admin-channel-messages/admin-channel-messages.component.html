@@ -1,0 +1,86 @@
+<main class="md:ms-[280px] min-h-screen bg-surface">
+  <app-top-bar titleKey="admin.channelMessages.title" portal="admin" />
+
+  <div
+    class="p-margin-mobile md:p-margin-desktop max-w-[1440px] mx-auto space-y-gutter animate-fade-in"
+  >
+    <section class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {{ 'admin.channelMessages.subtitle' | translate }}
+      </p>
+      <div class="flex flex-wrap gap-2">
+        @for (f of statusFilters; track f.value) {
+          <button
+            type="button"
+            class="ui-btn-secondary !px-3 !py-1.5"
+            [class.!bg-primary]="statusFilter === f.value"
+            [class.!text-on-primary]="statusFilter === f.value"
+            [class.!border-primary]="statusFilter === f.value"
+            (click)="setStatusFilter(f.value)"
+          >
+            {{ f.labelKey | translate }}
+          </button>
+        }
+      </div>
+    </section>
+
+    @if (disclaimer()) {
+      <p class="font-body-sm text-on-surface-variant">{{ disclaimer() }}</p>
+    }
+
+    <section class="ui-card overflow-hidden">
+      <div
+        class="p-6 border-b border-outline-variant flex justify-between items-center gap-3 bg-surface-container-lowest"
+      >
+        <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+          {{ 'admin.channelMessages.listTitle' | translate }}
+        </h2>
+        <button
+          type="button"
+          class="ui-btn-ghost"
+          (click)="load()"
+          [disabled]="loading()"
+        >
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true"
+            >refresh</span
+          >
+        </button>
+      </div>
+
+      @if (loading()) {
+        <div class="p-8">
+          <ui-loader />
+        </div>
+      } @else if (error()) {
+        <div class="p-8">
+          <ui-error-state [message]="error()!" (retry)="load()" />
+        </div>
+      } @else if (items().length === 0) {
+        <div class="p-8">
+          <ui-empty-state
+            titleKey="admin.channelMessages.emptyTitle"
+            bodyKey="admin.channelMessages.emptyBody"
+            icon="chat"
+          />
+        </div>
+      } @else {
+        <ul class="divide-y divide-outline-variant">
+          @for (row of items(); track row.channelMessageId) {
+            <li class="p-6 space-y-1">
+              <p class="font-label-md text-on-surface">
+                {{ row.templateKey }}
+                <span class="ms-2 text-on-surface-variant">{{
+                  statusLabelKey(row.status) | translate
+                }}</span>
+              </p>
+              <p class="text-sm text-on-surface-variant tabular-nums">
+                {{ row.toPhone }} · {{ row.createdAt | uiDate: 'medium' }}
+              </p>
+              <p class="text-sm text-on-surface">{{ row.body }}</p>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+</main>

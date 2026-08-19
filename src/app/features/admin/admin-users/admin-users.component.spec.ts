@@ -1,9 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 import { AdminUsersComponent } from './admin-users.component';
 import { AdminService } from '../../../core/services/admin/admin.service';
+import { FarmService } from '../../../core/services/farm/farm.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { TranslateService } from '../../../core/services/translate.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { AdminUser } from '../../../core/models/admin/admin-user.model';
 
 function mockMatchMedia(): void {
@@ -37,7 +40,10 @@ describe('AdminUsersComponent confirms', () => {
     createdAt: '2026-01-01',
   };
 
-  let confirmSpy: { confirm: ReturnType<typeof vi.fn> };
+  let confirmSpy: {
+    confirm: ReturnType<typeof vi.fn>;
+    takePrompt: ReturnType<typeof vi.fn>;
+  };
   let blockUser: ReturnType<typeof vi.fn>;
   let deactivateUser: ReturnType<typeof vi.fn>;
 
@@ -45,6 +51,7 @@ describe('AdminUsersComponent confirms', () => {
     mockMatchMedia();
     confirmSpy = {
       confirm: vi.fn().mockResolvedValue(true),
+      takePrompt: vi.fn().mockReturnValue(''),
     };
     blockUser = vi.fn().mockReturnValue(of(void 0));
     deactivateUser = vi.fn().mockReturnValue(of(void 0));
@@ -68,8 +75,22 @@ describe('AdminUsersComponent confirms', () => {
             unblockUser: () => of(void 0),
             reactivateUser: () => of(void 0),
             verifyUser: () => of(void 0),
+            analyzeKyb: () => of(void 0),
             createUser: () => of(void 0),
+            setUserSubscription: () => of(void 0),
           },
+        },
+        {
+          provide: FarmService,
+          useValue: { getCertificationCatalog: () => of([]) },
+        },
+        {
+          provide: ToastService,
+          useValue: { success: () => {}, info: () => {}, error: () => {} },
+        },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { queryParamMap: { get: () => null } } },
         },
         { provide: ConfirmDialogService, useValue: confirmSpy },
         {

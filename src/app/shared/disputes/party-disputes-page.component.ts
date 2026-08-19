@@ -1,6 +1,7 @@
-import { DatePipe, SlicePipe } from '@angular/common';
+import { SlicePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { UiDatePipe } from '../../core/pipes/ui-date.pipe';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { Dispute, DisputeList } from '../../core/models/dispute/dispute.model';
@@ -22,8 +23,7 @@ type DisputeFilter = 'all' | 'active' | 'closed';
   selector: 'app-party-disputes-page',
   standalone: true,
   imports: [
-    DatePipe,
-    SlicePipe,
+    UiDatePipe, SlicePipe,
     RouterLink,
     TranslatePipe,
     AppTopBarComponent,
@@ -41,11 +41,13 @@ export class PartyDisputesPageComponent implements OnInit {
   private readonly factoryApi = inject(FactoryService);
   private readonly auth = inject(AuthService);
   private readonly i18n = inject(TranslateService);
+  private readonly route = inject(ActivatedRoute);
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly disputes = signal<Dispute[]>([]);
   readonly filter = signal<DisputeFilter>('all');
+  readonly focusDisputeId = signal<string | null>(null);
 
   readonly filterTabs: { id: DisputeFilter; labelKey: string }[] = [
     { id: 'all', labelKey: 'dispute.filterAll' },
@@ -71,6 +73,10 @@ export class PartyDisputesPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      this.focusDisputeId.set(params.get('disputeId'));
+      this.scrollToFocus();
+    });
     this.load();
   }
 
@@ -82,9 +88,32 @@ export class PartyDisputesPageComponent implements OnInit {
         ? this.farmApi.listMyDisputes()
         : this.factoryApi.listMyDisputes();
     req.pipe(finalize(() => this.loading.set(false))).subscribe({
-      next: (res: DisputeList) => this.disputes.set(res.items ?? []),
+      next: (res: DisputeList) => {
+        const items = res.items ?? [];
+        this.disputes.set(items);
+        const id = this.focusDisputeId();
+        if (id) {
+          const found = items.find((d) => d.disputeId === id);
+          if (found && !this.isActive(found.status)) {
+            this.filter.set('all');
+          }
+        }
+        this.scrollToFocus();
+      },
       error: () => this.error.set(this.i18n.instant('dispute.inboxLoadFailed')),
     });
+  }
+
+  private scrollToFocus(): void {
+    const id = this.focusDisputeId();
+    if (!id) {
+      return;
+    }
+    setTimeout(() => {
+      document
+        .getElementById(`dispute-${id}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
   }
 
   setFilter(id: DisputeFilter): void {

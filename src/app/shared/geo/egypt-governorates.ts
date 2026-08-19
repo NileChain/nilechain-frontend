@@ -90,6 +90,20 @@ export function nearestGovernorate(
   return best;
 }
 
+export function governorateLabel(
+  name: string | null | undefined,
+  locale: 'ar' | 'en'
+): string {
+  if (!name?.trim()) {
+    return name ?? '';
+  }
+  const found = findGovernorateByName(name);
+  if (!found) {
+    return name;
+  }
+  return locale === 'ar' ? found.nameAr : found.name;
+}
+
 export function findGovernorateByName(
   name: string | null | undefined
 ): EgyptGovernorate | null {

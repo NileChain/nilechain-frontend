@@ -5,4 +5,7 @@ export interface FarmNotification {
   type: string | null;
   isRead: boolean;
   createdAt: string;
+  link?: string | null;
+  relatedEntityType?: string | null;
+  relatedEntityId?: string | null;
 }

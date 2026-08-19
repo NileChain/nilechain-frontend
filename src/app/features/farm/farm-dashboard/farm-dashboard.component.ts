@@ -12,7 +12,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Title } from '@angular/platform-browser';
+import { PageTitleService } from '../../../core/services/page-title.service';
 import { finalize } from 'rxjs';
 import {
   CategoryScale,
@@ -35,7 +35,6 @@ import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-her
 import { FarmService } from '../../../core/services/farm/farm.service';
 import {
   FarmDashboard,
-  ImprovementTip,
   RecentMatchItem,
   ReliabilityTrendPoint,
 } from '../../../core/models/farm/farm-dashboard.model';
@@ -98,21 +97,13 @@ export class FarmDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
   readonly activityItems = computed(() =>
     this.buildActivity(this.dashboard())
   );
-  readonly topTips = computed(() => {
-    const tips = this.dashboard()?.improvementTips ?? [];
-    const rank = (s: string) =>
-      s === 'high' ? 0 : s === 'medium' ? 1 : 2;
-    return [...tips]
-      .sort((a, b) => rank(a.severity) - rank(b.severity))
-      .slice(0, 3);
-  });
 
   private chart: Chart | null = null;
   private chartRegistered = false;
   private viewReady = false;
 
-  constructor(title: Title) {
-    title.setTitle('NileChain - Farm Dashboard');
+  constructor(pageTitle: PageTitleService) {
+    pageTitle.setKey('app.page.farmDashboard');
 
     effect(() => {
       const data = this.dashboard();
@@ -173,36 +164,10 @@ export class FarmDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
       });
   }
 
-  reliabilityHint(score: number | null | undefined): string {
-    if (score == null) {
-      return this.i18n.instant('farm.dashboard.reliabilityUnset');
-    }
-    if (score >= 80) {
-      return this.i18n.instant('farm.dashboard.reliabilityStrong');
-    }
-    if (score >= 60) {
-      return this.i18n.instant('farm.dashboard.reliabilityModerate');
-    }
-    return this.i18n.instant('farm.dashboard.reliabilityNeedsWork');
-  }
-
   proposedReviewCount(data: FarmDashboard): number {
     return (data.recentMatches ?? []).filter(
       (m) => (m.status || '').toLowerCase() === 'proposed'
     ).length;
-  }
-
-  activeMatchesHint(data: FarmDashboard): string {
-    const n = this.proposedReviewCount(data);
-    if (n > 0) {
-      return this.i18n.instant('farm.dashboard.activeMatchesNeedReview', {
-        count: n,
-      });
-    }
-    if (data.activeMatchesCount > 0) {
-      return this.i18n.instant('farm.dashboard.activeMatchesOngoing');
-    }
-    return this.i18n.instant('farm.dashboard.activeMatchesNone');
   }
 
   scoreTone(score: number | null | undefined): 'high' | 'mid' | 'low' | 'none' {
@@ -227,26 +192,6 @@ export class FarmDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
     if (s === 'rejected') return 'danger';
     if (s === 'expired') return 'muted';
     return 'attention';
-  }
-
-  tipShort(tip: ImprovementTip): string {
-    const msg = (tip.message || '').trim();
-    if (!msg) {
-      return tip.category;
-    }
-    const sentence = msg.split(/(?<=[.!?])\s+/)[0] ?? msg;
-    return sentence.length > 120 ? `${sentence.slice(0, 117)}…` : sentence;
-  }
-
-  tipLink(tip: ImprovementTip): string {
-    const cat = (tip.category || '').toLowerCase();
-    if (/contract/.test(cat)) {
-      return '/farm/contracts';
-    }
-    if (/match|rating|buyer/.test(cat)) {
-      return '/farm/matches';
-    }
-    return '/farm/profile';
   }
 
   trendDelta(points: ReliabilityTrendPoint[]): number | null {

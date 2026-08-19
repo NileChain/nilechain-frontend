@@ -85,16 +85,27 @@
   }
 }
 
+.wallet-page__balances .ui-metric-tile--emphasis {
+  border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  background: linear-gradient(
+    155deg,
+    color-mix(in srgb, var(--color-primary-container) 65%, transparent) 0%,
+    color-mix(in srgb, var(--color-primary) 8%, transparent) 50%,
+    var(--color-surface-container-lowest) 100%
+  );
+  box-shadow: 0 8px 30px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
 .wallet-page__panel {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  padding: 1.15rem 1.2rem;
+  padding: 1.25rem 1.3rem;
   border-radius: var(--radius-lg);
   border: 1px solid
-    color-mix(in srgb, var(--color-outline-variant) 80%, transparent);
+    color-mix(in srgb, var(--color-primary) 14%, var(--color-outline-variant));
   background: var(--color-surface-container-lowest);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-ambient);
 }
 
 .wallet-page__panel--ledger {

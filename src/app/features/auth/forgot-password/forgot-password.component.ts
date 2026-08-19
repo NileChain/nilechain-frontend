@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { Title } from '@angular/platform-browser';
+import { PageTitleService } from '../../../core/services/page-title.service';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { TranslateService } from '../../../core/services/translate.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
+import { UiAuthWordmarkComponent } from '../../../shared/ui/auth-wordmark/auth-wordmark.component';
 
 @Component({
   selector: 'app-forgot-password',
@@ -15,6 +16,7 @@ import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-to
     TranslatePipe,
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
+    UiAuthWordmarkComponent,
   ],
   templateUrl: './forgot-password.component.html',
 })
@@ -28,8 +30,8 @@ export class ForgotPasswordComponent {
   readonly submitted = signal(false);
   readonly errorMessage = signal('');
 
-  constructor(title: Title) {
-    title.setTitle('NileChain - Forgot Password');
+  constructor(pageTitle: PageTitleService) {
+    pageTitle.setKey('app.page.forgotPassword');
   }
 
   onSubmit(event: Event): void {

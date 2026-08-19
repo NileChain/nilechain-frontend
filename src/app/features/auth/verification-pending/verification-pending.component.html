@@ -1,0 +1,73 @@
+<div class="ui-page auth-shell flex flex-col min-h-screen overflow-x-hidden">
+  <header class="auth-bar">
+    <a
+      [routerLink]="'/landing'"
+      class="auth-bar__brand"
+      [attr.aria-label]="'app.name' | translate"
+    >
+      <ui-brand-mark [size]="32" [decorative]="true" />
+      <span class="auth-bar__name">{{ 'app.name' | translate }}</span>
+    </a>
+    <div class="auth-bar__tools">
+      <ui-language-toggle />
+      <ui-theme-toggle />
+    </div>
+  </header>
+
+  <div class="flex-grow">
+    <div class="auth-split">
+      <ui-auth-wordmark />
+      <div class="auth-panel">
+        <main class="auth-panel__inner">
+          <div class="pending-card">
+            <span class="material-symbols-outlined pending-card__icon" aria-hidden="true">
+              pending
+            </span>
+
+            <h1 class="auth-panel__title">
+              {{ 'verificationPending.title' | translate }}
+            </h1>
+
+            <p class="auth-panel__lede">
+              {{ 'verificationPending.body' | translate }}
+            </p>
+
+            @if (isRequestInfo()) {
+              <p class="pending-card__alert" role="status">
+                {{ 'verificationPending.requestInfoHint' | translate }}
+              </p>
+            }
+
+            @if (isRejected()) {
+              <p class="pending-card__alert" role="status">
+                {{ 'verificationPending.rejectedHint' | translate }}
+              </p>
+            }
+
+            @if (adminNote()) {
+              <p class="pending-card__alert" role="status">
+                <strong>{{ 'verificationPending.adminNote' | translate }}:</strong>
+                {{ adminNote() }}
+              </p>
+            }
+
+            @if (documentsIncomplete()) {
+              <p class="pending-card__alert" role="alert">
+                {{ 'verificationPending.documentsIncomplete' | translate }}
+              </p>
+            }
+
+            <div class="pending-card__actions">
+              <a class="ui-btn-primary" [routerLink]="profileLink()">
+                {{ 'verificationPending.updateDocuments' | translate }}
+              </a>
+              <button type="button" class="ui-btn-secondary" (click)="logout()">
+                {{ 'verificationPending.logout' | translate }}
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</div>

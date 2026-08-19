@@ -1,3 +1,21 @@
+<ng-template #navLink let-item>
+  <a
+    [routerLink]="item.link"
+    class="app-sidebar__link"
+    [class.app-sidebar__link--active]="active() === item.key"
+    [attr.data-nav-key]="item.key"
+    [attr.aria-current]="active() === item.key ? 'page' : null"
+  >
+    <span
+      class="material-symbols-outlined"
+      aria-hidden="true"
+      [attr.data-fill]="active() === item.key ? '1' : null"
+      >{{ item.icon }}</span
+    >
+    <span class="truncate">{{ item.labelKey | translate }}</span>
+  </a>
+</ng-template>
+
 <ng-template #navBody>
   <div class="app-sidebar__inner">
     <div class="app-sidebar__brand">
@@ -5,7 +23,7 @@
         <ui-brand-mark [size]="28" [decorative]="true" />
       </div>
       <div class="min-w-0">
-        <p class="app-sidebar__brand-title" dir="ltr">NileChain B2B</p>
+        <p class="app-sidebar__brand-title" dir="ltr">NileChain</p>
         <p class="app-sidebar__brand-sub">
           {{ 'nav.enterprisePortal' | translate }}
         </p>
@@ -14,27 +32,30 @@
 
     <div class="app-sidebar__scroll">
       <p class="app-sidebar__section-label">
+        {{ 'nav.dealSection' | translate }}
+      </p>
+      <nav
+        class="app-sidebar__nav"
+        [attr.aria-label]="'nav.dealSection' | translate"
+      >
+        @for (item of flowItems; track item.key) {
+          <ng-container
+            *ngTemplateOutlet="navLink; context: { $implicit: item }"
+          />
+        }
+      </nav>
+
+      <p class="app-sidebar__section-label">
         {{ 'nav.mainSection' | translate }}
       </p>
       <nav
         class="app-sidebar__nav"
         [attr.aria-label]="'nav.mainSection' | translate"
       >
-        @for (item of items; track item.key) {
-          <a
-            [routerLink]="item.link"
-            class="app-sidebar__link"
-            [class.app-sidebar__link--active]="active() === item.key"
-            [attr.aria-current]="active() === item.key ? 'page' : null"
-          >
-            <span
-              class="material-symbols-outlined"
-              aria-hidden="true"
-              [attr.data-fill]="active() === item.key ? '1' : null"
-              >{{ item.icon }}</span
-            >
-            <span class="truncate">{{ item.labelKey | translate }}</span>
-          </a>
+        @for (item of moreItems; track item.key) {
+          <ng-container
+            *ngTemplateOutlet="navLink; context: { $implicit: item }"
+          />
         }
       </nav>
 
@@ -85,7 +106,7 @@
 
 <aside
   class="app-sidebar fixed start-0 top-0 hidden md:flex"
-  aria-label="Factory navigation"
+  [attr.aria-label]="'common.factoryNav' | translate"
 >
   <ng-container *ngTemplateOutlet="navBody" />
 </aside>

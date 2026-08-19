@@ -40,6 +40,13 @@ testem.log
 /typings
 __screenshots__/
 
+# Local agent tooling
+.cursor/
+.claude/
+.codex/
+.gemini/
+.impeccable/
+
 # System files
 .DS_Store
 Thumbs.db

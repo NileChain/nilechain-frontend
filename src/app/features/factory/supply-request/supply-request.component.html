@@ -328,10 +328,7 @@
                 [class.ui-choice-chip--selected]="isGovSelected(gov.value)"
                 (click)="toggleGovernorate(gov.value)"
               >
-                {{ gov.labelEn }}
-                <span class="text-on-surface-variant ms-1 text-sm"
-                  >({{ gov.labelAr }})</span
-                >
+                {{ gov.value | govLabel }}
               </button>
             }
           </div>

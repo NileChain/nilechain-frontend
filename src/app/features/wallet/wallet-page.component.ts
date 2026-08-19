@@ -1,13 +1,18 @@
-import { DecimalPipe, DatePipe } from '@angular/common';
+import { UiDatePipe } from '../../core/pipes/ui-date.pipe';
+import { DecimalPipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
+import { PageTitleService } from '../../core/services/page-title.service';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { TranslateService } from '../../core/services/translate.service';
 import { ToastService } from '../../core/services/toast.service';
+import {
+  walletLedgerTypeKey,
+  walletWithdrawalStatusKey,
+} from '../../core/i18n/status-i18n.util';
 import {
   WalletBalance,
   WalletService,
@@ -23,15 +28,15 @@ import { UiAutoAnimateDirective } from '../../shared/directives/ui-auto-animate.
   selector: 'app-wallet-page',
   standalone: true,
   imports: [
-    TranslatePipe,
+    UiDatePipe, TranslatePipe,
     DecimalPipe,
-    DatePipe,
     FormsModule,
     AppTopBarComponent,
     UiPortalHeroComponent,
     UiLoaderComponent,
     UiCountUpDirective,
     UiAutoAnimateDirective,
+    RouterLink,
   ],
   templateUrl: './wallet-page.component.html',
   styleUrl: './wallet-page.component.scss',
@@ -40,7 +45,7 @@ export class WalletPageComponent implements OnInit {
   private readonly walletApi = inject(WalletService);
   private readonly toast = inject(ToastService);
   private readonly i18n = inject(TranslateService);
-  private readonly title = inject(Title);
+  private readonly pageTitle = inject(PageTitleService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
@@ -60,8 +65,12 @@ export class WalletPageComponent implements OnInit {
     return this.router.url.includes('/farm/') ? 'farm' : 'factory';
   }
 
+  get billingLink(): string {
+    return this.portal === 'farm' ? '/farm/billing' : '/factory/billing';
+  }
+
   ngOnInit(): void {
-    this.title.setTitle(this.i18n.instant('wallet.pageTitle'));
+    this.pageTitle.setKey('app.page.wallet');
     if (this.tryConfirmPaymobReturn()) {
       return;
     }
@@ -199,5 +208,13 @@ export class WalletPageComponent implements OnInit {
             err?.error?.message || this.i18n.instant('wallet.actionFailed')
           ),
       });
+  }
+
+  withdrawalStatusKey(status: string): string {
+    return walletWithdrawalStatusKey(status);
+  }
+
+  ledgerTypeKey(type: string): string {
+    return walletLedgerTypeKey(type);
   }
 }

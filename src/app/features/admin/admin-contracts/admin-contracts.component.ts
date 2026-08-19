@@ -97,6 +97,8 @@ export class AdminContractsComponent implements OnInit {
 
   formatValue(v: number | null): string {
     if (v == null) return '—';
-    return v.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    return v.toLocaleString(this.i18n.currentLang() === 'ar' ? 'ar-EG' : 'en-US', {
+      maximumFractionDigits: 0,
+    });
   }
 }

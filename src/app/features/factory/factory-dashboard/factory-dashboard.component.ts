@@ -1,7 +1,8 @@
-import { DecimalPipe, DatePipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
 import { RouterLink } from '@angular/router';
-import { Title } from '@angular/platform-browser';
+import { PageTitleService } from '../../../core/services/page-title.service';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { TranslateService } from '../../../core/services/translate.service';
@@ -58,10 +59,9 @@ export interface ProcurementRow {
 @Component({
   selector: 'app-factory-dashboard',
   imports: [
-    RouterLink,
+    UiDatePipe, RouterLink,
     TranslatePipe,
     DecimalPipe,
-    DatePipe,
     UiErrorStateComponent,
     UiSkeletonComponent,
     AppTopBarComponent,
@@ -114,8 +114,8 @@ export class FactoryDashboardComponent implements OnInit {
 
   readonly menuOpenId = signal<string | null>(null);
 
-  constructor(title: Title) {
-    title.setTitle('NileChain - Factory Dashboard');
+  constructor(pageTitle: PageTitleService) {
+    pageTitle.setKey('app.page.factoryDashboard');
   }
 
   ngOnInit(): void {
@@ -151,15 +151,18 @@ export class FactoryDashboardComponent implements OnInit {
 
   formatProcurement(value: number | null): string {
     if (value == null) return '—';
+    const egp = this.i18n.instant('common.egp');
     if (value >= 1_000_000) {
       const m = value / 1_000_000;
-      return `EGP ${m % 1 === 0 ? m.toFixed(0) : m.toFixed(1)}M`;
+      return `${egp} ${m % 1 === 0 ? m.toFixed(0) : m.toFixed(1)}M`;
     }
     if (value >= 1_000) {
       const k = value / 1_000;
-      return `EGP ${k % 1 === 0 ? k.toFixed(0) : k.toFixed(1)}K`;
+      return `${egp} ${k % 1 === 0 ? k.toFixed(0) : k.toFixed(1)}K`;
     }
-    return `EGP ${Math.round(value).toLocaleString()}`;
+    return `${egp} ${Math.round(value).toLocaleString(
+      this.i18n.currentLang() === 'ar' ? 'ar-EG' : 'en-US'
+    )}`;
   }
 
   shortId(id: string): string {
@@ -267,7 +270,7 @@ export class FactoryDashboardComponent implements OnInit {
           link: n.link || '/factory/notifications',
           tone: this.activityTone(n.type, title),
         });
-        if (items.length >= 6) break;
+        if (items.length >= 4) break;
       }
       return items;
     }
@@ -279,7 +282,7 @@ export class FactoryDashboardComponent implements OnInit {
           new Date(b.lastMessageAt!).getTime() -
           new Date(a.lastMessageAt!).getTime()
       )
-      .slice(0, 5);
+      .slice(0, 4);
 
     return convos.map((c) => ({
       id: c.matchId,
@@ -304,7 +307,7 @@ export class FactoryDashboardComponent implements OnInit {
 
   private buildProcurementRows(): ProcurementRow[] {
     const recent = this.dashboard()?.recentRequests ?? [];
-    return recent.map((r) => this.mapProcurementRow(r));
+    return recent.slice(0, 4).map((r) => this.mapProcurementRow(r));
   }
 
   private mapProcurementRow(r: FactorySupplyRequestListItem): ProcurementRow {

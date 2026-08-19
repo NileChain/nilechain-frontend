@@ -1,4 +1,5 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
+import { DecimalPipe } from '@angular/common';
 import {
   Component,
   Input,
@@ -22,13 +23,22 @@ import { FactoryService } from '../../../core/services/factory/factory.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslateService } from '../../../core/services/translate.service';
 import { UiLoaderComponent } from '../../ui/loader/loader.component';
+import { UiAutoAnimateDirective } from '../../directives/ui-auto-animate.directive';
+import { UiCountUpDirective } from '../../directives/ui-count-up.directive';
 
 export type PaymentPortal = 'farm' | 'factory';
 
 @Component({
   selector: 'app-contract-payment-milestones',
   standalone: true,
-  imports: [TranslatePipe, DatePipe, DecimalPipe, UiLoaderComponent, RouterLink],
+  imports: [
+    UiDatePipe, TranslatePipe,
+    DecimalPipe,
+    UiLoaderComponent,
+    RouterLink,
+    UiAutoAnimateDirective,
+    UiCountUpDirective,
+  ],
   templateUrl: './contract-payment-milestones.component.html',
   styleUrl: './contract-payment-milestones.component.scss',
 })
@@ -84,6 +94,7 @@ export class ContractPaymentMilestonesComponent implements OnChanges {
     return (
       this.portal === 'factory' &&
       !this.schedule()?.mockGatewayEnabled &&
+      !this.schedule()?.gatewayEnabled &&
       this.normalize(m.status) === 'Pending' &&
       !this.schedule()?.paymentsFrozenByDispute
     );
@@ -93,6 +104,16 @@ export class ContractPaymentMilestonesComponent implements OnChanges {
     return (
       this.portal === 'factory' &&
       !!this.schedule()?.mockGatewayEnabled &&
+      !this.schedule()?.gatewayEnabled &&
+      this.normalize(m.status) === 'Pending' &&
+      !this.schedule()?.paymentsFrozenByDispute
+    );
+  }
+
+  canPaymobPay(m: PaymentMilestone): boolean {
+    return (
+      this.portal === 'factory' &&
+      !!this.schedule()?.gatewayEnabled &&
       this.normalize(m.status) === 'Pending' &&
       !this.schedule()?.paymentsFrozenByDispute
     );
@@ -101,7 +122,8 @@ export class ContractPaymentMilestonesComponent implements OnChanges {
   canReleaseEscrow(m: PaymentMilestone): boolean {
     return (
       this.portal === 'factory' &&
-      !!this.schedule()?.mockGatewayEnabled &&
+      (!!this.schedule()?.mockGatewayEnabled ||
+        !!this.schedule()?.gatewayEnabled) &&
       this.normalize(m.status) === 'EscrowHeld' &&
       !!m.activeEscrowTransactionId &&
       !this.schedule()?.paymentsFrozenByDispute
@@ -126,22 +148,58 @@ export class ContractPaymentMilestonesComponent implements OnChanges {
 
   async openMockPay(m: PaymentMilestone): Promise<void> {
     this.acting.set(true);
-    this.factoryApi
-      .createMockPaymentSession(this.contractId, m.transactionId)
-      .pipe(finalize(() => this.acting.set(false)))
-      .subscribe({
-        next: (session) => this.checkoutSession.set(session),
-        error: (err: HttpErrorResponse) =>
-          this.toast.error(
-            err?.error?.message ||
-              this.i18n.instant('paymentMilestones.actionFailed')
-          ),
-      });
+    const req = this.schedule()?.gatewayEnabled
+      ? this.factoryApi.createPaymobPaymentSession(
+          this.contractId,
+          m.transactionId
+        )
+      : this.factoryApi.createMockPaymentSession(
+          this.contractId,
+          m.transactionId
+        );
+    req.pipe(finalize(() => this.acting.set(false))).subscribe({
+      next: (session) => {
+        if (session.checkoutUrl) {
+          window.open(session.checkoutUrl, '_blank', 'noopener');
+        }
+        this.checkoutSession.set(session);
+      },
+      error: (err: HttpErrorResponse) =>
+        this.toast.error(
+          err?.error?.message ||
+            this.i18n.instant('paymentMilestones.actionFailed')
+        ),
+    });
   }
 
   async confirmMockPay(): Promise<void> {
     const session = this.checkoutSession();
     if (!session) {
+      return;
+    }
+    if (session.simulatorAvailable && this.schedule()?.gatewayEnabled) {
+      this.acting.set(true);
+      this.factoryApi
+        .completePaymobSimulator(this.contractId, session.escrowTransactionId)
+        .pipe(finalize(() => this.acting.set(false)))
+        .subscribe({
+          next: (s) => {
+            this.schedule.set(s);
+            this.checkoutSession.set(null);
+            this.toast.info(this.i18n.instant('paymentMilestones.paymobSimToast'));
+          },
+          error: (err: HttpErrorResponse) =>
+            this.toast.error(
+              err?.error?.message ||
+                this.i18n.instant('paymentMilestones.actionFailed')
+            ),
+        });
+      return;
+    }
+    if (this.schedule()?.gatewayEnabled) {
+      this.toast.info(this.i18n.instant('paymentMilestones.paymobWaitWebhook'));
+      this.checkoutSession.set(null);
+      this.load();
       return;
     }
     const ok = await this.confirm.confirm({

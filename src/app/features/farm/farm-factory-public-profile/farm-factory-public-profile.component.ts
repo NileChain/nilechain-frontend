@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { GovLabelPipe } from '../../../core/pipes/gov-label.pipe';
 import { FactoryPublicProfile } from '../../../core/models/farm/factory-public-profile.model';
 import { FarmService } from '../../../core/services/farm/farm.service';
 import { TranslateService } from '../../../core/services/translate.service';
@@ -17,6 +18,7 @@ import { UiSkeletonComponent } from '../../../shared/ui/skeleton/skeleton.compon
   standalone: true,
   imports: [
     TranslatePipe,
+    GovLabelPipe,
     AppTopBarComponent,
     UiEmptyStateComponent,
     UiErrorStateComponent,

@@ -46,7 +46,7 @@
             <dt class="text-on-surface-variant">{{ 'factory.supplyRequest.targetPrice' | translate }}</dt>
             <dd class="tabular-nums">
               @if (r.pricePerTon != null) {
-                {{ r.pricePerTon | number: '1.0-0' }} EGP/t
+                {{ r.pricePerTon | number: '1.0-0' }} {{ 'common.egpPerTon' | translate }}
               } @else {
                 —
               }
@@ -66,7 +66,7 @@
             <dt class="text-on-surface-variant">{{ 'factory.supplyRequest.deliveryDate' | translate }}</dt>
             <dd>
               @if (r.deliveryDate) {
-                {{ r.deliveryDate | date: 'mediumDate' }}
+                {{ r.deliveryDate | uiDate: 'mediumDate' }}
               } @else {
                 —
               }
@@ -84,11 +84,17 @@
           </div>
           <div>
             <dt class="text-on-surface-variant">{{ 'factory.dashboard.date' | translate }}</dt>
-            <dd>{{ r.createdAt | date: 'medium' }}</dd>
+            <dd>{{ r.createdAt | uiDate: 'medium' }}</dd>
           </div>
           <div>
             <dt class="text-on-surface-variant">{{ 'factory.requests.matches' | translate }}</dt>
-            <dd class="tabular-nums">{{ r.matchCount }} ({{ r.activeMatchCount }} active)</dd>
+            <dd class="tabular-nums">
+              {{ r.matchCount }}
+              ({{
+                'factory.requests.activeCount'
+                  | translate: { count: r.activeMatchCount }
+              }})
+            </dd>
           </div>
         </dl>
       </header>
@@ -136,16 +142,35 @@
           @if (r.quality.preferredGovernorates?.length) {
             <div class="sm:col-span-2">
               <dt class="text-on-surface-variant">{{ 'factory.supplyRequest.governorates' | translate }}</dt>
-              <dd>{{ r.quality.preferredGovernorates!.join(', ') }}</dd>
+              <dd>{{ formatGovernorates(r.quality.preferredGovernorates!) }}</dd>
             </div>
           }
           @if (r.quality.geographicScope) {
             <div>
               <dt class="text-on-surface-variant">{{ 'factory.supplyRequest.geographicScope' | translate }}</dt>
-              <dd>{{ r.quality.geographicScope }}</dd>
+              <dd>{{ geographicScopeKey(r.quality.geographicScope) | translate }}</dd>
             </div>
           }
         </dl>
+
+        @if (r.canUpdateGeoScope) {
+          <div class="mt-4 flex flex-wrap items-center gap-2">
+            <label class="text-sm text-on-surface-variant" for="geo-scope-edit">
+              {{ 'factory.requests.changeScope' | translate }}
+            </label>
+            <select
+              id="geo-scope-edit"
+              class="ui-input max-w-xs"
+              [disabled]="acting()"
+              (change)="changeGeoScope($any($event.target).value)"
+            >
+              <option value="" disabled selected>{{ 'factory.requests.changeScopePlaceholder' | translate }}</option>
+              <option value="Exact">{{ geographicScopeKey('Exact') | translate }}</option>
+              <option value="Nearby">{{ geographicScopeKey('Nearby') | translate }}</option>
+              <option value="Nationwide">{{ geographicScopeKey('Nationwide') | translate }}</option>
+            </select>
+          </div>
+        }
 
         @if (
           !r.qualitySpecsRaw &&
@@ -173,6 +198,11 @@
         @if (r.canRerunAgent) {
           <button type="button" class="ui-btn-secondary" [disabled]="acting()" (click)="rerunAgent()">
             {{ 'factory.requests.rerunAgent' | translate }}
+          </button>
+        }
+        @if (r.canShowMoreMatches) {
+          <button type="button" class="ui-btn-secondary" [disabled]="acting()" (click)="showMore()">
+            {{ 'factory.progress.showMore' | translate }}
           </button>
         }
         @if (r.canCancel) {

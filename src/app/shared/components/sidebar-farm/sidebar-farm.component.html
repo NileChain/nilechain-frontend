@@ -5,7 +5,7 @@
         <ui-brand-mark [size]="28" [decorative]="true" />
       </div>
       <div class="min-w-0">
-        <p class="app-sidebar__brand-title" dir="ltr">NileChain B2B</p>
+        <p class="app-sidebar__brand-title" dir="ltr">NileChain</p>
         <p class="app-sidebar__brand-sub">
           {{ 'nav.farmPortal' | translate }}
         </p>
@@ -126,7 +126,7 @@
 
 <aside
   class="app-sidebar fixed start-0 top-0 hidden md:flex"
-  aria-label="Farm navigation"
+  [attr.aria-label]="'common.farmNav' | translate"
 >
   <ng-container *ngTemplateOutlet="navBody" />
 </aside>

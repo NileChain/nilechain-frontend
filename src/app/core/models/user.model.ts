@@ -45,6 +45,8 @@ export interface UserResponse {
   role: string;
   emailConfirmed: boolean;
   isVerified: boolean;
+  kybReviewStatus?: string;
+  kybAdminNote?: string | null;
 }
 
 export interface UserProfile {
@@ -55,6 +57,8 @@ export interface UserProfile {
   roles?: string[];
   emailConfirmed?: boolean;
   isVerified?: boolean;
+  kybReviewStatus?: string;
+  kybAdminNote?: string | null;
 }
 
 export interface JwtPayload {

@@ -15,7 +15,7 @@
     [class.lp-nav--scrolled]="navScrolled()"
     [class.lp-nav--open]="mobileOpen()"
   >
-    <nav class="lp-nav__inner" aria-label="Primary" (click)="$event.stopPropagation()">
+    <nav class="lp-nav__inner" [attr.aria-label]="'common.primaryNav' | translate" (click)="$event.stopPropagation()">
       <div class="lp-nav__start">
         <a
           [routerLink]="'/landing'"

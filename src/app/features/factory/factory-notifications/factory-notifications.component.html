@@ -11,7 +11,7 @@
     <ui-portal-hero
       size="compact"
       imageUrl="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=1600&q=70"
-      quoteKey="portalHero.notificationsQuote"
+      quoteKey="portalHero.factoryNotificationsQuote"
       titleKey="notifications.title"
       bodyKey="notifications.subtitle"
     />
@@ -68,13 +68,13 @@
       <section class="flex flex-col gap-4 pb-8" uiAutoAnimate>
         @for (item of visible(); track item.id) {
           <article
-            class="ui-card ui-card-interactive p-4 relative flex items-start gap-4"
+            class="ui-card ui-card-interactive p-4 relative flex items-start gap-4 cursor-pointer"
             [class.animate-fade-in]="$index < 6"
             [style.animation-delay]="
               $index < 6 ? $index * 40 + 'ms' : null
             "
             [class.border-error-container]="item.type === 'risk'"
-            (click)="markRead(item)"
+            (click)="open(item)"
           >
             @if (item.unread) {
               <span
@@ -115,7 +115,7 @@
                   class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap"
                 >
                   @if (item.time.includes('T') || item.time.includes('-')) {
-                    {{ item.time | date: 'short' }}
+                    {{ item.time | uiDate: 'short' }}
                   } @else {
                     {{ item.time }}
                   }
@@ -125,13 +125,9 @@
                 {{ item.body }}
               </p>
               @if (item.link) {
-                <a
-                  class="ui-btn-secondary !px-4 !py-1.5 inline-flex"
-                  [routerLink]="item.link"
-                  (click)="$event.stopPropagation()"
-                >
+                <span class="ui-btn-secondary !px-4 !py-1.5 inline-flex">
                   {{ 'notifications.viewDetails' | translate }}
-                </a>
+                </span>
               }
             </div>
           </article>

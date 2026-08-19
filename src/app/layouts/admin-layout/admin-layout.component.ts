@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { Title } from '@angular/platform-browser';
 import { RouterOutlet } from '@angular/router';
+import { PageTitleService } from '../../core/services/page-title.service';
 import { SidebarAdminComponent } from '../../shared/components/sidebar-admin/sidebar-admin.component';
 
 @Component({
@@ -11,7 +11,7 @@ import { SidebarAdminComponent } from '../../shared/components/sidebar-admin/sid
   styleUrl: './admin-layout.component.scss',
 })
 export class AdminLayoutComponent {
-  constructor(title: Title) {
-    title.setTitle('NileChain - Admin');
+  constructor(pageTitle: PageTitleService) {
+    pageTitle.setKey('app.page.admin');
   }
 }

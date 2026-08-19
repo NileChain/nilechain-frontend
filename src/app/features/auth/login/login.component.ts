@@ -1,12 +1,13 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Title } from '@angular/platform-browser';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { PageTitleService } from '../../../core/services/page-title.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiLanguageToggleComponent } from '../../../shared/ui/language-toggle/language-toggle.component';
 import { UiThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle.component';
 import { UiBrandMarkComponent } from '../../../shared/ui/brand-mark/brand-mark.component';
+import { UiAuthWordmarkComponent } from '../../../shared/ui/auth-wordmark/auth-wordmark.component';
 
 @Component({
   selector: 'app-login',
@@ -16,6 +17,7 @@ import { UiBrandMarkComponent } from '../../../shared/ui/brand-mark/brand-mark.c
     UiLanguageToggleComponent,
     UiThemeToggleComponent,
     UiBrandMarkComponent,
+    UiAuthWordmarkComponent,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
@@ -25,6 +27,8 @@ export class LoginComponent {
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
 
+  private readonly pageTitle = inject(PageTitleService);
+
   readonly passwordFieldType = signal<'password' | 'text'>('password');
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal('');
@@ -32,8 +36,8 @@ export class LoginComponent {
     this.passwordFieldType() === 'password' ? 'visibility' : 'visibility_off'
   );
 
-  constructor(title: Title) {
-    title.setTitle('NileChain - Login');
+  constructor() {
+    this.pageTitle.setKey('app.page.login');
   }
 
   togglePassword(): void {
@@ -76,13 +80,19 @@ export class LoginComponent {
             return;
           }
 
+          const isVerified = this.authService.currentUser()?.isVerified;
+
           if (this.authService.hasAnyRole(['Factory'])) {
-            void this.router.navigate(['/factory/home']);
+            void this.router.navigate(
+              isVerified ? ['/factory/home'] : ['/verification-pending']
+            );
             return;
           }
 
           if (this.authService.hasAnyRole(['Farm'])) {
-            void this.router.navigate(['/farm/home']);
+            void this.router.navigate(
+              isVerified ? ['/farm/home'] : ['/verification-pending']
+            );
             return;
           }
 

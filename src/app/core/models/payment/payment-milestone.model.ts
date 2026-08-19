@@ -49,6 +49,8 @@ export interface MockEscrowSession {
   currency: string;
   status: string;
   gateway: string;
+  checkoutUrl?: string | null;
+  simulatorAvailable?: boolean;
   disclaimer: string;
 }
 
@@ -84,6 +86,7 @@ export interface PaymentMilestoneSchedule {
   contractTotalUnavailableReason: string | null;
   disclaimer: string;
   mockGatewayEnabled?: boolean;
+  gatewayEnabled?: boolean;
   walletEnabled?: boolean;
   platformFeePercent?: number;
   farmPayoutDetails?: FarmPayoutDetails | null;

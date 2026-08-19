@@ -47,7 +47,7 @@
           <p class="ff-voided__title">{{ 'fulfillment.voidedBanner' | translate }}</p>
           @if (f.voidedAt) {
             <p class="ff-voided__time">
-              {{ f.voidedAt | date: 'medium' }}
+              {{ f.voidedAt | uiDate: 'medium' }}
             </p>
           }
         </div>
@@ -55,15 +55,37 @@
     }
 
     <ol class="ff-timeline">
-      @for (step of steps(); track step.id; let i = $index) {
+      @for (step of steps(); track step.id; let i = $index; let last = $last) {
         <li
-          class="ff-timeline__item"
+          class="ff-timeline__item animate-fade-in"
           [attr.data-state]="step.state"
-          [style.animation-delay.ms]="i * 60"
+          [style.animation-delay.ms]="i * 100"
+          [style.animation-fill-mode]="'both'"
         >
-          <span class="ff-timeline__icon" aria-hidden="true">
-            <span class="material-symbols-outlined">{{ step.icon }}</span>
-          </span>
+          <div class="ff-timeline__node">
+            <span
+              class="ff-timeline__icon"
+              [class]="
+                'ff-timeline__icon' +
+                (step.state === 'current' ? ' animate-soft-pulse' : '') +
+                (step.state === 'done'
+                  ? ' hover:scale-110 transition-transform duration-150'
+                  : '')
+              "
+              aria-hidden="true"
+            >
+              <span class="material-symbols-outlined">{{ step.icon }}</span>
+            </span>
+            @if (!last) {
+              <span
+                class="ff-timeline__rail"
+                [class.connected]="step.state === 'done'"
+                aria-hidden="true"
+              >
+                <span class="ff-timeline__rail-fill"></span>
+              </span>
+            }
+          </div>
           <div class="ff-timeline__body">
             <p class="ff-timeline__label">
               {{ step.labelKey | translate }}
@@ -75,9 +97,9 @@
               @if (step.state === 'skipped') {
                 {{ 'fulfillment.skipped' | translate }}
               } @else if (step.at) {
-                <span>{{ step.at | date: 'mediumDate' }}</span>
+                <span>{{ step.at | uiDate: 'mediumDate' }}</span>
                 <span class="ff-dot">·</span>
-                <span>{{ step.at | date: 'shortTime' }}</span>
+                <span>{{ step.at | uiDate: 'shortTime' }}</span>
               } @else if (step.state === 'upcoming') {
                 {{ 'fulfillment.pendingStep' | translate }}
               } @else if (step.state === 'current') {

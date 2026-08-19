@@ -66,7 +66,12 @@
     } @else {
       <ul class="space-y-3" role="list" uiAutoAnimate uiReveal="fadeUp">
         @for (d of filteredDisputes(); track d.disputeId) {
-          <li class="ui-card ui-card--lift p-5">
+          <li
+            class="ui-card ui-card--lift p-5"
+            [id]="'dispute-' + d.disputeId"
+            [class.ring-2]="focusDisputeId() === d.disputeId"
+            [class.ring-primary]="focusDisputeId() === d.disputeId"
+          >
             <div
               class="flex flex-col-reverse sm:flex-row sm:items-start gap-4"
             >
@@ -97,7 +102,7 @@
                     #{{ d.disputeId | slice: 0:8 }}
                   </span>
                   <span class="font-label-sm text-on-surface-variant">
-                    {{ d.createdAt | date: 'mediumDate' }}
+                    {{ d.createdAt | uiDate: 'mediumDate' }}
                   </span>
                 </div>
 

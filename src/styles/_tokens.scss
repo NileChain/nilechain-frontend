@@ -68,9 +68,23 @@
   --color-on-provenance: #ffffff;
   --color-on-provenance-container: #0a5c63;
 
-  --shadow-sm: 0 1px 2px rgb(16 24 40 / 0.04);
-  --shadow-md: 0 4px 16px rgb(16 24 40 / 0.07);
-  --shadow-login: 0 18px 45px rgb(0 0 0 / 0.08);
+  /* Nile brand extensions — Cinematic B2B Agritech */
+  --color-nile-deep: #0d3b12;
+  --color-nile-night: #07210a;
+  --color-leaf-highlight: #2e7d32;
+  --color-sand-gold: #c4a35a;
+  --color-sand-gold-container: #fef8e7;
+  --color-on-sand-gold: #4e3d0d;
+
+  --shadow-sm: 0 2px 6px rgb(16 24 40 / 0.05);
+  --shadow-md: 0 8px 24px rgb(16 24 40 / 0.08);
+  --shadow-ambient: 0 12px 40px rgb(27 94 32 / 0.08);
+  --shadow-card-hover: 0 14px 36px rgb(27 94 32 / 0.12);
+  --shadow-login: 0 20px 50px rgb(13 59 18 / 0.12);
+
+  --glass-background: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(192, 201, 187, 0.45);
+  --glass-blur: blur(14px);
 
   --radius-sm: 0.375rem;
   --radius-md: 0.625rem;
@@ -152,5 +166,18 @@ html.dark {
 
   --shadow-sm: 0 2px 4px rgb(0 0 0 / 0.35);
   --shadow-md: 0 4px 12px rgb(0 0 0 / 0.45);
-  --shadow-login: 0 18px 45px rgb(0 0 0 / 0.4);
+  --shadow-ambient: 0 12px 40px rgb(0 0 0 / 0.5);
+  --shadow-card-hover: 0 14px 36px rgb(0 0 0 / 0.6);
+  --shadow-login: 0 20px 50px rgb(0 0 0 / 0.55);
+
+  --color-nile-deep: #91d78a;
+  --color-nile-night: #051607;
+  --color-leaf-highlight: #90e08e;
+  --color-sand-gold: #e2c478;
+  --color-sand-gold-container: #2b220b;
+  --color-on-sand-gold: #f5e4b2;
+
+  --glass-background: rgba(30, 31, 30, 0.78);
+  --glass-border: rgba(65, 73, 62, 0.5);
+  --glass-blur: blur(14px);
 }

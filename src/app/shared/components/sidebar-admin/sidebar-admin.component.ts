@@ -11,6 +11,7 @@ import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { NgTemplateOutlet } from '@angular/common';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { AuthService } from '../../../core/services/auth.service';
+import { AdminService } from '../../../core/services/admin/admin.service';
 import { MobileNavService } from '../../../core/services/mobile-nav.service';
 import { filter } from 'rxjs';
 import {
@@ -28,6 +29,7 @@ import { UiBrandMarkComponent } from '../../ui/brand-mark/brand-mark.component';
 })
 export class SidebarAdminComponent {
   private readonly authService = inject(AuthService);
+  private readonly adminApi = inject(AdminService);
   private readonly router = inject(Router);
   readonly mobileNav = inject(MobileNavService);
 
@@ -39,6 +41,7 @@ export class SidebarAdminComponent {
     icon: string;
     labelKey: string;
     link: string;
+    badgeKey?: 'pendingVerifications' | 'openDisputes' | 'pendingWithdrawals';
   }> = [
     {
       key: 'dashboard',
@@ -51,6 +54,7 @@ export class SidebarAdminComponent {
       icon: 'group',
       labelKey: 'nav.users',
       link: '/admin/users',
+      badgeKey: 'pendingVerifications',
     },
     {
       key: 'contracts',
@@ -75,10 +79,35 @@ export class SidebarAdminComponent {
       icon: 'gavel',
       labelKey: 'nav.disputes',
       link: '/admin/disputes',
+      badgeKey: 'openDisputes',
+    },
+    {
+      key: 'withdrawals',
+      icon: 'account_balance_wallet',
+      labelKey: 'nav.withdrawals',
+      link: '/admin/withdrawals',
+      badgeKey: 'pendingWithdrawals',
+    },
+    {
+      key: 'channelMessages',
+      icon: 'chat',
+      labelKey: 'nav.channelMessages',
+      link: '/admin/channel-messages',
+    },
+    {
+      key: 'aiRuns',
+      icon: 'smart_toy',
+      labelKey: 'nav.aiRuns',
+      link: '/admin/ai-runs',
     },
   ];
 
   readonly active = signal(this.resolveActive(this.router.url));
+  readonly badges = signal({
+    pendingVerifications: 0,
+    openDisputes: 0,
+    pendingWithdrawals: 0,
+  });
 
   private previousFocus: HTMLElement | null = null;
   private wasOpen = false;
@@ -96,6 +125,13 @@ export class SidebarAdminComponent {
         this.previousFocus = null;
       }
       this.wasOpen = isOpen;
+    });
+
+    this.adminApi.getOpsBadges().subscribe({
+      next: (b) => this.badges.set(b),
+      error: () => {
+        /* badges are optional chrome */
+      },
     });
 
     this.router.events

@@ -63,7 +63,7 @@
               <span class="material-symbols-outlined" aria-hidden="true"
                 >location_on</span
               >
-              {{ p.governorate || p.location || '—' }}
+              {{ (p.governorate | govLabel) || p.location || '—' }}
             </span>
             @if (p.industryType) {
               <span class="fpp-chip">
@@ -116,7 +116,7 @@
         <dl class="fpp-facts">
           <div>
             <dt>{{ 'farm.factoryProfile.governorate' | translate }}</dt>
-            <dd>{{ p.governorate || '—' }}</dd>
+            <dd>{{ (p.governorate | govLabel) || '—' }}</dd>
           </div>
           <div>
             <dt>{{ 'farm.factoryProfile.location' | translate }}</dt>

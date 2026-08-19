@@ -1,6 +1,6 @@
-import { DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
+import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { UiEmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
@@ -15,6 +15,11 @@ import { NotificationCenterService } from '../../../core/services/notification-c
 import { TranslateService } from '../../../core/services/translate.service';
 import { UiPortalHeroComponent } from '../../../shared/ui/portal-hero/portal-hero.component';
 import { UiAutoAnimateDirective } from '../../../shared/directives/ui-auto-animate.directive';
+import {
+  navigateNotificationLink,
+  notificationTargetUrl,
+  stripNotificationMarker,
+} from '../../../core/utils/notification-target';
 
 type NotifTab = 'all' | 'unread' | 'matches' | 'risks';
 
@@ -32,13 +37,11 @@ interface DisplayNotification {
   selector: 'app-factory-notifications',
   standalone: true,
   imports: [
-    TranslatePipe,
+    UiDatePipe, TranslatePipe,
     UiEmptyStateComponent,
     UiErrorStateComponent,
     UiSkeletonComponent,
     AppTopBarComponent,
-    RouterLink,
-    DatePipe,
     UiPortalHeroComponent,
     UiAutoAnimateDirective,
   ],
@@ -48,6 +51,7 @@ export class FactoryNotificationsComponent implements OnInit {
   private readonly factoryService = inject(FactoryService);
   private readonly notificationCenter = inject(NotificationCenterService);
   private readonly i18n = inject(TranslateService);
+  private readonly router = inject(Router);
 
   readonly loading = signal(true);
   readonly loadError = signal<string | null>(null);
@@ -101,6 +105,11 @@ export class FactoryNotificationsComponent implements OnInit {
       });
   }
 
+  open(item: DisplayNotification): void {
+    this.markRead(item);
+    navigateNotificationLink(this.router, item.link);
+  }
+
   markRead(item: DisplayNotification): void {
     if (!item.unread) {
       return;
@@ -141,7 +150,16 @@ export class FactoryNotificationsComponent implements OnInit {
       time: n.createdAt,
       type: this.normalizeType(n.type),
       unread: !n.isRead,
-      link: n.link,
+      link: notificationTargetUrl(
+        {
+          link: n.link,
+          type: n.type,
+          relatedEntityType: n.relatedEntityType,
+          relatedEntityId: n.relatedEntityId,
+          message: n.message,
+        },
+        'factory'
+      ),
     };
   }
 
@@ -164,7 +182,7 @@ export class FactoryNotificationsComponent implements OnInit {
     if (n.message?.startsWith('notifications.')) {
       return this.i18n.instant(n.message);
     }
-    return n.message;
+    return stripNotificationMarker(n.message);
   }
 
   private typeI18n(

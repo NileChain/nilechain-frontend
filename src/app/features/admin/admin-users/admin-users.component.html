@@ -113,73 +113,95 @@
       </section>
     }
 
-    <section class="flex flex-col lg:flex-row gap-3 lg:items-center">
-      <div class="relative flex-1 max-w-md">
+    <section class="ui-card p-4 space-y-4">
+      <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
         <label class="sr-only" for="admin-users-search">{{
           'common.search' | translate
         }}</label>
         <input
           id="admin-users-search"
           type="search"
-          class="ui-input w-full"
+          class="ui-input flex-1"
           [(ngModel)]="search"
           name="search"
           (keyup.enter)="searchUsers()"
           [attr.placeholder]="'admin.users.searchPlaceholder' | translate"
         />
+        <button type="button" class="ui-btn-secondary shrink-0" (click)="searchUsers()">
+          {{ 'common.search' | translate }}
+        </button>
       </div>
-      <button type="button" class="ui-btn-secondary" (click)="searchUsers()">
-        {{ 'common.search' | translate }}
-      </button>
-      <div class="flex flex-wrap gap-2">
-        <button
-          type="button"
-          class="!rounded-full !px-4 !py-2 text-label-lg"
-          [class]="
-            !roleFilter
-              ? 'ui-btn-primary'
-              : 'ui-btn-secondary border border-outline-variant'
-          "
-          (click)="setRoleFilter('')"
-        >
-          {{ 'admin.users.filterAll' | translate }}
-        </button>
-        <button
-          type="button"
-          class="!rounded-full !px-4 !py-2 text-label-lg"
-          [class]="
-            roleFilter === 'Farm'
-              ? 'ui-btn-primary'
-              : 'ui-btn-secondary border border-outline-variant'
-          "
-          (click)="setRoleFilter('Farm')"
-        >
-          {{ 'admin.users.roleFarm' | translate }}
-        </button>
-        <button
-          type="button"
-          class="!rounded-full !px-4 !py-2 text-label-lg"
-          [class]="
-            roleFilter === 'Factory'
-              ? 'ui-btn-primary'
-              : 'ui-btn-secondary border border-outline-variant'
-          "
-          (click)="setRoleFilter('Factory')"
-        >
-          {{ 'admin.users.roleFactory' | translate }}
-        </button>
-        <button
-          type="button"
-          class="!rounded-full !px-4 !py-2 text-label-lg"
-          [class]="
-            roleFilter === 'Admin'
-              ? 'ui-btn-primary'
-              : 'ui-btn-secondary border border-outline-variant'
-          "
-          (click)="setRoleFilter('Admin')"
-        >
-          {{ 'admin.users.roleAdmin' | translate }}
-        </button>
+      <div class="flex flex-col lg:flex-row gap-4">
+        <div class="space-y-2">
+          <p class="font-label-sm text-on-surface-variant">
+            {{ 'admin.users.filterRole' | translate }}
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <button
+              type="button"
+              class="admin-chip"
+              [class.is-on]="!roleFilter"
+              (click)="setRoleFilter('')"
+            >
+              {{ 'admin.users.filterAll' | translate }}
+            </button>
+            <button
+              type="button"
+              class="admin-chip"
+              [class.is-on]="roleFilter === 'Farm'"
+              (click)="setRoleFilter('Farm')"
+            >
+              {{ 'admin.users.roleFarm' | translate }}
+            </button>
+            <button
+              type="button"
+              class="admin-chip"
+              [class.is-on]="roleFilter === 'Factory'"
+              (click)="setRoleFilter('Factory')"
+            >
+              {{ 'admin.users.roleFactory' | translate }}
+            </button>
+            <button
+              type="button"
+              class="admin-chip"
+              [class.is-on]="roleFilter === 'Admin'"
+              (click)="setRoleFilter('Admin')"
+            >
+              {{ 'admin.users.roleAdmin' | translate }}
+            </button>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <p class="font-label-sm text-on-surface-variant">
+            {{ 'admin.users.filterStatus' | translate }}
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <button
+              type="button"
+              class="admin-chip"
+              [class.is-on]="verifiedFilter === 'pending'"
+              (click)="setVerifiedFilter('pending')"
+            >
+              {{ 'admin.users.unverifiedOnly' | translate }}
+            </button>
+            <button
+              type="button"
+              class="admin-chip"
+              [class.is-on]="verifiedFilter === 'verified'"
+              (click)="setVerifiedFilter('verified')"
+            >
+              {{ 'admin.users.verifiedOnly' | translate }}
+            </button>
+            <button
+              type="button"
+              class="admin-chip"
+              [class.is-on]="verifiedFilter === 'all'"
+              (click)="setVerifiedFilter('all')"
+            >
+              {{ 'admin.users.allVerified' | translate }}
+            </button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -201,186 +223,418 @@
         }
       </div>
     } @else {
-      <section class="ui-card overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full min-w-[720px] text-start border-collapse">
-            <thead>
-              <tr
-                class="bg-surface-container-lowest border-b border-outline-variant"
-              >
-                <th
-                  scope="col"
-                  class="p-4 font-title-md text-title-md text-on-surface text-start"
+      <section class="space-y-4">
+        <div class="admin-users-grid admin-users-head px-4">
+          <p>{{ 'admin.users.name' | translate }}</p>
+          <p>{{ 'admin.users.email' | translate }}</p>
+          <p>{{ 'admin.users.role' | translate }}</p>
+          <p>{{ 'admin.users.status' | translate }}</p>
+          <p>{{ 'common.actions' | translate }}</p>
+        </div>
+
+        @for (user of users(); track user.id) {
+          <article
+            class="ui-card overflow-visible"
+            [class.ring-1]="expandedUserId() === user.id"
+            [class.ring-primary/20]="expandedUserId() === user.id"
+          >
+            <div class="admin-users-grid admin-users-row p-4">
+              <div class="flex items-center gap-3 min-w-0">
+                <div
+                  class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center font-bold text-primary shrink-0"
                 >
-                  {{ 'admin.users.name' | translate }}
-                </th>
-                <th
-                  scope="col"
-                  class="p-4 font-title-md text-title-md text-on-surface text-start"
+                  {{ initial(user) }}
+                </div>
+                <p
+                  class="font-body-lg text-body-lg font-medium text-on-surface truncate"
                 >
-                  {{ 'admin.users.email' | translate }}
-                </th>
-                <th
-                  scope="col"
-                  class="p-4 font-title-md text-title-md text-on-surface text-start"
-                >
-                  {{ 'admin.users.role' | translate }}
-                </th>
-                <th
-                  scope="col"
-                  class="p-4 font-title-md text-title-md text-on-surface text-start"
-                >
-                  {{ 'admin.users.status' | translate }}
-                </th>
-                <th
-                  scope="col"
-                  class="p-4 font-title-md text-title-md text-on-surface text-start"
-                >
-                  {{ 'common.actions' | translate }}
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-outline-variant">
-              @for (user of users(); track user.id) {
-                <tr
-                  class="hover:bg-surface-container-low transition-colors group"
-                >
-                  <td class="p-4">
-                    <div class="flex items-center gap-3">
-                      <div
-                        class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center font-bold text-primary shrink-0"
-                      >
-                        {{ initial(user) }}
-                      </div>
-                      <div>
-                        <p
-                          class="font-body-lg text-body-lg font-medium text-on-surface"
-                        >
-                          {{ displayName(user) }}
-                        </p>
-                        <p
-                          class="font-label-sm text-label-sm text-on-surface-variant"
-                        >
-                          ID: {{ user.id.slice(0, 8) }}…
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="p-4 font-body-md text-body-md text-on-surface-variant"
+                  {{ displayName(user) }}
+                </p>
+              </div>
+              <p class="font-body-md text-body-md text-on-surface-variant truncate">
+                {{ user.email }}
+              </p>
+              <div>
+                <span class="admin-pill admin-pill--neutral">
+                  {{ roleLabelKey(user.role) | translate }}
+                </span>
+              </div>
+              <div class="flex flex-col items-start gap-1.5">
+                <span class="admin-pill" [attr.data-tone]="statusTone(user)">
+                  {{ reviewStatusKey(user) | translate }}
+                </span>
+                @if (!user.isVerified && trustScore(user) !== null) {
+                  <span
+                    class="admin-score"
+                    [attr.data-tone]="scoreTone(trustScore(user)!)"
                   >
-                    {{ user.email }}
-                  </td>
-                  <td class="p-4">
-                    <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container-high text-on-surface"
-                    >
-                      {{ user.role }}
-                    </span>
-                  </td>
-                  <td class="p-4">
-                    <div class="flex flex-col gap-1">
-                      @if (user.isVerified) {
-                        <span
-                          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-label-sm text-label-sm bg-secondary-container text-on-secondary-container w-fit"
-                        >
-                          {{ 'common.verified' | translate }}
-                        </span>
-                      } @else {
-                        <span
-                          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-label-sm text-label-sm bg-error-container text-on-error-container w-fit"
-                        >
-                          {{ 'common.pending' | translate }}
-                        </span>
-                      }
-                      @if (user.isBlocked) {
-                        <span class="text-xs text-error">Blocked</span>
-                      }
-                      @if (!user.isActive) {
-                        <span class="text-xs text-on-surface-variant"
-                          >Inactive</span
-                        >
-                      }
-                    </div>
-                  </td>
-                  <td class="p-4">
-                    <div class="flex items-center gap-2 flex-wrap">
-                      @if (!user.isVerified) {
-                        <button
-                          type="button"
-                          class="ui-btn-primary !px-3 !py-1.5 !text-label-lg inline-flex items-center gap-1"
-                          [disabled]="!!actionLoading()"
-                          (click)="verify(user)"
-                        >
-                          {{ 'admin.users.verify' | translate }}
-                        </button>
-                      }
-                      @if (user.isBlocked) {
+                    {{ trustScore(user) }}/100
+                  </span>
+                }
+                @if ((user.role === 'Farm' || user.role === 'Factory') && user.planCode) {
+                  <span class="admin-pill admin-pill--neutral">
+                    {{ 'admin.users.plan' | translate }}: {{ user.planCode }}
+                  </span>
+                }
+                @if (user.isBlocked) {
+                  <span class="font-label-sm text-error">{{
+                    'common.blocked' | translate
+                  }}</span>
+                }
+                @if (!user.isActive) {
+                  <span class="font-label-sm text-on-surface-variant">{{
+                    'common.inactive' | translate
+                  }}</span>
+                }
+              </div>
+              <div class="flex items-center justify-end gap-1">
+                      @if (hasKybProfile(user)) {
                         <button
                           type="button"
                           class="ui-btn-secondary !px-3 !py-1.5 !text-label-lg"
-                          [disabled]="!!actionLoading()"
-                          (click)="unblock(user)"
+                          (click)="toggleHygiene(user)"
                         >
-                          {{ 'admin.users.unblock' | translate }}
+                          {{
+                            (expandedUserId() === user.id
+                              ? 'admin.users.hideKyb'
+                              : 'admin.users.showKyb'
+                            ) | translate
+                          }}
                         </button>
-                      } @else {
+                      }
+                      <div class="relative">
                         <button
                           type="button"
-                          class="p-2 text-on-surface-variant hover:text-danger-red rounded-full hover:bg-error-container transition-colors"
-                          [attr.aria-label]="'admin.users.block' | translate"
-                          [disabled]="!!actionLoading()"
-                          (click)="block(user)"
+                          class="p-2 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container-high transition-colors"
+                          [attr.aria-label]="'admin.users.accountMenu' | translate"
+                          [attr.aria-expanded]="menuUserId() === user.id"
+                          (click)="toggleMenu(user.id, $event)"
                         >
                           <span
                             class="material-symbols-outlined text-[20px]"
                             aria-hidden="true"
-                            >block</span
+                            >more_vert</span
                           >
                         </button>
-                      }
-                      @if (user.isActive) {
-                        <button
-                          type="button"
-                          class="ui-btn-ghost !px-3 !py-1.5 !text-label-lg"
-                          [disabled]="!!actionLoading()"
-                          (click)="deactivate(user)"
-                        >
-                          {{ 'admin.users.deactivate' | translate }}
-                        </button>
-                      } @else {
-                        <button
-                          type="button"
-                          class="ui-btn-secondary !px-3 !py-1.5 !text-label-lg"
-                          [disabled]="!!actionLoading()"
-                          (click)="reactivate(user)"
-                        >
-                          {{ 'admin.users.activate' | translate }}
-                        </button>
+                        @if (menuUserId() === user.id) {
+                          <div
+                            class="absolute end-0 z-20 mt-1 w-44 rounded-xl border border-outline-variant bg-surface shadow-lg py-1"
+                            (click)="$event.stopPropagation()"
+                          >
+                            @if (user.isBlocked) {
+                              <button
+                                type="button"
+                                class="admin-menu-item"
+                                [disabled]="!!actionLoading()"
+                                (click)="unblock(user); closeMenu()"
+                              >
+                                {{ 'admin.users.unblock' | translate }}
+                              </button>
+                            } @else {
+                              <button
+                                type="button"
+                                class="admin-menu-item"
+                                [disabled]="!!actionLoading()"
+                                (click)="block(user); closeMenu()"
+                              >
+                                {{ 'admin.users.block' | translate }}
+                              </button>
+                            }
+                            @if (user.isActive) {
+                              <button
+                                type="button"
+                                class="admin-menu-item"
+                                [disabled]="!!actionLoading()"
+                                (click)="deactivate(user); closeMenu()"
+                              >
+                                {{ 'admin.users.deactivate' | translate }}
+                              </button>
+                            } @else {
+                              <button
+                                type="button"
+                                class="admin-menu-item"
+                                [disabled]="!!actionLoading()"
+                                (click)="reactivate(user); closeMenu()"
+                              >
+                                {{ 'admin.users.activate' | translate }}
+                              </button>
+                            }
+                            @if (user.role === 'Farm' || user.role === 'Factory') {
+                              @if (isProPlan(user)) {
+                                <button
+                                  type="button"
+                                  class="admin-menu-item"
+                                  [disabled]="!!actionLoading()"
+                                  (click)="revokePro(user); closeMenu()"
+                                >
+                                  {{ 'admin.users.revokePro' | translate }}
+                                </button>
+                              } @else {
+                                <button
+                                  type="button"
+                                  class="admin-menu-item"
+                                  [disabled]="!!actionLoading()"
+                                  (click)="grantPro(user); closeMenu()"
+                                >
+                                  {{ 'admin.users.grantPro' | translate }}
+                                </button>
+                              }
+                            }
+                            <button
+                              type="button"
+                              class="admin-menu-item admin-menu-item--danger"
+                              [disabled]="!!actionLoading()"
+                              (click)="deleteUser(user); closeMenu()"
+                            >
+                              {{ 'common.delete' | translate }}
+                            </button>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  </div>
+
+                @if (hasKybProfile(user) && expandedUserId() === user.id) {
+                  <div class="px-4 pb-4">
+                      @if (hygieneLoading()) {
+                        <p class="font-body-md text-on-surface-variant">
+                          {{ 'common.loading' | translate }}
+                        </p>
+                      } @else if (hygiene(); as h) {
+                        <div class="kyb-panel">
+                          <section class="kyb-panel__score">
+                            <p class="font-label-sm text-on-surface-variant">
+                              {{ 'admin.users.assistantScore' | translate }}
+                            </p>
+                            @if (trustScore(user) !== null) {
+                              <p
+                                class="kyb-panel__number"
+                                [attr.data-tone]="scoreTone(trustScore(user)!)"
+                              >
+                                {{ trustScore(user) }}
+                                <span>/100</span>
+                              </p>
+                              @if (verificationFor(user); as v) {
+                                <span
+                                  class="admin-pill"
+                                  [attr.data-tone]="scoreTone(v.trustScore)"
+                                >
+                                  {{ recommendationKey(v.recommendation) | translate }}
+                                </span>
+                              }
+                            } @else {
+                              <p class="font-body-md text-on-surface-variant">
+                                {{ 'admin.users.agentAssistHint' | translate }}
+                              </p>
+                            }
+                            @if (needsKybDecision(user)) {
+                              <button
+                                type="button"
+                                class="ui-btn-secondary !px-3 !py-1.5 mt-2"
+                                [disabled]="!!actionLoading()"
+                                (click)="analyze(user)"
+                              >
+                                {{ 'admin.users.analyze' | translate }}
+                              </button>
+                            }
+                          </section>
+
+                          <section class="kyb-panel__docs">
+                            <p class="font-title-sm text-on-surface mb-3">
+                              {{ 'admin.users.requiredDocs' | translate }}
+                            </p>
+                            <ul class="space-y-2">
+                              @for (item of checklist(h, user); track item.kind) {
+                                <li class="kyb-doc">
+                                  <span
+                                    class="material-symbols-outlined kyb-doc__icon"
+                                    [class.is-ok]="item.provided"
+                                    aria-hidden="true"
+                                  >
+                                    {{ item.provided ? 'check_circle' : 'cancel' }}
+                                  </span>
+                                  <div class="min-w-0 flex-1">
+                                    <p class="font-body-md text-on-surface">
+                                      {{ kybLabel(item.kind) }}
+                                    </p>
+                                    <p class="font-label-sm text-on-surface-variant">
+                                      {{
+                                        (item.provided
+                                          ? 'admin.users.docProvided'
+                                          : 'admin.users.docMissing'
+                                        ) | translate
+                                      }}
+                                      @if (item.score !== null) {
+                                        · {{ item.score }}/100
+                                      }
+                                    </p>
+                                  </div>
+                                </li>
+                              } @empty {
+                                <li class="font-body-md text-on-surface-variant">
+                                  {{ 'admin.users.noDocs' | translate }}
+                                </li>
+                              }
+                            </ul>
+
+                            @if (h.documents.length) {
+                              <p class="font-title-sm text-on-surface mt-4 mb-2">
+                                {{ 'admin.users.uploadedFiles' | translate }}
+                              </p>
+                              <ul class="flex flex-wrap gap-2">
+                                @for (doc of h.documents; track doc.documentId) {
+                                  <li>
+                                    @if (doc.fileUrl) {
+                                      <a
+                                        class="kyb-file"
+                                        [href]="doc.fileUrl"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        {{ doc.fileName }}
+                                      </a>
+                                    } @else {
+                                      <span class="kyb-file">{{ doc.fileName }}</span>
+                                    }
+                                  </li>
+                                }
+                              </ul>
+                            }
+                          </section>
+
+                          <section class="kyb-panel__decision">
+                            @if (needsKybDecision(user)) {
+                              <p class="font-title-sm text-on-surface mb-2">
+                                {{ 'admin.users.decisionTitle' | translate }}
+                              </p>
+                              <label class="sr-only" for="decision-note-{{ user.id }}">
+                                {{ 'admin.users.decisionNote' | translate }}
+                              </label>
+                              <textarea
+                                class="ui-input min-h-[6rem]"
+                                id="decision-note-{{ user.id }}"
+                                name="decisionNote"
+                                [(ngModel)]="decisionNote"
+                                [attr.placeholder]="'admin.users.decisionNoteHint' | translate"
+                              ></textarea>
+                              <div class="flex flex-col gap-2 mt-3">
+                                <button
+                                  type="button"
+                                  class="ui-btn-primary"
+                                  [disabled]="!!actionLoading()"
+                                  (click)="approve(user)"
+                                >
+                                  {{ 'admin.users.approve' | translate }}
+                                </button>
+                                <button
+                                  type="button"
+                                  class="ui-btn-secondary"
+                                  [disabled]="!!actionLoading()"
+                                  (click)="requestInfo(user)"
+                                >
+                                  {{ 'admin.users.requestInfo' | translate }}
+                                </button>
+                                <button
+                                  type="button"
+                                  class="ui-btn-danger"
+                                  [disabled]="!!actionLoading()"
+                                  (click)="reject(user)"
+                                >
+                                  {{ 'admin.users.rejectKyb' | translate }}
+                                </button>
+                              </div>
+                            } @else {
+                              <p class="font-body-md text-on-surface-variant">
+                                {{ reviewStatusKey(user) | translate }}
+                              </p>
+                            }
+                          </section>
+
+                          @if (h.kind === 'farm') {
+                            <section class="kyb-panel__certs">
+                              <p class="font-title-sm text-on-surface mb-2">
+                                {{ 'admin.users.certsTitle' | translate }}
+                              </p>
+                              <ul class="space-y-1 mb-3">
+                                @for (cert of h.certifications ?? []; track cert.certificationId) {
+                                  <li class="flex items-center gap-2 flex-wrap">
+                                    <span class="font-body-md">{{ cert.name }}</span>
+                                    @if (!cert.adminGranted) {
+                                      <span class="admin-pill admin-pill--neutral">{{
+                                        'admin.users.notAdminGranted' | translate
+                                      }}</span>
+                                    }
+                                    <button
+                                      type="button"
+                                      class="ui-btn-ghost !px-2 !py-1"
+                                      (click)="revokeCert(h.entityId, cert.certificationId)"
+                                    >
+                                      {{ 'common.remove' | translate }}
+                                    </button>
+                                  </li>
+                                }
+                              </ul>
+                              <div class="flex flex-col sm:flex-row gap-2">
+                                <select
+                                  class="ui-input"
+                                  [(ngModel)]="grantCertId"
+                                  name="grantCertId"
+                                >
+                                  <option value="">
+                                    {{ 'common.select' | translate }}
+                                  </option>
+                                  @for (c of certCatalog(); track c.certificationId) {
+                                    <option [value]="c.certificationId">
+                                      {{ c.name }}
+                                    </option>
+                                  }
+                                </select>
+                                <input
+                                  type="date"
+                                  class="ui-input"
+                                  [(ngModel)]="grantExpiresAt"
+                                  name="grantExpiresAt"
+                                  [attr.aria-label]="'admin.users.expiresAt' | translate"
+                                />
+                                <button
+                                  type="button"
+                                  class="ui-btn-primary shrink-0"
+                                  [disabled]="!grantCertId"
+                                  (click)="grantCert(h.entityId)"
+                                >
+                                  {{ 'admin.users.grantCert' | translate }}
+                                </button>
+                              </div>
+                            </section>
+                          }
+                        </div>
                       }
                     </div>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="5" class="p-6">
-                    <ui-empty-state
-                      titleKey="admin.users.noUsers"
-                      bodyKey="admin.users.emptyBody"
-                      icon="group_off"
-                    />
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+                }
+              </article>
+            } @empty {
+              <div class="ui-card p-6">
+                <ui-empty-state
+                  titleKey="admin.users.noUsers"
+                  bodyKey="admin.users.emptyBody"
+                  icon="group_off"
+                />
+              </div>
+            }
 
-        <div
-          class="p-4 border-t border-outline-variant bg-surface-container-lowest flex flex-col sm:flex-row items-center justify-between gap-3 font-body-md text-body-md text-on-surface-variant"
-        >
+            <div
+              class="ui-card p-4 flex flex-col sm:flex-row items-center justify-between gap-3 font-body-md text-body-md text-on-surface-variant"
+            >
           <p>
-            {{ totalCount() }} user(s) · page {{ page }} / {{ totalPages() }}
+            {{
+              'admin.users.pageSummary'
+                | translate
+                  : {
+                      count: totalCount(),
+                      page: page,
+                      totalPages: totalPages(),
+                    }
+            }}
           </p>
           <div class="flex items-center gap-2">
             <button

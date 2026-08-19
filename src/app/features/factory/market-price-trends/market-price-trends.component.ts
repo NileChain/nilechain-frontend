@@ -2,13 +2,15 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  Input,
   OnDestroy,
   ViewChild,
   computed,
   inject,
   signal,
 } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
+import { DecimalPipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {
   Chart,
@@ -84,8 +86,7 @@ const CROP_ICONS: Record<string, string> = {
   selector: 'app-market-price-trends',
   standalone: true,
   imports: [
-    TranslatePipe,
-    DatePipe,
+    UiDatePipe, TranslatePipe,
     DecimalPipe,
     UiEmptyStateComponent,
     UiErrorStateComponent,
@@ -95,6 +96,9 @@ const CROP_ICONS: Record<string, string> = {
   styleUrl: './market-price-trends.component.scss',
 })
 export class MarketPriceTrendsComponent implements AfterViewInit, OnDestroy {
+  /** Snapshot only — skip the full chart on crowded dashboards. */
+  @Input() compact = false;
+
   @ViewChild('mainChart', { static: false })
   mainChartRef?: ElementRef<HTMLCanvasElement>;
 
@@ -134,6 +138,10 @@ export class MarketPriceTrendsComponent implements AfterViewInit, OnDestroy {
 
   setRange(value: RangeKey): void {
     this.range.set(value);
+    if (this.compact) {
+      this.loadSeries();
+      return;
+    }
     this.applyChart();
   }
 
@@ -196,7 +204,9 @@ export class MarketPriceTrendsComponent implements AfterViewInit, OnDestroy {
       const k = value / 1000;
       return `${k % 1 === 0 ? k.toFixed(0) : k.toFixed(1)}k`;
     }
-    return Math.round(value).toLocaleString();
+    return Math.round(value).toLocaleString(
+      this.i18n.currentLang() === 'ar' ? 'ar-EG' : 'en-US'
+    );
   }
 
   abs(value: number): number {
@@ -258,6 +268,9 @@ export class MarketPriceTrendsComponent implements AfterViewInit, OnDestroy {
   }
 
   private applyChart(): void {
+    if (this.compact) {
+      return;
+    }
     if (this.state() !== 'ready' || !this.rawSeries.length) {
       return;
     }
@@ -338,7 +351,7 @@ export class MarketPriceTrendsComponent implements AfterViewInit, OnDestroy {
             callbacks: {
               label: (item) => {
                 const v = item.parsed.y ?? 0;
-                return ` ${item.dataset.label}: EGP ${Math.round(v).toLocaleString()}`;
+                return ` ${item.dataset.label}: ${this.i18n.instant('common.egp')} ${Math.round(v).toLocaleString(this.i18n.currentLang() === 'ar' ? 'ar-EG' : 'en-US')}`;
               },
             },
           },

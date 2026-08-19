@@ -113,6 +113,10 @@ export class AuthService {
     );
   }
 
+  refreshCurrentUser(): Observable<UserProfile> {
+    return this.hydrateCurrentUser();
+  }
+
   forgotPassword(payload: ForgotPasswordRequest): Observable<void> {
     return this.http.post<void>(
       this.getUrl(environment.auth.endpoints.forgotPassword),
@@ -178,6 +182,8 @@ export class AuthService {
       roles: me.role ? [me.role] : [],
       emailConfirmed: me.emailConfirmed,
       isVerified: me.isVerified,
+      kybReviewStatus: me.kybReviewStatus,
+      kybAdminNote: me.kybAdminNote,
       displayName: fromToken?.displayName ?? me.email,
     });
   }

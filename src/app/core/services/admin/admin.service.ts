@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import {
@@ -35,6 +35,113 @@ export interface RagDocumentDto {
   filePath: string;
   uploadedAt: string;
   status: string;
+}
+
+export interface VerifyUserResult {
+  verified: boolean;
+  kybIncomplete: boolean;
+  missingKybKinds: string[];
+  trustScore: number;
+  overallSummary: string;
+  recommendation?: string;
+  comparison: {
+    kybKind: string;
+    provided: boolean;
+    kindTrustScore: number;
+    ragExcerpt?: string | null;
+    reasons: string[];
+    /** Signed contributions that add up to kindTrustScore. */
+    factors?: KybScoreFactor[];
+  }[];
+}
+
+export interface KybScoreFactor {
+  code: string;
+  delta: number;
+}
+
+export interface FarmHygieneDocument {
+  documentId: string;
+  fileName: string;
+  fileUrl: string;
+  kybKind: string;
+  uploadedAt: string;
+}
+
+export interface FarmHygieneCert {
+  certificationId: string;
+  name: string;
+  issuedAt: string;
+  expiresAt: string | null;
+  adminGranted: boolean;
+  isExpired: boolean;
+}
+
+export interface FarmHygiene {
+  farmId: string;
+  farmName: string;
+  isVerified: boolean;
+  kybIncomplete: boolean;
+  missingKybKinds: string[];
+  documents: FarmHygieneDocument[];
+  certifications: FarmHygieneCert[];
+}
+
+export interface FactoryHygiene {
+  factoryId: string;
+  factoryName: string;
+  isVerified: boolean;
+  kybIncomplete: boolean;
+  missingKybKinds: string[];
+  documents: FarmHygieneDocument[];
+}
+
+export interface AdminOpsBadges {
+  pendingVerifications: number;
+  openDisputes: number;
+  pendingWithdrawals: number;
+}
+
+export interface KybDecisionRequest {
+  reason?: string | null;
+}
+
+export interface AdminWithdrawal {
+  withdrawalId: string;
+  walletId: string;
+  userId: string;
+  ownerType: string;
+  ownerId: string;
+  amountEgp: number;
+  status: string;
+  method: string;
+  destinationSummary?: string | null;
+  createdAt: string;
+  completedAt?: string | null;
+}
+
+export interface AdminWithdrawalList {
+  totalCount: number;
+  items: AdminWithdrawal[];
+}
+
+export interface AdminChannelMessage {
+  channelMessageId: string;
+  channel: string;
+  toPhone: string;
+  userId?: string | null;
+  templateKey: string;
+  body: string;
+  status: string;
+  relatedEntityType?: string | null;
+  relatedEntityId?: string | null;
+  failReason?: string | null;
+  createdAt: string;
+}
+
+export interface AdminChannelMessageList {
+  items: AdminChannelMessage[];
+  disclaimer: string;
 }
 
 @Injectable({
@@ -203,8 +310,110 @@ export class AdminService {
     return this.http.get<RagDocumentDto[]>(`${this.api}/rag/documents`);
   }
 
-  verifyUser(id: string): Observable<void> {
-    return this.http.put<void>(`${this.api}/users/${id}/verify`, {});
+  verifyUser(id: string): Observable<VerifyUserResult> {
+    return this.analyzeKyb(id);
+  }
+
+  analyzeKyb(id: string): Observable<VerifyUserResult> {
+    return this.http.post<VerifyUserResult>(
+      `${this.api}/users/${id}/kyb/analyze`,
+      {}
+    );
+  }
+
+  getLastKybReport(id: string): Observable<VerifyUserResult> {
+    return this.http.get<VerifyUserResult>(`${this.api}/users/${id}/kyb/report`);
+  }
+
+  approveUser(id: string, reason?: string | null): Observable<void> {
+    return this.putNoContent(`${this.api}/users/${id}/approve`, {
+      reason: reason ?? null,
+    } satisfies KybDecisionRequest);
+  }
+
+  requestKybInfo(id: string, reason: string): Observable<void> {
+    return this.putNoContent(`${this.api}/users/${id}/request-info`, {
+      reason,
+    } satisfies KybDecisionRequest);
+  }
+
+  rejectUser(id: string, reason: string): Observable<void> {
+    return this.putNoContent(`${this.api}/users/${id}/reject`, {
+      reason,
+    } satisfies KybDecisionRequest);
+  }
+
+  /** Empty 200/204 bodies must not go through JSON parsing. */
+  private putNoContent(url: string, body: unknown): Observable<void> {
+    return this.http
+      .put(url, body, { responseType: 'text' })
+      .pipe(map(() => undefined));
+  }
+
+  getFarmHygiene(farmId: string): Observable<FarmHygiene> {
+    return this.http.get<FarmHygiene>(`${this.api}/farms/${farmId}/hygiene`);
+  }
+
+  getFactoryHygiene(factoryId: string): Observable<FactoryHygiene> {
+    return this.http.get<FactoryHygiene>(
+      `${this.api}/factories/${factoryId}/hygiene`
+    );
+  }
+
+  getOpsBadges(): Observable<AdminOpsBadges> {
+    return this.http.get<AdminOpsBadges>(`${this.api}/ops-badges`);
+  }
+
+  grantFarmCertification(
+    farmId: string,
+    payload: { certificationId: string; issuedAt?: string | null; expiresAt?: string | null }
+  ): Observable<void> {
+    return this.http.post<void>(`${this.api}/farms/${farmId}/certifications`, payload);
+  }
+
+  revokeFarmCertification(farmId: string, certificationId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.api}/farms/${farmId}/certifications/${certificationId}`
+    );
+  }
+
+  listWithdrawals(status?: string | null): Observable<AdminWithdrawalList> {
+    let params = new HttpParams();
+    if (status) {
+      params = params.set('status', status);
+    }
+    return this.http.get<AdminWithdrawalList>(`${this.api}/withdrawals`, { params });
+  }
+
+  completeWithdrawal(id: string): Observable<AdminWithdrawal> {
+    return this.http.post<AdminWithdrawal>(`${this.api}/withdrawals/${id}/complete`, {});
+  }
+
+  rejectWithdrawal(id: string, reason?: string): Observable<AdminWithdrawal> {
+    return this.http.post<AdminWithdrawal>(`${this.api}/withdrawals/${id}/reject`, {
+      reason: reason ?? null,
+    });
+  }
+
+  listChannelMessages(status?: string | null): Observable<AdminChannelMessageList> {
+    let params = new HttpParams();
+    if (status) {
+      params = params.set('status', status);
+    }
+    return this.http.get<AdminChannelMessageList>(`${this.api}/channel-messages`, {
+      params,
+    });
+  }
+
+  setUserSubscription(
+    id: string,
+    planCode: string,
+    periodEndUtc?: string | null
+  ): Observable<unknown> {
+    return this.http.put(`${this.api}/users/${id}/subscription`, {
+      planCode,
+      periodEndUtc: periodEndUtc ?? null,
+    });
   }
 
   blockUser(id: string): Observable<void> {
@@ -221,5 +430,9 @@ export class AdminService {
 
   reactivateUser(id: string): Observable<void> {
     return this.http.put<void>(`${this.api}/users/${id}/reactivate`, {});
+  }
+
+  deleteUser(id: string): Observable<void> {
+    return this.http.put<void>(`${this.api}/users/${id}/delete`, {});
   }
 }

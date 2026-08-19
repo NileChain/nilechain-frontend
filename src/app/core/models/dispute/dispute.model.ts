@@ -39,6 +39,8 @@ export interface Dispute {
   underReviewAt: string | null;
   resolvedAt: string | null;
   rejectedAt: string | null;
+  slaDueAt?: string | null;
+  isOverdue?: boolean;
   farmName: string | null;
   factoryName: string | null;
   fulfillmentFrozen: boolean;

@@ -1,4 +1,5 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { UiDatePipe } from '../../../core/pipes/ui-date.pipe';
+import { DecimalPipe } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { ContractDocumentModel } from '../models/contract-document.model';
@@ -7,7 +8,8 @@ import { displayText } from '../contract-text.util';
 @Component({
   selector: 'app-contract-metadata',
   standalone: true,
-  imports: [TranslatePipe, DatePipe, DecimalPipe],
+  imports: [
+    UiDatePipe, TranslatePipe, DecimalPipe],
   template: `
     <section
       class="contract-meta"
@@ -44,7 +46,7 @@ import { displayText } from '../contract-text.util';
           <dd>
             {{
               contract.deliveryDate
-                ? (contract.deliveryDate | date: 'mediumDate')
+                ? (contract.deliveryDate | uiDate: 'mediumDate')
                 : '—'
             }}
           </dd>

@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { UiDatePipe } from '../../core/pipes/ui-date.pipe';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -19,9 +19,8 @@ import { UiEmptyStateComponent } from '../../shared/ui/empty-state/empty-state.c
   selector: 'app-crop-request',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
+    UiDatePipe, ReactiveFormsModule,
     RouterLink,
-    DatePipe,
     TranslatePipe,
     AppTopBarComponent,
     UiPortalHeroComponent,
