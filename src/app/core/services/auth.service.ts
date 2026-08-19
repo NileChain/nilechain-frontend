@@ -234,6 +234,7 @@ export class AuthService {
       displayName: payload.unique_name,
       role: roles[0],
       roles,
+      isVerified: readBoolClaim(payload.is_verified),
     };
   }
 
@@ -289,4 +290,14 @@ export class AuthService {
 
     return [];
   }
+}
+
+function readBoolClaim(value: boolean | string | undefined): boolean | undefined {
+  if (value === true || value === 'true' || value === 'True') {
+    return true;
+  }
+  if (value === false || value === 'false' || value === 'False') {
+    return false;
+  }
+  return undefined;
 }

@@ -69,4 +69,5 @@ export interface JwtPayload {
   role?: string | string[];
   roles?: string[];
   exp?: number;
+  is_verified?: boolean | string;
 }

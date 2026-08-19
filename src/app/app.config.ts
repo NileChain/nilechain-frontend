@@ -6,9 +6,11 @@ import {
 } from '@angular/core';
 import { provideRouter, withViewTransitions } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { catchError, firstValueFrom, of } from 'rxjs';
 
 import { routes } from './app.routes';
 import { jwtInterceptor } from './core/interceptors/jwt.interceptor';
+import { AuthService } from './core/services/auth.service';
 import { LocaleService } from './core/services/locale.service';
 import { ThemeService } from './core/services/theme.service';
 
@@ -20,7 +22,15 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(() => {
       inject(ThemeService);
       const locale = inject(LocaleService);
-      return locale.setLocale(locale.locale());
+      const auth = inject(AuthService);
+      return locale.setLocale(locale.locale()).then(() => {
+        if (!auth.isAuthenticated()) {
+          return;
+        }
+        return firstValueFrom(
+          auth.refreshCurrentUser().pipe(catchError(() => of(null)))
+        );
+      });
     }),
   ],
 };

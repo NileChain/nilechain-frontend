@@ -44,7 +44,7 @@
               </p>
             }
 
-            @if (adminNote()) {
+            @if (adminNote() && needsDocumentUpdate()) {
               <p class="pending-card__alert" role="status">
                 <strong>{{ 'verificationPending.adminNote' | translate }}:</strong>
                 {{ adminNote() }}
@@ -58,7 +58,10 @@
             }
 
             <div class="pending-card__actions">
-              <a class="ui-btn-primary" [routerLink]="profileLink()">
+              <a
+                [class]="needsDocumentUpdate() ? 'ui-btn-primary' : 'ui-btn-secondary'"
+                [routerLink]="profileLink()"
+              >
                 {{ 'verificationPending.updateDocuments' | translate }}
               </a>
               <button type="button" class="ui-btn-secondary" (click)="logout()">

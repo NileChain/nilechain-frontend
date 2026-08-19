@@ -54,13 +54,33 @@ export class VerificationPendingComponent implements OnInit {
   readonly isRejected = computed(
     () => this.kybStatus().toLowerCase() === 'rejected'
   );
+  /** Admin asked for more files, or upload/register docs are still missing. */
+  readonly needsDocumentUpdate = computed(
+    () =>
+      this.isRequestInfo() || this.isRejected() || this.documentsIncomplete()
+  );
 
   constructor(pageTitle: PageTitleService) {
     pageTitle.setKey('app.page.pendingVerification');
   }
 
   ngOnInit(): void {
-    this.authService.refreshCurrentUser().subscribe();
+    const paymobQuery = this.paymobReturnQuery();
+    this.authService.refreshCurrentUser().subscribe({
+      next: (user) => {
+        if (!user.isVerified) {
+          return;
+        }
+        if (paymobQuery) {
+          void this.router.navigate([this.walletPath()], {
+            queryParams: paymobQuery,
+            replaceUrl: true,
+          });
+          return;
+        }
+        void this.router.navigateByUrl(this.homePath());
+      },
+    });
   }
 
   logout(): void {
@@ -68,5 +88,45 @@ export class VerificationPendingComponent implements OnInit {
       next: () => void this.router.navigate(['/login']),
       error: () => void this.router.navigate(['/login']),
     });
+  }
+
+  private homePath(): string {
+    if (this.authService.hasAnyRole(['Factory'])) {
+      return '/factory/home';
+    }
+    if (this.authService.hasAnyRole(['Farm'])) {
+      return '/farm/home';
+    }
+    return '/landing';
+  }
+
+  private walletPath(): string {
+    if (this.authService.hasAnyRole(['Factory'])) {
+      return '/factory/wallet';
+    }
+    if (this.authService.hasAnyRole(['Farm'])) {
+      return '/farm/wallet';
+    }
+    return this.homePath();
+  }
+
+  private paymobReturnQuery(): Record<string, string> | null {
+    const params = this.route.snapshot.queryParamMap;
+    const isPaymobReturn =
+      params.has('hmac') ||
+      params.has('topUpId') ||
+      params.has('success') ||
+      params.has('id');
+    if (!isPaymobReturn) {
+      return null;
+    }
+    const query: Record<string, string> = {};
+    params.keys.forEach((key) => {
+      const value = params.get(key);
+      if (value != null) {
+        query[key] = value;
+      }
+    });
+    return query;
   }
 }

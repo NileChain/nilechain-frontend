@@ -370,7 +370,10 @@ export class FarmProfileComponent implements OnInit {
         })
       )
       .subscribe({
-        next: () => this.loadProfile(),
+        next: () => {
+          this.loadProfile();
+          this.authService.refreshCurrentUser().subscribe();
+        },
         error: () =>
           this.mutationError.set(
             this.i18n.instant('farm.profile.uploadDocumentFailed')
